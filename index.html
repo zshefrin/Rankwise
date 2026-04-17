@@ -348,6 +348,10 @@ footer{background:var(--bg);border-top:1px solid var(--b);padding:40px 56px}.flo
       <input class="ctai" type="text" name="name" placeholder="Your name" autocomplete="name" required>
       <input class="ctai" type="tel" name="phone" placeholder="Best phone number" autocomplete="tel" required>
       <input class="ctai" type="text" name="company_city" placeholder="Company name + city">
+      <input type="hidden" name="utm_source" id="utm_source">
+      <input type="hidden" name="utm_medium" id="utm_medium">
+      <input type="hidden" name="utm_campaign" id="utm_campaign">
+      <input type="hidden" name="referrer_page" id="referrer_page">
       <button type="submit" class="ctab" id="submit-btn">Get your free audit →</button>
     </form>
     <div id="form-success" style="display:none;padding:20px;border-radius:10px;background:rgba(43,168,152,0.12);border:1px solid rgba(43,168,152,0.25);margin-top:16px;text-align:center">
@@ -382,6 +386,18 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 function tf(item){const o=item.classList.contains('open');document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));if(!o)item.classList.add('open')}
 const form=document.getElementById('audit-form');const btn=document.getElementById('submit-btn');const successEl=document.getElementById('form-success');const errorEl=document.getElementById('form-error');
 form.addEventListener('submit',async function(e){e.preventDefault();btn.disabled=true;btn.textContent='Sending...';successEl.style.display='none';errorEl.style.display='none';try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});if(res.ok){form.style.display='none';successEl.style.display='block';form.reset();}else{throw new Error('fail');}}catch(err){errorEl.style.display='block';btn.disabled=false;btn.textContent='Get your free audit →';}});
+</script>
+
+<script>
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    ['utm_source','utm_medium','utm_campaign'].forEach(function(key) {
+      var el = document.getElementById(key);
+      if (el && params.get(key)) el.value = params.get(key);
+    });
+    var ref = document.getElementById('referrer_page');
+    if (ref) ref.value = document.referrer || 'direct';
+  })();
 </script>
 
 </body></html>
