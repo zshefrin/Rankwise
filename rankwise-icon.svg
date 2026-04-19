@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" rx="48" fill="#0F1D35"/>
+  
+  <!-- Growth bars - centered, balanced -->
+  <rect x="82" y="275" width="44" height="65" rx="8" fill="#2BA898" opacity="0.4"/>
+  <rect x="140" y="225" width="44" height="115" rx="8" fill="#2BA898" opacity="0.65"/>
+  <rect x="198" y="168" width="44" height="172" rx="8" fill="#F5B731" opacity="0.8"/>
+  <rect x="256" y="105" width="44" height="235" rx="8" fill="#F5B731"/>
+  
+  <!-- Growth arrow -->
+  <path d="M104 268 L162 220 L220 165 L278 105 L308 70" stroke="#E8654A" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="308,58 320,76 296,76" fill="#E8654A"/>
+</svg>
