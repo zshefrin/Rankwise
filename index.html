@@ -358,25 +358,10 @@ footer{background:var(--bg);border-top:1px solid var(--b);padding:40px 56px}.flo
   <div class="ctaw">
     <div class="lbl reveal in">Free audit</div>
     <h2 class="reveal in">Find out where you stand<br>on <span class="it">Google.</span></h2>
-    <p class="reveal in">Takes 15 minutes. We'll show you how you compare to other HVAC contractors in your city, what's costing you calls, and what it would take to fix it. No charge, no obligation.</p>
-    <form id="audit-form" action="https://formspree.io/f/xdapdblr" method="POST" class="ctaform reveal in">
-      <input class="ctai" type="text" name="name" placeholder="Your name" autocomplete="name" required>
-      <input class="ctai" type="tel" name="phone" placeholder="Best phone number" autocomplete="tel" required>
-      <input class="ctai" type="text" name="company_city" placeholder="Company name + city">
-      <input type="hidden" name="utm_source" id="utm_source">
-      <input type="hidden" name="utm_medium" id="utm_medium">
-      <input type="hidden" name="utm_campaign" id="utm_campaign">
-      <input type="hidden" name="referrer_page" id="referrer_page">
-      <input type="hidden" name="_subject" id="subject">
-      <button type="submit" class="ctab" id="submit-btn">Get your free audit →</button>
-    </form>
-    <div id="form-success" style="display:none;padding:20px;border-radius:10px;background:rgba(43,168,152,0.12);border:1px solid rgba(43,168,152,0.25);margin-top:16px;text-align:center">
-      <p style="font-size:16px;font-weight:700;color:#2BA898;margin-bottom:4px">Got it — we'll reach out within 24 hours.</p>
-      <p style="font-size:13px;color:rgba(245,240,232,0.35)">We'll check out your Google presence before we call so we can show you exactly where things stand.</p>
-    </div>
-    <div id="form-error" style="display:none;padding:20px;border-radius:10px;background:rgba(232,101,74,0.12);border:1px solid rgba(232,101,74,0.25);margin-top:16px;text-align:center">
-      <p style="font-size:16px;font-weight:700;color:#E8654A;margin-bottom:4px">Something went wrong — try again.</p>
-      <p style="font-size:13px;color:rgba(245,240,232,0.35)">Or just email us at zshef@rankwise.ca</p>
+    <p class="reveal in">Takes 15 minutes. We'll pull your live Map Pack rankings, show you how you compare to competitors in your city, and walk through what to fix first. No charge, no obligation.</p>
+    <div class="ctaform reveal in" style="flex-direction:column;align-items:center;gap:12px">
+      <a href="/audit/" class="ctab" style="display:inline-block;text-align:center;text-decoration:none">Get your free audit →</a>
+      <a href="https://cal.com/zackary-shefrin-oy63zv/15min" style="font-size:13px;color:rgba(245,240,232,0.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='rgba(245,240,232,0.8)'" onmouseout="this.style.color='rgba(245,240,232,0.45)'">Or book a call directly →</a>
     </div>
     <p class="ctanote reveal in">Metro Vancouver · One HVAC contractor per city · Results guaranteed</p>
   </div>
@@ -391,7 +376,7 @@ footer{background:var(--bg);border-top:1px solid var(--b);padding:40px 56px}.flo
       <a href="#results">Results</a>
       <a href="#faq">FAQ</a>
       <a href="/blog/">Blog</a>
-      <a href="#contact">Free audit</a>
+      <a href="/audit/">Free audit</a>
     </div>
     <div class="fcopy">© 2026 Rankwise · HVAC marketing · Metro Vancouver, BC</div>
   </div>
@@ -401,29 +386,5 @@ footer{background:var(--bg);border-top:1px solid var(--b);padding:40px 56px}.flo
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')})},{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 function tf(item){const o=item.classList.contains('open');document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));if(!o)item.classList.add('open')}
-const form=document.getElementById('audit-form');const btn=document.getElementById('submit-btn');const successEl=document.getElementById('form-success');const errorEl=document.getElementById('form-error');
-form.addEventListener('submit',async function(e){e.preventDefault();btn.disabled=true;btn.textContent='Sending...';successEl.style.display='none';errorEl.style.display='none';try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});if(res.ok){form.style.display='none';successEl.style.display='block';form.reset();if(typeof gtag==='function')gtag('event','audit_request_submitted',{event_category:'lead'});}else{throw new Error('fail');}}catch(err){errorEl.style.display='block';btn.disabled=false;btn.textContent='Get your free audit →';}});
-</script>
-
-<script>
-  (function() {
-    var params = new URLSearchParams(window.location.search);
-    var vals = {};
-    ['utm_source','utm_medium','utm_campaign'].forEach(function(key) {
-      var el = document.getElementById(key);
-      var v = params.get(key);
-      if (el && v) { el.value = v; vals[key] = v; }
-    });
-    var ref = document.getElementById('referrer_page');
-    if (ref) ref.value = document.referrer || 'direct';
-    var subj = document.getElementById('subject');
-    if (subj) {
-      var src = vals.utm_source || 'direct';
-      var med = vals.utm_medium || 'none';
-      var camp = vals.utm_campaign || 'none';
-      subj.value = 'New audit lead — ' + src + ' / ' + med + ' / ' + camp;
-    }
-  })();
-</script>
 
 </body></html>
