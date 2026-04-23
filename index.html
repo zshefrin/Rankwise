@@ -402,7 +402,7 @@ const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.targe
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 function tf(item){const o=item.classList.contains('open');document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));if(!o)item.classList.add('open')}
 const form=document.getElementById('audit-form');const btn=document.getElementById('submit-btn');const successEl=document.getElementById('form-success');const errorEl=document.getElementById('form-error');
-form.addEventListener('submit',async function(e){e.preventDefault();btn.disabled=true;btn.textContent='Sending...';successEl.style.display='none';errorEl.style.display='none';try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});if(res.ok){form.style.display='none';successEl.style.display='block';form.reset();}else{throw new Error('fail');}}catch(err){errorEl.style.display='block';btn.disabled=false;btn.textContent='Get your free audit →';}});
+form.addEventListener('submit',async function(e){e.preventDefault();btn.disabled=true;btn.textContent='Sending...';successEl.style.display='none';errorEl.style.display='none';try{const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});if(res.ok){form.style.display='none';successEl.style.display='block';form.reset();if(typeof gtag==='function')gtag('event','audit_request_submitted',{event_category:'lead'});}else{throw new Error('fail');}}catch(err){errorEl.style.display='block';btn.disabled=false;btn.textContent='Get your free audit →';}});
 </script>
 
 <script>
