@@ -98,7 +98,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0C1220;--bg2:#111827;--bg3:#1A2332;--b:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.12);--w:rgba(245,240,232,1);--w6:rgba(245,240,232,0.6);--w35:rgba(245,240,232,0.35);--w15:rgba(245,240,232,0.15);--amber:#F5B731;--teal:#2BA898;--coral:#E8654A;--coral-h:#D4553A;--D:'Syne',sans-serif;--S:'Source Serif 4',Georgia,serif;--T:'Plus Jakarta Sans','Helvetica Neue',sans-serif}
-html{scroll-behavior:smooth}body{font-family:var(--T);background:var(--bg);color:var(--w);line-height:1.7;font-weight:400;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth}body{font-family:var(--T);background:radial-gradient(circle at 8% 0%,rgba(245,183,49,.10),transparent 28%),radial-gradient(circle at 96% 7%,rgba(43,168,152,.12),transparent 33%),linear-gradient(180deg,var(--bg),var(--bg2) 55%,var(--bg) 100%);color:var(--w);line-height:1.7;font-weight:400;min-height:100vh;-webkit-font-smoothing:antialiased}
 nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:rgba(12,18,32,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--b)}
 .logo{font-family:var(--D);font-size:20px;font-weight:700;color:var(--w);text-decoration:none}.logo span{color:var(--amber)}
 .nav-cta{padding:10px 22px;background:linear-gradient(135deg,var(--coral),var(--coral-h));color:var(--w);border-radius:8px;font-family:var(--D);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 2px 12px rgba(232,101,74,0.25)}.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(232,101,74,0.35)}
@@ -117,9 +117,13 @@ article li strong{color:var(--w);font-weight:600}
 article hr{border:none;border-top:1px solid var(--b);margin:40px 0}
 article code{background:var(--bg2);padding:2px 6px;border-radius:4px;font-size:15px;color:var(--amber)}
 .related{margin-top:48px;padding-top:32px;border-top:1px solid var(--b)}.related h3{font-family:var(--D);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w35);margin-bottom:16px}.related-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px}.related-list a{color:var(--w);text-decoration:none;font-size:16px;line-height:1.4;transition:color .15s}.related-list a:hover{color:var(--amber)}
+.audit-cta{margin:40px 0 0;border:1px solid rgba(245,183,49,.34);border-radius:14px;background:rgba(245,183,49,.08);padding:18px}
+.audit-cta h3{font-family:var(--D);font-size:24px;line-height:1.1;color:var(--w);margin:0 0 10px}
+.audit-cta p{font-size:15px;color:var(--w6);margin:0 0 14px}
+.audit-cta a{display:inline-block;padding:10px 16px;border-radius:8px;font-family:var(--D);font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--coral),var(--coral-h));color:var(--w);text-decoration:none}
 footer{background:var(--bg);border-top:1px solid var(--b);padding:36px 24px;font-size:13px;color:var(--w35);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:720px;margin:0 auto}
 footer a{color:var(--w35);text-decoration:none}footer a:hover{color:var(--amber)}
-@media(max-width:700px){nav{padding:14px 20px}.nav-cta{padding:8px 16px;font-size:12px}article{padding:24px 18px 56px}article h1{font-size:32px}article h2{font-size:22px;margin:36px 0 12px}article p,article li{font-size:16px}}
+@media(max-width:700px){nav{padding:14px 20px}.nav-cta{padding:8px 16px;font-size:12px}article{padding:24px 18px 56px}article h1{font-size:32px}article h2{font-size:22px;margin:36px 0 12px}article p,article li{font-size:16px}.audit-cta h3{font-size:20px}}
 </style>
 </head>
 <body>
@@ -130,7 +134,6 @@ footer a{color:var(--w35);text-decoration:none}footer a:hover{color:var(--amber)
 </nav>
 
 <div class="crumb"><a href="/">Home</a> · <a href="/blog/">Blog</a></div>
-
 <article>
   <div class="meta">Published 2026-04-20 · Rankwise</div>
   <h1>How Do I Get More HVAC Leads in Vancouver?</h1>
@@ -185,6 +188,11 @@ footer a{color:var(--w35);text-decoration:none}footer a:hover{color:var(--amber)
 <p>Start with your Google Business Profile — it's the highest-ROI move and the fastest to show results. Claim it if you haven't, complete every field, fix your primary category if it's wrong, and start posting weekly.</p>
 <p>If you want a clear picture of where you stand versus other HVAC contractors in your city — what's ranking, what keywords have real search volume, where the gaps are — that's exactly what a free audit covers.</p>
 <p>Book the free audit at <a href="https://rankwise.ca/audit?utm_source=blog&amp;utm_medium=cta&amp;utm_campaign=how-to-get-more-hvac-leads-vancouver">rankwise.ca/audit?utm_source=blog&amp;utm_medium=cta&amp;utm_campaign=how-to-get-more-hvac-leads-vancouver</a>. We'll look at your specific market, show you where the opportunity is, and give you a straight answer on what it would take to get there.</p>
+<div class="audit-cta">
+  <h3>Want your exact map-pack gaps?</h3>
+  <p>Book a free audit and we will show where your current visibility is leaking calls, plus what to fix first.</p>
+  <a href="/audit/?utm_source=blog&utm_medium=promise_cta&utm_campaign=blog-readers">Book free HVAC audit</a>
+</div>
 <section class="related">
   <h3>More from Rankwise</h3>
   <ul class="related-list">
