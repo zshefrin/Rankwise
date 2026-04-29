@@ -99,9 +99,12 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--paper:#0C1220;--paper-2:#111827;--paper-3:#1A2332;--ink:#F5F0E8;--ink-soft:rgba(245,240,232,.68);--ink-muted:rgba(245,240,232,.35);--line:rgba(245,240,232,.14);--line-strong:rgba(245,240,232,.24);--accent:#F5B731;--accent-2:#2BA898;--accent-3:#E8654A;--accent-4:#D4553A;--display:'Syne',sans-serif;--serif:'Source Serif 4',Georgia,serif;--text:'Plus Jakarta Sans','Helvetica Neue',sans-serif}
 html{scroll-behavior:smooth}body{font-family:var(--text);background:radial-gradient(circle at 10% 0%,rgba(245,183,49,.10),transparent 28%),radial-gradient(circle at 95% 8%,rgba(43,168,152,.12),transparent 34%),linear-gradient(180deg,var(--paper),var(--paper-2) 55%,var(--paper) 100%);color:var(--ink);line-height:1.7;font-weight:400;min-height:100vh;-webkit-font-smoothing:antialiased}
-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(12,18,32,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.logo{font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ink);text-decoration:none}.logo span{color:var(--accent)}
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 52px;background:rgba(12,18,32,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink);text-decoration:none}.logo span{color:var(--accent)}
 .nav-cta{padding:11px 20px;background:linear-gradient(135deg,var(--accent-3),var(--accent-4));color:#fff;border-radius:999px;font-family:var(--display);font-size:13px;font-weight:700;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 10px 24px rgba(232,101,74,.28)}.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(232,101,74,.36)}
+.nav-links{display:flex;list-style:none;gap:30px;margin:0;padding:0}
+.nav-links a{font-size:13px;text-decoration:none;color:var(--ink-soft);font-weight:600;letter-spacing:.02em}
+.nav-links a:hover{color:var(--ink)}
 .crumb{max-width:720px;margin:0 auto;padding:32px 24px 0;font-size:13px;color:var(--ink-muted)}.crumb a{color:var(--ink-muted);text-decoration:none}.crumb a:hover{color:var(--accent)}
 article{max-width:720px;margin:0 auto;padding:32px 24px 72px}
 .meta{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
@@ -127,16 +130,29 @@ tbody tr:last-child td{border-bottom:none}
 .audit-cta h3{font-family:var(--display);font-size:24px;line-height:1.1;color:var(--ink);margin:0 0 10px}
 .audit-cta p{font-size:15px;color:var(--ink-soft);margin:0 0 14px}
 .audit-cta a{display:inline-block;padding:11px 20px;border-radius:999px;font-family:var(--display);font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--accent-3),var(--accent-4));color:#fff;text-decoration:none;box-shadow:0 10px 24px rgba(232,101,74,.28)}
-footer{background:var(--paper);border-top:1px solid var(--line);padding:36px 24px;font-size:13px;color:var(--ink-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:720px;margin:0 auto}
-footer a{color:var(--ink-muted);text-decoration:none}footer a:hover{color:var(--accent)}
-@media(max-width:700px){nav{padding:14px 20px}.nav-cta{padding:9px 15px;font-size:12px}article{padding:24px 18px 56px}article h1{font-size:32px}article h2{font-size:22px;margin:36px 0 12px}article p,article li{font-size:16px}.audit-cta h3{font-size:20px}}
+footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 52px;font-size:13px;color:var(--ink-muted)}
+.footer-wrap{max-width:1150px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.flogo{font-family:var(--display);font-size:21px;color:var(--ink)}
+.flogo span{color:var(--accent)}
+.flinks{display:flex;gap:18px;flex-wrap:wrap}
+.flinks a{text-decoration:none;font-size:13px;color:var(--ink-soft);font-weight:600}
+.flinks a:hover{color:var(--ink)}
+.fcopy{font-size:12px;color:var(--ink-soft)}
+@media(max-width:700px){nav{padding:14px 20px}.nav-links{display:none}.nav-cta{padding:9px 15px;font-size:12px}article{padding:24px 18px 56px}article h1{font-size:32px}article h2{font-size:22px;margin:36px 0 12px}article p,article li{font-size:16px}.audit-cta h3{font-size:20px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="/" class="logo">Rank<span>wise</span></a>
-  <a href="/audit/" class="nav-cta">Free audit</a>
+  <ul class="nav-links">
+    <li><a href="/#services">What we do</a></li>
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#faq">FAQ</a></li>
+    <li><a href="/blog/">Blog</a></li>
+  </ul>
+  <a href="/audit/" class="nav-cta">Book free audit</a>
 </nav>
 
 <div class="crumb"><a href="/">Home</a> · <a href="/blog/">Blog</a></div>
@@ -174,8 +190,18 @@ footer a{color:var(--ink-muted);text-decoration:none}footer a:hover{color:var(--
 </article>
 
 <footer>
-  <a href="/">← Back to rankwise.ca</a>
-  <span>© 2026 Rankwise</span>
+  <div class="footer-wrap">
+    <div class="flogo">Rank<span>wise</span></div>
+    <div class="flinks">
+      <a href="/#services">What we do</a>
+      <a href="/#how">How it works</a>
+      <a href="/#results">Results</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/blog/">Blog</a>
+      <a href="/audit/">Free audit</a>
+    </div>
+    <div class="fcopy">&copy; 2026 Rankwise &middot; HVAC marketing &middot; Metro Vancouver, BC</div>
+  </div>
 </footer>
 
 </body></html>
