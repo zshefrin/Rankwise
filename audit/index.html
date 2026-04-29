@@ -301,18 +301,39 @@ footer{
     calLink: "zackary-shefrin-oy63zv/15min",
   });
   Cal.ns["15min"]("ui", {"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
+  function fireAuditConversion(e, source){
+    console.log("[Cal->GA4]", source, e && e.detail);
+    if (typeof gtag !== "function") return;
+    var bookingUid =
+      (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) ||
+      (e && e.detail && e.detail.data && e.detail.data.uid) ||
+      "cal_com";
+    gtag("event","audit_request_submitted",{
+      event_category:"lead",
+      event_label: bookingUid,
+      utm_source: params.get("utm_source") || "direct",
+      utm_campaign: params.get("utm_campaign") || "direct"
+    });
+  }
+
+  // Cal.com renamed the event in v2. Listen for both so we don't miss either.
   Cal.ns["15min"]("on", {
     action: "bookingSuccessful",
-    callback: function(e){
-      if (typeof gtag === "function") {
-        gtag("event","audit_request_submitted",{
-          event_category:"lead",
-          event_label: (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) || "cal_com",
-          utm_source: params.get("utm_source") || "direct",
-          utm_campaign: params.get("utm_campaign") || "direct"
-        });
-      }
-    }
+    callback: function(e){ fireAuditConversion(e, "bookingSuccessful"); }
+  });
+  Cal.ns["15min"]("on", {
+    action: "bookingSuccessfulV2",
+    callback: function(e){ fireAuditConversion(e, "bookingSuccessfulV2"); }
+  });
+
+  // Debug catch-all — logs every Cal event so we can see what's firing.
+  // Remove after Cal.com → GA4 chain is verified.
+  ["linkReady","linkFailed","__routeChanged","__windowLoadComplete",
+   "eventTypeSelected","__iframeReady","__closeIframe"].forEach(function(action){
+    Cal.ns["15min"]("on", {
+      action: action,
+      callback: function(e){ console.log("[Cal debug]", action, e && e.detail); }
+    });
   });
 })();
 </script>
