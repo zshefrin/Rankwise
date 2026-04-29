@@ -203,10 +203,6 @@ footer{
   font-size:13px;
 }
 .footer-wrap a{color:var(--ink-soft);text-decoration:none}
-.mobile-sticky{
-  display:none;
-}
-
 @media(max-width:1000px){
   .hero{padding:28px 16px 8px}
   .booking{padding:8px 16px 24px}
@@ -216,26 +212,6 @@ footer{
   .hero-actions{margin-bottom:12px}
   .back,
   .learn-more-btn{font-size:12px;padding:9px 12px}
-  .mobile-sticky{
-    display:flex;
-    position:fixed;
-    left:14px;
-    right:14px;
-    bottom:calc(14px + env(safe-area-inset-bottom));
-    z-index:120;
-    justify-content:center;
-    align-items:center;
-    text-decoration:none;
-    background:linear-gradient(135deg,var(--accent-3),var(--accent-4));
-    color:#fff;
-    font-family:var(--display);
-    font-size:15px;
-    font-weight:700;
-    padding:14px 16px;
-    border-radius:999px;
-    box-shadow:0 12px 28px rgba(232,101,74,.38);
-  }
-  body{padding-bottom:92px}
 }
 </style>
 </head>
@@ -281,8 +257,6 @@ footer{
     <a href="mailto:zshef@rankwise.ca">zshef@rankwise.ca</a>
   </div>
 </footer>
-
-<a class="mobile-sticky" href="#book">Book Free HVAC Audit</a>
 
 <script type="text/javascript">
 (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");

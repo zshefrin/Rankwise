@@ -138,6 +138,8 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
 .flinks a{text-decoration:none;font-size:13px;color:var(--ink-soft);font-weight:600}
 .flinks a:hover{color:var(--ink)}
 .fcopy{font-size:12px;color:var(--ink-soft)}
+.mobile-sticky-cta{display:none}
+@media(max-width:1000px){.mobile-sticky-cta{display:flex;position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:150;justify-content:center;align-items:center;text-decoration:none;background:linear-gradient(135deg,var(--accent),#F2C95A);color:var(--paper);border:1px solid rgba(245,183,49,.65);font-family:var(--display);font-size:15px;font-weight:700;padding:14px 16px;border-radius:999px;box-shadow:0 12px 28px rgba(245,183,49,.30);letter-spacing:.01em}body{padding-bottom:92px}}
 @media(max-width:700px){nav{padding:14px 20px}.nav-links{display:none}.nav-cta{padding:9px 15px;font-size:12px}article{padding:24px 18px 56px}article h1{font-size:32px}article h2{font-size:22px;margin:36px 0 12px}article p,article li{font-size:16px}.audit-cta h3{font-size:20px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
 </style>
 </head>
@@ -209,4 +211,6 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
   </div>
 </footer>
 
+
+<a class="mobile-sticky-cta" href="/audit/?utm_source=blog&amp;utm_medium=cta&amp;utm_campaign=optimize-gbp-hvac-contractor&amp;utm_content=mobile-sticky">Book Free HVAC Audit</a>
 </body></html>
