@@ -529,6 +529,79 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .timeline strong{font-family:var(--display);display:block;color:var(--ink);margin-bottom:4px}
 .result-main:hover,.result-side:hover{transform:translateY(-3px);border-color:var(--accent)}
 
+.lab{
+  background:linear-gradient(180deg,rgba(245,183,49,.08),rgba(43,168,152,.05));
+}
+.lab-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.lab-main,.lab-card{
+  border:1px solid rgba(245,183,49,.30);
+  border-radius:16px;
+  background:rgba(245,183,49,.06);
+}
+.lab-main{
+  padding:28px;
+}
+.lab-main h3,.lab-card h3{
+  font-family:var(--display);
+  font-size:22px;
+  line-height:1.12;
+  margin-bottom:10px;
+}
+.lab-main p,.lab-card p{
+  color:var(--ink-soft);
+  font-size:14px;
+}
+.lab-cards{
+  display:grid;
+  gap:14px;
+}
+.lab-card{
+  padding:22px;
+}
+.lab-status{
+  display:inline-flex;
+  margin-bottom:14px;
+  border:1px solid rgba(43,168,152,.40);
+  border-radius:999px;
+  padding:7px 10px;
+  background:rgba(43,168,152,.12);
+  color:var(--accent-2);
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.lab-list{
+  display:grid;
+  gap:10px;
+  margin-top:18px;
+}
+.lab-list div{
+  border:1px solid rgba(245,183,49,.24);
+  border-radius:12px;
+  padding:12px;
+  color:var(--ink-soft);
+  font-size:14px;
+  background:rgba(255,255,255,.035);
+}
+.lab-list strong{
+  display:block;
+  color:var(--ink);
+  font-family:var(--display);
+  margin-bottom:3px;
+}
+.lab-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:22px;
+}
+
 .faq{border-top:1px solid var(--line)}
 .faq-wrap{max-width:860px;margin:0 auto}
 .faq-item{
@@ -641,7 +714,7 @@ footer{
   .hero-grid{grid-template-columns:1fr}
   .hero-left{padding:30px 24px}
   .hero-copy{font-size:16px}
-  .hero-lock,.proof-grid,.promise-grid,.problem-grid,.services-grid,.how-grid,.results-grid,.cta-promise{grid-template-columns:1fr}
+  .hero-lock,.proof-grid,.promise-grid,.problem-grid,.services-grid,.how-grid,.results-grid,.lab-grid,.cta-promise{grid-template-columns:1fr}
   .proof-head{display:block}
   .promise-title{font-size:20px}
   .faq-q{font-size:17px}
@@ -684,6 +757,7 @@ footer{
     <li><a href="#services">What we do</a></li>
     <li><a href="#how">How it works</a></li>
     <li><a href="#results">Results</a></li>
+    <li><a href="#lab">Lab</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="/blog/">Blog</a></li>
   </ul>
@@ -897,6 +971,42 @@ footer{
   </div>
 </section>
 
+<section class="lab" id="lab">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="label">Rankwise Lab</div>
+      <h2>Market studies.<br>Visibility experiments.<br><span class="serif">No fake case studies.</span></h2>
+      <p class="sub">Before we publish client case studies, we show the work: public market data, owned-site experiments, clear limits, and practical next moves for HVAC owners.</p>
+    </div>
+    <div class="lab-grid">
+      <article class="lab-main reveal in">
+        <div class="lab-status">First study in progress</div>
+        <h3>Metro Vancouver HVAC Map Pack Market Study</h3>
+        <p>We are comparing public Google profile signals across nearby HVAC markets: categories, reviews, local page strength, profile activity, and what shows up in the Map Pack.</p>
+        <div class="lab-list">
+          <div><strong>Input</strong>Public Google, SERP, website, and directory signals.</div>
+          <div><strong>Output</strong>A plain-English read on what strong local HVAC visibility looks like city by city.</div>
+          <div><strong>Limit</strong>This is market research, not a client result or a ranking promise.</div>
+        </div>
+        <div class="lab-actions">
+          <a href="/blog/" class="btn-secondary">Read current posts</a>
+          <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=lab" class="btn-primary">Book a visibility check</a>
+        </div>
+      </article>
+      <div class="lab-cards">
+        <article class="lab-card reveal in">
+          <h3>Market Studies</h3>
+          <p>Public-data breakdowns of local search markets, so HVAC owners can see what is actually happening before they spend money.</p>
+        </article>
+        <article class="lab-card reveal in">
+          <h3>Visibility Experiments</h3>
+          <p>Controlled tests on Rankwise-owned pages, posts, CTAs, and tracking loops. We publish the method, the result, and what it does not prove.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
@@ -962,6 +1072,7 @@ footer{
       <a href="#services">What we do</a>
       <a href="#how">How it works</a>
       <a href="#results">Results</a>
+      <a href="#lab">Rankwise Lab</a>
       <a href="#faq">FAQ</a>
       <a href="/blog/">Blog</a>
       <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=footer">Free audit</a>
