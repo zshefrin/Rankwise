@@ -713,6 +713,11 @@ footer{
   opacity:1;
   transform:translateY(0);
 }
+.hero .reveal{
+  opacity:1;
+  transform:none;
+  transition:none;
+}
 
 @media(max-width:1000px){
   nav{padding:14px 18px}
@@ -1159,7 +1164,7 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
           observer.disconnect();
         }
       });
-    }, {rootMargin:"600px 0px"});
+    }, {rootMargin:"0px 0px"});
     observer.observe(embedEl);
   } else {
     loadCal();
