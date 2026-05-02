@@ -18,8 +18,7 @@
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});gtag('config','G-LRX309H9CH',_rwInt?{traffic_type:'internal'}:{});</script>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://app.cal.com" crossorigin>
 
 <!-- Schema markup for local business SEO -->
 <script type="application/ld+json">
@@ -147,9 +146,9 @@
   --accent-3:#E8654A;
   --accent-4:#D4553A;
   --radius:18px;
-  --display:'Syne',sans-serif;
-  --serif:'Source Serif 4',Georgia,serif;
-  --text:'Plus Jakarta Sans','Helvetica Neue',sans-serif;
+  --display:"Avenir Next","Segoe UI","Trebuchet MS",sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --text:"Avenir Next","Segoe UI","Helvetica Neue",sans-serif;
 }
 html{scroll-behavior:smooth}
 body{
@@ -165,13 +164,13 @@ body{
 }
 .container{max-width:1150px;margin:0 auto}
 section{padding:100px 52px}
+.services,.how,.results,.lab,.faq,footer{content-visibility:auto;contain-intrinsic-size:900px}
 nav{
   position:fixed;top:0;left:0;right:0;z-index:120;
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 52px;
-  background:rgba(12,18,32,.92);
+  background:rgba(12,18,32,.96);
   border-bottom:1px solid var(--line);
-  backdrop-filter:blur(12px);
 }
 .logo{font-family:var(--display);font-size:24px;letter-spacing:-.02em;color:var(--ink);text-decoration:none;font-weight:700}
 .logo span{color:var(--accent)}
@@ -668,6 +667,19 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
   border:1px solid rgba(255,255,255,.2);
   background:#121715;
 }
+.cal-loading,
+.cal-fallback{
+  min-height:700px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  text-align:center;
+  color:rgba(255,255,255,.72);
+  font-size:15px;
+  line-height:1.6;
+}
+.cal-fallback a{color:var(--accent);font-weight:700}
 .cta-note{
   margin-top:18px;
   font-size:13px;
@@ -1090,35 +1102,68 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
 </script>
 
 <script type="text/javascript">
-(function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-
 (function(){
   var params = new URLSearchParams(window.location.search);
   var cfg = {"layout":"month_view","useSlotsViewOnSmallScreen":"true"};
+  var embedEl = document.getElementById("cal-embed");
+  var started = false;
   ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){
     var v = params.get(k); if(v) cfg[k] = v;
   });
+  if (!embedEl) return;
+  embedEl.innerHTML = '<div class="cal-loading">Loading booking calendar…</div>';
 
-  Cal("init", "15min", {origin:"https://app.cal.com"});
-  Cal.ns["15min"]("inline", {
-    elementOrSelector:"#cal-embed",
-    config: cfg,
-    calLink: "zackary-shefrin-oy63zv/15min",
-  });
-  Cal.ns["15min"]("ui", {"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
-  Cal.ns["15min"]("on", {
-    action: "bookingSuccessful",
-    callback: function(e){
-      if (typeof gtag === "function") {
-        gtag("event","audit_request_submitted",{
-          event_category:"lead",
-          event_label: (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) || "cal_com",
-          utm_source: params.get("utm_source") || "direct",
-          utm_campaign: params.get("utm_campaign") || "direct"
-        });
-      }
-    }
-  });
+  function fireAuditConversion(e){
+    if (typeof gtag !== "function") return;
+    gtag("event","audit_request_submitted",{
+      event_category:"lead",
+      event_label: (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) || "cal_com",
+      utm_source: params.get("utm_source") || "direct",
+      utm_campaign: params.get("utm_campaign") || "direct"
+    });
+  }
+
+  function initCal(){
+    if (!window.Cal) return;
+    window.Cal("init", "15min", {origin:"https://app.cal.com"});
+    window.Cal.ns["15min"]("inline", {
+      elementOrSelector:"#cal-embed",
+      config: cfg,
+      calLink: "zackary-shefrin-oy63zv/15min",
+    });
+    window.Cal.ns["15min"]("ui", {"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
+    window.Cal.ns["15min"]("on", {
+      action: "bookingSuccessful",
+      callback: fireAuditConversion
+    });
+  }
+
+  function loadCal(){
+    if (started) return;
+    started = true;
+    var script = document.createElement("script");
+    script.src = "https://app.cal.com/embed/embed.js";
+    script.async = true;
+    script.onload = initCal;
+    script.onerror = function(){
+      embedEl.innerHTML = '<div class="cal-fallback">Calendar not loading? <a href="/audit/?utm_source=home&utm_medium=cta&utm_content=calendar-fallback">Open the booking page directly</a>.</div>';
+    };
+    document.head.appendChild(script);
+  }
+
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          loadCal();
+          observer.disconnect();
+        }
+      });
+    }, {rootMargin:"600px 0px"});
+    observer.observe(embedEl);
+  } else {
+    loadCal();
+  }
 })();
 </script>
 </body></html>
