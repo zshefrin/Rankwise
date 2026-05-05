@@ -1118,42 +1118,56 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
   if (!embedEl) return;
   embedEl.innerHTML = '<div class="cal-loading">Loading booking calendar…</div>';
 
+  // Cal.com embed.js v1.5.3+ requires window.Cal.q to exist before the script loads.
+  // Use the official snippet pattern: pre-creates the queue, loads the script internally.
+  var _conversionFired = false;
   function fireAuditConversion(e){
-    if (typeof gtag !== "function") return;
+    if (_conversionFired || typeof gtag !== "function") return;
+    _conversionFired = true;
+    var bookingUid =
+      (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) ||
+      (e && e.detail && e.detail.data && e.detail.data.uid) ||
+      "cal_com";
     gtag("event","audit_request_submitted",{
       event_category:"lead",
-      event_label: (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) || "cal_com",
+      event_label: bookingUid,
       utm_source: params.get("utm_source") || "direct",
       utm_campaign: params.get("utm_campaign") || "direct"
-    });
-  }
-
-  function initCal(){
-    if (!window.Cal) return;
-    window.Cal("init", "15min", {origin:"https://app.cal.com"});
-    window.Cal.ns["15min"]("inline", {
-      elementOrSelector:"#cal-embed",
-      config: cfg,
-      calLink: "zackary-shefrin-oy63zv/15min",
-    });
-    window.Cal.ns["15min"]("ui", {"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
-    window.Cal.ns["15min"]("on", {
-      action: "bookingSuccessful",
-      callback: fireAuditConversion
     });
   }
 
   function loadCal(){
     if (started) return;
     started = true;
-    var script = document.createElement("script");
-    script.src = "https://app.cal.com/embed/embed.js";
-    script.async = true;
-    script.onload = initCal;
-    script.onerror = function(){
-      embedEl.innerHTML = '<div class="cal-fallback">Calendar not loading? <a href="/audit/?utm_source=home&utm_medium=cta&utm_content=calendar-fallback">Open the booking page directly</a>.</div>';
-    };
-    document.head.appendChild(script);
+    (function(C,A,L){
+      var p=function(a,ar){a.q.push(ar);};
+      C.Cal=C.Cal||function(){
+        var cal=C.Cal,ar=arguments;
+        if(!cal.loaded){
+          cal.ns={};cal.q=cal.q||[];
+          var s=document.createElement("script");
+          s.src=A;s.async=true;
+          s.onerror=function(){
+            embedEl.innerHTML='<div class="cal-fallback">Calendar not loading? <a href="/audit/?utm_source=home&utm_medium=cta&utm_content=calendar-fallback">Open the booking page directly</a>.</div>';
+          };
+          document.head.appendChild(s);
+          cal.loaded=1;
+        }
+        if(ar[0]===L){
+          var api=function(){p(api,arguments);};var namespace=ar[1];
+          api.q=api.q||[];
+          if(typeof namespace==="string"){cal.ns[namespace]=cal.ns[namespace]||api;p(cal.ns[namespace],ar);p(cal,[L,namespace,api]);}
+          else p(cal,ar);
+          return;
+        }
+        p(cal,ar);
+      };
+    })(window,"https://app.cal.com/embed/embed.js","init");
+    Cal("init","15min",{origin:"https://app.cal.com"});
+    Cal.ns["15min"]("inline",{elementOrSelector:"#cal-embed",config:cfg,calLink:"zackary-shefrin-oy63zv/15min"});
+    Cal.ns["15min"]("ui",{"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
+    Cal.ns["15min"]("on",{action:"bookingSuccessful",callback:fireAuditConversion});
+    Cal.ns["15min"]("on",{action:"bookingSuccessfulV2",callback:fireAuditConversion});
   }
 
   if ("IntersectionObserver" in window) {
@@ -1164,7 +1178,7 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
           observer.disconnect();
         }
       });
-    }, {rootMargin:"0px 0px"});
+    }, {rootMargin:"200px 0px"});
     observer.observe(embedEl);
   } else {
     loadCal();
