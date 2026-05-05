@@ -1116,7 +1116,6 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
     var v = params.get(k); if(v) cfg[k] = v;
   });
   if (!embedEl) return;
-  embedEl.innerHTML = '<div class="cal-loading">Loading booking calendar…</div>';
 
   // Cal.com embed.js v1.5.3+ requires window.Cal.q to exist before the script loads.
   // Use the official snippet pattern: pre-creates the queue, loads the script internally.
