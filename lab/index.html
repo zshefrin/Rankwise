@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rankwise Lab — HVAC Market Studies</title>
+<meta name="description" content="Public SERP data, tracked over time. Market studies showing what the Metro Vancouver HVAC map pack actually looks like — who is in it, review ranges, and where the gaps are.">
+<link rel="canonical" href="https://rankwise.ca/lab/">
+<meta property="og:title" content="Rankwise Lab — HVAC Market Studies">
+<meta property="og:description" content="Public SERP data, tracked over time. Market studies for HVAC contractors who want to know what the map pack actually looks like.">
+<meta property="og:url" content="https://rankwise.ca/lab/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_CA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rankwise Lab — HVAC Market Studies">
+<meta name="twitter:description" content="Public SERP data, tracked over time. Market studies for HVAC contractors who want to know what the map pack actually looks like.">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});gtag('config','G-LRX309H9CH',_rwInt?{traffic_type:'internal'}:{});</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#0C1220;--paper-2:#111827;--paper-3:#1A2332;--ink:#F5F0E8;--ink-soft:rgba(245,240,232,.68);--ink-muted:rgba(245,240,232,.35);--line:rgba(245,240,232,.14);--line-strong:rgba(245,240,232,.24);--accent:#F5B731;--accent-2:#2BA898;--accent-3:#E8654A;--accent-4:#D4553A;--display:"Avenir Next","Segoe UI","Trebuchet MS",sans-serif;--serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;--text:"Avenir Next","Segoe UI","Helvetica Neue",sans-serif}
+html{scroll-behavior:smooth}body{font-family:var(--text);background:radial-gradient(circle at 10% 0%,rgba(43,168,152,.10),transparent 28%),radial-gradient(circle at 95% 8%,rgba(245,183,49,.09),transparent 34%),linear-gradient(180deg,var(--paper),var(--paper-2) 55%,var(--paper) 100%);color:var(--ink);line-height:1.7;min-height:100vh;-webkit-font-smoothing:antialiased}
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 52px;background:rgba(12,18,32,0.96);border-bottom:1px solid var(--line)}
+.logo{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink);text-decoration:none}.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:30px;list-style:none}.nav-links a{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--ink-soft);text-decoration:none;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--ink)}
+.nav-cta{padding:10px 16px;background:linear-gradient(135deg,var(--accent),#F2C95A);color:var(--paper);border:1px solid rgba(245,183,49,.65);border-radius:999px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 10px 24px rgba(245,183,49,.23)}.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(245,183,49,.30)}
+.page-header{padding:72px 48px 48px;border-bottom:1px solid var(--line)}
+.page-header-inner{max-width:720px;margin:0 auto}
+.lbl{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin-bottom:16px}
+.page-header h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1.0;letter-spacing:-.025em;color:var(--ink);margin-bottom:16px}
+.page-header p{font-size:16px;color:var(--ink-muted);line-height:1.7}
+.posts{max-width:720px;margin:0 auto;padding:0 48px 80px}
+.post-item{display:block;padding:36px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:opacity .15s;content-visibility:auto;contain-intrinsic-size:240px}
+.post-item:first-child{padding-top:40px}
+.post-item:hover{opacity:0.85}
+.post-item:hover .post-title{color:var(--accent)}
+.post-meta{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:10px}
+.post-badge{display:inline-block;margin-bottom:8px;padding:2px 8px;border-radius:5px;background:rgba(43,168,152,.12);border:1px solid rgba(43,168,152,.28);font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2)}
+.post-title{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.2;color:var(--ink);margin-bottom:10px;transition:color .15s}
+.post-excerpt{font-size:15px;color:var(--ink-muted);line-height:1.72;margin-bottom:14px}
+.post-link{font-family:var(--display);font-size:12px;font-weight:700;color:var(--accent-2);letter-spacing:.04em}
+.empty-state{padding:60px 0;text-align:center;color:var(--ink-muted);font-size:15px}
+footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 52px;font-size:13px;color:var(--ink-muted);content-visibility:auto;contain-intrinsic-size:220px}
+.footer-wrap{max-width:1150px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.flogo{font-family:var(--display);font-size:21px;color:var(--ink)}.flogo span{color:var(--accent)}
+.flinks{display:flex;gap:18px;flex-wrap:wrap}.flinks a{text-decoration:none;font-size:13px;color:var(--ink-soft);font-weight:600;transition:color .2s}.flinks a:hover{color:var(--ink)}
+.fcopy{font-size:12px;color:var(--ink-soft)}
+.mobile-sticky-cta{display:none}
+@media(max-width:1000px){.mobile-sticky-cta{display:flex;position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:150;justify-content:center;align-items:center;text-decoration:none;background:linear-gradient(135deg,var(--accent),#F2C95A);color:var(--paper);border:1px solid rgba(245,183,49,.65);font-family:var(--display);font-size:15px;font-weight:700;padding:14px 16px;border-radius:999px;box-shadow:0 12px 28px rgba(245,183,49,.30);letter-spacing:.01em}body{padding-bottom:92px}}
+@media(max-width:700px){nav{padding:14px 20px}.nav-links{display:none}.nav-cta{padding:9px 15px;font-size:12px}.page-header{padding:48px 20px 36px}.page-header h1{font-size:32px}.posts{padding:0 20px 56px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Rank<span>wise</span></a>
+  <ul class="nav-links">
+    <li><a href="/#services">What we do</a></li>
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/lab/" class="active">Lab</a></li>
+  </ul>
+  <a href="/audit/" class="nav-cta">Book free audit</a>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="lbl">Rankwise Lab</div>
+    <h1>What does the<br>map pack actually look like?</h1>
+    <p>Public SERP data, tracked over time. Market studies showing who is in the Metro Vancouver HVAC map pack, what review ranges get contractors in, and where the openings are.</p>
+  </div>
+</div>
+
+<div class="posts">
+  <a href="https://rankwise.ca/lab/hvac-marketing-agencies-map-pack-metro-vancouver/" class="post-item">
+    <div class="post-badge">Market Study</div>
+    <div class="post-meta">May 1, 2026</div>
+    <div class="post-title">Which Marketing Agencies Show Up When HVAC Contractors Search for Help in Metro Vancouver?</div>
+    <div class="post-excerpt">Rankwise Lab — Market Study · May 2026</div>
+    <div class="post-link">Read study &#8594;</div>
+  </a>
+
+  <a href="https://rankwise.ca/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-li/" class="post-item">
+    <div class="post-badge">Market Study</div>
+    <div class="post-meta">May 1, 2026</div>
+    <div class="post-title">What Does the Metro Vancouver HVAC Map Pack Actually Look Like Right Now?</div>
+    <div class="post-excerpt">Rankwise Lab — Market Study · May 2026</div>
+    <div class="post-link">Read study &#8594;</div>
+  </a>
+</div>
+
+<footer>
+  <div class="footer-wrap">
+    <div class="flogo">Rank<span>wise</span></div>
+    <div class="flinks">
+      <a href="/#services">What we do</a>
+      <a href="/#how">How it works</a>
+      <a href="/#results">Results</a>
+      <a href="/blog/">Blog</a>
+      <a href="/lab/">Lab</a>
+      <a href="/audit/">Free audit</a>
+    </div>
+    <div class="fcopy">&#169; 2026 Rankwise &middot; HVAC marketing &middot; Metro Vancouver, BC</div>
+  </div>
+</footer>
+
+<a class="mobile-sticky-cta" href="/audit/?utm_source=lab&amp;utm_medium=cta&amp;utm_content=mobile-sticky-index">Book Free HVAC Audit</a>
+
+</body></html>
