@@ -520,11 +520,17 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .lab-main{
   padding:28px;
 }
-.lab-main h3,.lab-card h3{
+.lab-main h3{
   font-family:var(--display);
   font-size:22px;
   line-height:1.12;
   margin-bottom:10px;
+}
+.lab-card h3{
+  font-family:var(--display);
+  font-size:16px;
+  line-height:1.25;
+  margin-bottom:8px;
 }
 .lab-main p,.lab-card p{
   color:var(--ink-soft);
@@ -536,6 +542,20 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 }
 .lab-card{
   padding:22px;
+  text-decoration:none;
+  color:inherit;
+  display:block;
+  transition:transform .25s ease,border-color .25s ease;
+}
+.lab-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.lab-card-label{
+  font-family:var(--display);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:10px;
+  color:var(--accent);
+  margin-bottom:8px;
+  display:block;
 }
 .lab-status{
   display:inline-flex;
@@ -1041,14 +1061,21 @@ footer{
         </div>
       </article>
       <div class="lab-cards">
-        <article class="lab-card reveal in">
-          <h3>Market Studies</h3>
-          <p>Public-data breakdowns of local search markets, so HVAC owners can see what is actually happening before they spend money.</p>
-        </article>
-        <article class="lab-card reveal in">
-          <h3>Visibility Experiments</h3>
-          <p>Controlled tests on Rankwise-owned pages, posts, CTAs, and tracking loops. We publish the method, the result, and what it does not prove.</p>
-        </article>
+        <a href="/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-li/" class="lab-card reveal in">
+          <span class="lab-card-label">Market Study</span>
+          <h3>What Does the Metro Vancouver HVAC Map Pack Actually Look Like Right Now?</h3>
+          <p>Two contractors appear in more than half of all Map Pack results across 12 searches tracked — see what the field actually looks like.</p>
+        </a>
+        <a href="/lab/what-do-hvac-consumers-actually-search-for-metro-vancouver/" class="lab-card reveal in">
+          <span class="lab-card-label">Market Study</span>
+          <h3>What Do HVAC Consumers Actually Search For in Metro Vancouver?</h3>
+          <p>The search terms homeowners use when looking for HVAC help — and what that means for how you show up.</p>
+        </a>
+        <a href="/lab/hvac-marketing-agencies-map-pack-metro-vancouver/" class="lab-card reveal in">
+          <span class="lab-card-label">Market Study</span>
+          <h3>Which Marketing Agencies Show Up When HVAC Contractors Search for Help?</h3>
+          <p>15 searches, one clear pattern: generalists dominate — with one notable gap in the market.</p>
+        </a>
       </div>
     </div>
   </div>
