@@ -544,10 +544,15 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
   padding:22px;
   text-decoration:none;
   color:inherit;
-  display:block;
+  display:flex;
+  flex-direction:column;
   transition:transform .25s ease,border-color .25s ease;
 }
 .lab-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.lab-card p{margin-bottom:14px;flex:1}
+.lab-card-cta{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:4px;margin-top:auto}
+.lab-card-cta .arrow{display:inline-block;transition:transform .2s ease}
+.lab-card:hover .arrow{transform:translateX(4px)}
 .lab-card-label{
   font-family:var(--display);
   text-transform:uppercase;
@@ -1069,16 +1074,19 @@ footer{
           <span class="lab-card-label">Market Study</span>
           <h3>What Does the Metro Vancouver HVAC Map Pack Actually Look Like Right Now?</h3>
           <p>Two contractors appear in more than half of all Map Pack results across 12 searches tracked — see what the field actually looks like.</p>
+          <span class="lab-card-cta">Read study <span class="arrow">→</span></span>
         </a>
         <a href="/lab/what-do-hvac-consumers-actually-search-for-metro-vancouver/" class="lab-card reveal in">
           <span class="lab-card-label">Market Study</span>
           <h3>What Do HVAC Consumers Actually Search For in Metro Vancouver?</h3>
           <p>The search terms homeowners use when looking for HVAC help — and what that means for how you show up.</p>
+          <span class="lab-card-cta">Read study <span class="arrow">→</span></span>
         </a>
         <a href="/lab/hvac-marketing-agencies-map-pack-metro-vancouver/" class="lab-card reveal in">
           <span class="lab-card-label">Market Study</span>
           <h3>Which Marketing Agencies Show Up When HVAC Contractors Search for Help?</h3>
           <p>15 searches, one clear pattern: generalists dominate — with one notable gap in the market.</p>
+          <span class="lab-card-cta">Read study <span class="arrow">→</span></span>
         </a>
       </div>
     </div>
