@@ -821,7 +821,11 @@ footer{
   padding:16px 20px;
   background:rgba(255,255,255,.03);
   margin-bottom:18px;
+  text-decoration:none;
+  color:inherit;
+  transition:transform .2s ease,border-color .2s ease;
 }
+.founder-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .founder-avatar{
   width:46px;height:46px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent-2),rgba(43,168,152,.5));
@@ -1111,13 +1115,13 @@ footer{
       <div>One HVAC contractor per city.</div>
       <div>If we miss targets, you do not pay for that month.</div>
     </div>
-    <div class="founder-card reveal in">
+    <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=founder-card" class="founder-card reveal in">
       <div class="founder-avatar">ZS</div>
       <div class="founder-text">
         <strong>Zack Shefrin — Founder, Rankwise</strong>
         <span>I review every audit personally before the call. Metro Vancouver HVAC is the only market I work in.</span>
       </div>
-    </div>
+    </a>
     <div class="reveal in" id="cal-embed"></div>
     <p class="cta-note reveal in">Metro Vancouver only · Results guarantee included</p>
   </div>
