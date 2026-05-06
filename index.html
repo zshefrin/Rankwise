@@ -836,12 +836,16 @@ footer{
   background:rgba(255,255,255,.03);
   text-decoration:none;
   color:inherit;
-  display:block;
+  display:flex;
+  flex-direction:column;
   transition:transform .22s ease,border-color .22s ease;
 }
 .blog-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .blog-card h3{font-family:var(--display);font-size:17px;line-height:1.25;margin-bottom:8px;color:var(--ink)}
-.blog-card p{font-size:13px;color:var(--ink-soft);line-height:1.55}
+.blog-card p{font-size:13px;color:var(--ink-soft);line-height:1.55;flex:1;margin-bottom:14px}
+.blog-card-cta{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:4px;margin-top:auto}
+.blog-card-cta .arrow{display:inline-block;transition:transform .2s ease}
+.blog-card:hover .arrow{transform:translateX(4px)}
 .blog-cta{display:flex;gap:12px;align-items:center}
 
 @media(max-width:1000px){
@@ -1115,14 +1119,17 @@ footer{
       <a href="/blog/how-do-i-get-more-hvac-leads-in-vancouver/" class="blog-card reveal in">
         <h3>How Do I Get More HVAC Leads in Vancouver?</h3>
         <p>The fastest path to more HVAC leads in Vancouver is a fully active Google Business Profile that ranks in the Map Pack — the three local listings that appear above organic results.</p>
+        <span class="blog-card-cta">Read article <span class="arrow">→</span></span>
       </a>
       <a href="/blog/why-isnt-my-hvac-business-showing-in-map-pack/" class="blog-card reveal in">
         <h3>Why Isn't My HVAC Business Showing Up in the Map Pack?</h3>
         <p>The most common reason HVAC contractors don't appear in the Map Pack is a mismatch between their Google Business Profile setup and what Google expects to see.</p>
+        <span class="blog-card-cta">Read article <span class="arrow">→</span></span>
       </a>
       <a href="/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/" class="blog-card reveal in">
         <h3>Who Should I Hire for HVAC Marketing in Vancouver?</h3>
         <p>Hire a marketing agency or specialist who works exclusively with HVAC contractors, has a verifiable process for Google Business Profile and local search, and can show real results.</p>
+        <span class="blog-card-cta">Read article <span class="arrow">→</span></span>
       </a>
     </div>
     <div class="blog-cta reveal in">
