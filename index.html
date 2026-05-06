@@ -760,6 +760,32 @@ footer{
   footer{padding:24px 18px}
 }
 
+.blog-strip{border-top:1px solid var(--line)}
+.blog-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:22px;
+}
+.blog-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:22px 20px;
+  background:rgba(255,255,255,.03);
+  text-decoration:none;
+  color:inherit;
+  display:block;
+  transition:transform .22s ease,border-color .22s ease;
+}
+.blog-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.blog-card h3{font-family:var(--display);font-size:17px;line-height:1.25;margin-bottom:8px;color:var(--ink)}
+.blog-card p{font-size:13px;color:var(--ink-soft);line-height:1.55}
+.blog-cta{display:flex;gap:12px;align-items:center}
+
+@media(max-width:1000px){
+  .blog-grid{grid-template-columns:1fr}
+}
+
 @media(max-width:480px){
   h1{font-size:34px}
   h2{font-size:31px}
@@ -823,56 +849,6 @@ footer{
     </aside>
   </div>
 </section>
-
-<section class="promise-band">
-  <div class="container promise-wrap reveal in">
-    <div class="promise-title">Our Promise Is <span>Simple.</span></div>
-    <div class="promise-grid">
-      <div class="promise-item">No contracts.<br>Month to month.</div>
-      <div class="promise-item">One HVAC contractor<br>per city.</div>
-      <div class="promise-item">Miss targets?<br>You do not pay for that month.</div>
-    </div>
-  </div>
-</section>
-
-<section class="proof-strip" id="proof">
-  <div class="container">
-    <div class="proof-head reveal in">
-      <div class="label" style="margin-bottom:0">Operating proof</div>
-      <p>We track the signals that actually lead to booked work, then use those signals to decide next-week actions.</p>
-    </div>
-    <div class="proof-grid">
-      <article class="proof-card reveal in">
-        <div class="proof-kicker">Lead signal</div>
-        <h3>Audit request events</h3>
-        <p>Completed booking events, not vanity button clicks.</p>
-      </article>
-      <article class="proof-card reveal in">
-        <div class="proof-kicker">Search signal</div>
-        <h3>Map pack movement</h3>
-        <p>City + service ranking shifts across your real target zones.</p>
-      </article>
-      <article class="proof-card reveal in">
-        <div class="proof-kicker">Quality signal</div>
-        <h3>Traffic cleanup</h3>
-        <p>Internal/test noise filtered so decisions are based on real prospects.</p>
-      </article>
-      <article class="proof-card reveal in">
-        <div class="proof-kicker">Action signal</div>
-        <h3>Weekly scorecards</h3>
-        <p>One-page operating view of what worked, what changed, and what ships next.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<div class="ticker">
-  <div class="ticker-wrap">
-    <span>Built for HVAC contractors only.</span>
-    <span>Focused on local calls and installs.</span>
-    <span>Human-reviewed, no AI spam publishing.</span>
-  </div>
-</div>
 
 <section>
   <div class="container">
@@ -1038,6 +1014,32 @@ footer{
     </div>
     <div class="reveal in" id="cal-embed"></div>
     <p class="cta-note reveal in">Metro Vancouver only · One HVAC contractor per city · Results guarantee included</p>
+  </div>
+</section>
+
+<section class="blog-strip">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="label">From the blog</div>
+      <h2>Straight answers on<br><span class="serif">HVAC marketing.</span></h2>
+    </div>
+    <div class="blog-grid">
+      <a href="/blog/how-many-reviews-hvac-contractors-need-rank-locally/" class="blog-card reveal in">
+        <h3>How Many Reviews Do HVAC Contractors Need to Rank Locally?</h3>
+        <p>There's no fixed number — but in Metro Vancouver, HVAC contractors consistently holding top-3 Map Pack positions have between 25 and 100 reviews depending on their city.</p>
+      </a>
+      <a href="/blog/map-pack-vs-organic-hvac-contractors/" class="blog-card reveal in">
+        <h3>Map Pack vs Organic Search: Where Should HVAC Contractors Focus First?</h3>
+        <p>HVAC contractors should focus on the Map Pack first. It delivers faster results — GBP improvements show up within 30 days and it captures more clicks for local searches.</p>
+      </a>
+      <a href="/blog/how-much-does-hvac-marketing-cost-in-british-columbia/" class="blog-card reveal in">
+        <h3>How Much Does HVAC Marketing Cost in British Columbia?</h3>
+        <p>HVAC marketing in BC typically runs $500–$3,000 per month, depending on what's included and how competitive your city is.</p>
+      </a>
+    </div>
+    <div class="blog-cta reveal in">
+      <a href="/blog/" class="btn-secondary">Read all articles</a>
+    </div>
   </div>
 </section>
 
