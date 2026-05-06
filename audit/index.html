@@ -47,6 +47,18 @@ nav{
   border-bottom:1px solid var(--line);
   background:rgba(12,18,32,.96);
 }
+.nav-links{display:flex;list-style:none;gap:30px}
+.nav-links a{font-size:13px;text-decoration:none;color:var(--ink-soft);font-weight:600;letter-spacing:.02em}
+.nav-links a:hover,.nav-links a.active{color:var(--ink)}
+.nav-cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;border-radius:999px;padding:10px 16px;
+  font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em;
+  color:var(--paper);background:linear-gradient(135deg,var(--accent),#F2C95A);
+  border:1px solid rgba(245,183,49,.65);box-shadow:0 10px 24px rgba(245,183,49,.23);
+  transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(245,183,49,.30)}
 .logo{
   text-decoration:none;
   color:var(--ink);
@@ -254,13 +266,15 @@ footer{
 }
 .footer-wrap a{color:var(--ink-soft);text-decoration:none}
 @media(max-width:1000px){
+  nav{padding:14px 18px}
+  .nav-links{display:none}
+  .nav-cta{padding:9px 15px;font-size:12px}
   .hero{padding:28px 16px 8px}
   .booking{padding:8px 16px 24px}
   .promise-grid{grid-template-columns:1fr}
   .promise-title{font-size:20px}
   .sub{font-size:16px}
   .hero-actions{margin-bottom:12px}
-  .back,
   .learn-more-btn{font-size:12px;padding:9px 12px}
 }
 </style>
@@ -269,7 +283,15 @@ footer{
 
 <nav>
   <a href="/" class="logo">Rank<span>wise</span></a>
-  <a href="/" class="back">← Back to rankwise.ca</a>
+  <ul class="nav-links">
+    <li><a href="/#services">What we do</a></li>
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#faq">FAQ</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/lab/">Lab</a></li>
+  </ul>
+  <a href="/audit/" class="nav-cta">Book free audit</a>
 </nav>
 
 <section class="hero">
