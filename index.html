@@ -103,30 +103,6 @@
         "text": "Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."
       }
     },
-    {
-      "@type": "Question",
-      "name": "Why not just do it myself?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Same reason homeowners hire you instead of watching a YouTube video and doing their own install. There are 40+ factors that decide where you rank — primary category, service area setup, description wording, review velocity, review response cadence, photo freshness, post cadence, citation consistency across directories, backlink profile, site speed, GBP Q&A, local page content — and that's before Google's next algorithm update. Most HVAC owners who try to handle it themselves spend 5–10 hours a week for the first three months and still miss things. This is what we do every day, specifically for HVAC contractors in Metro Vancouver."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do you work with other trades or just HVAC?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Just HVAC. That's the whole point — we're not spreading ourselves thin across dentists and landscapers and restaurants. We know how homeowners search for heating and cooling work, we know your industry, and we know the Metro Vancouver market. That focus is why it works."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do you use AI in your work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes — the way a surgeon uses imaging. It speeds up the parts that benefit from speed, and a human makes every decision that affects your business. AI helps with first drafts, tracking keyword movement across Google, and quality checks. A human reviews and approves every post, every report, and every response before it goes live."
-      }
-    }
   ]
 }
 </script>
@@ -760,6 +736,72 @@ footer{
   footer{padding:24px 18px}
 }
 
+.data-band{
+  padding:14px 52px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:rgba(43,168,152,.07);
+}
+.data-band-inner{
+  max-width:1150px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  gap:0;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.data-band-label{
+  font-family:var(--display);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  color:var(--accent-2);
+  margin-right:20px;
+  font-weight:700;
+}
+.data-band-stats{
+  display:flex;
+  gap:24px;
+  flex-wrap:wrap;
+  align-items:center;
+  font-size:14px;
+  color:var(--ink-soft);
+}
+.data-band-stats span strong{
+  color:var(--ink);
+  font-family:var(--display);
+}
+.data-band-link{
+  margin-left:20px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--accent-2);
+  text-decoration:none;
+  font-family:var(--display);
+}
+.data-band-link:hover{text-decoration:underline}
+.founder-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 20px;
+  background:rgba(255,255,255,.03);
+  margin-bottom:18px;
+}
+.founder-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent-2),rgba(43,168,152,.5));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:15px;font-weight:700;color:var(--paper);
+  flex-shrink:0;
+}
+.founder-text strong{
+  display:block;font-family:var(--display);font-size:15px;margin-bottom:3px;color:var(--ink);
+}
+.founder-text span{font-size:13px;color:var(--ink-soft)}
 .blog-strip{border-top:1px solid var(--line)}
 .blog-grid{
   display:grid;
@@ -783,6 +825,10 @@ footer{
 .blog-cta{display:flex;gap:12px;align-items:center}
 
 @media(max-width:1000px){
+  .data-band{padding:12px 18px}
+  .data-band-label{margin-right:0;margin-bottom:8px;width:100%;text-align:center}
+  .data-band-stats{justify-content:center}
+  .data-band-link{margin-left:0;margin-top:8px;width:100%;text-align:center;display:block}
   .blog-grid{grid-template-columns:1fr}
 }
 
@@ -841,14 +887,22 @@ footer{
         <strong>90-day action plan</strong>
         <span>Clear first moves for GBP, SEO, and lead conversion.</span>
       </div>
-      <div class="trust">
-        <div>No contracts. Month to month.</div>
-        <div>One HVAC contractor per city.</div>
-        <div>If we miss targets, you do not pay for that month.</div>
-      </div>
     </aside>
   </div>
 </section>
+
+<div class="data-band">
+  <div class="data-band-inner">
+    <span class="data-band-label">Rankwise Lab</span>
+    <div class="data-band-stats">
+      <span><strong>12</strong> HVAC search terms tracked</span>
+      <span><strong>19</strong> contractors monitored</span>
+      <span><strong>6</strong> Metro Vancouver cities</span>
+      <span>Median Map Pack reviews: <strong>275</strong></span>
+    </div>
+    <a href="/lab/" class="data-band-link">See the data →</a>
+  </div>
+</div>
 
 <section>
   <div class="container">
@@ -864,7 +918,7 @@ footer{
       </article>
       <article class="problem-card reveal in">
         <h3>Great work, quiet Google</h3>
-        <p>Companies that look more active online are winning map pack jobs that should be yours — not because their install work is better.</p>
+        <p>Companies that look more active online are winning Map Pack jobs that should be yours. In Metro Vancouver, the median contractor holding a top-3 position has 275 reviews — most new entrants have fewer than 30.</p>
       </article>
       <article class="problem-card reveal in">
         <h3>No time for marketing ops</h3>
@@ -1004,16 +1058,23 @@ footer{
   <div class="container">
     <div class="section-head reveal in">
       <div class="label">Free HVAC audit</div>
-      <h2>Let us show where there is room to grow your inbound call volume.</h2>
-      <p class="sub">Pick a time below. We will review your live map pack and website signal before the call so we can get straight to what matters.</p>
+      <h2>See your Map Pack standing in 15 minutes.</h2>
+      <p class="sub">We pull your live Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.</p>
     </div>
     <div class="cta-promise reveal in">
       <div>No contracts. Month to month.</div>
       <div>One HVAC contractor per city.</div>
       <div>If we miss targets, you do not pay for that month.</div>
     </div>
+    <div class="founder-card reveal in">
+      <div class="founder-avatar">ZS</div>
+      <div class="founder-text">
+        <strong>Zack Shefrin — Founder, Rankwise</strong>
+        <span>I review every audit personally before the call. Metro Vancouver HVAC is the only market I work in.</span>
+      </div>
+    </div>
     <div class="reveal in" id="cal-embed"></div>
-    <p class="cta-note reveal in">Metro Vancouver only · One HVAC contractor per city · Results guarantee included</p>
+    <p class="cta-note reveal in">Metro Vancouver only · Results guarantee included</p>
   </div>
 </section>
 
@@ -1068,18 +1129,6 @@ footer{
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
       <div class="faq-a">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Why not just do it myself?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Same reason homeowners hire you instead of watching a YouTube video and doing their own install. There are 40+ factors that decide where you rank — primary category, service area setup, description wording, review velocity, review response cadence, photo freshness, post cadence, citation consistency across directories, backlink profile, site speed, GBP Q&amp;A, local page content — and that's before Google's next algorithm update. Most HVAC owners who try to handle it themselves spend 5–10 hours a week for the first three months and still miss things.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Do you work with other trades or just HVAC?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Just HVAC. That's the whole point — we're not spreading ourselves thin across dentists and landscapers and restaurants. We know how homeowners search for heating and cooling work, we know your industry, and we know the Metro Vancouver market. That focus is why it works.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Do you use AI in your work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Yes — the way a surgeon uses imaging. It speeds up the parts that benefit from speed, and a human makes every decision that affects your business. AI helps with first drafts, tracking keyword movement across Google, and quality checks. A human reviews and approves every post, every report, and every response before it goes live.</div>
     </div>
   </div>
 </section>
