@@ -65,6 +65,9 @@ def build_sitemap() -> str:
         post_html = slug_dir / "index.html"
         if not post_html.exists():
             continue
+        # Skip pages marked noindex (e.g., redirect stubs to canonical URLs)
+        if 'name="robots" content="noindex' in post_html.read_text():
+            continue
         rel = f"blog/{slug_dir.name}/index.html"
         urls.append((f"{BASE}/blog/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
 
