@@ -47,6 +47,11 @@ def build_sitemap() -> str:
     if (ROOT / blog_index).exists():
         urls.append((f"{BASE}/blog/", git_lastmod(blog_index), "weekly", "0.8"))
 
+    # About page
+    about_html = "about/index.html"
+    if (ROOT / about_html).exists():
+        urls.append((f"{BASE}/about/", git_lastmod(about_html), "monthly", "0.8"))
+
     # City landing pages — any top-level directory ending in -hvac-marketing
     for slug_dir in sorted(ROOT.iterdir()):
         if not slug_dir.is_dir() or not slug_dir.name.endswith("-hvac-marketing"):
