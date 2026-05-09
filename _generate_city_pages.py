@@ -279,8 +279,6 @@ def build_page(c):
   <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=nav" class="nav-cta">Book free audit</a>
 </nav>
 
-{_aio_section_html(c)}
-
 <section class="hero">
   <div class="container hero-grid">
     <div class="hero-left reveal in">
@@ -314,6 +312,8 @@ def build_page(c):
     </aside>
   </div>
 </section>
+
+{_aio_section_html(c)}
 
 <section>
   <div class="container">
