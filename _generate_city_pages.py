@@ -9,8 +9,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Vancouver, BC",
         "h1_city": "Vancouver.",
         "meta_title": "HVAC Marketing Agency in Vancouver | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in Vancouver. Local SEO and Google Business Profile management for heating and cooling contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and Google Business Profile management. One HVAC contractor per city.",
         "og_desc": "HVAC marketing for Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Vancouver: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each have distinct search demand for furnace repair and heat pump installation.",
+            "<strong>Google Business Profile activity</strong> — weekly posts with real job photos, responses to every review, and an accurate primary category tell Google your business is active and relevant.",
+            "<strong>Review velocity</strong> — Vancouver contractors holding top-3 Map Pack positions carry a median of 275 reviews; contractors below 50 reviews are rarely competitive for high-intent queries.",
+            "<strong>City-specific landing pages</strong> — one page per service area lets Google match your website to neighbourhood-level searches for furnace repair, AC installation, and heat pump service.",
+        ],
         "hero_copy": "Your crew does great work. The opportunity is getting the dispatch line busier. We build the local search engine around your company so Vancouver homeowners find you first, trust you faster, and call before they call someone else.",
         "problem_stat": "In Vancouver, the median contractor holding a top-3 Map Pack position has 275 reviews — most new entrants have fewer than 30.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Vancouver — wherever high-intent homeowners are searching for furnace repair, AC installation, or heat pump service.",
@@ -25,8 +32,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Burnaby, BC",
         "h1_city": "Burnaby.",
         "meta_title": "HVAC Marketing Agency in Burnaby | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in Burnaby. Local SEO and Google Business Profile management for furnace repair and HVAC contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for Burnaby contractors — Brentwood, Metrotown, and Lougheed. Map Pack and Google Business Profile management for furnace repair and HVAC service. One contractor per city.",
         "og_desc": "HVAC marketing for Burnaby contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Burnaby: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones for furnace repair and HVAC installation searches.",
+            "<strong>Google Business Profile activity</strong> — weekly posts with real job photos and consistent review responses signal an active, trustworthy business to Google and to homeowners reading your profile.",
+            "<strong>Review velocity</strong> — Burnaby contractors with fewer than 30 reviews rarely appear in competitive Map Pack results for high-intent furnace repair and heating contractor queries.",
+            "<strong>City-specific landing pages</strong> — a Burnaby-specific page lets Google match your business to neighbourhood-level searches for furnace repair, HVAC installation, and emergency heating service.",
+        ],
         "hero_copy": "Burnaby homeowners search for furnace repair and HVAC help on Google every day. The opportunity is making sure they find your company first. We build the local search presence around your business so you get the call before a competitor does.",
         "problem_stat": "In Burnaby, furnace repair and near-me HVAC queries drive consistent year-round search volume — and most of those calls go to the contractors who appear in the top 3 Google Map Pack results.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Burnaby — wherever homeowners are searching for furnace repair, HVAC installation, or emergency heating service.",
@@ -41,8 +55,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Surrey, BC",
         "h1_city": "Surrey.",
         "meta_title": "HVAC Marketing Agency in Surrey | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in Surrey. Local SEO and Google Business Profile management for HVAC contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for BC's largest city. One HVAC contractor per city.",
         "og_desc": "HVAC marketing for Surrey contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Surrey: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high HVAC installation search volume as BC's largest city (~600,000 population) with active new-build development.",
+            "<strong>Google Business Profile activity</strong> — consistent weekly posting and review responses maintain visibility as Surrey's rapid growth drives heat pump and HVAC installation searches year-round.",
+            "<strong>Review velocity</strong> — Surrey's competitive HVAC market rewards contractors with strong review velocity; new-build areas like Fleetwood and South Surrey generate disproportionate search volume for heat pump installation.",
+            "<strong>City-specific landing pages</strong> — Surrey neighbourhood pages capture installation and furnace replacement searches from homeowners in new-build developments who are actively looking to book.",
+        ],
         "hero_copy": "Surrey is one of Metro Vancouver's fastest-growing markets for HVAC installation and service. The contractors winning the most calls aren't the biggest — they're the ones Google shows first. We build that visibility around your business.",
         "problem_stat": "Surrey HVAC installation and residential service queries are among the highest-volume in Metro Vancouver — but most of those searches resolve to the same 2–3 contractors showing up in the Map Pack.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Surrey — wherever homeowners are searching for HVAC installation, furnace replacement, or air conditioning service.",
@@ -57,8 +78,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Richmond, BC",
         "h1_city": "Richmond.",
         "meta_title": "HVAC Marketing Agency in Richmond | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in Richmond, BC. Local SEO and Google Business Profile management for HVAC contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for Richmond contractors — Steveston, Brighouse, Hamilton. Map Pack and GBP management for AC repair, heat pump, and furnace service. One contractor per city.",
         "og_desc": "HVAC marketing for Richmond contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Richmond: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Steveston, Brighouse, and Hamilton are Richmond's densest residential zones, with year-round demand for AC repair, heat pump installation, and furnace service.",
+            "<strong>Google Business Profile activity</strong> — active GBP with frequent job photos and review responses signals relevance for Richmond homeowners searching for HVAC service.",
+            "<strong>Review velocity</strong> — Richmond's top-3 Map Pack positions are typically held by contractors with 30–60 reviews and a consistent response pattern; below 20 reviews it is difficult to appear for competitive queries.",
+            "<strong>City-specific landing pages</strong> — Richmond-specific pages target city-level searches for AC repair, heat pump installation, and furnace service from a dense, high-intent residential market.",
+        ],
         "hero_copy": "Richmond homeowners search for AC repair, heat pump service, and furnace work year-round. We build the local search presence that puts your company in front of those searches — before a competitor gets the call.",
         "problem_stat": "Richmond's dense residential market means high HVAC search volume, but most of those searches convert to the same handful of contractors who dominate the local Map Pack.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Richmond — wherever homeowners are searching for AC repair, heat pump installation, or furnace service.",
@@ -73,8 +101,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · North Vancouver, BC",
         "h1_city": "North Vancouver.",
         "meta_title": "HVAC Marketing Agency in North Vancouver | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in North Vancouver. Local SEO and Google Business Profile management for HVAC contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for North Vancouver contractors — Lonsdale, Lynn Valley, Deep Cove, Capilano. Map Pack and GBP for furnace repair and heat pump installation. One contractor per city.",
         "og_desc": "HVAC marketing for North Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in North Vancouver: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Lonsdale, Lynn Valley, Deep Cove, and Capilano each have distinct search demand; North Vancouver has higher average job values and strong heat pump installation intent compared to most Metro Vancouver markets.",
+            "<strong>Google Business Profile activity</strong> — North Vancouver homeowners expect well-maintained listings and prompt responses; active GBP management is essential for building credibility in a market where trust matters.",
+            "<strong>Review velocity</strong> — North Vancouver furnace repair and heat pump searches route almost entirely to the top-3 Map Pack results; contractors below that visibility threshold see very few inbound calls from organic search.",
+            "<strong>City-specific landing pages</strong> — North Vancouver city pages capture distinct search intent across neighbourhoods, including heat pump installation searches from Lynn Valley and Capilano homeowners considering electrification upgrades.",
+        ],
         "hero_copy": "North Vancouver homeowners call HVAC contractors year-round — furnace work in winter, AC and heat pump service in summer. We make sure your company is the one they find when they search.",
         "problem_stat": "North Vancouver HVAC searches — especially for furnace repair and heating contractors — consistently flow to the top 3 Map Pack results. Most contractors below that threshold get very few organic calls.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across North Vancouver — wherever homeowners are searching for furnace repair, heating contractors, or HVAC service.",
@@ -89,8 +124,15 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Coquitlam, BC",
         "h1_city": "Coquitlam.",
         "meta_title": "HVAC Marketing Agency in Coquitlam | Rankwise",
-        "meta_desc": "Rankwise is an HVAC marketing agency in Coquitlam. Local SEO and Google Business Profile management for heating and HVAC contractors. One contractor per city, month-to-month.",
+        "meta_desc": "HVAC marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Heat pump and furnace Map Pack optimization. One HVAC contractor per city.",
         "og_desc": "HVAC marketing for Coquitlam contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Coquitlam: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Town Centre, Burke Mountain, and Westwood Plateau are fast-growing residential areas with strong demand for heat pump installation and ductless retrofit work.",
+            "<strong>Google Business Profile activity</strong> — Coquitlam's growing suburban neighbourhoods drive consistent new HVAC installation searches; active GBP with job photos from local installs builds trust and ranking authority.",
+            "<strong>Review velocity</strong> — Coquitlam heating contractor searches route almost entirely to the top-3 local Map Pack positions; contractors without a strong review profile see very few organic inbound calls.",
+            "<strong>City-specific landing pages</strong> — Coquitlam pages capture heat pump installation and ductless retrofit searches from homeowners in Burke Mountain and Westwood Plateau new developments, where installations are at a premium.",
+        ],
         "hero_copy": "Coquitlam homeowners searching for heating contractors and HVAC service are booking from the top of Google Maps. We build the visibility that puts your company in those results — and keeps competitors out.",
         "problem_stat": "Coquitlam heating contractor and HVAC service searches route almost entirely to contractors in the top 3 local Map Pack positions. Visibility below that threshold means very few inbound calls.",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Coquitlam — wherever homeowners are searching for heating contractors, furnace repair, or HVAC installation.",
@@ -102,6 +144,52 @@ CITIES = [
 ]
 
 CSS = open(os.path.join(os.path.dirname(__file__), "index.html")).read().split("<style>")[1].split("</style>")[0]
+
+CITY_EXTRA_CSS = """
+.city-intel{padding:48px 52px;background:rgba(255,255,255,0.025);border-top:1px solid var(--line)}
+.city-intel-inner{max-width:780px;margin:0 auto}
+.city-intel-h{font-family:var(--display);font-size:clamp(17px,1.8vw,21px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.3}
+.city-intel-list{padding-left:22px;display:flex;flex-direction:column;gap:10px;margin:0}
+.city-intel-list li{font-size:15px;color:var(--ink-soft);line-height:1.68}
+.city-intel-list li strong{color:var(--ink);font-weight:600}
+.city-links{padding:28px 52px;border-top:1px solid var(--line)}
+.city-links .container{max-width:1150px;margin:0 auto}
+.city-links-label{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px}
+.city-links-list{display:flex;flex-wrap:wrap;gap:10px}
+.city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
+.city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
+@media(max-width:700px){.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+"""
+
+
+def _city_links_html(current_slug: str) -> str:
+    others = [c for c in CITIES if c["slug"] != current_slug]
+    links = "\n      ".join(
+        f'<a href="/{c["slug"]}/">{c["name"]} HVAC marketing</a>' for c in others
+    )
+    return f"""<section class="city-links">
+  <div class="container">
+    <p class="city-links-label">We also serve</p>
+    <div class="city-links-list">
+      {links}
+    </div>
+  </div>
+</section>"""
+
+
+def _aio_section_html(c: dict) -> str:
+    items_html = "\n        ".join(
+        f"<li>{item}</li>" for item in c["aio_items"]
+    )
+    return f"""<section class="city-intel">
+  <div class="city-intel-inner reveal in">
+    <h2 class="city-intel-h">{c['aio_heading']}</h2>
+    <ol class="city-intel-list">
+        {items_html}
+    </ol>
+  </div>
+</section>"""
+
 
 def build_page(c):
     slug = c["slug"]
@@ -175,7 +263,7 @@ def build_page(c):
 }}
 </script>
 
-<style>{CSS}</style>
+<style>{CSS}{CITY_EXTRA_CSS}</style>
 </head>
 <body>
 <nav>
@@ -190,6 +278,8 @@ def build_page(c):
   </ul>
   <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=nav" class="nav-cta">Book free audit</a>
 </nav>
+
+{_aio_section_html(c)}
 
 <section class="hero">
   <div class="container hero-grid">
@@ -395,6 +485,8 @@ def build_page(c):
     </div>
   </div>
 </section>
+
+{_city_links_html(slug)}
 
 <footer>
   <div class="footer-wrap">
