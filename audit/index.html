@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book Your Free HVAC Marketing Audit — Rankwise</title>
-<meta name="description" content="Book a free 15-minute HVAC marketing audit. We show where there is room to grow call volume and give you a practical 90-day action plan.">
+<title>Find More HVAC Calls From Google — Rankwise</title>
+<meta name="description" content="Book a 15-minute call. Rankwise shows where more HVAC calls can come from, which competitors homeowners see first, and whether we can grow your call volume.">
 <link rel="canonical" href="https://rankwise.ca/audit/">
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -126,9 +126,9 @@ nav{
 }
 h1{
   font-family:var(--display);
-  font-size:clamp(34px,6vw,64px);
-  line-height:.95;
-  letter-spacing:-.03em;
+  font-size:clamp(34px,5.7vw,58px);
+  line-height:1;
+  letter-spacing:0;
   margin-bottom:16px;
 }
 h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
@@ -141,19 +141,58 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .hero-actions{
   display:flex;
   gap:10px;
-  margin:0 0 14px;
+  margin:0 0 12px;
+  flex-wrap:wrap;
+}
+.city-lock{
+  border:1px solid rgba(43,168,152,.42);
+  border-radius:8px;
+  background:rgba(43,168,152,.10);
+  color:var(--ink);
+  padding:11px 12px;
+  margin-bottom:12px;
+  font-size:14px;
+  line-height:1.35;
+}
+.city-lock strong{
+  color:var(--accent-2);
+  font-family:var(--display);
+}
+.call-preview{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:12px;
+}
+.call-item{
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:rgba(255,255,255,.035);
+  padding:12px;
+}
+.call-item strong{
+  display:block;
+  font-family:var(--display);
+  font-size:15px;
+  line-height:1.15;
+  margin-bottom:6px;
+}
+.call-item span{
+  display:block;
+  color:var(--ink-soft);
+  font-size:13px;
+  line-height:1.4;
 }
 .promise-wrap{
   border:1px solid rgba(245,183,49,.35);
-  border-radius:16px;
+  border-radius:8px;
   background:linear-gradient(180deg,rgba(245,183,49,.11),rgba(245,183,49,.03));
   padding:12px;
   margin-bottom:0;
 }
 .promise-title{
-  text-align:center;
   font-family:var(--display);
-  font-size:22px;
+  font-size:18px;
   margin-bottom:10px;
 }
 .promise-grid{
@@ -163,51 +202,44 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 }
 .promise-item{
   border:1px solid rgba(245,183,49,.32);
-  border-radius:11px;
+  border-radius:8px;
   background:rgba(12,18,32,.48);
   padding:10px;
   font-family:var(--display);
-  font-size:16px;
-  line-height:1.15;
+  font-size:15px;
+  line-height:1.25;
 }
-
-.prep{
-  padding:32px 24px 16px;
-}
-.prep-grid{
-  max-width:860px;
-  margin:0 auto;
+.proof-badges{
   display:flex;
-  flex-direction:column;
-  gap:20px;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
 }
-.prep-item{
-  display:flex;
-  gap:16px;
-  align-items:flex-start;
-}
-.prep-num{
-  flex-shrink:0;
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#F2C95A);
+.proof-badge{
+  flex:1 1 130px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 12px;
+  text-decoration:none;
   color:var(--ink);
-  font-weight:700;
-  font-size:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:rgba(255,255,255,.028);
+  transition:border-color .2s ease,transform .2s ease;
 }
-.prep-item p{
-  margin:4px 0 0;
+.proof-badge:hover{
+  border-color:var(--accent);
+  transform:translateY(-1px);
+}
+.proof-badge strong{
+  display:block;
+  font-family:var(--display);
+  font-size:15px;
+  line-height:1.1;
+}
+.proof-badge span{
+  display:block;
   color:var(--ink-soft);
-  font-size:15px;
-  line-height:1.55;
-}
-.prep-item strong{
-  font-size:15px;
-  color:var(--ink);
+  font-size:12px;
+  margin-top:3px;
 }
 
 .booking{
@@ -271,6 +303,7 @@ footer{
   .nav-cta{padding:9px 15px;font-size:12px}
   .hero{padding:28px 16px 8px}
   .booking{padding:8px 16px 24px}
+  .call-preview{grid-template-columns:1fr}
   .promise-grid{grid-template-columns:1fr}
   .promise-title{font-size:20px}
   .sub{font-size:16px}
@@ -292,60 +325,63 @@ footer{
     <li><a href="/lab/">Lab</a></li>
     <li><a href="/about/">About</a></li>
   </ul>
-  <a href="/audit/" class="nav-cta">Book free audit</a>
+  <a href="#book" class="nav-cta">Book 15-min call</a>
 </nav>
 
 <section class="hero">
   <div class="container hero-grid">
     <div class="hero-main">
-      <div class="eyebrow">Free audit · 15-minute call</div>
-      <h1>Book your free<br><span class="serif">HVAC marketing audit.</span></h1>
-      <p class="sub">Pick a time below and we will bring your current visibility opportunities plus a practical 90-day priority plan to the call.</p>
+      <div class="eyebrow">15-minute call · Metro Vancouver HVAC</div>
+      <h1>Find the HVAC calls Google should be sending you.</h1>
+      <p class="sub">Book a 15-minute call. We will show how your company appears today, which calls in your city may be going to competitors, and whether Rankwise is the right team to grow that call volume.</p>
+      <div class="city-lock"><strong>City lock:</strong> We only work with one HVAC contractor per city, based on the contractor's primary Google Business Profile city.</div>
       <div class="hero-actions">
-        <a href="/#services" class="learn-more-btn">← See How We Grow HVAC Call Volume</a>
+        <a href="#book" class="learn-more-btn">Pick a time</a>
+      </div>
+
+      <div class="call-preview" aria-label="What you get on the call">
+        <div class="call-item">
+          <strong>Call volume read</strong>
+          <span>Where ready-to-book homeowners are finding HVAC companies in your city.</span>
+        </div>
+        <div class="call-item">
+          <strong>Competitor snapshot</strong>
+          <span>The companies homeowners see first, and the proof signals helping them win calls.</span>
+        </div>
+        <div class="call-item">
+          <strong>90-day priority order</strong>
+          <span>The first moves for your Google listing, city pages, and booking path.</span>
+        </div>
       </div>
 
       <div class="promise-wrap">
-        <div class="promise-title">Our Promise</div>
+        <div class="promise-title">Before you book</div>
         <div class="promise-grid">
-          <div class="promise-item">No contracts.<br>Month to month.</div>
-          <div class="promise-item">One HVAC contractor<br>per city.</div>
-          <div class="promise-item">Miss targets?<br>You do not pay for that month.</div>
+          <div class="promise-item">No long contract. Month to month.</div>
+          <div class="promise-item">One HVAC contractor per city. No exceptions.</div>
+          <div class="promise-item">Miss the agreed target? You do not pay for that month.</div>
         </div>
+      </div>
+
+      <div class="proof-badges" aria-label="Rankwise external profiles">
+        <a class="proof-badge" href="https://clutch.co/profile/rankwise" target="_blank" rel="noopener">
+          <strong>Clutch</strong>
+          <span>Rankwise profile</span>
+        </a>
+        <a class="proof-badge" href="https://www.yelp.com/biz/rankwise-richmond" target="_blank" rel="noopener">
+          <strong>Yelp</strong>
+          <span>Richmond profile</span>
+        </a>
+        <a class="proof-badge" href="https://www.bbb.org/ca/bc/vancouver/profile/digital-marketing/rankwise-0037-2438860" target="_blank" rel="noopener">
+          <strong>BBB</strong>
+          <span>Business profile</span>
+        </a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="prep" id="book">
-  <div class="container">
-    <div class="prep-grid">
-      <div class="prep-item">
-        <div class="prep-num">1</div>
-        <div>
-          <strong>We prep before you show up</strong>
-          <p>After you book we pull your Google Business Profile, check your local map pack position, and flag the top 3 gaps before the call even starts.</p>
-        </div>
-      </div>
-      <div class="prep-item">
-        <div class="prep-num">2</div>
-        <div>
-          <strong>15 minutes — no deck, no pitch</strong>
-          <p>We walk through what we found, tell you what it means for your call volume, and give you a clear priority order. You ask questions, we answer them straight.</p>
-        </div>
-      </div>
-      <div class="prep-item">
-        <div class="prep-num">3</div>
-        <div>
-          <strong>You leave with a list, not a proposal</strong>
-          <p>Whether we work together or not, you get a written 90-day priority plan after the call. Nothing gated behind a contract.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="booking">
+<section class="booking" id="book">
   <div class="container booking-shell">
     <div id="cal-embed"></div>
     <p class="note">Metro Vancouver HVAC contractors only · One contractor per city (primary GBP city)</p>

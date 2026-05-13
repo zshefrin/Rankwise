@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate city-specific HVAC marketing pages for Rankwise."""
+"""Generate city-specific HVAC and Plumbing marketing pages for Rankwise."""
 import os
 
 CITIES = [
@@ -143,6 +143,178 @@ CITIES = [
     },
 ]
 
+PLUMBING_CITIES = [
+    {
+        "name": "Vancouver",
+        "slug": "vancouver-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · Vancouver, BC",
+        "h1_city": "Vancouver.",
+        "meta_title": "Plumbing Marketing Agency in Vancouver | Rankwise",
+        "meta_desc": "Plumbing marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and GBP management for drain cleaning and water heater replacement. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in Vancouver: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each generate high search demand for drain cleaning and water heater replacement, driven by Vancouver's median housing build year of 1975 and an ageing cast-iron drain stock.",
+            "<strong>Google Business Profile activity</strong> — weekly posts with real job photos of water heater swaps and drain work, responses to every review, and an accurate primary category tell Google your business is active and relevant.",
+            "<strong>Review velocity</strong> — Vancouver plumbing contractors holding top-3 Map Pack positions consistently carry strong review profiles; contractors with fewer than 30 reviews rarely appear for high-intent drain and water heater queries.",
+            "<strong>City-specific landing pages</strong> — neighbourhood-level pages let Google match your website to searches for drain cleaning, water heater replacement, and sewer line repair across Vancouver's distinct service areas.",
+        ],
+        "hero_copy": "Vancouver's housing stock — most of it built before 1980 — means cast-iron drains failing and water heaters hitting end-of-life are a consistent call driver all year. We build the local search presence that puts your plumbing company in front of those homeowners before they dial a competitor.",
+        "problem_stat": "In Vancouver, ageing cast-iron drains and end-of-life water heaters in pre-1980 homes generate year-round plumbing search volume — and most of those calls resolve to the contractors who dominate the local Map Pack.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Vancouver — wherever homeowners are searching for drain cleaning, water heater replacement, or sewer line repair.",
+        "cta_h2": "See your Vancouver Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Vancouver Map Pack data before the call so you can see exactly which drain and water heater calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Vancouver market, not split across multiple contractors competing for the same drain and water heater calls.",
+        "utm_city": "plumbing-vancouver",
+        "trade_label": "Plumbing",
+    },
+    {
+        "name": "Burnaby",
+        "slug": "burnaby-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · Burnaby, BC",
+        "h1_city": "Burnaby.",
+        "meta_title": "Plumbing Marketing Agency in Burnaby | Rankwise",
+        "meta_desc": "Plumbing marketing for Burnaby contractors — Brentwood, Metrotown, Lougheed. Map Pack and GBP management for drain cleaning and water heater replacement. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for Burnaby contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in Burnaby: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones, with a mix of pre-1980 condos and townhomes driving consistent drain cleaning and water heater call volume year-round.",
+            "<strong>Google Business Profile activity</strong> — regular posts featuring local water heater installations and drain jobs, paired with prompt review responses, signal an active and trustworthy business to both Google and homeowners.",
+            "<strong>Review velocity</strong> — Burnaby plumbing contractors with fewer than 25 reviews rarely appear in competitive Map Pack results for high-intent drain and water heater replacement queries.",
+            "<strong>City-specific landing pages</strong> — Burnaby-specific pages let Google match your business to neighbourhood-level searches for hot water tank replacement, drain cleaning, and emergency plumbing service.",
+        ],
+        "hero_copy": "Burnaby's pre-1980 condo and townhome stock keeps drain cleaning and water heater replacement calls steady all year. We build the local search presence that puts your plumbing company at the top of those searches — before a competitor picks up the phone.",
+        "problem_stat": "In Burnaby, drain cleaning and water heater replacement searches driven by the city's ageing pre-1980 condo stock flow almost entirely to plumbing contractors in the top 3 Map Pack positions.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Burnaby — wherever homeowners are searching for drain cleaning, hot water tank replacement, or emergency plumbing service.",
+        "cta_h2": "See your Burnaby Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Burnaby Map Pack data before the call so you can see exactly which drain and water heater calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If Burnaby is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Burnaby market specifically.",
+        "utm_city": "plumbing-burnaby",
+        "trade_label": "Plumbing",
+    },
+    {
+        "name": "Surrey",
+        "slug": "surrey-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · Surrey, BC",
+        "h1_city": "Surrey.",
+        "meta_title": "Plumbing Marketing Agency in Surrey | Rankwise",
+        "meta_desc": "Plumbing marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for water heater installation and drain service. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for Surrey contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in Surrey: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high plumbing installation search volume; as BC's fastest-growing city, new builds in Surrey generate disproportionate water heater installation demand.",
+            "<strong>Google Business Profile activity</strong> — consistent weekly posting with water heater installation photos and review responses keeps your listing visible as Surrey's rapid growth drives new plumbing search volume year-round.",
+            "<strong>Review velocity</strong> — Surrey's competitive plumbing market rewards contractors with strong review velocity; new-build areas like Fleetwood and South Surrey generate high search volume for water heater installation and drain connection work.",
+            "<strong>City-specific landing pages</strong> — Surrey neighbourhood pages capture water heater installation and drain service searches from homeowners in new developments who are actively ready to book.",
+        ],
+        "hero_copy": "Surrey's rapid growth means new-build water heater installations and drain connection work are constant. At the same time, older Newton and Cloverdale neighbourhoods keep sewer line and drain cleaning calls coming year-round. We make sure your plumbing company captures both.",
+        "problem_stat": "Surrey water heater installation and residential plumbing queries are among the highest-volume in Metro Vancouver — but most of those searches resolve to the same handful of contractors in the local Map Pack.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Surrey — wherever homeowners are searching for water heater installation, drain cleaning, or sewer line repair.",
+        "cta_h2": "See your Surrey Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Surrey Map Pack data before the call so you can see exactly which water heater and drain calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If Surrey is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Surrey market specifically.",
+        "utm_city": "plumbing-surrey",
+        "trade_label": "Plumbing",
+    },
+    {
+        "name": "Richmond",
+        "slug": "richmond-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · Richmond, BC",
+        "h1_city": "Richmond.",
+        "meta_title": "Plumbing Marketing Agency in Richmond | Rankwise",
+        "meta_desc": "Plumbing marketing for Richmond contractors — Steveston, Brighouse, Hamilton. Map Pack and GBP management for water heater replacement and drain service. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for Richmond contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in Richmond: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Steveston, Brighouse, and Hamilton are Richmond's densest residential zones, with a high proportion of 20–30 year old water heaters approaching end of life driving a consistent replacement call cycle.",
+            "<strong>Google Business Profile activity</strong> — active GBP with frequent water heater and drain job photos, and prompt review responses, signals relevance for Richmond homeowners searching for plumbing service.",
+            "<strong>Review velocity</strong> — Richmond's top-3 Map Pack positions are typically held by plumbing contractors with a consistent review history; below 20 reviews it is difficult to appear for competitive hot water tank replacement queries.",
+            "<strong>City-specific landing pages</strong> — Richmond-specific pages target city-level searches for water heater replacement, drain cleaning, and sewer line repair from a dense, high-intent residential market.",
+        ],
+        "hero_copy": "Richmond's dense residential neighbourhoods — Steveston, Brighouse, Hamilton — are home to a large stock of water heaters now 20 to 30 years old. That means end-of-life replacement calls are a reliable, recurring revenue driver. We make sure your plumbing company owns those searches.",
+        "problem_stat": "Richmond's high proportion of 20–30 year old residential water heaters creates consistent end-of-life replacement search volume — but most of those calls go to the contractors who dominate the local Map Pack.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Richmond — wherever homeowners are searching for water heater replacement, drain cleaning, or sewer line repair.",
+        "cta_h2": "See your Richmond Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Richmond Map Pack data before the call so you can see exactly which water heater and drain calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If Richmond is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Richmond market specifically.",
+        "utm_city": "plumbing-richmond",
+        "trade_label": "Plumbing",
+    },
+    {
+        "name": "North Vancouver",
+        "slug": "north-vancouver-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · North Vancouver, BC",
+        "h1_city": "North Vancouver.",
+        "meta_title": "Plumbing Marketing Agency in North Vancouver | Rankwise",
+        "meta_desc": "Plumbing marketing for North Vancouver contractors — Lonsdale, Lynn Valley, Deep Cove. Map Pack and GBP for drain cleaning, sewer line repair, and water heater replacement. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for North Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in North Vancouver: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Lonsdale, Lynn Valley, and Deep Cove each generate distinct plumbing search demand; North Vancouver's older detached housing stock drives above-average job values for sewer line repair and drain work.",
+            "<strong>Google Business Profile activity</strong> — North Vancouver homeowners research carefully before booking; active GBP management with sewer line and drain job photos and prompt review responses builds the credibility that converts searches into calls.",
+            "<strong>Review velocity</strong> — North Vancouver plumbing searches route almost entirely to the top-3 Map Pack results; contractors without a strong review profile and active listing see very few inbound calls from organic search.",
+            "<strong>City-specific landing pages</strong> — North Vancouver city pages capture distinct search intent, including sewer line repair searches from Lynn Valley and Deep Cove homeowners dealing with older drain infrastructure.",
+        ],
+        "hero_copy": "North Vancouver's older detached housing stock — Lonsdale, Lynn Valley, Deep Cove — means sewer line issues, ageing drain systems, and end-of-life water heaters are a constant call driver. We build the local search presence that puts your plumbing company in front of those high-value jobs first.",
+        "problem_stat": "North Vancouver plumbing searches — especially for sewer line repair and drain cleaning — consistently flow to the top 3 Map Pack results. Most plumbing contractors below that threshold see very few organic calls.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across North Vancouver — wherever homeowners are searching for drain cleaning, sewer line repair, or water heater replacement.",
+        "cta_h2": "See your North Vancouver Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live North Vancouver Map Pack data before the call so you can see exactly which drain and sewer calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If North Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your North Vancouver market specifically.",
+        "utm_city": "plumbing-north-vancouver",
+        "trade_label": "Plumbing",
+    },
+    {
+        "name": "Coquitlam",
+        "slug": "coquitlam-plumbing-marketing",
+        "eyebrow": "Plumbing marketing agency · Coquitlam, BC",
+        "h1_city": "Coquitlam.",
+        "meta_title": "Plumbing Marketing Agency in Coquitlam | Rankwise",
+        "meta_desc": "Plumbing marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Map Pack optimization for water heater installation and drain service. One plumbing contractor per city.",
+        "og_desc": "Plumbing marketing for Coquitlam contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "Plumbing marketing in Coquitlam: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Town Centre, Burke Mountain, and Westwood Plateau are fast-growing residential areas with strong demand for water heater installation and drain connection work driven by rapid new development.",
+            "<strong>Google Business Profile activity</strong> — Coquitlam's expanding suburban neighbourhoods drive consistent new plumbing installation searches; active GBP with water heater and drain job photos from local installs builds trust and ranking authority.",
+            "<strong>Review velocity</strong> — Coquitlam plumbing searches route almost entirely to the top-3 local Map Pack positions; contractors without a strong review profile see very few organic inbound calls from new homeowners.",
+            "<strong>City-specific landing pages</strong> — Coquitlam pages capture water heater installation and drain connection searches from homeowners in Burke Mountain and Westwood Plateau new developments, where first-time plumbing service demand is high.",
+        ],
+        "hero_copy": "Coquitlam's rapid development — Burke Mountain, Westwood Plateau, Town Centre — means water heater installations and new drain connections are a consistent high-volume call driver. We build the local search visibility that puts your plumbing company at the top of those searches and keeps competitors out.",
+        "problem_stat": "Coquitlam plumbing searches — especially for water heater installation and drain connection work in new developments — route almost entirely to contractors in the top 3 local Map Pack positions.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Coquitlam — wherever homeowners are searching for water heater installation, drain cleaning, or plumbing service.",
+        "cta_h2": "See your Coquitlam Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Coquitlam Map Pack data before the call so you can see exactly which water heater and drain calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one plumbing contractor per city — that's a hard rule. If Coquitlam is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Coquitlam market specifically.",
+        "utm_city": "plumbing-coquitlam",
+        "trade_label": "Plumbing",
+    },
+]
+
+PLUMBING_LANDING = {
+    "name": "Metro Vancouver",
+    "slug": "plumbing",
+    "eyebrow": "Plumbing marketing agency · Metro Vancouver, BC",
+    "h1_city": "Metro Vancouver.",
+    "meta_title": "Plumbing Marketing Agency in Metro Vancouver | Rankwise",
+    "meta_desc": "Plumbing marketing for Metro Vancouver contractors — drain cleaning, water heater replacement, and sewer line repair. GBP and Map Pack management. One contractor per city.",
+    "og_desc": "Plumbing marketing for Metro Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+    "aio_heading": "Plumbing marketing in Metro Vancouver: four signals that decide who gets the call",
+    "aio_items": [
+        "<strong>Google Map Pack placement</strong> is where most plumbing calls originate — homeowners searching for drain cleaning or a water heater replacement tap the first three results on the map, rarely scrolling further. Ranking in that pack is not optional if you want consistent inbound volume.",
+        "<strong>Google Business Profile activity</strong> drives Map Pack ranking and conversion together — regular posts with real job photos, responses to every review, and an accurate service area tell Google your business is active and trusted in Metro Vancouver.",
+        "<strong>Review velocity and recency</strong> separate the contractors who win calls from the ones who don't — Metro Vancouver plumbing contractors holding top-3 positions consistently show recent reviews; a stagnant review profile signals inactivity to both Google and homeowners.",
+        "<strong>City-specific landing pages</strong> let Google match your website to high-intent neighbourhood-level searches — a homeowner in Steveston searching for water heater replacement near me should land on a page built for Richmond, not a generic Metro Vancouver page.",
+    ],
+    "hero_copy": "Metro Vancouver's mix of ageing housing stock and rapid new development creates consistent, year-round plumbing call volume — drain cleaning in older Vancouver and Burnaby neighbourhoods, water heater installations in new Surrey and Coquitlam builds, sewer line work in North Vancouver's older detached homes. We build the local search presence that routes those calls to your company.",
+    "problem_stat": "Across Metro Vancouver, most plumbing searches — drain cleaning, water heater replacement, sewer line repair — resolve to the same 2–3 contractors showing up in the Map Pack. Visibility below that threshold means very few organic calls.",
+    "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Metro Vancouver — wherever homeowners are searching for drain cleaning, water heater replacement, or sewer line repair.",
+    "cta_h2": "See your Metro Vancouver Map Pack standing in 15 minutes.",
+    "cta_sub": "We pull your live Metro Vancouver Map Pack data before the call so you can see exactly which drain cleaning and water heater calls are going to competitors — and what it would take to change that.",
+    "faq_exclusivity": "No. I take one plumbing contractor per city across Metro Vancouver — that's a hard rule. If your city is open when you book the audit, your local competitors can't hire Rankwise while you're a client.",
+    "utm_city": "plumbing-landing",
+    "trade_label": "Plumbing",
+}
+
 CSS = open(os.path.join(os.path.dirname(__file__), "index.html")).read().split("<style>")[1].split("</style>")[0]
 
 CITY_EXTRA_CSS = """
@@ -162,10 +334,10 @@ CITY_EXTRA_CSS = """
 """
 
 
-def _city_links_html(current_slug: str) -> str:
-    others = [c for c in CITIES if c["slug"] != current_slug]
+def _city_links_html(current_slug: str, cities_list: list, tl: str = "HVAC") -> str:
+    others = [c for c in cities_list if c["slug"] != current_slug]
     links = "\n      ".join(
-        f'<a href="/{c["slug"]}/">{c["name"]} HVAC marketing</a>' for c in others
+        f'<a href="/{c["slug"]}/">{c["name"]} {tl} marketing</a>' for c in others
     )
     return f"""<section class="city-links">
   <div class="container">
@@ -191,7 +363,8 @@ def _aio_section_html(c: dict) -> str:
 </section>"""
 
 
-def build_page(c):
+def build_page(c, cities_list):
+    tl = c.get("trade_label", "HVAC")
     slug = c["slug"]
     name = c["name"]
     utm = c["utm_city"]
@@ -222,7 +395,7 @@ def build_page(c):
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   "name": "Rankwise",
-  "description": "HVAC marketing agency serving {name}, BC — one contractor per city, no exceptions. Local SEO and Google Business Profile management for heating and cooling contractors.",
+  "description": "{tl} marketing agency serving {name}, BC — one contractor per city, no exceptions. Local SEO and Google Business Profile management for heating and cooling contractors.",
   "url": "https://rankwise.ca",
   "image": "https://rankwise.ca/rankwise-icon.svg.png",
   "email": "zshef@rankwise.ca",
@@ -233,7 +406,7 @@ def build_page(c):
     "addressCountry": "CA"
   }},
   "areaServed": [{{"@type": "City", "name": "{name}", "containedInPlace": {{"@type": "AdministrativeArea", "name": "British Columbia"}}}}],
-  "knowsAbout": ["Local SEO", "Google Business Profile Management", "Content Marketing", "HVAC Marketing", "Search Engine Optimization", "Map Pack Optimization", "Review Management"],
+  "knowsAbout": ["Local SEO", "Google Business Profile Management", "Content Marketing", "{tl} Marketing", "Search Engine Optimization", "Map Pack Optimization", "Review Management"],
   "priceRange": "$$",
   "telephone": "+1-778-887-0311",
   "openingHoursSpecification": {{
@@ -258,7 +431,7 @@ def build_page(c):
     {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
     {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"We set specific, measurable targets with you every month. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print."}}}},
     {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
-    {{"@type":"Question","name":"Do you work with other HVAC contractors in {name}?","acceptedAnswer":{{"@type":"Answer","text":"{c["faq_exclusivity"]}"}}}}
+    {{"@type":"Question","name":"Do you work with other {tl} contractors in {name}?","acceptedAnswer":{{"@type":"Answer","text":"{c["faq_exclusivity"]}"}}}}
   ]
 }}
 </script>
@@ -283,15 +456,15 @@ def build_page(c):
   <div class="container hero-grid">
     <div class="hero-left reveal in">
       <div class="eyebrow">{c["eyebrow"]}</div>
-      <h1>Get more booked<br>HVAC jobs in <span class="serif">{c["h1_city"]}</span></h1>
+      <h1>Get more booked<br>{tl} jobs in <span class="serif">{c["h1_city"]}</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
-        <div>One HVAC contractor<br>per city.</div>
+        <div>One {tl} contractor<br>per city.</div>
         <div>If we miss targets,<br>you do not pay for that month.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
       <div class="hero-actions">
-        <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=hero" class="btn-primary">Book my free HVAC audit</a>
+        <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=hero" class="btn-primary">Book my free {tl} audit</a>
         <a href="/#services" class="btn-secondary">See how it works</a>
       </div>
     </div>
@@ -320,7 +493,7 @@ def build_page(c):
     <div class="section-head reveal in">
       <div class="label">The gap we fix</div>
       <h2>Solid install team,<br>weak <span class="serif">inbound flow.</span></h2>
-      <p class="sub">Most HVAC owners in {name} already run solid businesses. The opportunity is turning more Google search demand into booked calls each week.</p>
+      <p class="sub">Most {tl} owners in {name} already run solid businesses. The opportunity is turning more Google search demand into booked calls each week.</p>
     </div>
     <div class="problem-grid">
       <article class="problem-card reveal in">
@@ -358,7 +531,7 @@ def build_page(c):
       </article>
       <article class="service-card reveal in">
         <h3>Turning searches into calls</h3>
-        <p>Ranking is step one. Our HVAC lead generation layer tightens page clarity, proof, and calls to action so clicks become booked conversations.</p>
+        <p>Ranking is step one. Our {tl} lead generation layer tightens page clarity, proof, and calls to action so clicks become booked conversations.</p>
         <div class="service-list">
           <div>Landing page and audit funnel positioning</div>
           <div>Offer framing for contractor buyers</div>
@@ -422,7 +595,7 @@ def build_page(c):
       </article>
       <article class="result-side reveal in">
         <h3>How we protect your position in {name}</h3>
-        <p>We do not work with multiple HVAC companies in {name}. That keeps your market message focused and your growth plan clean.</p>
+        <p>We do not work with multiple {tl} companies in {name}. That keeps your market message focused and your growth plan clean.</p>
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
       </article>
     </div>
@@ -432,20 +605,20 @@ def build_page(c):
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">Free HVAC audit</div>
+      <div class="label">Free {tl} audit</div>
       <h2>{c["cta_h2"]}</h2>
       <p class="sub">{c["cta_sub"]}</p>
     </div>
     <div class="cta-promise reveal in">
       <div>No contracts. Month to month.</div>
-      <div>One HVAC contractor per city.</div>
+      <div>One {tl} contractor per city.</div>
       <div>If we miss targets, you do not pay for that month.</div>
     </div>
     <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=founder-card" class="founder-card reveal in">
       <div class="founder-avatar">ZS</div>
       <div class="founder-text">
         <strong>Zack Shefrin — Founder, Rankwise</strong>
-        <span>Every audit lands in my inbox, not a team's. I work with HVAC contractors only, one per city, and I review the numbers myself before every call.</span>
+        <span>Every audit lands in my inbox, not a team's. I work with {tl} contractors only, one per city, and I review the numbers myself before every call.</span>
       </div>
     </a>
     <div class="reveal in" id="cal-embed"></div>
@@ -480,13 +653,13 @@ def build_page(c):
       <div class="faq-a">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Do you work with other HVAC contractors in {name}?<span class="faq-icon">+</span></div>
+      <div class="faq-q">Do you work with other {tl} contractors in {name}?<span class="faq-icon">+</span></div>
       <div class="faq-a">{c["faq_exclusivity"]}</div>
     </div>
   </div>
 </section>
 
-{_city_links_html(slug)}
+{_city_links_html(slug, cities_list, tl)}
 
 <footer>
   <div class="footer-wrap">
@@ -501,11 +674,11 @@ def build_page(c):
       <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=footer">Free audit</a>
       <a href="https://www.linkedin.com/in/zackary-shefrin-8a1a87406/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
-    <div class="fcopy">© 2026 Rankwise · HVAC marketing · {name}, BC</div>
+    <div class="fcopy">© 2026 Rankwise · {tl} marketing · {name}, BC</div>
   </div>
 </footer>
 
-<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book Free HVAC Audit</a>
+<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book Free {tl} Audit</a>
 
 <script>
 const obs=new IntersectionObserver(e=>{{e.forEach(x=>{{if(x.isIntersecting)x.target.classList.add('in')}});}},{{threshold:.1}});
@@ -587,12 +760,29 @@ function toggleFaq(item){{const o=item.classList.contains('open');document.query
 
 
 base = os.path.dirname(os.path.abspath(__file__))
+
+# HVAC city pages
 for c in CITIES:
     out_dir = os.path.join(base, c["slug"])
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "index.html")
-    with open(out_path, "w") as f:
-        f.write(build_page(c))
+    with open(os.path.join(out_dir, "index.html"), "w") as f:
+        f.write(build_page(c, CITIES))
     print(f"✓ {c['slug']}/index.html")
 
-print(f"\nGenerated {len(CITIES)} city pages.")
+# Plumbing pages — archived 2026-05-12, will re-enable after first paying HVAC client.
+# Data definitions (PLUMBING_CITIES, PLUMBING_LANDING) kept above so this block can be
+# uncommented when the Trade Expansion Plan Phase 1 trigger fires.
+# Old generated output preserved at _archive/plumbing-pages-2026-05-12/
+
+# for c in PLUMBING_CITIES:
+#     out_dir = os.path.join(base, c["slug"])
+#     os.makedirs(out_dir, exist_ok=True)
+#     with open(os.path.join(out_dir, "index.html"), "w") as f:
+#         f.write(build_page(c, PLUMBING_CITIES))
+#     print(f"✓ {c['slug']}/index.html")
+#
+# out_dir = os.path.join(base, PLUMBING_LANDING["slug"])
+# os.makedirs(out_dir, exist_ok=True)
+# with open(os.path.join(out_dir, "index.html"), "w") as f:
+#     f.write(build_page(PLUMBING_LANDING, PLUMBING_CITIES))
+# print(f"✓ {PLUMBING_LANDING['slug']}/index.html")

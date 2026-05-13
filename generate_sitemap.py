@@ -52,9 +52,17 @@ def build_sitemap() -> str:
     if (ROOT / about_html).exists():
         urls.append((f"{BASE}/about/", git_lastmod(about_html), "monthly", "0.8"))
 
-    # City landing pages — any top-level directory ending in -hvac-marketing
+    # Trade landing pages — /plumbing/, /electrical/ (future)
+    for trade_slug in ("plumbing", "electrical"):
+        trade_html = f"{trade_slug}/index.html"
+        if (ROOT / trade_html).exists():
+            urls.append((f"{BASE}/{trade_slug}/", git_lastmod(trade_html), "monthly", "0.8"))
+
+    # City landing pages — any top-level directory ending in -<trade>-marketing
     for slug_dir in sorted(ROOT.iterdir()):
-        if not slug_dir.is_dir() or not slug_dir.name.endswith("-hvac-marketing"):
+        if not slug_dir.is_dir():
+            continue
+        if not any(slug_dir.name.endswith(f"-{t}-marketing") for t in ("hvac", "plumbing", "electrical")):
             continue
         page_html = slug_dir / "index.html"
         if not page_html.exists():
