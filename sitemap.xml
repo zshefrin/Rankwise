@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://rankwise.ca/</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -14,13 +14,13 @@
   </url>
   <url>
     <loc>https://rankwise.ca/blog/</loc>
-    <lastmod>2026-05-09</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://rankwise.ca/about/</loc>
-    <lastmod>2026-05-09</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -67,6 +67,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://rankwise.ca/blog/hold-top-3-map-pack-position-metro-vancouver-hvac/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/how-do-hvac-contractors-find-new-customers-in-2026/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://rankwise.ca/blog/how-do-i-get-more-hvac-leads-in-vancouver/</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
@@ -99,6 +111,24 @@
   <url>
     <loc>https://rankwise.ca/blog/how-much-does-hvac-marketing-cost-in-british-columbia/</loc>
     <lastmod>2026-05-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/how-to-choose-an-hvac-marketing-agency-in-metro-vancouver/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/how-to-fix-hvac-contractor-map-pack-ranking-issues/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/how-to-get-more-hvac-service-calls/</loc>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -165,6 +195,12 @@
   <url>
     <loc>https://rankwise.ca/blog/what-is-the-map-pack-hvac-contractors/</loc>
     <lastmod>2026-05-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/what-primary-category-should-an-hvac-contractor-pick-on-goog/</loc>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
