@@ -297,6 +297,18 @@ footer{
   font-size:13px;
 }
 .footer-wrap a{color:var(--ink-soft);text-decoration:none}
+.book-direct-wrap{text-align:center;margin-bottom:20px}
+.book-direct-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:16px 32px;
+  background:linear-gradient(135deg,var(--accent-3),var(--accent-4));
+  color:#fff;border-radius:10px;text-decoration:none;
+  font-weight:700;font-size:17px;
+  box-shadow:0 10px 22px rgba(232,101,74,.26);
+  transition:transform .15s,box-shadow .15s;
+}
+.book-direct-btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(232,101,74,.38)}
+.book-direct-or{margin-top:10px;font-size:13px;color:var(--ink-soft)}
 @media(max-width:1000px){
   nav{padding:14px 18px}
   .nav-links{display:none}
@@ -309,6 +321,8 @@ footer{
   .sub{font-size:16px}
   .hero-actions{margin-bottom:12px}
   .learn-more-btn{font-size:12px;padding:9px 12px}
+  #cal-embed{min-height:480px}
+  .cal-loading,.cal-fallback{min-height:480px}
 }
 </style>
 </head>
@@ -336,7 +350,7 @@ footer{
       <p class="sub">Book a 15-minute call. We will show how your company appears today, which calls in your city may be going to competitors, and whether Rankwise is the right team to grow that call volume.</p>
       <div class="city-lock"><strong>City lock:</strong> We only work with one HVAC contractor per city, based on the contractor's primary Google Business Profile city.</div>
       <div class="hero-actions">
-        <a href="#book" class="learn-more-btn">Pick a time</a>
+        <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener" class="learn-more-btn">Book 15-minute call →</a>
       </div>
 
       <div class="call-preview" aria-label="What you get on the call">
@@ -383,6 +397,10 @@ footer{
 
 <section class="booking" id="book">
   <div class="container booking-shell">
+    <div class="book-direct-wrap">
+      <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener" class="book-direct-btn">Book 15-minute call →</a>
+      <p class="book-direct-or">or pick a time using the calendar below</p>
+    </div>
     <div id="cal-embed"></div>
     <p class="note">Metro Vancouver HVAC contractors only · One contractor per city (primary GBP city)</p>
   </div>
