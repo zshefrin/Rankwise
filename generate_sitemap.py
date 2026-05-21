@@ -21,6 +21,13 @@ BASE = "https://rankwise.ca"
 
 def git_lastmod(rel_path: str) -> str:
     """Return YYYY-MM-DD of the last commit that touched this path, or today."""
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain", "--", rel_path],
+        capture_output=True, text=True, cwd=ROOT,
+    )
+    if dirty.stdout.strip():
+        return date.today().isoformat()
+
     result = subprocess.run(
         ["git", "log", "-1", "--format=%aI", "--", rel_path],
         capture_output=True, text=True, cwd=ROOT,
@@ -46,6 +53,11 @@ def build_sitemap() -> str:
     blog_index = "blog/index.html"
     if (ROOT / blog_index).exists():
         urls.append((f"{BASE}/blog/", git_lastmod(blog_index), "weekly", "0.8"))
+
+    # Lab index
+    lab_index = "lab/index.html"
+    if (ROOT / lab_index).exists():
+        urls.append((f"{BASE}/lab/", git_lastmod(lab_index), "monthly", "0.8"))
 
     # About page
     about_html = "about/index.html"
@@ -83,6 +95,19 @@ def build_sitemap() -> str:
             continue
         rel = f"blog/{slug_dir.name}/index.html"
         urls.append((f"{BASE}/blog/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
+
+    # Individual lab studies — any subdirectory of lab/ containing index.html
+    lab_dir = ROOT / "lab"
+    for slug_dir in sorted(lab_dir.iterdir()):
+        if not slug_dir.is_dir():
+            continue
+        study_html = slug_dir / "index.html"
+        if not study_html.exists():
+            continue
+        if 'name="robots" content="noindex' in study_html.read_text():
+            continue
+        rel = f"lab/{slug_dir.name}/index.html"
+        urls.append((f"{BASE}/lab/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
 
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
