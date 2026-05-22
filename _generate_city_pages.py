@@ -417,7 +417,9 @@ def build_page(c, cities_list):
   }},
   "founder": {{
     "@type": "Person",
-    "name": "Zackary Shefrin",
+    "name": "Zack Shefrin",
+    "givenName": "Zackary",
+    "alternateName": "Zack",
     "sameAs": "https://www.wikidata.org/wiki/Q139590851"
   }}
 }}
