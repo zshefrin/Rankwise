@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://rankwise.ca/blog/</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-05-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -159,6 +159,12 @@
   <url>
     <loc>https://rankwise.ca/blog/how-much-should-hvac-contractors-spend-on-marketing/</loc>
     <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/blog/how-much-should-hvac-contractors-spend-on-marketing-each-mon/</loc>
+    <lastmod>2026-05-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
