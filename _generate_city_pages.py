@@ -119,6 +119,52 @@ CITIES = [
         "utm_city": "north-vancouver",
     },
     {
+        "name": "Langley",
+        "slug": "langley-hvac-marketing",
+        "eyebrow": "HVAC marketing agency · Langley, BC",
+        "h1_city": "Langley.",
+        "meta_title": "HVAC Marketing Agency in Langley | Rankwise",
+        "meta_desc": "HVAC marketing for Langley contractors — Walnut Grove, Willoughby, Brookswood. Map Pack and Google Business Profile management for furnace repair and heat pump installation. One HVAC contractor per city.",
+        "og_desc": "HVAC marketing for Langley contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Langley: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Walnut Grove, Willoughby, and Brookswood are Langley's fastest-growing residential zones, with strong heat pump installation and furnace replacement demand driven by new-build activity and older housing stock.",
+            "<strong>Google Business Profile activity</strong> — weekly posts with real job photos and consistent review responses signal an active, trustworthy business to both Google and Langley homeowners searching for HVAC service.",
+            "<strong>Review velocity</strong> — Langley HVAC contractors holding top-3 Map Pack positions maintain a consistent review cadence; contractors with fewer than 25 reviews rarely appear for high-intent furnace repair and heating contractor queries.",
+            "<strong>City-specific landing pages</strong> — a Langley-specific page lets Google match your business to neighbourhood-level searches for furnace repair, heat pump installation, and HVAC service across Walnut Grove and Willoughby.",
+        ],
+        "hero_copy": "Langley homeowners search for furnace repair and HVAC help on Google every week. The contractors who win those calls aren't the biggest — they're the ones showing up first on Google Maps. We build that visibility around your business so you get the call before a competitor does.",
+        "problem_stat": "In Langley, furnace repair and heat pump installation searches are growing with the city's rapid residential development — but most of those calls go to the handful of contractors dominating the local Map Pack.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Langley — wherever homeowners in Walnut Grove, Willoughby, and Brookswood are searching for furnace repair, heat pump installation, or HVAC service.",
+        "cta_h2": "See your Langley Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Langley Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Langley is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Langley market specifically.",
+        "utm_city": "langley",
+    },
+    {
+        "name": "Abbotsford",
+        "slug": "abbotsford-hvac-marketing",
+        "eyebrow": "HVAC marketing agency · Abbotsford, BC",
+        "h1_city": "Abbotsford.",
+        "meta_title": "HVAC Marketing Agency in Abbotsford | Rankwise",
+        "meta_desc": "HVAC marketing for Abbotsford contractors — Clearbrook, Clayburn, West Abbotsford. Map Pack and Google Business Profile management for furnace repair and heat pump service. One HVAC contractor per city.",
+        "og_desc": "HVAC marketing for Abbotsford contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": "HVAC marketing in Abbotsford: four signals that decide who gets the call",
+        "aio_items": [
+            "<strong>Google Map Pack coverage</strong> across your service area — Clearbrook, Clayburn, and West Abbotsford each have distinct residential search demand for furnace repair and heat pump installation, driven by a mix of older housing stock and active new development.",
+            "<strong>Google Business Profile activity</strong> — regular posts with real job photos and prompt review responses keep your listing visible and credible to Abbotsford homeowners who search before they call.",
+            "<strong>Review velocity</strong> — Abbotsford HVAC contractors with fewer than 25 reviews rarely appear in competitive Map Pack results for high-intent furnace repair and heating contractor searches.",
+            "<strong>City-specific landing pages</strong> — an Abbotsford-specific page lets Google match your business to neighbourhood-level searches for furnace repair, heat pump service, and HVAC installation across Clearbrook and West Abbotsford.",
+        ],
+        "hero_copy": "Abbotsford homeowners search for HVAC help year-round — furnace service in winter, heat pump and AC work in summer. We make sure your company shows up first when they search on Google Maps, so the call comes to you, not a competitor.",
+        "problem_stat": "In Abbotsford, HVAC searches for furnace repair and heat pump installation are consistent year-round — but most of those calls resolve to the contractors who hold the top 3 Map Pack positions.",
+        "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Abbotsford — wherever homeowners in Clearbrook, Clayburn, and West Abbotsford are searching for furnace repair, heat pump service, or HVAC installation.",
+        "cta_h2": "See your Abbotsford Map Pack standing in 15 minutes.",
+        "cta_sub": "We pull your live Abbotsford Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Abbotsford is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Abbotsford market specifically.",
+        "utm_city": "abbotsford",
+    },
+    {
         "name": "Coquitlam",
         "slug": "coquitlam-hvac-marketing",
         "eyebrow": "HVAC marketing agency · Coquitlam, BC",
@@ -317,6 +363,18 @@ PLUMBING_LANDING = {
 
 CSS = open(os.path.join(os.path.dirname(__file__), "index.html")).read().split("<style>")[1].split("</style>")[0]
 
+TESTIMONIALS_CSS = """
+.testimonials{padding:100px 52px}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.testimonial-card{background:var(--paper-3);border:1px solid var(--line);border-radius:var(--radius);padding:32px;display:flex;flex-direction:column;gap:16px}
+.testimonial-quote{font-size:17px;line-height:1.65;color:var(--ink-soft);font-style:italic}
+.testimonial-quote::before{content:'\\201C';color:var(--accent);font-size:32px;line-height:.6;display:block;margin-bottom:8px;font-style:normal}
+.testimonial-meta{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.testimonial-name{font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink)}
+.testimonial-detail{font-size:12px;color:var(--ink-soft);letter-spacing:.02em}
+@media(max-width:700px){.testimonials{padding:60px 20px}}
+"""
+
 CITY_EXTRA_CSS = """
 .city-intel{padding:48px 52px;background:rgba(255,255,255,0.025);border-top:1px solid var(--line)}
 .city-intel-inner{max-width:780px;margin:0 auto}
@@ -332,6 +390,38 @@ CITY_EXTRA_CSS = """
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
 @media(max-width:700px){.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
+
+
+TESTIMONIALS_DATA: list[dict] = [
+    # Populate when first client results are ready:
+    # {"quote": "...", "name": "...", "detail": "Owner, Acme HVAC · Vancouver"},
+]
+
+
+def _testimonials_section_html(city_name: str) -> str:
+    if not TESTIMONIALS_DATA:
+        return ""
+    cards = "\n      ".join(
+        f'''<article class="testimonial-card reveal in">
+        <p class="testimonial-quote">{t["quote"]}</p>
+        <div class="testimonial-meta">
+          <span class="testimonial-name">{t["name"]}</span>
+          <span class="testimonial-detail">{t["detail"]}</span>
+        </div>
+      </article>'''
+        for t in TESTIMONIALS_DATA
+    )
+    return f"""<section class="testimonials">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="label">Client results</div>
+      <h2>HVAC contractors<br>growing with <span class="serif">Rankwise.</span></h2>
+    </div>
+    <div class="testimonials-grid">
+      {cards}
+    </div>
+  </div>
+</section>"""
 
 
 def _city_links_html(current_slug: str, cities_list: list, tl: str = "HVAC") -> str:
@@ -440,7 +530,7 @@ def build_page(c, cities_list):
 }}
 </script>
 
-<style>{CSS}{CITY_EXTRA_CSS}</style>
+<style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
 </head>
 <body>
 <nav>
@@ -606,6 +696,8 @@ def build_page(c, cities_list):
   </div>
 </section>
 
+{_testimonials_section_html(name)}
+
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
@@ -675,6 +767,7 @@ def build_page(c, cities_list):
       <a href="/#faq">FAQ</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Rankwise Lab</a>
+      <a href="/hvac-marketing-options-compared/">Compare options</a>
       <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=footer">Free audit</a>
       <a href="https://www.linkedin.com/in/zackary-shefrin-8a1a87406/" target="_blank" rel="noopener">LinkedIn</a>
     </div>

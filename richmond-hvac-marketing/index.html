@@ -798,6 +798,20 @@ footer{
   display:block;font-family:var(--display);font-size:15px;margin-bottom:3px;color:var(--ink);
 }
 .founder-text span{font-size:13px;color:var(--ink-soft)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.testimonial-card{background:var(--paper-3);border:1px solid var(--line);border-radius:var(--radius);padding:32px;display:flex;flex-direction:column;gap:16px}
+.testimonial-quote{font-size:17px;line-height:1.65;color:var(--ink-soft);font-style:italic}
+.testimonial-quote::before{content:'\201C';color:var(--accent);font-size:32px;line-height:.6;display:block;margin-bottom:8px;font-style:normal}
+.testimonial-meta{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.testimonial-name{font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink)}
+.testimonial-detail{font-size:12px;color:var(--ink-soft);letter-spacing:.02em}
+.city-links-strip{padding:28px 52px;border-top:1px solid var(--line)}
+.city-links-strip .container{max-width:1150px;margin:0 auto}
+.city-links-strip-label{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px}
+.city-links-strip-list{display:flex;flex-wrap:wrap;gap:10px}
+.city-links-strip-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
+.city-links-strip-list a:hover{color:var(--ink);border-color:var(--line-strong)}
+@media(max-width:700px){.city-links-strip{padding:24px 18px}}
 .blog-strip{border-top:1px solid var(--line)}
 .blog-grid{
   display:grid;
@@ -850,6 +864,16 @@ footer{
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
 @media(max-width:700px){.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+
+.testimonials{padding:100px 52px}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.testimonial-card{background:var(--paper-3);border:1px solid var(--line);border-radius:var(--radius);padding:32px;display:flex;flex-direction:column;gap:16px}
+.testimonial-quote{font-size:17px;line-height:1.65;color:var(--ink-soft);font-style:italic}
+.testimonial-quote::before{content:'\201C';color:var(--accent);font-size:32px;line-height:.6;display:block;margin-bottom:8px;font-style:normal}
+.testimonial-meta{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.testimonial-name{font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink)}
+.testimonial-detail{font-size:12px;color:var(--ink-soft);letter-spacing:.02em}
+@media(max-width:700px){.testimonials{padding:60px 20px}}
 </style>
 </head>
 <body>
@@ -1026,6 +1050,8 @@ footer{
   </div>
 </section>
 
+
+
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
@@ -1091,6 +1117,8 @@ footer{
       <a href="/burnaby-hvac-marketing/">Burnaby HVAC marketing</a>
       <a href="/surrey-hvac-marketing/">Surrey HVAC marketing</a>
       <a href="/north-vancouver-hvac-marketing/">North Vancouver HVAC marketing</a>
+      <a href="/langley-hvac-marketing/">Langley HVAC marketing</a>
+      <a href="/abbotsford-hvac-marketing/">Abbotsford HVAC marketing</a>
       <a href="/coquitlam-hvac-marketing/">Coquitlam HVAC marketing</a>
     </div>
   </div>
@@ -1106,6 +1134,7 @@ footer{
       <a href="/#faq">FAQ</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Rankwise Lab</a>
+      <a href="/hvac-marketing-options-compared/">Compare options</a>
       <a href="/audit/?utm_source=richmond&amp;utm_medium=cta&amp;utm_content=footer">Free audit</a>
       <a href="https://www.linkedin.com/in/zackary-shefrin-8a1a87406/" target="_blank" rel="noopener">LinkedIn</a>
     </div>

@@ -64,6 +64,12 @@ def build_sitemap() -> str:
     if (ROOT / about_html).exists():
         urls.append((f"{BASE}/about/", git_lastmod(about_html), "monthly", "0.8"))
 
+    # Decision/comparison pages — explicit list (not auto-discovered)
+    for comp_slug in ("hvac-marketing-options-compared",):
+        comp_html = f"{comp_slug}/index.html"
+        if (ROOT / comp_html).exists():
+            urls.append((f"{BASE}/{comp_slug}/", git_lastmod(comp_html), "monthly", "0.8"))
+
     # Trade landing pages — /plumbing/, /electrical/ (future)
     for trade_slug in ("plumbing", "electrical"):
         trade_html = f"{trade_slug}/index.html"
