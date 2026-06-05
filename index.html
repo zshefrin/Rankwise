@@ -491,21 +491,91 @@ h2{
 h2 .serif{font-family:var(--serif);font-style:italic;font-weight:500;color:#22302B}
 .sub{font-size:17px;color:var(--ink-soft)}
 
-.problem-grid{
+.gap-layout{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
+  grid-template-columns:1fr 1.08fr;
+  gap:72px;
+  align-items:start;
 }
-.problem-card{
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:24px;
-  background:rgba(255,255,255,.03);
-  transition:transform .25s ease,border-color .25s ease;
+.gap-stats{
+  display:flex;
+  gap:36px;
+  margin:28px 0 18px;
 }
-.problem-card h3{font-family:var(--display);font-size:20px;line-height:1.15;margin-bottom:10px}
-.problem-card p{font-size:14px;color:var(--ink-soft)}
-.problem-card:hover{transform:translateY(-3px);border-color:var(--link)}
+.gap-stats div{display:flex;flex-direction:column}
+.gap-stats strong{
+  font-family:var(--display);
+  font-size:42px;
+  line-height:1;
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+.gap-stats span{
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-top:5px;
+  line-height:1.4;
+  max-width:110px;
+}
+.gap-note{font-size:13px;color:var(--ink-soft);line-height:1.65;max-width:380px}
+.mp-panel{
+  background:rgba(20,28,48,.8);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.40);
+}
+.mp-search{
+  padding:10px 14px;
+  background:rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:9px;
+}
+.mp-search-q{font-size:13px;color:var(--ink);font-weight:500}
+.mp-search-lbl{font-size:11px;color:var(--ink-muted);margin-left:auto;letter-spacing:.04em;text-transform:uppercase}
+.mp-listings{padding:0}
+.mp-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:16px 16px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  transition:background .15s;
+}
+.mp-item:last-child{border-bottom:none}
+.mp-item:hover{background:rgba(255,255,255,.03)}
+.mp-pos{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(66,133,244,.18);
+  border:1px solid rgba(66,133,244,.32);
+  color:#7BAAF7;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:3px;
+}
+.mp-pos-you{
+  background:rgba(232,101,74,.14)!important;
+  border-color:rgba(232,101,74,.32)!important;
+  color:#E8654A!important;
+}
+.mp-biz-name{font-size:14px;font-weight:600;color:#7BAAF7;margin-bottom:3px;line-height:1.2}
+.mp-biz-name-you{color:var(--ink-soft)!important}
+.mp-stars{font-size:11px;color:#F5B731;letter-spacing:.01em}
+.mp-stars-dim{color:rgba(245,183,49,.30)!important}
+.mp-rev{font-size:12px;color:var(--ink-muted);margin-left:5px}
+.mp-sub{font-size:12px;color:var(--ink-muted);margin-top:2px}
+.mp-open{color:#5CB870}
+.mp-pos-label{color:#E8654A;font-weight:600}
+.mp-footer{
+  padding:9px 14px;
+  font-size:11px;
+  color:var(--ink-muted);
+  background:rgba(255,255,255,.02);
+  border-top:1px solid rgba(255,255,255,.06);
+  text-align:center;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
 
 .services{background:linear-gradient(180deg,rgba(43,168,152,.08),rgba(255,255,255,.01))}
 .services-grid{
@@ -514,10 +584,10 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:500;color:#2230
   gap:14px;
 }
 .service-card{
-  border:1px solid #99CEC2;
+  border:1px solid rgba(43,168,152,.28);
   border-radius:16px;
   padding:26px 24px;
-  background:#F8FFFB;
+  background:rgba(43,168,152,.06);
   transition:transform .25s ease,border-color .25s ease;
 }
 .service-card h3{font-family:var(--display);font-size:21px;line-height:1.1;margin-bottom:12px}
@@ -526,29 +596,36 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:500;color:#2230
 .service-list div::before{content:"• ";color:var(--label)}
 .service-card:hover{transform:translateY(-3px);border-color:var(--link)}
 
-.how-grid{
+.how-steps{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
+  grid-template-columns:1fr auto 1fr auto 1fr;
+  gap:0;
+  align-items:start;
+  padding-top:4px;
 }
 .step{
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:24px;
-  background:rgba(255,255,255,.03);
-  transition:transform .25s ease,border-color .25s ease;
+  padding:0 0 8px;
 }
 .step-num{
   font-family:var(--display);
-  font-size:12px;
-  letter-spacing:0;
-  color:var(--label);
-  margin-bottom:12px;
+  font-size:56px;
   font-weight:800;
+  line-height:1;
+  letter-spacing:-.03em;
+  color:rgba(245,183,49,.15);
+  margin-bottom:14px;
+  display:block;
 }
-.step h3{font-family:var(--display);font-size:20px;margin-bottom:8px}
-.step p{font-size:14px;color:var(--ink-soft)}
-.step:hover{transform:translateY(-3px);border-color:var(--link)}
+.step h3{font-family:var(--display);font-size:19px;font-weight:700;margin-bottom:9px;color:var(--ink);line-height:1.1}
+.step p{font-size:14px;color:var(--ink-soft);line-height:1.65;max-width:280px}
+.step-arrow{
+  display:flex;
+  justify-content:center;
+  padding:0 16px;
+  margin-top:28px;
+  color:rgba(255,255,255,.18);
+  font-size:22px;
+}
 
 .results{
   background:linear-gradient(180deg,rgba(232,101,74,.10),rgba(255,255,255,.02));
@@ -886,7 +963,11 @@ footer{
   .hero-data{grid-template-columns:1fr 1fr;gap:12px}
   .audit-strip{padding:24px 18px}
   .audit-strip-grid{grid-template-columns:1fr;gap:16px}
-  .hero-lock,.proof-grid,.promise-grid,.problem-grid,.services-grid,.how-grid,.results-grid,.lab-grid,.cta-promise{grid-template-columns:1fr}
+  .hero-lock,.proof-grid,.promise-grid,.services-grid,.results-grid,.lab-grid,.cta-promise{grid-template-columns:1fr}
+  .gap-layout{grid-template-columns:1fr;gap:36px}
+  .how-steps{grid-template-columns:1fr;gap:32px}
+  .step-arrow{display:none}
+  .gap-stats strong{font-size:32px}
   .founder-layout,.founder-facts{grid-template-columns:1fr}
   .founder-panel{padding:22px}
   .proof-head{display:block}
@@ -1132,25 +1213,50 @@ footer{
 </div>
 
 <section>
-  <div class="container">
-    <div class="section-head reveal in">
-      <div class="label">The gap we fix</div>
-      <h2>Solid install team,<br>weak <span class="serif">inbound flow.</span></h2>
-      <p class="sub">Most HVAC owners already run solid businesses. The opportunity is turning more Google search demand into booked calls each week.</p>
+  <div class="container gap-layout reveal in">
+    <div class="gap-copy">
+      <div class="label">Why inbound stalls</div>
+      <h2>Three spots.<br>Hundreds of searches.<br><span class="serif">You're watching it happen.</span></h2>
+      <p class="sub">When a homeowner types "hvac repair near me," Google shows a Map Pack — three local businesses. Those three get the calls. Everyone else gets nothing, regardless of how good their work is.</p>
+      <div class="gap-stats">
+        <div><strong>275</strong><span>median reviews, top-3 position</span></div>
+        <div><strong>&lt;30</strong><span>where most new entrants start</span></div>
+      </div>
+      <p class="gap-note">The gap is real, but it closes. With the right signals applied consistently over months, you move from buried to booked.</p>
     </div>
-    <div class="problem-grid">
-      <article class="problem-card reveal in">
-        <h3>Feast-or-famine calendar</h3>
-        <p>Referrals keep you alive, but they do not create predictable weeks for your crew or your cash flow.</p>
-      </article>
-      <article class="problem-card reveal in">
-        <h3>Great work, quiet Google</h3>
-        <p>Companies that look more active online are winning Map Pack jobs that should be yours. In Metro Vancouver, the median contractor holding a top-3 position has 275 reviews — most new entrants have fewer than 30.</p>
-      </article>
-      <article class="problem-card reveal in">
-        <h3>No time for marketing ops</h3>
-        <p>You are running service calls, estimates, and team logistics. You should not also be babysitting search systems.</p>
-      </article>
+    <div class="mp-panel">
+      <div class="mp-search">
+        <span style="font-size:12px;opacity:.5">🔍</span>
+        <span class="mp-search-q">hvac contractor near me</span>
+        <span class="mp-search-lbl">Google Map Pack</span>
+      </div>
+      <div class="mp-listings">
+        <div class="mp-item">
+          <div class="mp-pos">1</div>
+          <div>
+            <div class="mp-biz-name">Premier Climate Systems</div>
+            <div><span class="mp-stars">★★★★★</span><span class="mp-rev">4.9 · 312 reviews</span></div>
+            <div class="mp-sub">HVAC Contractor · <span class="mp-open">Open</span> · North Vancouver</div>
+          </div>
+        </div>
+        <div class="mp-item">
+          <div class="mp-pos">2</div>
+          <div>
+            <div class="mp-biz-name">Metro Heating &amp; Cooling</div>
+            <div><span class="mp-stars">★★★★½</span><span class="mp-rev">4.8 · 187 reviews</span></div>
+            <div class="mp-sub">Air conditioning contractor · <span class="mp-open">Open</span> · Vancouver</div>
+          </div>
+        </div>
+        <div class="mp-item">
+          <div class="mp-pos mp-pos-you">?</div>
+          <div>
+            <div class="mp-biz-name mp-biz-name-you">Your company</div>
+            <div><span class="mp-stars mp-stars-dim">★★★</span><span class="mp-rev" style="color:rgba(232,101,74,.8)">4.1 · 18 reviews</span></div>
+            <div class="mp-sub"><span class="mp-pos-label">Not in Map Pack — page 2 or lower</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mp-footer">Metro Vancouver — real review count gap</div>
     </div>
   </div>
 </section>
@@ -1201,21 +1307,23 @@ footer{
       <h2>You stay on jobs.<br>We keep the <span class="serif">calls coming in.</span></h2>
       <p class="sub">Simple operating model. You keep the field running. We keep inbound momentum running.</p>
     </div>
-    <div class="how-grid">
-      <article class="step reveal in">
-        <div class="step-num">STEP 01</div>
+    <div class="how-steps reveal in">
+      <article class="step">
+        <span class="step-num">01</span>
         <h3>Diagnostic audit</h3>
-        <p>We compare your current visibility against local competitors and identify the fastest opportunities by city and service intent.</p>
+        <p>We pull your live Map Pack data before the first call — your position, who's outranking you, and which cities and services have the most realistic upside.</p>
       </article>
-      <article class="step reveal in">
-        <div class="step-num">STEP 02</div>
-        <h3>System build and launch</h3>
-        <p>We set up positioning, content, and conversion assets so your brand looks like the clear trusted option in your zone.</p>
+      <div class="step-arrow">→</div>
+      <article class="step">
+        <span class="step-num">02</span>
+        <h3>System build</h3>
+        <p>GBP tightening, city page structure, review cadence, and positioning assets — everything needed to start appearing in the right searches consistently.</p>
       </article>
-      <article class="step reveal in">
-        <div class="step-num">STEP 03</div>
-        <h3>Weekly optimization loop</h3>
-        <p>Every week we review traffic quality, booking events, and ranking movement, then adjust the next sprint so momentum compounds.</p>
+      <div class="step-arrow">→</div>
+      <article class="step">
+        <span class="step-num">03</span>
+        <h3>Weekly signal loop</h3>
+        <p>Every week: ranking movement, traffic quality, and booking events reviewed. We cut what does not convert and press harder on what does.</p>
       </article>
     </div>
   </div>
