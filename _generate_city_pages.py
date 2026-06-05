@@ -531,6 +531,8 @@ def build_page(c, cities_list):
 </script>
 
 <style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
+<link rel="stylesheet" href="/assets/rankwise-theme.css">
+<script src="/assets/nav-mobile.js" defer></script>
 </head>
 <body>
 <nav>
