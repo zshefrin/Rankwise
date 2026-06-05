@@ -109,6 +109,57 @@ td{color:var(--ink-soft)!important}
 @media(max-width:1000px){
   .mobile-sticky-cta{display:flex!important}
 }
+/* ── Blog/Lab: page header decoration ───────────────────── */
+.page-header{
+  background:linear-gradient(180deg,var(--paper) 0%,var(--paper-2) 100%)!important;
+  position:relative!important;
+}
+.lbl{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+.lbl::before{
+  content:'';
+  display:inline-block;
+  width:18px;height:2px;
+  background:currentColor;
+  border-radius:1px;
+  opacity:.7;
+  flex-shrink:0;
+}
+/* ── Blog/Lab: post list refinements ────────────────────── */
+.post-item{
+  padding-left:18px!important;
+  border-left:3px solid transparent!important;
+  transition:border-color .2s ease,opacity .15s!important;
+  position:relative!important;
+}
+.post-item:hover{
+  opacity:1!important;
+  border-left-color:var(--accent)!important;
+}
+.post-item:hover .post-title{color:var(--ink)!important}
+/* ── Featured first post ─────────────────────────────────── */
+.posts .post-item:first-child{
+  padding-top:44px!important;
+  padding-bottom:40px!important;
+}
+.posts .post-item:first-child .post-title{
+  font-size:28px!important;
+  line-height:1.12!important;
+}
+.posts .post-item:first-child .post-excerpt{
+  font-size:16px!important;
+  color:rgba(23,35,31,.68)!important;
+  line-height:1.72!important;
+}
+/* ── Lab page: study post badge refinement ───────────────── */
+.post-badge{
+  background:rgba(10,103,95,.08)!important;
+  border:1px solid rgba(10,103,95,.20)!important;
+  color:#0A675F!important;
+}
 /* ── Hamburger nav ───────────────────────────────────────── */
 .nav-hamburger{
   display:none;
