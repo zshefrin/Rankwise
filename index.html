@@ -1232,6 +1232,57 @@ footer{
   line-height:1.3;
 }
 
+/* ── Section color story ─────────────────────────────────────
+   Before: all sections were 8% tint on cream — invisible
+   Now: each section has a distinct chromatic identity     */
+
+/* Services — real teal, stands out from cream body */
+.services{background:linear-gradient(150deg,#BEE6DF 0%,#CCEEE8 100%)}
+.service-card{
+  background:rgba(255,255,255,.54)!important;
+  border-color:rgba(43,168,152,.20)!important;
+}
+
+/* How — dark forest anchor, creates a page chapter break */
+.how{background:linear-gradient(180deg,#14211D 0%,#101A17 100%)}
+.how .label{color:rgba(245,183,49,.78)}
+.how h2{color:#fff}
+.how h2 .serif{color:rgba(245,240,232,.80)}
+.how .sub{color:rgba(245,240,232,.64)}
+.how .step-num{color:rgba(245,183,49,.28)}
+.how .step{
+  background:rgba(255,255,255,.05);
+  border-radius:14px;
+  padding:22px 20px;
+}
+.how .step h3{color:#fff}
+.how .step p{color:rgba(245,240,232,.62)}
+.how .step-badge{
+  background:rgba(245,183,49,.11);
+  border-color:rgba(245,183,49,.24);
+  color:rgba(245,240,232,.88);
+}
+.how .step-arrow{color:rgba(255,255,255,.16)}
+
+/* Results — visible warm peach */
+.results{background:linear-gradient(150deg,#FAD4C0 0%,#F8E2D5 100%)}
+
+/* Founder — warm amber cream, breaks away from cool mint body */
+.founder{background:#FFF4E3}
+.founder .founder-panel{
+  background:#fff!important;
+  box-shadow:0 4px 28px rgba(200,140,60,.10)!important;
+}
+
+/* Lab — deeper warm gold, clearly distinct from cream */
+.lab{background:linear-gradient(150deg,#EBE090 0%,#F3E8B2 100%)}
+
+/* FAQ — subtle cool mint reset after warm lab */
+.faq{background:#EFF6F3}
+
+/* sc-stat: neutral dark ghost readable on any light section bg */
+.sc-stat{color:rgba(10,20,15,.12)!important}
+
 @media(max-width:1000px){
   nav{padding:14px 18px;flex-wrap:wrap;position:relative}
   .nav-links{display:none}
