@@ -471,6 +471,142 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
   color:var(--ink-soft);
 }
 
+/* ── Review gap bars ─────────────────────────────────── */
+.review-gap{padding:0 52px 80px}
+.rg-head{margin-bottom:22px}
+.rg-head p{font-size:13px;color:var(--ink-soft);margin-top:6px}
+.rg-rows{max-width:620px}
+.rg-row{
+  display:grid;
+  grid-template-columns:26px 1fr 160px 44px;
+  align-items:center;
+  gap:14px;
+  margin-bottom:9px;
+}
+.rg-pos{
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(74,144,217,.14);
+  border:1px solid rgba(74,144,217,.28);
+  color:#5A9FD4;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.rg-pos-you{
+  background:rgba(217,95,66,.14)!important;
+  border-color:rgba(217,95,66,.28)!important;
+  color:var(--accent-3)!important;
+}
+.rg-name{font-size:13px;font-weight:600;color:var(--ink)}
+.rg-name-you{color:var(--ink-soft)!important;font-style:italic}
+.rg-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.rg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4A90D9,#81BBE8)}
+.rg-fill-you{background:linear-gradient(90deg,rgba(217,95,66,.5),rgba(217,95,66,.3))!important}
+.rg-n{font-size:13px;font-weight:700;color:var(--ink);text-align:right;font-family:var(--display)}
+.rg-n-you{color:var(--accent-3)!important}
+.rg-divider{
+  border-top:1px dashed rgba(10,103,95,.30);
+  margin:14px 0 14px 40px;
+  position:relative;
+}
+.rg-divider span{
+  position:absolute;top:-9px;right:0;
+  font-size:10px;color:var(--label);
+  background:linear-gradient(180deg,#F7F0E3,#FFFDF7 50%,#E8F1EB);
+  padding:0 8px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.rg-note{font-size:12px;color:var(--ink-soft);margin-top:16px;max-width:480px}
+
+/* ── Signals comparison table ────────────────────────── */
+.signals{padding:72px 52px}
+.signals-table{
+  margin-top:32px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+}
+.st-head{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:0;
+  background:rgba(10,103,95,.07);
+  border-bottom:1px solid var(--line);
+  padding:10px 20px;
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--label);
+}
+.st-row{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:0;
+  padding:14px 20px;
+  border-bottom:1px solid var(--line);
+  align-items:center;
+  transition:background .15s;
+}
+.st-row:last-child{border-bottom:none}
+.st-row:hover{background:rgba(10,103,95,.03)}
+.st-signal{font-size:14px;font-weight:600;color:var(--ink)}
+.st-val{font-size:13px;color:var(--ink-soft)}
+.st-val-good{color:#2E7D56!important;font-weight:700}
+.st-val-bad{color:var(--accent-3)!important;font-weight:700}
+.st-action{font-size:12px;color:var(--label);font-weight:600}
+
+/* ── City availability panel ─────────────────────────── */
+.cities-avail{padding:72px 52px;border-top:1px solid var(--line)}
+.ca-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+}
+.ca-sub{font-size:14px;color:var(--ink-soft);max-width:440px;line-height:1.55}
+.ca-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.ca-city{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px 16px;
+  text-decoration:none;
+  color:inherit;
+  background:var(--surface);
+  display:block;
+  transition:border-color .15s ease,transform .18s ease,box-shadow .18s ease;
+}
+.ca-city:hover{
+  border-color:#86BDB1;
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(10,103,95,.10);
+}
+.ca-dot{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:#2E7D56;
+  margin-bottom:9px;
+}
+.ca-dot::before{
+  content:'';width:7px;height:7px;
+  border-radius:50%;background:#4CAF50;
+  flex-shrink:0;box-shadow:0 0 0 2px rgba(76,175,80,.20);
+}
+.ca-name{font-family:var(--display);font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.1}
+.ca-vol{font-size:12px;color:var(--ink-soft)}
+.ca-note{font-size:12px;color:var(--ink-soft);margin-top:16px;font-style:italic}
+
 .section-head{max-width:760px;margin-bottom:28px}
 .label{
   font-family:var(--display);
@@ -968,6 +1104,14 @@ footer{
   .how-steps{grid-template-columns:1fr;gap:32px}
   .step-arrow{display:none}
   .gap-stats strong{font-size:32px}
+  .review-gap{padding:0 18px 56px}
+  .rg-row{grid-template-columns:26px 1fr 100px 36px;gap:8px}
+  .signals{padding:56px 18px}
+  .st-head,.st-row{grid-template-columns:1.2fr 1fr;padding:10px 14px}
+  .st-head span:nth-child(n+3),.st-row span:nth-child(n+3){display:none}
+  .cities-avail{padding:56px 18px}
+  .ca-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ca-head{flex-direction:column;align-items:flex-start;gap:10px}
   .founder-layout,.founder-facts{grid-template-columns:1fr}
   .founder-panel{padding:22px}
   .proof-head{display:block}
@@ -1261,6 +1405,85 @@ footer{
   </div>
 </section>
 
+<section class="review-gap">
+  <div class="container">
+    <div class="rg-head">
+      <div class="label">The review gap — tracked weekly</div>
+      <p>Metro Vancouver "hvac contractor near me" — Map Pack positions and review counts from the Rankwise Lab dataset.</p>
+    </div>
+    <div class="rg-rows">
+      <div class="rg-row">
+        <div class="rg-pos">1</div>
+        <span class="rg-name">Premier Climate Systems</span>
+        <div class="rg-track"><div class="rg-fill" style="width:100%"></div></div>
+        <span class="rg-n">312</span>
+      </div>
+      <div class="rg-row">
+        <div class="rg-pos">2</div>
+        <span class="rg-name">Metro Heating &amp; Cooling</span>
+        <div class="rg-track"><div class="rg-fill" style="width:60%"></div></div>
+        <span class="rg-n">187</span>
+      </div>
+      <div class="rg-row">
+        <div class="rg-pos">3</div>
+        <span class="rg-name">Burnaby Heating &amp; AC</span>
+        <div class="rg-track"><div class="rg-fill" style="width:30%"></div></div>
+        <span class="rg-n">94</span>
+      </div>
+      <div class="rg-divider"><span>Map Pack floor</span></div>
+      <div class="rg-row">
+        <div class="rg-pos rg-pos-you">?</div>
+        <span class="rg-name rg-name-you">Your company (typical entry)</span>
+        <div class="rg-track"><div class="rg-fill rg-fill-you" style="width:6%"></div></div>
+        <span class="rg-n rg-n-you">18</span>
+      </div>
+    </div>
+    <p class="rg-note">You don't need the most reviews — just enough to stay in the top 3. The bar is high, but it's a known number.</p>
+  </div>
+</section>
+
+<section class="signals" id="signals">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="label">How the Map Pack actually works</div>
+      <h2>Four signals.<br>Most contractors are <span class="serif">weak on all four.</span></h2>
+      <p class="sub">Google scores every local business on the same four signals. Here's where most new entrants stand — and what fixing each one looks like.</p>
+    </div>
+    <div class="signals-table reveal in">
+      <div class="st-head">
+        <span>Signal</span>
+        <span>Typical new entrant</span>
+        <span>Top-3 median</span>
+        <span>What we do</span>
+      </div>
+      <div class="st-row">
+        <span class="st-signal">GBP posts &amp; activity</span>
+        <span class="st-val st-val-bad">0–1 posts/month</span>
+        <span class="st-val st-val-good">4–6 posts/month</span>
+        <span class="st-action">Weekly optimized posts</span>
+      </div>
+      <div class="st-row">
+        <span class="st-signal">Review count</span>
+        <span class="st-val st-val-bad">&lt;30 reviews</span>
+        <span class="st-val st-val-good">275 median</span>
+        <span class="st-action">Velocity strategy + responses</span>
+      </div>
+      <div class="st-row">
+        <span class="st-signal">City page coverage</span>
+        <span class="st-val st-val-bad">1 generic page</span>
+        <span class="st-val st-val-good">4–6 city pages</span>
+        <span class="st-action">Full Metro Van structure</span>
+      </div>
+      <div class="st-row">
+        <span class="st-signal">NAP consistency</span>
+        <span class="st-val st-val-bad">Inconsistent across dirs</span>
+        <span class="st-val st-val-good">Clean across 40+ sources</span>
+        <span class="st-action">Citation audit &amp; cleanup</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="services" id="services">
   <div class="container">
     <div class="section-head reveal in">
@@ -1535,19 +1758,58 @@ footer{
   </div>
 </section>
 
-<section class="city-links-strip">
+<section class="cities-avail">
   <div class="container">
-    <p class="city-links-strip-label">We serve HVAC contractors across Metro Vancouver</p>
-    <div class="city-links-strip-list">
-      <a href="/vancouver-hvac-marketing/">Vancouver</a>
-      <a href="/burnaby-hvac-marketing/">Burnaby</a>
-      <a href="/surrey-hvac-marketing/">Surrey</a>
-      <a href="/richmond-hvac-marketing/">Richmond</a>
-      <a href="/north-vancouver-hvac-marketing/">North Vancouver</a>
-      <a href="/coquitlam-hvac-marketing/">Coquitlam</a>
-      <a href="/langley-hvac-marketing/">Langley</a>
-      <a href="/abbotsford-hvac-marketing/">Abbotsford</a>
+    <div class="ca-head">
+      <div>
+        <div class="label">Service territory</div>
+        <h2>Metro Vancouver.<br><span class="serif">8 cities. 8 open slots.</span></h2>
+      </div>
+      <p class="ca-sub">One HVAC contractor per city — exclusively. The first contractor signed in each city locks in that territory for the life of the contract. All eight are currently open.</p>
     </div>
+    <div class="ca-grid">
+      <a href="/vancouver-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Vancouver</div>
+        <div class="ca-vol">~420 local searches/mo</div>
+      </a>
+      <a href="/surrey-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Surrey</div>
+        <div class="ca-vol">~390 local searches/mo</div>
+      </a>
+      <a href="/burnaby-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Burnaby</div>
+        <div class="ca-vol">~280 local searches/mo</div>
+      </a>
+      <a href="/richmond-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Richmond</div>
+        <div class="ca-vol">~210 local searches/mo</div>
+      </a>
+      <a href="/north-vancouver-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">North Vancouver</div>
+        <div class="ca-vol">~190 local searches/mo</div>
+      </a>
+      <a href="/coquitlam-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Coquitlam</div>
+        <div class="ca-vol">~160 local searches/mo</div>
+      </a>
+      <a href="/langley-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Langley</div>
+        <div class="ca-vol">~150 local searches/mo</div>
+      </a>
+      <a href="/abbotsford-hvac-marketing/" class="ca-city">
+        <div class="ca-dot">Available</div>
+        <div class="ca-name">Abbotsford</div>
+        <div class="ca-vol">~130 local searches/mo</div>
+      </a>
+    </div>
+    <p class="ca-note">Search volume estimates from Rankwise Lab — tracked monthly across 12 HVAC intent terms per city.</p>
   </div>
 </section>
 
