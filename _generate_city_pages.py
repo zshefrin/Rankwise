@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Generate city-specific HVAC and Plumbing marketing pages for Rankwise."""
+"""Generate city-specific HVAC and Plumbing marketing pages for Rankwise.
+
+Run with no args to (re)write the pages. Run with --check to verify the on-disk
+pages still match the generator and exit non-zero on drift (CI guard, like
+generate_sitemap.py) — see finding #6 in code-audit-2026-06-05.md.
+"""
+import argparse
 import os
 
 CITIES = [
@@ -361,7 +367,25 @@ PLUMBING_LANDING = {
     "trade_label": "Plumbing",
 }
 
-CSS = open(os.path.join(os.path.dirname(__file__), "index.html")).read().split("<style>")[1].split("</style>")[0]
+# Shared CSS is scraped from index.html's single inline <style> block (finding #23 —
+# this couples city-page CSS to whatever index.html currently contains; the longer-term
+# fix is to move shared CSS into /assets/rankwise-theme.css). Guard the scrape so a
+# missing/duplicated block fails loudly instead of an IndexError or silently grabbing
+# the wrong block.
+_index_html = open(os.path.join(os.path.dirname(__file__), "index.html")).read()
+_style_parts = _index_html.split("<style>")
+if len(_style_parts) != 2 or "</style>" not in _style_parts[1]:
+    raise SystemExit(
+        f"fatal: expected exactly one <style>...</style> block in index.html to scrape "
+        f"shared CSS (found {len(_style_parts) - 1}). Fix index.html or migrate the shared "
+        f"CSS into /assets/rankwise-theme.css (see audit finding #23)."
+    )
+CSS = _style_parts[1].split("</style>")[0]
+
+# Nav markup — single source of truth shared with sync_nav.py (finding #6). Read it from
+# partials/nav.html instead of hardcoding a copy here, so a Codex/operator nav edit can't
+# silently drift the generated city pages from the rest of the site.
+NAV = open(os.path.join(os.path.dirname(__file__), "partials", "nav.html")).read().strip()
 
 TESTIMONIALS_CSS = """
 .testimonials{padding:100px 52px}
@@ -539,19 +563,7 @@ def build_page(c, cities_list):
 <script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
 <body>
-<header class="rw-nav" role="navigation" aria-label="Primary">
-  <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
-  <ul class="rw-nav__links">
-    <li><a href="/#services">What we do</a></li>
-    <li><a href="/#how">How it works</a></li>
-    <li><a href="/#results">Results</a></li>
-    <li><a href="/#faq">FAQ</a></li>
-    <li><a href="/blog/">Blog</a></li>
-    <li><a href="/lab/">Lab</a></li>
-    <li><a href="/about/">About</a></li>
-  </ul>
-  <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
-</header>
+{NAV}
 
 <section class="hero">
   <div class="container hero-grid">
@@ -888,13 +900,43 @@ function toggleFaq(item){{const o=item.classList.contains('open');document.query
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-# HVAC city pages
-for c in CITIES:
-    out_dir = os.path.join(base, c["slug"])
-    os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "index.html"), "w") as f:
-        f.write(build_page(c, CITIES))
-    print(f"✓ {c['slug']}/index.html")
+
+def _render(c):
+    # Trailing newline matches the deployed pages (and sync_nav.py output).
+    return build_page(c, CITIES) + "\n"
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Generate Rankwise city pages.")
+    ap.add_argument(
+        "--check",
+        action="store_true",
+        help="Don't write; exit 1 if any on-disk page differs from the generator (drift guard).",
+    )
+    args = ap.parse_args()
+
+    if args.check:
+        drifted = []
+        for c in CITIES:
+            path = os.path.join(base, c["slug"], "index.html")
+            current = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+            if current != _render(c):
+                drifted.append(c["slug"])
+        if drifted:
+            print("DRIFT — these city pages differ from the generator (regenerate or reconcile):")
+            for s in drifted:
+                print(f"  - {s}")
+            raise SystemExit(1)
+        print("✓ all city pages match the generator")
+        return
+
+    # HVAC city pages
+    for c in CITIES:
+        out_dir = os.path.join(base, c["slug"])
+        os.makedirs(out_dir, exist_ok=True)
+        with open(os.path.join(out_dir, "index.html"), "w") as f:
+            f.write(_render(c))
+        print(f"✓ {c['slug']}/index.html")
 
 # Plumbing pages — archived 2026-05-12, will re-enable after first paying HVAC client.
 # Data definitions (PLUMBING_CITIES, PLUMBING_LANDING) kept above so this block can be
@@ -913,3 +955,7 @@ for c in CITIES:
 # with open(os.path.join(out_dir, "index.html"), "w") as f:
 #     f.write(build_page(PLUMBING_LANDING, PLUMBING_CITIES))
 # print(f"✓ {PLUMBING_LANDING['slug']}/index.html")
+
+
+if __name__ == "__main__":
+    main()
