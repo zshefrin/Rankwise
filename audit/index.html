@@ -473,6 +473,23 @@ footer{
     });
   }
 
+  // Booking-intent signal: the Cal embed is cross-origin (GA4 can't see form_start
+  // inside it), so track clicks on the direct cal.com booking links as the
+  // top-of-funnel event, mirroring audit_cta_clicked on the marketing pages.
+  document.addEventListener("click",function(event){
+    var link=event.target.closest("a");
+    if(!link)return;
+    var href=link.getAttribute("href")||"";
+    if(href.indexOf("cal.com")===-1)return;
+    if(typeof gtag!=="function")return;
+    gtag("event","audit_cta_clicked",{
+      page_path:window.location.pathname,
+      cta_location:(link.closest("section")&&link.closest("section").id)||"audit-page",
+      cta_text:(link.textContent||"").replace(/\s+/g," ").trim().slice(0,80),
+      link_url:link.href
+    });
+  });
+
   function loadCal(){
     if (started) return;
     started = true;

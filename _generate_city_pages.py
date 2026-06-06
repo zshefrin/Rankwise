@@ -782,7 +782,30 @@ def build_page(c, cities_list):
 <script>
 const obs=new IntersectionObserver(e=>{{e.forEach(x=>{{if(x.isIntersecting)x.target.classList.add('in')}});}},{{threshold:.1}});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-function toggleFaq(item){{const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!o)item.classList.add('open');}}
+function rwTrack(name,params){{
+  if(typeof gtag!=="function")return;
+  gtag("event",name,Object.assign({{page_path:window.location.pathname}},params||{{}}));
+}}
+function rwLocation(link){{
+  if(link.dataset.ctaLocation)return link.dataset.ctaLocation;
+  const section=link.closest("section");
+  if(section&&section.id)return section.id;
+  if(link.closest("nav"))return "nav";
+  if(link.closest("footer"))return "footer";
+  return "unknown";
+}}
+document.addEventListener("click",function(event){{
+  const link=event.target.closest("a");
+  if(!link)return;
+  const href=link.getAttribute("href")||"";
+  const text=(link.textContent||"").replace(/\\s+/g," ").trim().slice(0,80);
+  if(href.indexOf("/audit/")!==-1){{
+    rwTrack("audit_cta_clicked",{{cta_location:rwLocation(link),cta_text:text,link_url:link.href}});
+  }}else if(href.charAt(0)==="#"){{
+    rwTrack("section_nav_clicked",{{cta_location:rwLocation(link),cta_text:text,target_section:href.slice(1)}});
+  }}
+}});
+function toggleFaq(item){{const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!o){{item.classList.add('open');const q=item.querySelector('.faq-q');rwTrack('faq_opened',{{question:q?q.textContent.replace('+','').trim().slice(0,100):''}});}}}}
 </script>
 
 <script type="text/javascript">
