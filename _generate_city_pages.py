@@ -532,8 +532,8 @@ def build_page(c, cities_list):
 
 <style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
 <link rel="stylesheet" href="/assets/rankwise-theme.css?v=nav-20260605">
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-20260605">
-<script src="/assets/nav-mobile.js?v=rw-nav-20260605" defer></script>
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
+<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
 <body>
 <header class="rw-nav" role="navigation" aria-label="Primary">
