@@ -1,0 +1,214 @@
+.rw-nav,
+.rw-nav * {
+  box-sizing: border-box;
+}
+
+.rw-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  min-height: 76px;
+  padding: 16px 52px;
+  background: rgba(15, 24, 21, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: #fff;
+  line-height: 1.6;
+}
+
+.rw-nav__logo {
+  flex: 0 0 auto;
+  color: #fff;
+  font-family: var(--display, "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.rw-nav__logo span {
+  color: #f2b533;
+}
+
+.rw-nav__links {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rw-nav__links li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rw-nav__links a {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.rw-nav__links a:hover,
+.rw-nav__links a:focus-visible {
+  color: #fff;
+}
+
+.rw-nav__cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 18px;
+  border: 1px solid rgba(242, 181, 51, 0.45);
+  border-radius: 999px;
+  background: rgba(242, 181, 51, 0.12);
+  color: #ffd76a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.rw-nav__hamburger {
+  display: none;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.rw-nav__hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.rw-nav__hamburger.rw-nav__hamburger--open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.rw-nav__hamburger.rw-nav__hamburger--open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.rw-nav__hamburger.rw-nav__hamburger--open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (min-width: 1001px) {
+  body:has(> .rw-nav + .page-header),
+  body:has(> .rw-nav + .crumb),
+  body:has(> .rw-nav + article),
+  body:has(> .rw-nav + section.booking) {
+    padding-top: 76px !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  .rw-nav {
+    position: relative;
+    min-height: 70px;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .rw-nav__links {
+    display: none;
+  }
+
+  .rw-nav__hamburger {
+    display: flex;
+    order: 2;
+  }
+
+  .rw-nav__cta {
+    order: 3;
+    max-width: calc(100vw - 138px);
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .rw-nav__logo {
+    order: 1;
+    font-size: 22px;
+  }
+
+  .rw-nav.rw-nav--open .rw-nav__links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 501;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 20px 20px;
+    background: rgba(12, 18, 14, 0.97);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26);
+  }
+
+  .rw-nav.rw-nav--open .rw-nav__links a {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 15px;
+    padding: 2px 0;
+  }
+
+  body:has(> .rw-nav + .page-header),
+  body:has(> .rw-nav + .crumb),
+  body:has(> .rw-nav + article),
+  body:has(> .rw-nav + section.booking) {
+    padding-top: 0 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .rw-nav {
+    padding: 12px;
+  }
+
+  .rw-nav__cta {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+}

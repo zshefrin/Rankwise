@@ -531,22 +531,24 @@ def build_page(c, cities_list):
 </script>
 
 <style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
-<link rel="stylesheet" href="/assets/rankwise-theme.css">
-<script src="/assets/nav-mobile.js" defer></script>
+<link rel="stylesheet" href="/assets/rankwise-theme.css?v=nav-20260605">
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-20260605">
+<script src="/assets/nav-mobile.js?v=rw-nav-20260605" defer></script>
 </head>
 <body>
-<nav>
-  <a href="/" class="logo">Rank<span>wise</span></a>
-  <ul class="nav-links">
+<header class="rw-nav" role="navigation" aria-label="Primary">
+  <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
+  <ul class="rw-nav__links">
     <li><a href="/#services">What we do</a></li>
     <li><a href="/#how">How it works</a></li>
     <li><a href="/#results">Results</a></li>
     <li><a href="/#faq">FAQ</a></li>
     <li><a href="/blog/">Blog</a></li>
     <li><a href="/lab/">Lab</a></li>
+    <li><a href="/about/">About</a></li>
   </ul>
-  <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=nav" class="nav-cta">Book free audit</a>
-</nav>
+  <a href="/audit/" class="rw-nav__cta">Book free audit</a>
+</header>
 
 <section class="hero">
   <div class="container hero-grid">
