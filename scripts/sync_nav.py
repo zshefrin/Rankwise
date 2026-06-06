@@ -6,7 +6,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 NAV = (ROOT / "partials" / "nav.html").read_text(encoding="utf-8").strip()
 NAV_CSS = '<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-20260605">'
-NAV_JS = '<script src="/assets/nav-mobile.js?v=rw-nav-20260605" defer></script>'
+NAV_JS = '<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>'
 
 OLD_NAV_RE = re.compile(r"<nav\b[^>]*>.*?</nav>", re.DOTALL | re.IGNORECASE)
 RW_NAV_RE = re.compile(

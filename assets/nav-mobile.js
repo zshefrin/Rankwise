@@ -12,6 +12,15 @@
   var cta = nav.querySelector('.rw-nav__cta');
   if (cta) {
     nav.insertBefore(btn, cta);
+    cta.addEventListener('click', function(){
+      if (typeof gtag !== 'function') return;
+      gtag('event', 'nav_cta_clicked', {
+        event_category: 'lead',
+        event_label: 'global_nav',
+        page_path: window.location.pathname,
+        destination: cta.href
+      });
+    });
   } else {
     nav.appendChild(btn);
   }

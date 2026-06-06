@@ -547,7 +547,7 @@ def build_page(c, cities_list):
     <li><a href="/lab/">Lab</a></li>
     <li><a href="/about/">About</a></li>
   </ul>
-  <a href="/audit/" class="rw-nav__cta">Book free audit</a>
+  <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
 
 <section class="hero">
