@@ -125,7 +125,13 @@ nav{
 }
 
 .hero{
-  padding:32px 24px 8px;
+  /* top padding clears the shared rw-nav (position:fixed, 76px) — the old nav was
+     sticky/in-flow so 32px was enough; +76 keeps the same visual gap below the nav. */
+  padding:108px 24px 8px;
+  /* rankwise-nav.css applies the dark HVAC photo as `.hero` background for the
+     marketing/city pages; this is a TEXT hero, so neutralise that leak and let the
+     light body show through (restores the pre-nav-refactor look). */
+  background-image:none!important;
 }
 .hero-grid{
   display:block;
@@ -341,7 +347,7 @@ footer{
   nav{padding:14px 18px}
   .nav-links{display:none}
   .nav-cta{padding:9px 15px;font-size:12px}
-  .hero{padding:28px 16px 8px}
+  .hero{padding:98px 16px 8px}
   .booking{padding:8px 16px 24px}
   .call-preview{grid-template-columns:1fr}
   .promise-grid{grid-template-columns:1fr}
