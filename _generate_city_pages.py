@@ -195,6 +195,234 @@ CITIES = [
     },
 ]
 
+
+def _build_hvac_city(
+    name: str,
+    slug: str,
+    neighborhoods: str,
+    primary_services: str,
+    market_note: str,
+    review_note: str,
+    growth_note: str,
+):
+    utm_city = slug.replace("-hvac-marketing", "")
+    return {
+        "name": name,
+        "slug": slug,
+        "eyebrow": f"HVAC marketing agency · {name}, BC",
+        "h1_city": f"{name}.",
+        "meta_title": f"HVAC Marketing Agency in {name} | Rankwise",
+        "meta_desc": f"HVAC marketing for {name} contractors — {neighborhoods}. Map Pack and Google Business Profile management for {primary_services}. One HVAC contractor per city.",
+        "og_desc": f"HVAC marketing for {name} contractors. One client per city. Month-to-month, results guaranteed.",
+        "aio_heading": f"HVAC marketing in {name}: four signals that decide who gets the call",
+        "aio_items": [
+            f"<strong>Google Map Pack coverage</strong> across your service area — {neighborhoods} each create local search demand for {primary_services}. {market_note}",
+            "<strong>Google Business Profile activity</strong> — steady job photos, review responses, service updates, and accurate city/service signals tell Google your business is active and trusted locally.",
+            f"<strong>Review velocity</strong> — {review_note}",
+            f"<strong>City-specific landing pages</strong> — a {name}-specific page lets Google match your company to high-intent searches for {primary_services}, instead of treating your site as a generic Lower Mainland service page.",
+        ],
+        "hero_copy": f"{name} homeowners search for HVAC help every week. {growth_note} We build the local search presence around your company so those searches turn into booked calls before a competitor gets them.",
+        "problem_stat": f"In {name}, {primary_services} searches are local enough that a generic Metro Vancouver page is rarely enough. Contractors need city relevance, active GBP signals, and review momentum to compete in the Map Pack.",
+        "services_copy": f"We tighten your Google Business Profile and local SEO structure so your company shows up across {name} — wherever homeowners are searching for {primary_services}.",
+        "cta_h2": f"See your {name} Map Pack standing in 15 minutes.",
+        "cta_sub": f"We pull your live {name} Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
+        "faq_exclusivity": f"No. I take one HVAC contractor per city — that's a hard rule. If {name} is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your {name} market specifically.",
+        "utm_city": utm_city,
+    }
+
+
+CITIES.extend([
+    _build_hvac_city(
+        "West Vancouver",
+        "west-vancouver-hvac-marketing",
+        "Ambleside, Dundarave, Caulfeild, and Horseshoe Bay",
+        "furnace repair, boiler service, heat pump installation, and HVAC maintenance",
+        "Higher-value detached homes make trust signals, review quality, and a polished Google listing especially important.",
+        "West Vancouver contractors compete on trust and proof as much as proximity; thin profiles are easy for homeowners to skip even when they appear nearby.",
+        "The market is smaller than Vancouver, but job value and homeowner expectations are higher.",
+    ),
+    _build_hvac_city(
+        "New Westminster",
+        "new-westminster-hvac-marketing",
+        "Uptown, Sapperton, Queensborough, and the Quay",
+        "furnace repair, heat pump service, AC repair, and HVAC contractor searches",
+        "Dense housing and older buildings create a steady mix of repair, replacement, and maintenance intent.",
+        "New Westminster searches are compact and competitive; contractors without strong city relevance can be outranked by nearby Burnaby or Surrey operators.",
+        "The city is geographically small, so ranking improvements can compound quickly when the profile and service pages are aligned.",
+    ),
+    _build_hvac_city(
+        "Delta",
+        "delta-hvac-marketing",
+        "Ladner, Tsawwassen, North Delta, and Sunshine Hills",
+        "furnace repair, AC service, heat pump installation, and HVAC maintenance",
+        "Delta search intent splits across distinct communities, so city and neighbourhood relevance matter more than a single generic service-area claim.",
+        "Delta contractors need enough local proof to compete in North Delta while still showing relevance for Ladner and Tsawwassen homeowners.",
+        "The market rewards contractors who can show both residential trust and coverage across Delta's split geography.",
+    ),
+    _build_hvac_city(
+        "White Rock",
+        "white-rock-hvac-marketing",
+        "Uptown, East Beach, West Beach, and nearby South Surrey",
+        "furnace repair, heat pump service, AC installation, and HVAC maintenance",
+        "White Rock is a smaller market, but homeowners often compare local specialists against South Surrey contractors in the same search journey.",
+        "A thin review profile can get swallowed by larger South Surrey operators; the opportunity is showing strong local trust in a tighter market.",
+        "The standalone volume is smaller, but the searches are clear and locally specific.",
+    ),
+    _build_hvac_city(
+        "Port Moody",
+        "port-moody-hvac-marketing",
+        "Newport Village, Suter Brook, Heritage Mountain, and Ioco",
+        "heat pump installation, furnace service, AC repair, and HVAC maintenance",
+        "Condo, townhouse, and detached-home demand overlap here, so service clarity on the profile matters.",
+        "Port Moody contractors often compete with Coquitlam and Burnaby listings; city-specific proof helps keep calls local.",
+        "The market is compact, but homeowner intent is strong around heat pumps, maintenance, and replacement work.",
+    ),
+    _build_hvac_city(
+        "Port Coquitlam",
+        "port-coquitlam-hvac-marketing",
+        "Citadel, Mary Hill, Riverwood, and Oxford Heights",
+        "furnace repair, heat pump service, HVAC installation, and AC maintenance",
+        "Family-home neighbourhoods create practical service demand, especially for repair and replacement searches.",
+        "Port Coquitlam contractors can lose calls to Coquitlam and Maple Ridge listings unless the GBP and landing pages make the local fit obvious.",
+        "The market is a strong service area for companies that can show local availability and consistent review activity.",
+    ),
+    _build_hvac_city(
+        "Pitt Meadows",
+        "pitt-meadows-hvac-marketing",
+        "Osprey Village, South Meadows, Bonson, and central Pitt Meadows",
+        "furnace repair, heat pump service, HVAC maintenance, and AC repair",
+        "Pitt Meadows is lower-volume, but homeowners searching there are usually looking for a nearby contractor, not a generic regional brand.",
+        "The Map Pack can be open because fewer contractors build dedicated Pitt Meadows relevance; consistency matters more than volume.",
+        "This is a smaller but cleaner local market where a focused profile can stand out.",
+    ),
+    _build_hvac_city(
+        "Maple Ridge",
+        "maple-ridge-hvac-marketing",
+        "Albion, Hammond, Silver Valley, and Cottonwood",
+        "furnace repair, heat pump installation, HVAC service, and AC repair",
+        "Growing residential areas and older housing stock create a useful mix of installation and service demand.",
+        "Maple Ridge contractors need city-specific proof to avoid being treated as a secondary service area behind Coquitlam, Pitt Meadows, or Mission.",
+        "The city has enough search volume to justify a dedicated page and a focused GBP growth plan.",
+    ),
+    _build_hvac_city(
+        "Mission",
+        "mission-hvac-marketing",
+        "Hatzic, Cedar Valley, Silverdale, and central Mission",
+        "furnace repair, heat pump installation, HVAC service, and AC maintenance",
+        "Mission sits outside Metro Vancouver proper, but it behaves like a practical Fraser Valley service market for HVAC contractors.",
+        "Mission contractors can compete on local proximity and trust if their Google profile makes the service area clear and active.",
+        "The market is smaller than Abbotsford, but the intent is local and the competition is less consolidated.",
+    ),
+])
+
+HVAC_MARKET_DATA = {
+    "Vancouver": {
+        "volume": "~420/mo",
+        "areas": "Kitsilano, Mount Pleasant, Kerrisdale, and Marpole",
+        "terms": ["Furnace repair", "AC installation", "Emergency HVAC"],
+        "first_move": "Check neighborhood spread first; Vancouver rankings can look strong downtown while leaking calls in the west side, south side, or east side.",
+    },
+    "West Vancouver": {
+        "volume": "~95/mo",
+        "areas": "Ambleside, Dundarave, Caulfeild, and Horseshoe Bay",
+        "terms": ["Boiler service", "Heat pump installs", "Furnace repair"],
+        "first_move": "Lead with premium trust signals: review quality, photos, service clarity, and a profile that feels credible for high-value homes.",
+    },
+    "North Vancouver": {
+        "volume": "~190/mo",
+        "areas": "Lonsdale, Lynn Valley, Deep Cove, and Capilano",
+        "terms": ["Furnace repair", "Boiler repair", "Heat pump installs"],
+        "first_move": "Separate North Shore intent from generic Vancouver coverage so the profile proves local availability.",
+    },
+    "Burnaby": {
+        "volume": "~280/mo",
+        "areas": "Metrotown, Brentwood, Edmonds, and Burnaby Heights",
+        "terms": ["Heating contractor", "Furnace service", "HVAC installation"],
+        "first_move": "Audit category fit and review recency first; Burnaby is central enough that nearby cities can bleed into the results.",
+    },
+    "Richmond": {
+        "volume": "~210/mo",
+        "areas": "Steveston, City Centre, Broadmoor, and Bridgeport",
+        "terms": ["AC repair", "Heat pump service", "Furnace maintenance"],
+        "first_move": "Prioritize seasonal AC and heat-pump proof so the profile matches what homeowners search before they call.",
+    },
+    "New Westminster": {
+        "volume": "~95/mo",
+        "areas": "Uptown, Sapperton, Queensborough, and the Quay",
+        "terms": ["Furnace repair", "Heat pump service", "AC repair"],
+        "first_move": "Use city-specific proof to keep compact New West searches from defaulting to Burnaby or Surrey competitors.",
+    },
+    "Coquitlam": {
+        "volume": "~160/mo",
+        "areas": "Town Centre, Burke Mountain, Westwood Plateau, and Austin Heights",
+        "terms": ["HVAC service", "Furnace installation", "Heating repair"],
+        "first_move": "Check whether fast-growing neighborhoods are seeing your profile or only older, broader Coquitlam terms.",
+    },
+    "Port Moody": {
+        "volume": "~70/mo",
+        "areas": "Newport Village, Suter Brook, Heritage Mountain, and Ioco",
+        "terms": ["Heat pump installation", "Furnace service", "AC repair"],
+        "first_move": "Build local trust around Port Moody specifically so Coquitlam and Burnaby listings do not absorb the demand.",
+    },
+    "Port Coquitlam": {
+        "volume": "~90/mo",
+        "areas": "Citadel, Mary Hill, Riverwood, and Oxford Heights",
+        "terms": ["Furnace repair", "Heat pump service", "HVAC installation"],
+        "first_move": "Make proximity and service clarity obvious, especially against Coquitlam and Maple Ridge operators.",
+    },
+    "Pitt Meadows": {
+        "volume": "~40/mo",
+        "areas": "Osprey Village, South Meadows, Bonson, and central Pitt Meadows",
+        "terms": ["Furnace repair", "HVAC maintenance", "Heat pump service"],
+        "first_move": "Treat the lower volume as a focus advantage: fewer contractors build dedicated Pitt Meadows relevance.",
+    },
+    "Maple Ridge": {
+        "volume": "~115/mo",
+        "areas": "Albion, Hammond, Silver Valley, and Cottonwood",
+        "terms": ["Furnace repair", "Heat pump installation", "AC repair"],
+        "first_move": "Prove Maple Ridge relevance directly so the city is not treated as a secondary service area behind Coquitlam or Mission.",
+    },
+    "Surrey": {
+        "volume": "~390/mo",
+        "areas": "Cloverdale, Newton, Guildford, and South Surrey",
+        "terms": ["Heat pump repair", "HVAC contractor", "Furnace replacement"],
+        "first_move": "Split the audit by neighborhood cluster; Surrey is too large for one generic city read.",
+    },
+    "Delta": {
+        "volume": "~120/mo",
+        "areas": "Ladner, Tsawwassen, North Delta, and Sunshine Hills",
+        "terms": ["Furnace repair", "AC service", "Heat pump installation"],
+        "first_move": "Check which part of Delta Google is rewarding first; North Delta, Ladner, and Tsawwassen often behave differently.",
+    },
+    "White Rock": {
+        "volume": "~55/mo",
+        "areas": "Uptown, East Beach, West Beach, and nearby South Surrey",
+        "terms": ["Heat pump service", "AC installation", "Furnace repair"],
+        "first_move": "Make the listing look local enough to win White Rock-specific searches instead of blending into South Surrey.",
+    },
+    "Langley": {
+        "volume": "~150/mo",
+        "areas": "Willoughby, Walnut Grove, Brookswood, and Murrayville",
+        "terms": ["Furnace repair", "Heat pump installation", "HVAC service"],
+        "first_move": "Separate fast-growing Willoughby install demand from broader Langley repair and maintenance searches.",
+    },
+    "Abbotsford": {
+        "volume": "~130/mo",
+        "areas": "Clearbrook, McMillan, West Abbotsford, and Auguston",
+        "terms": ["Heating repair", "AC service", "Furnace replacement"],
+        "first_move": "Look for clean local-intent openings before broader Fraser Valley competitors consolidate the result set.",
+    },
+    "Mission": {
+        "volume": "~75/mo",
+        "areas": "Hatzic, Cedar Valley, Silverdale, and central Mission",
+        "terms": ["Furnace repair", "Heat pump installation", "HVAC service"],
+        "first_move": "Use local proximity and review activity to create an opening before larger Abbotsford brands dominate the searches.",
+    },
+}
+
+for _city in CITIES:
+    _city.update(HVAC_MARKET_DATA.get(_city["name"], {}))
+
 PLUMBING_CITIES = [
     {
         "name": "Vancouver",
@@ -400,6 +628,19 @@ TESTIMONIALS_CSS = """
 """
 
 CITY_EXTRA_CSS = """
+.city-proof{padding:42px 52px;background:linear-gradient(135deg,rgba(255,253,247,.94),rgba(232,241,235,.78));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.city-proof-grid{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,.85fr));gap:12px;align-items:stretch}
+.city-proof-copy{padding:6px 18px 6px 0}
+.city-proof-copy h2{font-family:var(--display);font-size:clamp(25px,3vw,40px);line-height:1.02;letter-spacing:0;margin:0 0 12px;color:var(--ink)}
+.city-proof-copy p{font-size:15px;color:var(--ink-soft);line-height:1.62;max-width:520px}
+.city-proof-card{border:1px solid rgba(23,35,31,.13);border-radius:8px;background:rgba(255,253,247,.82);padding:17px 18px;box-shadow:0 16px 34px rgba(10,103,95,.07)}
+.city-proof-card-wide{grid-column:2/-1}
+.city-proof-card span{display:block;font-family:var(--display);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
+.city-proof-card strong{display:block;font-family:var(--display);font-size:26px;line-height:1;color:var(--ink);margin-bottom:8px}
+.city-proof-card p{font-size:13px;line-height:1.45;color:var(--ink-soft);margin:0}
+.city-proof-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.city-proof-list li{font-size:13px;line-height:1.35;color:var(--ink-soft);display:flex;gap:7px}
+.city-proof-list li::before{content:'+';font-weight:900;color:var(--accent-3)}
 .city-intel{padding:48px 52px;background:rgba(255,255,255,0.025);border-top:1px solid var(--line)}
 .city-intel-inner{max-width:780px;margin:0 auto}
 .city-intel-h{font-family:var(--display);font-size:clamp(17px,1.8vw,21px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.3}
@@ -412,7 +653,8 @@ CITY_EXTRA_CSS = """
 .city-links-list{display:flex;flex-wrap:wrap;gap:10px}
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
-@media(max-width:700px){.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+@media(max-width:980px){.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}}
+@media(max-width:700px){.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
 
 
@@ -477,6 +719,45 @@ def _aio_section_html(c: dict) -> str:
 </section>"""
 
 
+def _market_snapshot_html(c: dict, tl: str) -> str:
+    terms = c.get("terms", [f"{tl} repair", f"{tl} service", f"{tl} installation"])
+    terms_html = "\n          ".join(f"<li>{term}</li>" for term in terms)
+    volume = c.get("volume", "Market check")
+    areas = c.get("areas", f"{c['name']} service area")
+    first_move = c.get(
+        "first_move",
+        f"Check the live Map Pack first, then prioritize the {tl} terms where {c['name']} has a realistic opening.",
+    )
+    return f"""<section class="city-proof" aria-label="{c['name']} local market snapshot">
+  <div class="container city-proof-grid reveal in">
+    <div class="city-proof-copy">
+      <div class="label">{c['name']} market read</div>
+      <h2>Local proof beats a generic service-area page.</h2>
+      <p>Before we talk tactics, we look at the searches, neighborhoods, and Map Pack competitors that actually matter in {c['name']}.</p>
+    </div>
+    <div class="city-proof-card">
+      <span>Tracked demand</span>
+      <strong>{volume}</strong>
+      <p>Directional {tl} search demand across the high-intent terms we audit first.</p>
+    </div>
+    <div class="city-proof-card">
+      <span>Searches checked</span>
+      <ul class="city-proof-list">
+          {terms_html}
+      </ul>
+    </div>
+    <div class="city-proof-card">
+      <span>Local focus</span>
+      <p>{areas}</p>
+    </div>
+    <div class="city-proof-card city-proof-card-wide">
+      <span>First audit move</span>
+      <p>{first_move}</p>
+    </div>
+  </div>
+</section>"""
+
+
 def build_page(c, cities_list):
     tl = c.get("trade_label", "HVAC")
     slug = c["slug"]
@@ -500,9 +781,9 @@ def build_page(c, cities_list):
 <meta name="twitter:description" content="{c["og_desc"]}">
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-900.avif" type="image/avif" media="(max-width: 700px)">
-<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1200.avif" type="image/avif" media="(min-width: 701px) and (max-width: 1000px)">
-<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1600.avif" type="image/avif" media="(min-width: 1001px)">
+<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-900.avif" type="image/avif" media="(max-width: 700px)" fetchpriority="high">
+<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1200.avif" type="image/avif" media="(min-width: 701px) and (max-width: 1000px)" fetchpriority="high">
+<link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1600.avif" type="image/avif" media="(min-width: 1001px)" fetchpriority="high">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){{return c.trim()==='internal_traffic=true';}});gtag('config','G-LRX309H9CH',_rwInt?{{traffic_type:'internal'}}:{{}});</script>
 <link rel="preconnect" href="https://app.cal.com" crossorigin>
@@ -558,12 +839,14 @@ def build_page(c, cities_list):
 </script>
 
 <style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
-<link rel="stylesheet" href="/assets/rankwise-theme.css?v=nav-20260605">
+<link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
 <script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
 <body>
 {NAV}
+
+<main id="main-content">
 
 <section class="hero">
   <div class="container hero-grid">
@@ -598,6 +881,8 @@ def build_page(c, cities_list):
     </aside>
   </div>
 </section>
+
+{_market_snapshot_html(c, tl)}
 
 {_aio_section_html(c)}
 
@@ -775,6 +1060,8 @@ def build_page(c, cities_list):
 </section>
 
 {_city_links_html(slug, cities_list, tl)}
+
+</main>
 
 <footer>
   <div class="footer-wrap">

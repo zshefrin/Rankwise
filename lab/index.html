@@ -20,15 +20,34 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--paper:#0C1220;--paper-2:#111827;--paper-3:#1A2332;--ink:#F5F0E8;--ink-soft:rgba(245,240,232,.68);--ink-muted:rgba(245,240,232,.35);--line:rgba(245,240,232,.14);--line-strong:rgba(245,240,232,.24);--accent:#F5B731;--accent-2:#2BA898;--accent-3:#E8654A;--accent-4:#D4553A;--display:"Avenir Next","Segoe UI","Trebuchet MS",sans-serif;--serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;--text:"Avenir Next","Segoe UI","Helvetica Neue",sans-serif}
 html{scroll-behavior:smooth}body{font-family:var(--text);background:radial-gradient(circle at 10% 0%,rgba(43,168,152,.10),transparent 28%),radial-gradient(circle at 95% 8%,rgba(245,183,49,.09),transparent 34%),linear-gradient(180deg,var(--paper),var(--paper-2) 55%,var(--paper) 100%);color:var(--ink);line-height:1.7;min-height:100vh;-webkit-font-smoothing:antialiased}
-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 52px;background:rgba(12,18,32,0.96);border-bottom:1px solid var(--line)}
-.logo{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink);text-decoration:none}.logo span{color:var(--accent)}
-.nav-links{display:flex;gap:30px;list-style:none}.nav-links a{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--ink-soft);text-decoration:none;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--ink)}
-.nav-cta{padding:10px 16px;background:linear-gradient(135deg,var(--accent),#F2C95A);color:var(--paper);border:1px solid rgba(245,183,49,.65);border-radius:999px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 10px 24px rgba(245,183,49,.23)}.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(245,183,49,.30)}
 .page-header{padding:72px 48px 48px;border-bottom:1px solid var(--line)}
 .page-header-inner{max-width:720px;margin:0 auto}
 .lbl{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin-bottom:16px}
 .page-header h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1.0;letter-spacing:-.025em;color:var(--ink);margin-bottom:16px}
 .page-header p{font-size:16px;color:var(--ink-muted);line-height:1.7}
+.lab-stats{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-family:var(--display);font-size:12px;color:#0A675F;font-weight:700}
+.lab-stats span{display:inline-flex;align-items:center;gap:20px}
+.lab-stats span+span::before{content:'·';color:rgba(23,35,31,.28)}
+.lab-snapshot{padding:34px 48px 24px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(255,253,247,.72),rgba(232,241,235,.62))}
+.lab-snapshot-inner{max-width:980px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:center}
+.lab-snapshot-copy{padding:8px 0}
+.lab-snapshot-copy h2{font-family:var(--display);font-size:clamp(24px,3vw,38px);line-height:1.05;letter-spacing:0;color:var(--ink);margin-bottom:10px}
+.lab-snapshot-copy p{font-size:15px;color:var(--ink-soft);line-height:1.65;max-width:430px}
+.lab-snapshot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.lab-snapshot-metric{border-left:2px solid #0A675F;padding:4px 0 4px 11px}
+.lab-snapshot-metric strong{display:block;font-family:var(--display);font-size:22px;line-height:1;color:var(--ink)}
+.lab-snapshot-metric span{display:block;font-size:12px;color:var(--ink-soft);line-height:1.35;margin-top:5px}
+.lab-chart{border:1px solid rgba(23,35,31,.13);border-radius:8px;background:rgba(255,253,247,.84);padding:20px;box-shadow:0 18px 38px rgba(10,103,95,.08)}
+.lab-chart-head{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;align-items:flex-start}
+.lab-chart-head span{font-family:var(--display);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#0A675F}
+.lab-chart-head strong{font-family:var(--display);font-size:13px;line-height:1.25;color:var(--ink);max-width:210px;text-align:right}
+.lab-bars{display:grid;gap:14px}
+.lab-bar{display:grid;grid-template-columns:92px 1fr 86px;gap:12px;align-items:center;font-size:13px;color:var(--ink-soft)}
+.lab-bar span,.lab-bar b{font-family:var(--display);font-size:12px;color:var(--ink);line-height:1.1}
+.lab-bar b{text-align:right}
+.lab-bar i{display:block;height:10px;border-radius:999px;background:linear-gradient(90deg,#0F766E,#F2B533);width:var(--w);min-width:18px;box-shadow:0 0 0 3px rgba(15,118,110,.08)}
+.lab-bar:nth-child(2) i{background:linear-gradient(90deg,#D95F42,#F2B533)}
+.lab-note{margin-top:16px;font-size:12px;line-height:1.5;color:var(--ink-soft)}
 .posts{max-width:720px;margin:0 auto;padding:0 48px 80px}
 .post-item{display:block;padding:36px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:opacity .15s;content-visibility:auto;contain-intrinsic-size:240px}
 .post-item:first-child{padding-top:40px}
@@ -47,12 +66,13 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
 .fcopy{font-size:12px;color:var(--ink-soft)}
 .mobile-sticky-cta{display:none}
 @media(max-width:1000px){.mobile-sticky-cta{display:flex;position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:150;justify-content:center;align-items:center;text-decoration:none;background:linear-gradient(135deg,var(--accent),#F2C95A);color:var(--paper);border:1px solid rgba(245,183,49,.65);font-family:var(--display);font-size:15px;font-weight:700;padding:14px 16px;border-radius:999px;box-shadow:0 12px 28px rgba(245,183,49,.30);letter-spacing:.01em}body{padding-bottom:92px}}
-@media(max-width:700px){nav{padding:14px 20px}.nav-links{display:none}.nav-cta{padding:9px 15px;font-size:12px}.page-header{padding:48px 20px 36px}.page-header h1{font-size:32px}.posts{padding:0 20px 56px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
+@media(max-width:860px){.lab-snapshot-inner{grid-template-columns:1fr}.lab-chart-head strong{text-align:left}.lab-snapshot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.page-header{padding:48px 20px 36px}.page-header h1{font-size:32px}.lab-stats{gap:10px 14px}.lab-stats span+span::before{display:none}.lab-snapshot{padding:26px 20px 18px}.lab-snapshot-grid{grid-template-columns:1fr}.lab-chart{padding:16px}.lab-chart-head{display:grid}.lab-bar{grid-template-columns:84px 1fr 74px;gap:9px}.posts{padding:0 20px 56px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"Rankwise Lab — HVAC Market Studies","description":"Public SERP data, tracked over time. Market studies showing what the Metro Vancouver HVAC map pack actually looks like — who is in it, review ranges, and where the gaps are.","url":"https://rankwise.ca/lab/","publisher":{"@type":"Organization","name":"Rankwise","url":"https://rankwise.ca","logo":{"@type":"ImageObject","url":"https://rankwise.ca/rankwise-icon.svg.png"}}}
 </script>
-<link rel="stylesheet" href="/assets/rankwise-theme.css?v=nav-20260605">
+<link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
 <script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
@@ -72,22 +92,64 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
   <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
 
+<main id="main-content">
+
 <div class="page-header">
   <div class="page-header-inner">
     <div class="lbl">Rankwise Lab</div>
     <h1>What does the<br>map pack actually look like?</h1>
     <p>Public SERP data, tracked over time. Market studies showing who is in the Metro Vancouver HVAC map pack, what review ranges get contractors in, and where the openings are.</p>
-    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-family:var(--display);font-size:12px;color:#0A675F;font-weight:700">
+    <div class="lab-stats">
       <span>4 studies published</span>
-      <span style="color:rgba(23,35,31,.28)">·</span>
       <span>75 Map Pack positions tracked</span>
-      <span style="color:rgba(23,35,31,.28)">·</span>
       <span>6 Metro Vancouver cities</span>
-      <span style="color:rgba(23,35,31,.28)">·</span>
       <span>Last updated May 2026</span>
     </div>
   </div>
 </div>
+
+<section class="lab-snapshot" aria-label="Latest Rankwise Lab market snapshot">
+  <div class="lab-snapshot-inner">
+    <div class="lab-snapshot-copy">
+      <div class="lbl">Latest dataset</div>
+      <h2>The #1 result does not always have the most reviews.</h2>
+      <p>The May 2026 study found that profile fit, activity, proximity, and page relevance can matter more than raw review count in local HVAC searches.</p>
+      <div class="lab-snapshot-grid">
+        <div class="lab-snapshot-metric">
+          <strong>75</strong>
+          <span>Map Pack positions reviewed</span>
+        </div>
+        <div class="lab-snapshot-metric">
+          <strong>25</strong>
+          <span>HVAC intent searches tracked</span>
+        </div>
+        <div class="lab-snapshot-metric">
+          <strong>6</strong>
+          <span>Metro Vancouver cities sampled</span>
+        </div>
+      </div>
+    </div>
+    <div class="lab-chart" aria-label="Median reviews by Map Pack position">
+      <div class="lab-chart-head">
+        <span>Median reviews</span>
+        <strong>Published market-study sample, May 2026</strong>
+      </div>
+      <div class="lab-bars">
+        <div class="lab-bar" style="--w:15%">
+          <span>Position 1</span>
+          <i aria-hidden="true"></i>
+          <b>41</b>
+        </div>
+        <div class="lab-bar" style="--w:100%">
+          <span>Position 2</span>
+          <i aria-hidden="true"></i>
+          <b>278</b>
+        </div>
+      </div>
+      <p class="lab-note">The practical takeaway: review count matters, but it is not the only lever. The audit looks for cities where stronger profile structure can beat a larger but weaker competitor.</p>
+    </div>
+  </div>
+</section>
 
 <div class="posts">
   <a href="https://rankwise.ca/lab/metro-vancouver-hvac-map-pack-market-study-2026/" class="post-item">
@@ -122,6 +184,8 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
     <div class="post-link">Read study &#8594;</div>
   </a>
 </div>
+
+</main>
 
 <footer>
   <div class="footer-wrap">

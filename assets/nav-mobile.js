@@ -48,4 +48,17 @@
       btn.setAttribute('aria-expanded', 'false');
     });
   }
+
+  var stickyCta = document.querySelector('.mobile-sticky-cta');
+  function syncStickyCta(){
+    if (!stickyCta) return;
+    var shouldShow = window.innerWidth <= 1000 && window.scrollY > window.innerHeight * 0.72;
+    document.body.classList.toggle('show-mobile-cta', shouldShow);
+  }
+
+  if (stickyCta) {
+    syncStickyCta();
+    window.addEventListener('scroll', syncStickyCta, { passive: true });
+    window.addEventListener('resize', syncStickyCta);
+  }
 })();

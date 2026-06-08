@@ -68,34 +68,14 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .container{max-width:1100px;margin:0 auto}
-nav{
-  position:sticky;top:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 52px;
-  border-bottom:1px solid var(--line);
-  background:rgba(12,18,32,.96);
-}
-.nav-links{display:flex;list-style:none;gap:30px}
-.nav-links a{font-size:13px;text-decoration:none;color:var(--ink-soft);font-weight:600;letter-spacing:.02em}
-.nav-links a:hover,.nav-links a.active{color:var(--ink)}
-.nav-cta{
-  display:inline-flex;align-items:center;justify-content:center;
-  text-decoration:none;border-radius:999px;padding:10px 16px;
-  font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em;
-  color:var(--paper);background:linear-gradient(135deg,var(--accent),#F2C95A);
-  border:1px solid rgba(245,183,49,.65);box-shadow:0 10px 24px rgba(245,183,49,.23);
-  transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap;
-}
-.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(245,183,49,.30)}
-.logo{
-  text-decoration:none;
-  color:var(--ink);
-  font-family:var(--display);
-  font-size:24px;
-  font-weight:700;
-  letter-spacing:-.02em;
-}
-.logo span{color:var(--accent)}
+
+
+
+
+
+
+
+
 .back,
 .learn-more-btn{
   display:inline-flex;
@@ -344,9 +324,9 @@ footer{
 .book-direct-btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(232,101,74,.38)}
 .book-direct-or{margin-top:10px;font-size:13px;color:var(--ink-soft)}
 @media(max-width:1000px){
-  nav{padding:14px 18px}
-  .nav-links{display:none}
-  .nav-cta{padding:9px 15px;font-size:12px}
+
+
+
   .hero{padding:98px 16px 8px}
   .booking{padding:8px 16px 24px}
   .call-preview{grid-template-columns:1fr}
@@ -359,7 +339,7 @@ footer{
   .cal-loading,.cal-fallback{min-height:480px}
 }
 </style>
-<link rel="stylesheet" href="/assets/rankwise-theme.css?v=nav-20260605">
+<link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
 <script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
@@ -378,6 +358,8 @@ footer{
   </ul>
   <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
+
+<main id="main-content">
 
 <section class="hero">
   <div class="container hero-grid">
@@ -442,6 +424,8 @@ footer{
     <p class="note">Metro Vancouver HVAC contractors only · One contractor per city (primary GBP city)</p>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="footer-wrap">
