@@ -16,7 +16,7 @@ CITIES = [
         "h1_city": "Vancouver.",
         "meta_title": "HVAC Marketing Agency in Vancouver | Rankwise",
         "meta_desc": "HVAC marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and Google Business Profile management. One HVAC contractor per city.",
-        "og_desc": "HVAC marketing for Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Vancouver: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each have distinct search demand for furnace repair and heat pump installation.",
@@ -39,7 +39,7 @@ CITIES = [
         "h1_city": "Burnaby.",
         "meta_title": "HVAC Marketing Agency in Burnaby | Rankwise",
         "meta_desc": "HVAC marketing for Burnaby contractors — Brentwood, Metrotown, and Lougheed. Map Pack and Google Business Profile management for furnace repair and HVAC service. One contractor per city.",
-        "og_desc": "HVAC marketing for Burnaby contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Burnaby contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Burnaby: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones for furnace repair and HVAC installation searches.",
@@ -62,7 +62,7 @@ CITIES = [
         "h1_city": "Surrey.",
         "meta_title": "HVAC Marketing Agency in Surrey | Rankwise",
         "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for BC's largest city. One HVAC contractor per city.",
-        "og_desc": "HVAC marketing for Surrey contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Surrey contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Surrey: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high HVAC installation search volume as BC's largest city (~600,000 population) with active new-build development.",
@@ -85,7 +85,7 @@ CITIES = [
         "h1_city": "Richmond.",
         "meta_title": "HVAC Marketing Agency in Richmond | Rankwise",
         "meta_desc": "HVAC marketing for Richmond contractors — Steveston, Brighouse, Hamilton. Map Pack and GBP management for AC repair, heat pump, and furnace service. One contractor per city.",
-        "og_desc": "HVAC marketing for Richmond contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Richmond contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Richmond: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Steveston, Brighouse, and Hamilton are Richmond's densest residential zones, with year-round demand for AC repair, heat pump installation, and furnace service.",
@@ -108,7 +108,7 @@ CITIES = [
         "h1_city": "North Vancouver.",
         "meta_title": "HVAC Marketing Agency in North Vancouver | Rankwise",
         "meta_desc": "HVAC marketing for North Vancouver contractors — Lonsdale, Lynn Valley, Deep Cove, Capilano. Map Pack and GBP for furnace repair and heat pump installation. One contractor per city.",
-        "og_desc": "HVAC marketing for North Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for North Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in North Vancouver: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Lonsdale, Lynn Valley, Deep Cove, and Capilano each have distinct search demand; North Vancouver has higher average job values and strong heat pump installation intent compared to most Metro Vancouver markets.",
@@ -131,7 +131,7 @@ CITIES = [
         "h1_city": "Langley.",
         "meta_title": "HVAC Marketing Agency in Langley | Rankwise",
         "meta_desc": "HVAC marketing for Langley contractors — Walnut Grove, Willoughby, Brookswood. Map Pack and Google Business Profile management for furnace repair and heat pump installation. One HVAC contractor per city.",
-        "og_desc": "HVAC marketing for Langley contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Langley contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Langley: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Walnut Grove, Willoughby, and Brookswood are Langley's fastest-growing residential zones, with strong heat pump installation and furnace replacement demand driven by new-build activity and older housing stock.",
@@ -154,7 +154,7 @@ CITIES = [
         "h1_city": "Abbotsford.",
         "meta_title": "HVAC Marketing Agency in Abbotsford | Rankwise",
         "meta_desc": "HVAC marketing for Abbotsford contractors — Clearbrook, Clayburn, West Abbotsford. Map Pack and Google Business Profile management for furnace repair and heat pump service. One HVAC contractor per city.",
-        "og_desc": "HVAC marketing for Abbotsford contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Abbotsford contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Abbotsford: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Clearbrook, Clayburn, and West Abbotsford each have distinct residential search demand for furnace repair and heat pump installation, driven by a mix of older housing stock and active new development.",
@@ -177,7 +177,7 @@ CITIES = [
         "h1_city": "Coquitlam.",
         "meta_title": "HVAC Marketing Agency in Coquitlam | Rankwise",
         "meta_desc": "HVAC marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Heat pump and furnace Map Pack optimization. One HVAC contractor per city.",
-        "og_desc": "HVAC marketing for Coquitlam contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "HVAC marketing for Coquitlam contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Coquitlam: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Town Centre, Burke Mountain, and Westwood Plateau are fast-growing residential areas with strong demand for heat pump installation and ductless retrofit work.",
@@ -213,7 +213,7 @@ def _build_hvac_city(
         "h1_city": f"{name}.",
         "meta_title": f"HVAC Marketing Agency in {name} | Rankwise",
         "meta_desc": f"HVAC marketing for {name} contractors — {neighborhoods}. Map Pack and Google Business Profile management for {primary_services}. One HVAC contractor per city.",
-        "og_desc": f"HVAC marketing for {name} contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": f"HVAC marketing for {name} contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": f"HVAC marketing in {name}: four signals that decide who gets the call",
         "aio_items": [
             f"<strong>Google Map Pack coverage</strong> across your service area — {neighborhoods} each create local search demand for {primary_services}. {market_note}",
@@ -431,7 +431,7 @@ PLUMBING_CITIES = [
         "h1_city": "Vancouver.",
         "meta_title": "Plumbing Marketing Agency in Vancouver | Rankwise",
         "meta_desc": "Plumbing marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and GBP management for drain cleaning and water heater replacement. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in Vancouver: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each generate high search demand for drain cleaning and water heater replacement, driven by Vancouver's median housing build year of 1975 and an ageing cast-iron drain stock.",
@@ -455,7 +455,7 @@ PLUMBING_CITIES = [
         "h1_city": "Burnaby.",
         "meta_title": "Plumbing Marketing Agency in Burnaby | Rankwise",
         "meta_desc": "Plumbing marketing for Burnaby contractors — Brentwood, Metrotown, Lougheed. Map Pack and GBP management for drain cleaning and water heater replacement. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for Burnaby contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for Burnaby contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in Burnaby: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones, with a mix of pre-1980 condos and townhomes driving consistent drain cleaning and water heater call volume year-round.",
@@ -479,7 +479,7 @@ PLUMBING_CITIES = [
         "h1_city": "Surrey.",
         "meta_title": "Plumbing Marketing Agency in Surrey | Rankwise",
         "meta_desc": "Plumbing marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for water heater installation and drain service. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for Surrey contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for Surrey contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in Surrey: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high plumbing installation search volume; as BC's fastest-growing city, new builds in Surrey generate disproportionate water heater installation demand.",
@@ -503,7 +503,7 @@ PLUMBING_CITIES = [
         "h1_city": "Richmond.",
         "meta_title": "Plumbing Marketing Agency in Richmond | Rankwise",
         "meta_desc": "Plumbing marketing for Richmond contractors — Steveston, Brighouse, Hamilton. Map Pack and GBP management for water heater replacement and drain service. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for Richmond contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for Richmond contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in Richmond: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Steveston, Brighouse, and Hamilton are Richmond's densest residential zones, with a high proportion of 20–30 year old water heaters approaching end of life driving a consistent replacement call cycle.",
@@ -527,7 +527,7 @@ PLUMBING_CITIES = [
         "h1_city": "North Vancouver.",
         "meta_title": "Plumbing Marketing Agency in North Vancouver | Rankwise",
         "meta_desc": "Plumbing marketing for North Vancouver contractors — Lonsdale, Lynn Valley, Deep Cove. Map Pack and GBP for drain cleaning, sewer line repair, and water heater replacement. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for North Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for North Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in North Vancouver: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Lonsdale, Lynn Valley, and Deep Cove each generate distinct plumbing search demand; North Vancouver's older detached housing stock drives above-average job values for sewer line repair and drain work.",
@@ -551,7 +551,7 @@ PLUMBING_CITIES = [
         "h1_city": "Coquitlam.",
         "meta_title": "Plumbing Marketing Agency in Coquitlam | Rankwise",
         "meta_desc": "Plumbing marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Map Pack optimization for water heater installation and drain service. One plumbing contractor per city.",
-        "og_desc": "Plumbing marketing for Coquitlam contractors. One client per city. Month-to-month, results guaranteed.",
+        "og_desc": "Plumbing marketing for Coquitlam contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "Plumbing marketing in Coquitlam: four signals that decide who gets the call",
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Town Centre, Burke Mountain, and Westwood Plateau are fast-growing residential areas with strong demand for water heater installation and drain connection work driven by rapid new development.",
@@ -577,7 +577,7 @@ PLUMBING_LANDING = {
     "h1_city": "Metro Vancouver.",
     "meta_title": "Plumbing Marketing Agency in Metro Vancouver | Rankwise",
     "meta_desc": "Plumbing marketing for Metro Vancouver contractors — drain cleaning, water heater replacement, and sewer line repair. GBP and Map Pack management. One contractor per city.",
-    "og_desc": "Plumbing marketing for Metro Vancouver contractors. One client per city. Month-to-month, results guaranteed.",
+    "og_desc": "Plumbing marketing for Metro Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
     "aio_heading": "Plumbing marketing in Metro Vancouver: four signals that decide who gets the call",
     "aio_items": [
         "<strong>Google Map Pack placement</strong> is where most plumbing calls originate — homeowners searching for drain cleaning or a water heater replacement tap the first three results on the map, rarely scrolling further. Ranking in that pack is not optional if you want consistent inbound volume.",
