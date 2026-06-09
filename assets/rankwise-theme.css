@@ -86,6 +86,27 @@ td{color:var(--ink-soft)!important}
 @media(max-width:1000px){
   .mobile-sticky-cta{
     display:flex!important;
+    position:fixed!important;
+    left:14px!important;
+    right:14px!important;
+    bottom:calc(14px + env(safe-area-inset-bottom))!important;
+    z-index:150!important;
+    justify-content:center!important;
+    align-items:center!important;
+    min-height:52px!important;
+    padding:14px 16px!important;
+    border:1px solid rgba(245,183,49,.65)!important;
+    border-radius:999px!important;
+    background:linear-gradient(135deg,var(--accent),#F2C95A)!important;
+    box-shadow:0 12px 28px rgba(245,183,49,.30)!important;
+    color:var(--paper)!important;
+    font-family:var(--display)!important;
+    font-size:15px!important;
+    font-weight:700!important;
+    letter-spacing:0!important;
+    line-height:1.15!important;
+    text-align:center!important;
+    text-decoration:none!important;
     opacity:0!important;
     pointer-events:none!important;
     transform:translateY(12px)!important;

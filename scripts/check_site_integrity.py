@@ -11,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_NAV = (ROOT / "partials" / "nav.html").read_text(encoding="utf-8").strip()
 SKIP_NAV = {"404.html", "blog/hvac-marketing-cost/index.html"}
 STALE_NAV_RE = re.compile(r"(?m)^nav\{|\.nav-links|\.nav-cta|\.logo\{")
+STALE_STICKY_CTA_RE = re.compile(
+    r"\.mobile-sticky-cta\{display:none\}\s*"
+    r"@media\(max-width:1000px\)\{\.mobile-sticky-cta\{display:flex;position:fixed;"
+)
 RW_NAV_RE = re.compile(
     r'<header\s+class=["\']rw-nav["\']\s+role=["\']navigation["\']\s+aria-label=["\']Primary["\']>.*?</header>',
     re.DOTALL | re.IGNORECASE,
@@ -52,6 +56,8 @@ def main() -> int:
 
         if STALE_NAV_RE.search(text):
             fail(errors, f"{rel}: contains stale inline old-nav CSS")
+        if STALE_STICKY_CTA_RE.search(text):
+            fail(errors, f"{rel}: contains duplicated inline sticky CTA CSS")
 
         for index, match in enumerate(JSON_LD_RE.finditer(text), 1):
             try:

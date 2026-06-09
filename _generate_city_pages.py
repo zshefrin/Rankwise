@@ -222,7 +222,7 @@ def _build_hvac_city(
             f"<strong>City-specific landing pages</strong> — a {name}-specific page lets Google match your company to high-intent searches for {primary_services}, instead of treating your site as a generic Lower Mainland service page.",
         ],
         "hero_copy": f"{name} homeowners search for HVAC help every week. {growth_note} We build the local search presence around your company so those searches turn into booked calls before a competitor gets them.",
-        "problem_stat": f"In {name}, {primary_services} searches are local enough that a generic Metro Vancouver page is rarely enough. Contractors need city relevance, active GBP signals, and review momentum to compete in the Map Pack.",
+        "problem_stat": f"In {name}, {primary_services} searches are local enough that a generic Lower Mainland page is rarely enough. Contractors need city relevance, active GBP signals, and review momentum to compete in the Map Pack.",
         "services_copy": f"We tighten your Google Business Profile and local SEO structure so your company shows up across {name} — wherever homeowners are searching for {primary_services}.",
         "cta_h2": f"See your {name} Map Pack standing in 15 minutes.",
         "cta_sub": f"We pull your live {name} Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
@@ -628,6 +628,15 @@ TESTIMONIALS_CSS = """
 """
 
 CITY_EXTRA_CSS = """
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.58fr);gap:42px;align-items:end;width:100%}
+.hero-left{max-width:760px}
+.hero-lock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;max-width:640px}
+.hero-lock div{border-left:2px solid var(--accent);padding-left:10px;color:rgba(255,255,255,.84);font-size:14px;line-height:1.35}
+.hero-right{align-self:end;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(12,18,15,.48);backdrop-filter:blur(10px);padding:22px 22px 20px;box-shadow:0 20px 44px rgba(0,0,0,.22)}
+.hero-right h3{font-family:var(--display);font-size:22px;line-height:1.05;color:#fff;margin:0 0 14px}
+.mini{border-top:1px solid rgba(255,255,255,.14);padding:12px 0 0;margin-top:12px}
+.mini strong{display:block;font-family:var(--display);font-size:14px;color:#fff;margin-bottom:4px}
+.mini span{display:block;font-size:13px;line-height:1.45;color:rgba(255,255,255,.70)}
 .city-proof{padding:42px 52px;background:linear-gradient(135deg,rgba(255,253,247,.94),rgba(232,241,235,.78));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .city-proof-grid{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,.85fr));gap:12px;align-items:stretch}
 .city-proof-copy{padding:6px 18px 6px 0}
@@ -653,8 +662,8 @@ CITY_EXTRA_CSS = """
 .city-links-list{display:flex;flex-wrap:wrap;gap:10px}
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
-@media(max-width:980px){.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}}
-@media(max-width:700px){.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}}
+@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.hero-right{display:none}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
 
 

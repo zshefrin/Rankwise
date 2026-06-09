@@ -55,6 +55,27 @@
   line-height:1.35;
   color:var(--ink-soft);
 }
+.metro-reach-note{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:13px 15px;
+  border:1px solid rgba(15,118,110,.22);
+  border-radius:8px;
+  background:rgba(255,253,247,.74);
+  color:var(--ink-soft);
+  font-size:13px;
+  line-height:1.5;
+}
+.metro-reach-note strong{
+  flex-shrink:0;
+  font-family:var(--display);
+  color:var(--label);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
 .metro-map-board{
   position:relative;
   min-height:454px;
@@ -402,34 +423,46 @@
   .metro-map-section{padding:56px 18px}
   .metro-map-head{align-items:flex-start;gap:14px}
   .metro-map-shell{grid-template-columns:1fr}
-  .metro-search-snapshot{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .metro-search-snapshot{grid-template-columns:repeat(3,minmax(0,1fr));order:3}
   .metro-search-snapshot div{min-height:auto}
-  .metro-map-board{min-height:auto;padding:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .metro-water,.metro-ridge,.metro-outline{display:none}
-  .metro-map-legend{display:none}
-  .metro-city,.metro-city:hover,.metro-city:focus-visible,.metro-city.is-active{
-    position:relative;
-    left:auto;
-    top:auto;
-    transform:none;
-    min-width:0;
-    height:auto;
-    width:100%;
-    justify-content:flex-start;
-    gap:7px;
-    padding:8px 10px;
-    font-size:12px;
-    box-shadow:0 10px 22px rgba(23,35,31,.08);
+  .metro-reach-note{display:block;order:4}
+  .metro-reach-note strong{display:block;margin-bottom:3px}
+  .metro-map-board{
+    order:1;
+    min-height:300px;
+    padding:0;
+    display:block;
   }
-  .metro-city::after{display:none}
-  .metro-market-index{display:none}
+  .metro-outline{
+    display:block;
+    inset:0;
+    opacity:1;
+  }
+  .metro-map-label,
+  .metro-place-label,
+  .metro-route-label{font-size:9px}
+  .metro-map-legend{display:none}
+  .metro-city{display:none}
+  .metro-market-index{
+    order:2;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .metro-market-chip{
+    width:100%;
+    padding:10px 8px;
+    text-align:center;
+  }
   .metro-detail{min-height:auto;padding:22px}
   .metro-detail h3{font-size:30px}
   .metro-metrics{grid-template-columns:1fr}
+  .metro-map-caption{order:5}
 }
 @media(max-width:520px){
   .metro-search-snapshot{grid-template-columns:1fr}
-  .metro-map-board{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  .metro-city{font-size:11px;padding:8px 9px}
+  .metro-map-board{min-height:252px}
+  .metro-market-index{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metro-market-chip{font-size:11px}
   .metro-actions .btn-primary,.metro-page-link{width:100%}
 }
