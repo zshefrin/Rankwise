@@ -1031,7 +1031,7 @@ def build_page(c, cities_list):
       </div>
     </a>
     <div class="reveal in" id="cal-embed"></div>
-    <p class="cta-note reveal in">{name} only · Results guarantee included</p>
+    <p class="cta-note reveal in">{name} only · Position milestone agreed in writing before month one</p>
   </div>
 </section>
 

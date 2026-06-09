@@ -476,7 +476,7 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .rg-name{font-size:13px;font-weight:600;color:var(--ink)}
 .rg-name-you{color:var(--ink-soft)!important;font-style:italic}
 .rg-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-.rg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4A90D9,#81BBE8)}
+.rg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4A90D9,#81BBE8);transition:width 1s cubic-bezier(.22,.8,.3,1)}
 .rg-fill-you{background:linear-gradient(90deg,rgba(217,95,66,.5),rgba(217,95,66,.3))!important}
 .rg-n{font-size:13px;font-weight:700;color:var(--ink);text-align:right;font-family:var(--display)}
 .rg-n-you{color:var(--accent-3)!important}
@@ -1453,8 +1453,8 @@ footer{
       <h1>HVAC marketing that turns Google Maps into booked calls.</h1>
       <p class="hero-copy">
         Homeowners choose from the Map Pack before they ever reach your website.
-        We show where your company stands, who is taking the calls now, and the
-        fastest way to move more local demand toward your dispatch line.
+        I'll show you where your company stands, who's taking the calls right now,
+        and the fastest way to move more local demand toward your dispatch line.
       </p>
       <div class="hero-actions">
         <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=hero-preview" class="btn-primary" data-cta-location="hero-primary">Check my Map Pack standing</a>
@@ -1755,13 +1755,13 @@ footer{
     <div class="section-head reveal in">
       <div class="label">How the Map Pack actually works</div>
       <h2>Four signals.<br>Most contractors are <span class="serif">weak on all four.</span></h2>
-      <p class="sub">Google scores every local business on the same four signals. Here's where most new entrants stand — and what fixing each one looks like.</p>
+      <p class="sub">Google weighs relevance, proximity, and prominence. These four working signals are where that translates into rank — and where most new entrants are weak.</p>
     </div>
     <div class="signals-table reveal in">
       <div class="st-head">
         <span>Signal</span>
         <span>Typical new entrant</span>
-        <span>Top-3 median</span>
+        <span>The competitive bar</span>
         <span>What we do</span>
       </div>
       <div class="st-row">
@@ -1773,7 +1773,7 @@ footer{
       <div class="st-row">
         <span class="st-signal">Review velocity</span>
         <span class="st-val st-val-bad">Stalled, no responses</span>
-        <span class="st-val st-val-good">Active cadence, 40–80+</span>
+        <span class="st-val st-val-good">50+ reviews · pack median 198</span>
         <span class="st-action">Velocity strategy + responses</span>
       </div>
       <div class="st-row">
@@ -1789,6 +1789,7 @@ footer{
         <span class="st-action">Citation audit &amp; cleanup</span>
       </div>
     </div>
+    <p class="st-note reveal in" style="font-size:12px;opacity:.55;margin-top:12px;letter-spacing:.02em">Review figures from the Rankwise Lab May 2026 dataset; activity and coverage bars are practitioner targets, not measured medians.</p>
   </div>
 </section>
 
@@ -1801,14 +1802,15 @@ footer{
     </div>
     <div class="services-grid">
       <article class="service-card reveal in">
-        <span class="sc-stat">4–6</span>
+        <span class="sc-stat">4.9★</span>
         <h3>Your Google listing</h3>
-        <p>We tighten your Google Business Profile and local SEO structure so your company shows up across Vancouver, Burnaby, Surrey, and Richmond — wherever high-intent homeowners are searching.</p>
+        <p>The average Map Pack business rates 4.9 — the rating gets you considered, the profile gets you ranked. We tighten your Google Business Profile and local SEO structure so your company shows up wherever high-intent homeowners are searching.</p>
         <div class="service-list">
           <div>GBP optimization and posting cadence</div>
           <div>City-level service page structure</div>
           <div>Review velocity and response support</div>
         </div>
+        <div style="font-family:var(--display,sans-serif);font-size:10px;opacity:.45;margin-top:8px;letter-spacing:.04em">Rankwise Lab, 75 rated Map Pack businesses, May 2026</div>
       </article>
       <article class="service-card reveal in">
         <span class="sc-stat">93%</span>
@@ -2139,6 +2141,35 @@ footer{
 <script>
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')})},{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.querySelectorAll('.hero-data strong').forEach(function(el){
+    var m=(el.textContent||'').match(/^(\d+)(.*)$/);
+    if(!m)return;
+    var target=parseInt(m[1],10),suffix=m[2],t0=null;
+    el.textContent='0'+suffix;
+    function step(ts){
+      if(t0===null)t0=ts;
+      var p=Math.min((ts-t0)/900,1);
+      el.textContent=Math.round((1-Math.pow(1-p,3))*target)+suffix;
+      if(p<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+  var gap=document.querySelector('.review-gap');
+  if(!gap)return;
+  var fills=Array.prototype.slice.call(gap.querySelectorAll('.rg-fill'));
+  var targets=fills.map(function(f){return f.style.width;});
+  fills.forEach(function(f){f.style.width='0%';});
+  var gapIO=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      fills.forEach(function(f,i){f.style.width=targets[i];});
+      gapIO.disconnect();
+    });
+  },{threshold:.4});
+  gapIO.observe(gap);
+})();
 function rwTrack(name,params){
   if(typeof gtag!=="function")return;
   gtag("event",name,Object.assign({
