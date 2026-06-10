@@ -661,6 +661,8 @@ CITY_EXTRA_CSS = """
 .how-grid .step p{font-size:14px;color:rgba(245,240,232,.62)!important;line-height:1.65}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.58fr);gap:42px;align-items:end;width:100%}
 .hero-left{max-width:760px}
+.city-slot-pill{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(245,183,49,.55);border-radius:999px;background:rgba(245,183,49,.14);color:#FFD76A;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em}
+.csp-dot{width:8px;height:8px;border-radius:50%;background:#5CB870;flex-shrink:0}
 .hero-lock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;max-width:640px}
 .hero-lock div{border-left:2px solid var(--accent);padding-left:10px;color:rgba(255,255,255,.84);font-size:14px;line-height:1.35}
 .hero-right{align-self:end;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(12,18,15,.48);backdrop-filter:blur(10px);padding:22px 22px 20px;box-shadow:0 20px 44px rgba(0,0,0,.22)}
@@ -681,9 +683,9 @@ CITY_EXTRA_CSS = """
 .city-proof-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .city-proof-list li{font-size:13px;line-height:1.35;color:var(--ink-soft);display:flex;gap:7px}
 .city-proof-list li::before{content:'+';font-weight:900;color:var(--accent-3)}
-.city-intel{padding:48px 52px;background:rgba(255,255,255,0.025);border-top:1px solid var(--line)}
+.city-intel{padding:52px 52px;background:var(--surface-cool);border-top:1px solid var(--line)}
 .city-intel-inner{max-width:780px;margin:0 auto}
-.city-intel-h{font-family:var(--display);font-size:clamp(17px,1.8vw,21px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.3}
+.city-intel-h{font-family:var(--display);font-size:clamp(22px,2.6vw,30px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.15}
 .city-intel-list{padding-left:22px;display:flex;flex-direction:column;gap:10px;margin:0}
 .city-intel-list li{font-size:15px;color:var(--ink-soft);line-height:1.68}
 .city-intel-list li strong{color:var(--ink);font-weight:600}
@@ -694,7 +696,7 @@ CITY_EXTRA_CSS = """
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}.problem-grid,.how-grid{grid-template-columns:1fr}}
-@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.hero-right{display:none}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.city-slot-pill{font-size:12px;padding:6px 12px}.hero-right{margin-top:20px;padding:16px 16px 14px;box-shadow:none}.hero-right h3{font-size:17px;margin-bottom:10px}.hero-right .mini strong{font-size:13.5px}.hero-right .mini span{font-size:12.5px}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
 
 
@@ -869,10 +871,10 @@ def build_page(c, cities_list):
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
-    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}}}},
-    {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
     {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}}}},
+    {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
+    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}}}},
+    {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
     {{"@type":"Question","name":"How fast will I see results?","acceptedAnswer":{{"@type":"Answer","text":"Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."}}}},
     {{"@type":"Question","name":"Do you work with other {tl} contractors in {name}?","acceptedAnswer":{{"@type":"Answer","text":"{c["faq_exclusivity"]}"}}}}
   ]
@@ -893,10 +895,11 @@ def build_page(c, cities_list):
   <div class="container hero-grid">
     <div class="hero-left reveal in">
       <div class="eyebrow">{c["eyebrow"]}</div>
+      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One {tl} contractor per city — first to sign locks {name}</div>
       <h1>Get more booked<br>{tl} jobs in <span class="serif">{c["h1_city"]}</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
-        <div>One {tl} contractor<br>per city.</div>
+        <div>Free 15-minute audit.<br>No pitch deck.</div>
         <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
@@ -1048,9 +1051,12 @@ def build_page(c, cities_list):
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
           <span class="gb-icon">✓</span>
-          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. Miss it — billing pauses until we hit it.</span>
+          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
+    </div>
+    <div class="midpage-cta reveal in" style="text-align:center;margin-top:28px">
+      <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=midpage" class="btn-primary">Book my free {tl} audit</a>
     </div>
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">That's the plan in general. The only numbers missing are yours, in {name}.</p>
@@ -1093,20 +1099,20 @@ def build_page(c, cities_list):
       <h2>Questions we get a lot.</h2>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
-      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
+      <div class="faq-a">{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
       <div class="faq-a">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+    </div>
+    <div class="faq-item reveal in" onclick="toggleFaq(this)">
+      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
+      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
@@ -1146,7 +1152,7 @@ def build_page(c, cities_list):
   </div>
 </footer>
 
-<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book Free {tl} Audit</a>
+<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book my free {tl} audit</a>
 
 <script>
 const obs=new IntersectionObserver(e=>{{e.forEach(x=>{{if(x.isIntersecting)x.target.classList.add('in')}});}},{{threshold:.1}});
@@ -1175,6 +1181,19 @@ document.addEventListener("click",function(event){{
   }}
 }});
 function toggleFaq(item){{const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!o){{item.classList.add('open');const q=item.querySelector('.faq-q');rwTrack('faq_opened',{{question:q?q.textContent.replace('+','').trim().slice(0,100):''}});}}}}
+(function(){{
+  var sticky=document.querySelector('.mobile-sticky-cta');
+  var contact=document.getElementById('contact');
+  if(!sticky)return;
+  function sync(){{
+    var pastHero=window.scrollY>window.innerHeight*.6;
+    var nearBooking=contact&&contact.getBoundingClientRect().top<window.innerHeight*.85;
+    document.body.classList.toggle('show-mobile-cta',pastHero&&!nearBooking);
+  }}
+  sync();
+  window.addEventListener('scroll',sync,{{passive:true}});
+  window.addEventListener('resize',sync);
+}})();
 </script>
 
 <script type="text/javascript">

@@ -61,10 +61,10 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}},
-    {"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Port Coquitlam and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}},
-    {"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}},
     {"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your Port Coquitlam market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}},
+    {"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}},
+    {"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Port Coquitlam and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}},
+    {"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}},
     {"@type":"Question","name":"How fast will I see results?","acceptedAnswer":{"@type":"Answer","text":"Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."}},
     {"@type":"Question","name":"Do you work with other HVAC contractors in Port Coquitlam?","acceptedAnswer":{"@type":"Answer","text":"No. I take one HVAC contractor per city — that's a hard rule. If Port Coquitlam is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Port Coquitlam market specifically."}}
   ]
@@ -432,7 +432,7 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .st-val{font-size:13px;color:var(--ink-soft)}
 .st-val-good{color:#2E7D56!important;font-weight:700}
 .st-val-bad{color:var(--accent-3)!important;font-weight:700}
-.st-action{font-size:12px;color:var(--label);font-weight:600}
+.st-action{font-size:13px;color:var(--ink);font-weight:700}
 
 .section-head{max-width:760px;margin-bottom:28px}
 .label{
@@ -918,11 +918,11 @@ footer{
 /* ── Service cards: stat anchor ───────────────────────────── */
 .sc-stat{
   font-family:var(--display);
-  font-size:54px;
+  font-size:44px;
   font-weight:800;
   letter-spacing:-.03em;
   line-height:1;
-  color:rgba(43,168,152,.20);
+  color:var(--accent-2);
   margin-bottom:12px;
   display:block;
 }
@@ -1023,20 +1023,22 @@ footer{
 /* ── Guarantee badge ─────────────────────────────────────── */
 .guarantee-badge{
   margin-top:18px;
-  padding:12px 16px;
-  background:rgba(46,125,86,.06);
-  border:1px solid rgba(46,125,86,.18);
-  border-radius:10px;
+  padding:16px 18px;
+  background:#EAF6EF;
+  border:2px solid rgba(46,125,86,.45);
+  border-radius:12px;
   display:flex;
   align-items:flex-start;
-  gap:10px;
-  font-size:14px;
+  gap:12px;
+  font-size:15px;
   color:var(--ink);
-  line-height:1.4;
+  line-height:1.5;
+  box-shadow:0 6px 18px rgba(46,125,86,.10);
 }
+.guarantee-badge strong{color:#1F5C40}
 .gb-icon{
   color:#2E7D56;
-  font-size:20px;
+  font-size:22px;
   font-weight:800;
   flex-shrink:0;
   line-height:1;
@@ -1139,8 +1141,9 @@ footer{
   .review-gap{padding:0 18px 56px}
   .rg-row{grid-template-columns:26px 1fr 100px 36px;gap:8px}
   .signals{padding:56px 18px}
-  .st-head,.st-row{grid-template-columns:1.2fr 1fr;padding:10px 14px}
-  .st-head span:nth-child(n+3),.st-row span:nth-child(n+3){display:none}
+  .st-head,.st-row{grid-template-columns:1.1fr 1fr;padding:10px 14px}
+  .st-head span:nth-child(2),.st-row span:nth-child(2),
+  .st-head span:nth-child(3),.st-row span:nth-child(3){display:none}
   .founder-layout,.founder-facts{grid-template-columns:1fr}
   .founder-panel{padding:22px}
   .proof-head{display:block}
@@ -1154,7 +1157,7 @@ footer{
   .rt-connector{flex:0 0 28px}
   .rt-connector::after{right:-6px}
   .mobile-sticky-cta{
-    display:none;
+    display:flex;
     position:fixed;
     left:14px;
     right:14px;
@@ -1478,6 +1481,8 @@ footer{
 .how-grid .step p{font-size:14px;color:rgba(245,240,232,.62)!important;line-height:1.65}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.58fr);gap:42px;align-items:end;width:100%}
 .hero-left{max-width:760px}
+.city-slot-pill{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(245,183,49,.55);border-radius:999px;background:rgba(245,183,49,.14);color:#FFD76A;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.01em}
+.csp-dot{width:8px;height:8px;border-radius:50%;background:#5CB870;flex-shrink:0}
 .hero-lock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;max-width:640px}
 .hero-lock div{border-left:2px solid var(--accent);padding-left:10px;color:rgba(255,255,255,.84);font-size:14px;line-height:1.35}
 .hero-right{align-self:end;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(12,18,15,.48);backdrop-filter:blur(10px);padding:22px 22px 20px;box-shadow:0 20px 44px rgba(0,0,0,.22)}
@@ -1498,9 +1503,9 @@ footer{
 .city-proof-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .city-proof-list li{font-size:13px;line-height:1.35;color:var(--ink-soft);display:flex;gap:7px}
 .city-proof-list li::before{content:'+';font-weight:900;color:var(--accent-3)}
-.city-intel{padding:48px 52px;background:rgba(255,255,255,0.025);border-top:1px solid var(--line)}
+.city-intel{padding:52px 52px;background:var(--surface-cool);border-top:1px solid var(--line)}
 .city-intel-inner{max-width:780px;margin:0 auto}
-.city-intel-h{font-family:var(--display);font-size:clamp(17px,1.8vw,21px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.3}
+.city-intel-h{font-family:var(--display);font-size:clamp(22px,2.6vw,30px);font-weight:700;color:var(--ink);margin-bottom:18px;line-height:1.15}
 .city-intel-list{padding-left:22px;display:flex;flex-direction:column;gap:10px;margin:0}
 .city-intel-list li{font-size:15px;color:var(--ink-soft);line-height:1.68}
 .city-intel-list li strong{color:var(--ink);font-weight:600}
@@ -1511,7 +1516,7 @@ footer{
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}.problem-grid,.how-grid{grid-template-columns:1fr}}
-@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.hero-right{display:none}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.city-slot-pill{font-size:12px;padding:6px 12px}.hero-right{margin-top:20px;padding:16px 16px 14px;box-shadow:none}.hero-right h3{font-size:17px;margin-bottom:10px}.hero-right .mini strong{font-size:13.5px}.hero-right .mini span{font-size:12.5px}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 
 .testimonials{padding:100px 52px}
 .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
@@ -1548,10 +1553,11 @@ footer{
   <div class="container hero-grid">
     <div class="hero-left reveal in">
       <div class="eyebrow">HVAC marketing agency · Port Coquitlam, BC</div>
+      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One HVAC contractor per city — first to sign locks Port Coquitlam</div>
       <h1>Get more booked<br>HVAC jobs in <span class="serif">Port Coquitlam.</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
-        <div>One HVAC contractor<br>per city.</div>
+        <div>Free 15-minute audit.<br>No pitch deck.</div>
         <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">Port Coquitlam homeowners search for HVAC help every week. The market is a strong service area for companies that can show local availability and consistent review activity. We build the local search presence around your company so those searches turn into booked calls before a competitor gets them.</p>
@@ -1742,9 +1748,12 @@ footer{
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
           <span class="gb-icon">✓</span>
-          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. Miss it — billing pauses until we hit it.</span>
+          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
+    </div>
+    <div class="midpage-cta reveal in" style="text-align:center;margin-top:28px">
+      <a href="/audit/?utm_source=port-coquitlam&amp;utm_medium=cta&amp;utm_content=midpage" class="btn-primary">Book my free HVAC audit</a>
     </div>
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">That's the plan in general. The only numbers missing are yours, in Port Coquitlam.</p>
@@ -1787,20 +1796,20 @@ footer{
       <h2>Questions we get a lot.</h2>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
-      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Port Coquitlam and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
+      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your Port Coquitlam market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
       <div class="faq-a">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your Port Coquitlam market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Port Coquitlam and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+    </div>
+    <div class="faq-item reveal in" onclick="toggleFaq(this)">
+      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
+      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
@@ -1862,7 +1871,7 @@ footer{
   </div>
 </footer>
 
-<a class="mobile-sticky-cta" href="/audit/?utm_source=port-coquitlam&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book Free HVAC Audit</a>
+<a class="mobile-sticky-cta" href="/audit/?utm_source=port-coquitlam&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book my free HVAC audit</a>
 
 <script>
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')});},{threshold:.1});
@@ -1891,6 +1900,19 @@ document.addEventListener("click",function(event){
   }
 });
 function toggleFaq(item){const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!o){item.classList.add('open');const q=item.querySelector('.faq-q');rwTrack('faq_opened',{question:q?q.textContent.replace('+','').trim().slice(0,100):''});}}
+(function(){
+  var sticky=document.querySelector('.mobile-sticky-cta');
+  var contact=document.getElementById('contact');
+  if(!sticky)return;
+  function sync(){
+    var pastHero=window.scrollY>window.innerHeight*.6;
+    var nearBooking=contact&&contact.getBoundingClientRect().top<window.innerHeight*.85;
+    document.body.classList.toggle('show-mobile-cta',pastHero&&!nearBooking);
+  }
+  sync();
+  window.addEventListener('scroll',sync,{passive:true});
+  window.addEventListener('resize',sync);
+})();
 </script>
 
 <script type="text/javascript">
