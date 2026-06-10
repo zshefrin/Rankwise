@@ -44,6 +44,10 @@ def main() -> int:
         rel = path.relative_to(ROOT).as_posix()
         text = path.read_text(encoding="utf-8")
 
+        # Meta-refresh redirect stubs (old slugs) carry no nav or main landmark.
+        if 'http-equiv="refresh"' in text:
+            continue
+
         if rel not in SKIP_NAV:
             match = RW_NAV_RE.search(text)
             if not match:
