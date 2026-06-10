@@ -1442,13 +1442,144 @@ footer{
 .how-steps .step:nth-child(5){transition-delay:.2s}
 @media(prefers-reduced-motion:reduce){.mp-slot3-label,.mp-slot3-you{transition:none}.mappack .mp-slot3-label{transform:translateY(-135%);opacity:0}.mappack .mp-slot3-you{transform:none;opacity:1}}
 @media(max-width:900px){.mappack{padding:56px 18px 40px}.mappack-grid{grid-template-columns:1fr;gap:26px}}
+/* ── continuous scroll flow (2026-06-09) ─────────────────
+   Bridges: each chapter hands off to the next with a serif
+   teaser + growing thread, so the page reads as one story. */
+.bridge{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:11px;
+  margin:58px auto 0;
+  max-width:560px;
+  text-align:center;
+  text-decoration:none;
+  cursor:pointer;
+}
+.bridge-q{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:19px;
+  line-height:1.5;
+  color:var(--ink-soft);
+}
+.bridge-line{
+  width:1px;
+  height:42px;
+  background:linear-gradient(180deg,var(--line-strong),transparent);
+  transform-origin:top;
+  transform:scaleY(0);
+  transition:transform .9s cubic-bezier(.22,.8,.3,1) .2s;
+}
+.bridge.in .bridge-line{transform:scaleY(1)}
+.bridge-next{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--label);
+}
+.bridge-next::after{content:"↓";font-size:13px;transition:transform .25s ease}
+.bridge:hover .bridge-next::after{transform:translateY(3px)}
+.bridge--dark .bridge-q{color:rgba(245,240,232,.62)}
+.bridge--dark .bridge-next{color:rgba(245,183,49,.85)}
+.bridge--dark .bridge-line{background:linear-gradient(180deg,rgba(245,240,232,.38),transparent)}
+@media(prefers-reduced-motion:reduce){.bridge-line{transition:none}.bridge .bridge-line{transform:scaleY(1)}}
+@media(max-width:700px){.bridge{margin-top:40px}.bridge-q{font-size:16px}.bridge-line{height:30px}}
+/* Hero scroll cue */
+.hero-scroll{
+  position:absolute;
+  right:52px;
+  bottom:20px;
+  z-index:2;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:rgba(255,255,255,.76);
+  text-decoration:none;
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.hero-scroll:hover{color:#fff}
+.hero-scroll-arrow{display:inline-block;animation:rw-bob 2.2s ease-in-out infinite}
+@keyframes rw-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@media(prefers-reduced-motion:reduce){.hero-scroll-arrow{animation:none}}
+@media(max-width:1000px){.hero-scroll{display:none}}
+/* Chapter progress rail — desktop only */
+.chapter-rail{
+  position:fixed;
+  left:18px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:90;
+  display:none;
+  flex-direction:column;
+  gap:13px;
+}
+@media(min-width:1280px){.chapter-rail{display:flex}}
+.chapter-rail a{
+  position:relative;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  border:1.5px solid var(--line-strong);
+  background:rgba(255,253,247,.6);
+  box-shadow:0 0 0 2px rgba(255,253,247,.45);
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.chapter-rail a:hover{border-color:var(--accent-2)}
+.chapter-rail a.active{
+  background:var(--accent-2);
+  border-color:var(--accent-2);
+  transform:scale(1.25);
+}
+.chapter-rail a::after{
+  content:attr(data-title);
+  position:absolute;
+  left:19px;
+  top:50%;
+  transform:translateY(-50%);
+  padding:4px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,253,247,.94);
+  color:var(--ink);
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+.chapter-rail a:hover::after,.chapter-rail a.active::after{opacity:1}
 </style>
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
-<link rel="preload" href="/assets/home-map.css?v=metro-map-17-20260607" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/home-map.css?v=metro-map-17-20260607"></noscript>
+<link rel="preload" href="/assets/home-map.css?v=metro-map-18-20260609" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/home-map.css?v=metro-map-18-20260609"></noscript>
 <script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
 </head>
 <body>
+
+<nav class="chapter-rail" aria-label="Page chapters">
+  <a href="#mappack" data-title="01 · The prize"></a>
+  <a href="#cities" data-title="02 · Your city"></a>
+  <a href="#signals" data-title="03 · Four signals"></a>
+  <a href="#services" data-title="04 · The system"></a>
+  <a href="#results" data-title="05 · Expectations"></a>
+  <a href="#founder" data-title="06 · The founder"></a>
+  <a href="#lab" data-title="07 · The record"></a>
+  <a href="#contact" data-title="08 · Your move"></a>
+</nav>
 
 <header class="rw-nav" role="navigation" aria-label="Primary">
   <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
@@ -1498,6 +1629,7 @@ footer{
       <p class="hero-source">Rankwise Lab · May 2026 public dataset · no client data, no fabricated results</p>
     </div>
   </div>
+  <a class="hero-scroll" href="#mappack">The story starts with three slots <span class="hero-scroll-arrow">↓</span></a>
 </section>
 
 <section class="mappack" id="mappack">
@@ -1580,6 +1712,11 @@ footer{
         <p class="rg-note">21 of 36 appearances carried 50+ reviews — median 198 — yet ratings were nearly uniform. Reviews get you considered; profile signals separate the three. <a href="/lab/metro-vancouver-hvac-map-pack-market-study-2026/" style="color:inherit;font-weight:700">Read the full study →</a></p>
       </div>
     </div>
+    <a class="bridge reveal" href="#cities">
+      <p class="bridge-q">Two names hold a third of the pack region-wide — but every city is its own fight, with its own opening.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 02 · Find your city</span>
+    </a>
   </div>
 </section>
 
@@ -1734,6 +1871,11 @@ footer{
         <p class="metro-note">Search volume estimates are Rankwise Lab planning estimates across tracked HVAC intent terms. They are directional, not a ranking promise.</p>
       </aside>
     </div>
+    <a class="bridge reveal" href="#signals">
+      <p class="bridge-q">Picking the city is the easy part. Winning it comes down to four signals Google actually counts.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 03 · The four signals</span>
+    </a>
   </div>
 </section>
 
@@ -1777,6 +1919,11 @@ footer{
       </div>
     </div>
     <p class="st-note reveal in" style="font-size:12px;opacity:.55;margin-top:12px;letter-spacing:.02em">Review figures from the Rankwise Lab May 2026 dataset; activity and coverage bars are practitioner targets, not measured medians.</p>
+    <a class="bridge reveal" href="#services">
+      <p class="bridge-q">Weak on all four is the normal starting point — which is exactly why it's fixable.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 04 · The system that fixes them</span>
+    </a>
   </div>
 </section>
 
@@ -1849,6 +1996,11 @@ footer{
         <p>Every week: ranking movement, traffic quality, and booking events reviewed. We cut what does not convert and press harder on what does.</p>
       </article>
     </div>
+    <a class="bridge bridge--dark reveal" href="#results">
+      <p class="bridge-q">Any agency can show you a system. The honest part is the timeline.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 05 · What actually happens, month by month</span>
+    </a>
   </div>
 </section>
 
@@ -1902,6 +2054,11 @@ footer{
         </div>
       </article>
     </div>
+    <a class="bridge reveal" href="#founder">
+      <p class="bridge-q">A guarantee only matters if you know whose name is on it.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 06 · Who's behind this</span>
+    </a>
   </div>
 </section>
 
@@ -1930,7 +2087,7 @@ footer{
   <div class="container">
     <div class="founder-layout">
       <div class="section-head reveal in">
-        <div class="label">Who's behind this</div>
+        <div class="label">06 · Who's behind this</div>
         <h2>One operator.<br>One trade.<br><span class="serif">One city at a time.</span></h2>
         <p class="sub">Rankwise is not a generalist agency taking every contractor that fills out a form. The model is intentionally narrow.</p>
       </div>
@@ -1962,13 +2119,18 @@ footer{
         </div>
       </div>
     </div>
+    <a class="bridge reveal" href="#lab">
+      <p class="bridge-q">I'd rather show you receipts than promises — so the research is public.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 07 · The public record</span>
+    </a>
   </div>
 </section>
 
 <section class="lab" id="lab">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">06 · The public record</div>
+      <div class="label">07 · The public record</div>
       <h2>Market studies.<br>Visibility experiments.<br><span class="serif">No fake case studies.</span></h2>
       <p class="sub">Before we publish client case studies, we show the work: public market data, owned-site experiments, clear limits, and practical next moves for HVAC owners.</p>
     </div>
@@ -2008,13 +2170,18 @@ footer{
         </a>
       </div>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">That's the market, measured. The only number still missing is yours.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Final chapter · See your standing</span>
+    </a>
   </div>
 </section>
 
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">Free HVAC audit</div>
+      <div class="label">08 · Your move — free HVAC audit</div>
       <h2>See your Map Pack standing in 15 minutes.</h2>
       <p class="sub">We pull your live Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.</p>
     </div>
@@ -2099,6 +2266,11 @@ footer{
       <div class="faq-q">Do you work with other HVAC contractors in my city?<span class="faq-icon">+</span></div>
       <div class="faq-a">No. I take one HVAC contractor per city — that's a hard rule. If your city is open when you book the audit, your local competitors can't hire Rankwise while you're a client. It also means every strategy I build is built for your market, not split across five contractors competing for the same jobs.</div>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Book the free audit</span>
+    </a>
   </div>
 </section>
 
@@ -2128,6 +2300,24 @@ footer{
 <script>
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')})},{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+(function(){
+  var rail=document.querySelector('.chapter-rail');
+  if(!rail)return;
+  var byId={};
+  rail.querySelectorAll('a').forEach(function(l){byId[l.getAttribute('href').slice(1)]=l;});
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      rail.querySelectorAll('a').forEach(function(l){l.classList.remove('active');});
+      var l=byId[e.target.id];
+      if(l)l.classList.add('active');
+    });
+  },{rootMargin:'-42% 0px -42% 0px'});
+  Object.keys(byId).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)io.observe(el);
+  });
+})();
 (function(){
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   document.querySelectorAll('.hero-data strong').forEach(function(el){
@@ -2222,8 +2412,9 @@ window.addEventListener('resize',syncStickyCta);
   const focus=document.getElementById('metro-city-focus');
   const audit=document.getElementById('metro-audit-link');
   const page=document.getElementById('metro-page-link');
+  const detail=map.querySelector('.metro-detail');
   function slug(value){return value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
-  function selectCity(link){
+  function selectCity(link,userInitiated){
     const city=link.dataset.city;
     cities.forEach(item=>{
       const active=item===link;
@@ -2248,30 +2439,50 @@ window.addEventListener('resize',syncStickyCta);
     page.href=link.href;
     audit.href='/audit/?utm_source=home&utm_medium=cta&utm_content=city-map-'+slug(city);
     audit.textContent='Check '+city;
+    if(detail&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      detail.classList.remove('swap');
+      void detail.offsetWidth;
+      detail.classList.add('swap');
+    }
+    if(userInitiated&&detail&&window.matchMedia('(max-width: 1000px)').matches){
+      detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  }
+  function hoverSync(city,on){
+    const dot=cities.find(item=>item.dataset.city===city);
+    const area=areas.find(item=>item.dataset.city===city);
+    if(dot)dot.classList.toggle('is-hover',on);
+    if(area)area.classList.toggle('is-hover',on);
   }
   cities.forEach(link=>{
     link.addEventListener('click',event=>{
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       event.preventDefault();
-      selectCity(link);
+      selectCity(link,true);
       rwTrack('city_map_selected',{city:link.dataset.city,link_url:link.href});
     });
+    link.addEventListener('mouseenter',()=>hoverSync(link.dataset.city,true));
+    link.addEventListener('mouseleave',()=>hoverSync(link.dataset.city,false));
   });
   areas.forEach(area=>{
     area.addEventListener('click',function(){
       const link=cities.find(item=>item.dataset.city===area.dataset.city);
       if(!link)return;
-      selectCity(link);
+      selectCity(link,true);
       rwTrack('city_map_selected',{city:area.dataset.city,link_url:link.href});
     });
+    area.addEventListener('mouseenter',()=>hoverSync(area.dataset.city,true));
+    area.addEventListener('mouseleave',()=>hoverSync(area.dataset.city,false));
   });
   chips.forEach(chip=>{
     chip.addEventListener('click',function(){
       const link=cities.find(item=>item.dataset.city===chip.dataset.city);
       if(!link)return;
-      selectCity(link);
+      selectCity(link,true);
       rwTrack('city_map_selected',{city:chip.dataset.city,link_url:link.href});
     });
+    chip.addEventListener('mouseenter',()=>hoverSync(chip.dataset.city,true));
+    chip.addEventListener('mouseleave',()=>hoverSync(chip.dataset.city,false));
   });
 })();
 </script>

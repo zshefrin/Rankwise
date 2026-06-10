@@ -221,11 +221,20 @@
 .metro-area[data-city="Abbotsford"]{fill:rgba(216,95,66,.10)}
 .metro-area[data-city="Mission"]{fill:rgba(190,141,70,.10)}
 .metro-area:hover,
+.metro-area.is-hover,
 .metro-area.is-active{
   fill:rgba(242,181,51,.36);
   stroke:rgba(15,118,110,.84);
   filter:drop-shadow(0 8px 14px rgba(10,103,95,.12));
 }
+/* Staggered territory entrance — only fires once the reveal class lands,
+   so a JS failure leaves the map fully visible. */
+.metro-map-left.reveal.in .metro-area{animation:rw-area-in .5s ease backwards}
+.metro-map-left.reveal.in .metro-area:nth-of-type(2n){animation-delay:.08s}
+.metro-map-left.reveal.in .metro-area:nth-of-type(3n){animation-delay:.16s}
+.metro-map-left.reveal.in .metro-area:nth-of-type(5n){animation-delay:.24s}
+@keyframes rw-area-in{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.metro-map-left.reveal.in .metro-area{animation:none}}
 .metro-city{
   position:absolute;
   left:var(--x);
@@ -279,7 +288,7 @@
   pointer-events:none;
   transition:opacity .16s ease,transform .16s ease;
 }
-.metro-city:hover,.metro-city:focus-visible,.metro-city.is-active{
+.metro-city:hover,.metro-city:focus-visible,.metro-city.is-hover,.metro-city.is-active{
   border-color:rgba(15,118,110,.62);
   background:#fff;
   transform:translate(-50%,-50%) scale(1.12);
@@ -287,11 +296,20 @@
   outline:none;
   z-index:7;
 }
-.metro-city:hover::after,.metro-city:focus-visible::after,.metro-city.is-active::after{
+.metro-city:hover::after,.metro-city:focus-visible::after,.metro-city.is-hover::after,.metro-city.is-active::after{
   opacity:1;
   transform:translate(-50%,-112%);
 }
-.metro-city.is-active::before{background:var(--accent)}
+.metro-city.is-active::before{
+  background:var(--accent);
+  animation:rw-ping 2.4s ease-out infinite;
+}
+@keyframes rw-ping{
+  0%{box-shadow:0 0 0 3px rgba(242,181,51,.30)}
+  70%{box-shadow:0 0 0 11px rgba(242,181,51,0)}
+  100%{box-shadow:0 0 0 3px rgba(242,181,51,0)}
+}
+@media(prefers-reduced-motion:reduce){.metro-city.is-active::before{animation:none}}
 .metro-market-index{
   display:flex;
   flex-wrap:wrap;
@@ -361,6 +379,11 @@
   border-radius:8px;
   background:rgba(255,253,247,.92);
   box-shadow:0 24px 54px rgba(23,35,31,.08);
+}
+.metro-detail.swap{animation:rw-detail-swap .32s ease}
+@keyframes rw-detail-swap{
+  from{opacity:.4;transform:translateY(7px)}
+  to{opacity:1;transform:none}
 }
 .metro-status{
   display:inline-flex;
