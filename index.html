@@ -19,7 +19,6 @@
 <link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1200.avif" type="image/avif" media="(min-width: 701px) and (max-width: 1000px)" fetchpriority="high">
 <link rel="preload" as="image" href="/assets/rankwise-hvac-hero-1600.avif" type="image/avif" media="(min-width: 1001px)" fetchpriority="high">
 <link rel="preload" as="font" href="/assets/fonts/bricolage-grotesque-800-latin.woff2" type="font/woff2" crossorigin>
-<link rel="preload" as="font" href="/assets/fonts/instrument-serif-italic-latin.woff2" type="font/woff2" crossorigin>
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});gtag('config','G-LRX309H9CH',_rwInt?{traffic_type:'internal'}:{});</script>
@@ -229,7 +228,7 @@
 :focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;border-radius:3px}
 .hero :focus-visible,.how :focus-visible,.cta :focus-visible,footer :focus-visible,.rw-nav :focus-visible{outline-color:#F2C95A}
 body::after{
-  content:"";position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  content:"";position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.045;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:220px 220px;
 }
@@ -261,9 +260,7 @@ section{padding:100px 52px}
   background:
     linear-gradient(90deg,rgba(13,20,18,.94) 0%,rgba(13,20,18,.78) 36%,rgba(13,20,18,.28) 70%,rgba(13,20,18,.18) 100%),
     linear-gradient(180deg,rgba(13,20,18,.12) 0%,rgba(13,20,18,.55) 100%),
-    linear-gradient(rgb(17,36,30),rgb(17,36,30)),
     url('/assets/rankwise-hvac-hero.jpg') center/cover no-repeat;
-  background-blend-mode:normal,normal,color,normal;
   overflow:hidden;
   isolation:isolate;
 }

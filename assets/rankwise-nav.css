@@ -161,7 +161,6 @@
   background-image:
     linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.78) 36%, rgba(13, 20, 18, 0.28) 70%, rgba(13, 20, 18, 0.18) 100%),
     linear-gradient(180deg, rgba(13, 20, 18, 0.12) 0%, rgba(13, 20, 18, 0.55) 100%),
-    linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
     image-set(
       url("/assets/rankwise-hvac-hero-1600.avif") type("image/avif"),
       url("/assets/rankwise-hvac-hero-1600.webp") type("image/webp"),
@@ -176,7 +175,6 @@
   background-image:
     linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.80) 38%, rgba(13, 20, 18, 0.35) 76%, rgba(13, 20, 18, 0.20) 100%),
     linear-gradient(180deg, rgba(13, 20, 18, 0.18), rgba(13, 20, 18, 0.72)),
-    linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
     image-set(
       url("/assets/rankwise-hvac-hero-1600.avif") type("image/avif"),
       url("/assets/rankwise-hvac-hero-1600.webp") type("image/webp"),
@@ -252,8 +250,7 @@
     background-image:
       linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.78) 36%, rgba(13, 20, 18, 0.28) 70%, rgba(13, 20, 18, 0.18) 100%),
       linear-gradient(180deg, rgba(13, 20, 18, 0.12) 0%, rgba(13, 20, 18, 0.55) 100%),
-      linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
-    image-set(
+      image-set(
         url("/assets/rankwise-hvac-hero-1200.avif") type("image/avif"),
         url("/assets/rankwise-hvac-hero-1200.webp") type("image/webp"),
         url("/assets/rankwise-hvac-hero.jpg") type("image/jpeg")
@@ -264,8 +261,7 @@
     background-image:
       linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.80) 38%, rgba(13, 20, 18, 0.35) 76%, rgba(13, 20, 18, 0.20) 100%),
       linear-gradient(180deg, rgba(13, 20, 18, 0.18), rgba(13, 20, 18, 0.72)),
-      linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
-    image-set(
+      image-set(
         url("/assets/rankwise-hvac-hero-1200.avif") type("image/avif"),
         url("/assets/rankwise-hvac-hero-1200.webp") type("image/webp"),
         url("/assets/rankwise-hvac-hero.jpg") type("image/jpeg")
@@ -285,8 +281,7 @@
     background-image:
       linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.78) 36%, rgba(13, 20, 18, 0.28) 70%, rgba(13, 20, 18, 0.18) 100%),
       linear-gradient(180deg, rgba(13, 20, 18, 0.12) 0%, rgba(13, 20, 18, 0.55) 100%),
-      linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
-    image-set(
+      image-set(
         url("/assets/rankwise-hvac-hero-900.avif") type("image/avif"),
         url("/assets/rankwise-hvac-hero-900.webp") type("image/webp"),
         url("/assets/rankwise-hvac-hero.jpg") type("image/jpeg")
@@ -297,8 +292,7 @@
     background-image:
       linear-gradient(90deg, rgba(13, 20, 18, 0.94) 0%, rgba(13, 20, 18, 0.80) 38%, rgba(13, 20, 18, 0.35) 76%, rgba(13, 20, 18, 0.20) 100%),
       linear-gradient(180deg, rgba(13, 20, 18, 0.18), rgba(13, 20, 18, 0.72)),
-      linear-gradient(rgb(17, 36, 30), rgb(17, 36, 30)),
-    image-set(
+      image-set(
         url("/assets/rankwise-hvac-hero-900.avif") type("image/avif"),
         url("/assets/rankwise-hvac-hero-900.webp") type("image/webp"),
         url("/assets/rankwise-hvac-hero.jpg") type("image/jpeg")
@@ -316,10 +310,4 @@
     padding: 7px 10px;
     font-size: 11px;
   }
-}
-
-/* Duotone ink-plate hero: green plate takes its color, photo supplies luminosity */
-.hero,
-.compare-hero {
-  background-blend-mode: normal, normal, color, normal;
 }
