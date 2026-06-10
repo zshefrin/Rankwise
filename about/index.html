@@ -186,10 +186,12 @@ article hr{border:none;border-top:1px solid var(--line);margin:40px 0}
 .disambiguation-box{margin:32px 0;border:1px solid rgba(43,168,152,.34);border-radius:14px;background:rgba(43,168,152,.06);padding:18px 20px}
 .disambiguation-box p{font-size:15px;color:var(--ink-soft);margin:0}
 .disambiguation-box strong{color:var(--ink)}
-.about-proof-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:28px 0 34px}
-.about-proof{border:1px solid rgba(23,35,31,.13);border-radius:8px;background:rgba(255,253,247,.74);padding:16px 17px}
-.about-proof strong{display:block;font-family:var(--display);font-size:28px;line-height:1;color:var(--ink);margin-bottom:7px}
-.about-proof span{display:block;font-size:13px;line-height:1.4;color:var(--ink-soft)}
+.about-proof-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:34px 0 40px;border-top:1px solid rgba(23,35,31,.22);border-bottom:1px solid rgba(23,35,31,.12)}
+.about-proof{padding:22px 20px 24px;border-left:1px solid rgba(23,35,31,.12)}
+.about-proof:first-child{border-left:none;padding-left:0}
+.about-proof strong{display:block;font-family:var(--headline,var(--display));font-weight:800;font-size:clamp(38px,4.4vw,52px);line-height:1;letter-spacing:-.02em;color:#0A675F;margin-bottom:9px}
+.about-proof span{display:block;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;color:var(--ink-muted)}
+@media(max-width:700px){.about-proof{border-left:none;border-top:1px solid rgba(23,35,31,.12);padding-left:0}.about-proof:first-child{border-top:none}}
 .founder-panel{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;margin:28px 0;border:1px solid rgba(23,35,31,.13);border-radius:8px;background:linear-gradient(135deg,rgba(255,253,247,.86),rgba(232,241,235,.70));padding:20px;box-shadow:0 16px 34px rgba(10,103,95,.07)}
 .founder-mark{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0A675F,#77BEB2);color:#fff;font-family:var(--display);font-size:17px;font-weight:800;flex-shrink:0;object-fit:cover}
 .founder-panel span{display:block;font-family:var(--display);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#0A675F;margin-bottom:6px}
@@ -239,7 +241,7 @@ footer{background:var(--paper-2);border-top:1px solid var(--line);padding:30px 5
 
 <article>
   <div class="meta">Rankwise · Vancouver, BC · Canada</div>
-  <h1>About Rankwise</h1>
+  <h1>About <em>Rankwise</em></h1>
 
   <p><strong>Rankwise</strong> (rankwise.ca) is a local SEO agency based in Vancouver, British Columbia, Canada. It specializes exclusively in HVAC contractors across the Lower Mainland — furnace companies, heat pump installers, AC contractors, and full-service HVAC shops. Founded by <strong>Zack Shefrin</strong> in 2026. Contact: <a href="mailto:zshef@rankwise.ca">zshef@rankwise.ca</a>.</p>
 
