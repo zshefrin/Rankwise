@@ -838,9 +838,9 @@ def build_page(c, cities_list):
   "@type": "FAQPage",
   "mainEntity": [
     {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
-    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"We set specific, measurable targets with you every month. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print."}}}},
+    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}}}},
     {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
-    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"Depends on your market and what you need. Book the free audit — we'll look at your {name} market specifically, show you the opportunity, and give you a straight answer on cost."}}}},
+    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}}}},
     {{"@type":"Question","name":"How fast will I see results?","acceptedAnswer":{{"@type":"Answer","text":"Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."}}}},
     {{"@type":"Question","name":"Do you work with other {tl} contractors in {name}?","acceptedAnswer":{{"@type":"Answer","text":"{c["faq_exclusivity"]}"}}}}
   ]
@@ -865,7 +865,7 @@ def build_page(c, cities_list):
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
         <div>One {tl} contractor<br>per city.</div>
-        <div>If we miss targets,<br>you do not pay for that month.</div>
+        <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
       <div class="hero-actions">
@@ -898,7 +898,7 @@ def build_page(c, cities_list):
 <section>
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">The gap we fix</div>
+      <div class="label">01 · The gap we fix</div>
       <h2>Solid install team,<br>weak <span class="serif">inbound flow.</span></h2>
       <p class="sub">Most {tl} owners in {name} already run solid businesses. The opportunity is turning more Google search demand into booked calls each week.</p>
     </div>
@@ -916,13 +916,18 @@ def build_page(c, cities_list):
         <p>You are running service calls, estimates, and team logistics. You should not also be babysitting search systems.</p>
       </article>
     </div>
+    <a class="bridge reveal" href="#services">
+      <p class="bridge-q">The gap is fixable — and in {name}, the playbook is specific.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 02 · The system</span>
+    </a>
   </div>
 </section>
 
 <section class="services" id="services">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What we do</div>
+      <div class="label">02 · The system</div>
       <h2>One operator.<br>Three engines.<br><span class="serif">One outcome.</span></h2>
       <p class="sub">Everything points to one metric that matters: more qualified calls from {name} homeowners ready to book.</p>
     </div>
@@ -961,7 +966,7 @@ def build_page(c, cities_list):
 <section class="how" id="how">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">How it works</div>
+      <div class="label">03 · How it works</div>
       <h2>You stay on jobs.<br>We keep the <span class="serif">calls coming in.</span></h2>
       <p class="sub">Simple operating model. You keep the field running. We keep inbound momentum running.</p>
     </div>
@@ -982,13 +987,18 @@ def build_page(c, cities_list):
         <p>Every week we review traffic quality, booking events, and ranking movement, then adjust the next sprint so momentum compounds.</p>
       </article>
     </div>
+    <a class="bridge bridge--dark reveal" href="#results">
+      <p class="bridge-q">Any agency can show you a system. The honest part is the timeline.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 04 · Real expectations</span>
+    </a>
   </div>
 </section>
 
 <section class="results" id="results">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What to expect</div>
+      <div class="label">04 · Real expectations</div>
       <h2>Real timeline.<br>Real tradeoffs.<br><span class="serif">No fake promises.</span></h2>
     </div>
     <div class="results-grid">
@@ -1004,8 +1014,17 @@ def build_page(c, cities_list):
         <h3>How we protect your position in {name}</h3>
         <p>We do not work with multiple {tl} companies in {name}. That keeps your market message focused and your growth plan clean.</p>
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
+        <div class="guarantee-badge">
+          <span class="gb-icon">✓</span>
+          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. Miss it — billing pauses until we hit it.</span>
+        </div>
       </article>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">That's the plan in general. The only numbers missing are yours, in {name}.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Final step · See your standing</span>
+    </a>
   </div>
 </section>
 
@@ -1014,14 +1033,14 @@ def build_page(c, cities_list):
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">Free {tl} audit</div>
+      <div class="label">05 · Your move — free {tl} audit</div>
       <h2>{c["cta_h2"]}</h2>
       <p class="sub">{c["cta_sub"]}</p>
     </div>
     <div class="cta-promise reveal in">
       <div>No contracts. Month to month.</div>
       <div>One {tl} contractor per city.</div>
-      <div>If we miss targets, you do not pay for that month.</div>
+      <div>Position guarantee — agreed in writing before month one.</div>
     </div>
     <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=founder-card" class="founder-card reveal in">
       <div class="founder-avatar">ZS</div>
@@ -1047,7 +1066,7 @@ def build_page(c, cities_list):
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">We set specific, measurable targets with you every month — things like search appearances, ranking positions, and calls from Google. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print.</div>
+      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
@@ -1055,7 +1074,7 @@ def build_page(c, cities_list):
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Depends on your market and what you need. Book the free audit — we'll look at your {name} market specifically, show you the opportunity, and give you a straight answer on cost.</div>
+      <div class="faq-a">{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
@@ -1065,6 +1084,11 @@ def build_page(c, cities_list):
       <div class="faq-q">Do you work with other {tl} contractors in {name}?<span class="faq-icon">+</span></div>
       <div class="faq-a">{c["faq_exclusivity"]}</div>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Book the free {tl} audit</span>
+    </a>
   </div>
 </section>
 
@@ -1175,7 +1199,7 @@ function toggleFaq(item){{const o=item.classList.contains('open');document.query
     }})(window,"https://app.cal.com/embed/embed.js","init");
     Cal("init","15min",{{origin:"https://app.cal.com"}});
     Cal.ns["15min"]("inline",{{elementOrSelector:"#cal-embed",config:cfg,calLink:"zackary-shefrin-oy63zv/15min"}});
-    Cal.ns["15min"]("ui",{{"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{{"dark":{{"cal-brand":"#F5B731"}}}}}});
+    Cal.ns["15min"]("ui",{{"theme":"light","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{{"light":{{"cal-brand":"#C75439"}}}}}});
     Cal.ns["15min"]("on",{{action:"bookingSuccessful",callback:fireAuditConversion}});
     Cal.ns["15min"]("on",{{action:"bookingSuccessfulV2",callback:fireAuditConversion}});
   }}

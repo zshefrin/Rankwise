@@ -62,9 +62,9 @@
   "@type": "FAQPage",
   "mainEntity": [
     {"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}},
-    {"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{"@type":"Answer","text":"We set specific, measurable targets with you every month. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print."}},
+    {"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Surrey and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}},
     {"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}},
-    {"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"Depends on your market and what you need. Book the free audit — we'll look at your Surrey market specifically, show you the opportunity, and give you a straight answer on cost."}},
+    {"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your Surrey market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}},
     {"@type":"Question","name":"How fast will I see results?","acceptedAnswer":{"@type":"Answer","text":"Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."}},
     {"@type":"Question","name":"Do you work with other HVAC contractors in Surrey?","acceptedAnswer":{"@type":"Answer","text":"No. I take one HVAC contractor per city — that's a hard rule. If Surrey is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Surrey market specifically."}}
   ]
@@ -376,7 +376,7 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .rg-name{font-size:13px;font-weight:600;color:var(--ink)}
 .rg-name-you{color:var(--ink-soft)!important;font-style:italic}
 .rg-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-.rg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4A90D9,#81BBE8)}
+.rg-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4A90D9,#81BBE8);transition:width 1s cubic-bezier(.22,.8,.3,1)}
 .rg-fill-you{background:linear-gradient(90deg,rgba(217,95,66,.5),rgba(217,95,66,.3))!important}
 .rg-n{font-size:13px;font-weight:700;color:var(--ink);text-align:right;font-family:var(--display)}
 .rg-n-you{color:var(--accent-3)!important}
@@ -1322,6 +1322,146 @@ footer{
   h1{font-size:clamp(34px,10.5vw,44px);line-height:1.02}
   .hero-copy{font-size:15px;line-height:1.55}
 }
+/* ── chapter flow (homepage rebuild 2026-06) ───────────── */
+.mappack{padding:78px 52px 58px}
+.mappack .section-head{margin-bottom:42px}
+.mappack-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:40px;align-items:start}
+.mappack-side-sub{font-size:14px;color:var(--ink-soft);opacity:.88;margin-bottom:18px;max-width:430px;line-height:1.6}
+.mp-slot3{overflow:hidden}
+.mp-slot3-swap{position:relative;min-height:46px;flex:1}
+.mp-slot3-label,.mp-slot3-you{transition:transform .7s cubic-bezier(.22,.8,.3,1) .55s,opacity .7s ease .55s}
+.mp-slot3-you{position:absolute;inset:0;transform:translateY(135%);opacity:0}
+.mappack.anim .mp-slot3-label{transform:translateY(-135%);opacity:0}
+.mappack.anim .mp-slot3-you{transform:none;opacity:1}
+.hero-source{font-family:var(--display);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.45;margin-top:12px}
+.how-merged{padding-top:0}
+.cta-call-items{margin-top:10px}
+.services-grid .service-card:nth-child(2){transition-delay:.1s}
+.services-grid .service-card:nth-child(3){transition-delay:.2s}
+.how-steps .step:nth-child(3){transition-delay:.1s}
+.how-steps .step:nth-child(5){transition-delay:.2s}
+@media(prefers-reduced-motion:reduce){.mp-slot3-label,.mp-slot3-you{transition:none}.mappack .mp-slot3-label{transform:translateY(-135%);opacity:0}.mappack .mp-slot3-you{transform:none;opacity:1}}
+@media(max-width:900px){.mappack{padding:56px 18px 40px}.mappack-grid{grid-template-columns:1fr;gap:26px}}
+/* ── continuous scroll flow (2026-06-09) ─────────────────
+   Bridges: each chapter hands off to the next with a serif
+   teaser + growing thread, so the page reads as one story. */
+.bridge{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:11px;
+  margin:58px auto 0;
+  max-width:560px;
+  text-align:center;
+  text-decoration:none;
+  cursor:pointer;
+}
+.bridge-q{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:19px;
+  line-height:1.5;
+  color:var(--ink-soft);
+}
+.bridge-line{
+  width:1px;
+  height:42px;
+  background:linear-gradient(180deg,var(--line-strong),transparent);
+  transform-origin:top;
+  transform:scaleY(0);
+  transition:transform .9s cubic-bezier(.22,.8,.3,1) .2s;
+}
+.bridge.in .bridge-line{transform:scaleY(1)}
+.bridge-next{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--label);
+}
+.bridge-next::after{content:"↓";font-size:13px;transition:transform .25s ease}
+.bridge:hover .bridge-next::after{transform:translateY(3px)}
+.bridge--dark .bridge-q{color:rgba(245,240,232,.62)}
+.bridge--dark .bridge-next{color:rgba(245,183,49,.85)}
+.bridge--dark .bridge-line{background:linear-gradient(180deg,rgba(245,240,232,.38),transparent)}
+@media(prefers-reduced-motion:reduce){.bridge-line{transition:none}.bridge .bridge-line{transform:scaleY(1)}}
+@media(max-width:700px){.bridge{margin-top:40px}.bridge-q{font-size:16px}.bridge-line{height:30px}}
+/* Hero scroll cue */
+.hero-scroll{
+  position:absolute;
+  right:52px;
+  bottom:20px;
+  z-index:2;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:rgba(255,255,255,.76);
+  text-decoration:none;
+  font-family:var(--display);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.hero-scroll:hover{color:#fff}
+.hero-scroll-arrow{display:inline-block;animation:rw-bob 2.2s ease-in-out infinite}
+@keyframes rw-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@media(prefers-reduced-motion:reduce){.hero-scroll-arrow{animation:none}}
+@media(max-width:1000px){.hero-scroll{display:none}}
+/* Chapter progress rail — desktop only */
+.chapter-rail{
+  position:fixed;
+  left:18px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:90;
+  display:none;
+  flex-direction:column;
+  gap:13px;
+}
+@media(min-width:1280px){.chapter-rail{display:flex}}
+.chapter-rail a{
+  position:relative;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  border:1.5px solid var(--line-strong);
+  background:rgba(255,253,247,.6);
+  box-shadow:0 0 0 2px rgba(255,253,247,.45);
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.chapter-rail a:hover{border-color:var(--accent-2)}
+.chapter-rail a.active{
+  background:var(--accent-2);
+  border-color:var(--accent-2);
+  transform:scale(1.25);
+}
+.chapter-rail a::after{
+  content:attr(data-title);
+  position:absolute;
+  left:19px;
+  top:50%;
+  transform:translateY(-50%);
+  padding:4px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,253,247,.94);
+  color:var(--ink);
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+.chapter-rail a:hover::after,.chapter-rail a.active::after{opacity:1}
 
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.58fr);gap:42px;align-items:end;width:100%}
 .hero-left{max-width:760px}
@@ -1399,7 +1539,7 @@ footer{
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
         <div>One HVAC contractor<br>per city.</div>
-        <div>If we miss targets,<br>you do not pay for that month.</div>
+        <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">Surrey is one of Metro Vancouver's fastest-growing markets for HVAC installation and service. The contractors winning the most calls aren't the biggest — they're the ones Google shows first. We build that visibility around your business.</p>
       <div class="hero-actions">
@@ -1471,7 +1611,7 @@ footer{
 <section>
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">The gap we fix</div>
+      <div class="label">01 · The gap we fix</div>
       <h2>Solid install team,<br>weak <span class="serif">inbound flow.</span></h2>
       <p class="sub">Most HVAC owners in Surrey already run solid businesses. The opportunity is turning more Google search demand into booked calls each week.</p>
     </div>
@@ -1489,13 +1629,18 @@ footer{
         <p>You are running service calls, estimates, and team logistics. You should not also be babysitting search systems.</p>
       </article>
     </div>
+    <a class="bridge reveal" href="#services">
+      <p class="bridge-q">The gap is fixable — and in Surrey, the playbook is specific.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 02 · The system</span>
+    </a>
   </div>
 </section>
 
 <section class="services" id="services">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What we do</div>
+      <div class="label">02 · The system</div>
       <h2>One operator.<br>Three engines.<br><span class="serif">One outcome.</span></h2>
       <p class="sub">Everything points to one metric that matters: more qualified calls from Surrey homeowners ready to book.</p>
     </div>
@@ -1534,7 +1679,7 @@ footer{
 <section class="how" id="how">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">How it works</div>
+      <div class="label">03 · How it works</div>
       <h2>You stay on jobs.<br>We keep the <span class="serif">calls coming in.</span></h2>
       <p class="sub">Simple operating model. You keep the field running. We keep inbound momentum running.</p>
     </div>
@@ -1555,13 +1700,18 @@ footer{
         <p>Every week we review traffic quality, booking events, and ranking movement, then adjust the next sprint so momentum compounds.</p>
       </article>
     </div>
+    <a class="bridge bridge--dark reveal" href="#results">
+      <p class="bridge-q">Any agency can show you a system. The honest part is the timeline.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Chapter 04 · Real expectations</span>
+    </a>
   </div>
 </section>
 
 <section class="results" id="results">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What to expect</div>
+      <div class="label">04 · Real expectations</div>
       <h2>Real timeline.<br>Real tradeoffs.<br><span class="serif">No fake promises.</span></h2>
     </div>
     <div class="results-grid">
@@ -1577,8 +1727,17 @@ footer{
         <h3>How we protect your position in Surrey</h3>
         <p>We do not work with multiple HVAC companies in Surrey. That keeps your market message focused and your growth plan clean.</p>
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
+        <div class="guarantee-badge">
+          <span class="gb-icon">✓</span>
+          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. Miss it — billing pauses until we hit it.</span>
+        </div>
       </article>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">That's the plan in general. The only numbers missing are yours, in Surrey.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Final step · See your standing</span>
+    </a>
   </div>
 </section>
 
@@ -1587,14 +1746,14 @@ footer{
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">Free HVAC audit</div>
+      <div class="label">05 · Your move — free HVAC audit</div>
       <h2>See your Surrey Map Pack standing in 15 minutes.</h2>
       <p class="sub">We pull your live Surrey Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.</p>
     </div>
     <div class="cta-promise reveal in">
       <div>No contracts. Month to month.</div>
       <div>One HVAC contractor per city.</div>
-      <div>If we miss targets, you do not pay for that month.</div>
+      <div>Position guarantee — agreed in writing before month one.</div>
     </div>
     <a href="/audit/?utm_source=surrey&amp;utm_medium=cta&amp;utm_content=founder-card" class="founder-card reveal in">
       <div class="founder-avatar">ZS</div>
@@ -1620,7 +1779,7 @@ footer{
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">We set specific, measurable targets with you every month — things like search appearances, ranking positions, and calls from Google. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print.</div>
+      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in Surrey and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
@@ -1628,7 +1787,7 @@ footer{
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Depends on your market and what you need. Book the free audit — we'll look at your Surrey market specifically, show you the opportunity, and give you a straight answer on cost.</div>
+      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your Surrey market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
@@ -1638,6 +1797,11 @@ footer{
       <div class="faq-q">Do you work with other HVAC contractors in Surrey?<span class="faq-icon">+</span></div>
       <div class="faq-a">No. I take one HVAC contractor per city — that's a hard rule. If Surrey is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Surrey market specifically.</div>
     </div>
+    <a class="bridge reveal" href="#contact">
+      <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
+      <span class="bridge-line" aria-hidden="true"></span>
+      <span class="bridge-next">Book the free HVAC audit</span>
+    </a>
   </div>
 </section>
 
@@ -1770,7 +1934,7 @@ function toggleFaq(item){const o=item.classList.contains('open');document.queryS
     })(window,"https://app.cal.com/embed/embed.js","init");
     Cal("init","15min",{origin:"https://app.cal.com"});
     Cal.ns["15min"]("inline",{elementOrSelector:"#cal-embed",config:cfg,calLink:"zackary-shefrin-oy63zv/15min"});
-    Cal.ns["15min"]("ui",{"theme":"dark","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"dark":{"cal-brand":"#F5B731"}}});
+    Cal.ns["15min"]("ui",{"theme":"light","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{"light":{"cal-brand":"#C75439"}}});
     Cal.ns["15min"]("on",{action:"bookingSuccessful",callback:fireAuditConversion});
     Cal.ns["15min"]("on",{action:"bookingSuccessfulV2",callback:fireAuditConversion});
   }
