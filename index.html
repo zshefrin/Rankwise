@@ -121,18 +121,10 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "How much of my time does this take?",
+      "name": "How much does it cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What if it doesn't work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "We set specific, measurable targets with you every month — things like search appearances, ranking positions, and calls from Google. If we don't hit the agreed target at the end of the month, you get your money back for that month. No arguing about it, no fine print."
+        "text": "HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."
       }
     },
     {
@@ -145,10 +137,18 @@
     },
     {
       "@type": "Question",
-      "name": "How much does it cost?",
+      "name": "What if it doesn't work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."
+        "text": "Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in your city and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much of my time does this take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us."
       }
     },
     {
@@ -532,7 +532,7 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .st-val{font-size:13px;color:var(--ink-soft)}
 .st-val-good{color:#2E7D56!important;font-weight:700}
 .st-val-bad{color:var(--accent-3)!important;font-weight:700}
-.st-action{font-size:12px;color:var(--label);font-weight:600}
+.st-action{font-size:13px;color:var(--ink);font-weight:700}
 
 .section-head{max-width:760px;margin-bottom:28px}
 .label{
@@ -1018,11 +1018,11 @@ footer{
 /* ── Service cards: stat anchor ───────────────────────────── */
 .sc-stat{
   font-family:var(--display);
-  font-size:54px;
+  font-size:44px;
   font-weight:800;
   letter-spacing:-.03em;
   line-height:1;
-  color:rgba(43,168,152,.20);
+  color:var(--accent-2);
   margin-bottom:12px;
   display:block;
 }
@@ -1123,20 +1123,22 @@ footer{
 /* ── Guarantee badge ─────────────────────────────────────── */
 .guarantee-badge{
   margin-top:18px;
-  padding:12px 16px;
-  background:rgba(46,125,86,.06);
-  border:1px solid rgba(46,125,86,.18);
-  border-radius:10px;
+  padding:16px 18px;
+  background:#EAF6EF;
+  border:2px solid rgba(46,125,86,.45);
+  border-radius:12px;
   display:flex;
   align-items:flex-start;
-  gap:10px;
-  font-size:14px;
+  gap:12px;
+  font-size:15px;
   color:var(--ink);
-  line-height:1.4;
+  line-height:1.5;
+  box-shadow:0 6px 18px rgba(46,125,86,.10);
 }
+.guarantee-badge strong{color:#1F5C40}
 .gb-icon{
   color:#2E7D56;
-  font-size:20px;
+  font-size:22px;
   font-weight:800;
   flex-shrink:0;
   line-height:1;
@@ -1239,8 +1241,9 @@ footer{
   .review-gap{padding:0 18px 56px}
   .rg-row{grid-template-columns:26px 1fr 100px 36px;gap:8px}
   .signals{padding:56px 18px}
-  .st-head,.st-row{grid-template-columns:1.2fr 1fr;padding:10px 14px}
-  .st-head span:nth-child(n+3),.st-row span:nth-child(n+3){display:none}
+  .st-head,.st-row{grid-template-columns:1.1fr 1fr;padding:10px 14px}
+  .st-head span:nth-child(2),.st-row span:nth-child(2),
+  .st-head span:nth-child(3),.st-row span:nth-child(3){display:none}
   .founder-layout,.founder-facts{grid-template-columns:1fr}
   .founder-panel{padding:22px}
   .proof-head{display:block}
@@ -1254,7 +1257,7 @@ footer{
   .rt-connector{flex:0 0 28px}
   .rt-connector::after{right:-6px}
   .mobile-sticky-cta{
-    display:none;
+    display:flex;
     position:fixed;
     left:14px;
     right:14px;
@@ -1606,25 +1609,24 @@ footer{
       <p class="hero-copy">
         Rankwise runs your Google Business Profile, your reviews, and your city pages —
         the three things that decide which contractor homeowners call first.
-        One contractor per city. Month to month. Milestones in writing.
       </p>
       <div class="hero-actions">
         <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=hero-preview" class="btn-primary" data-cta-location="hero-primary">Check my Map Pack standing</a>
         <a href="#lab" class="btn-secondary" data-cta-location="hero-secondary">See the market data</a>
       </div>
       <p class="hero-note">Free 15-minute audit · No pitch deck · One HVAC contractor per city</p>
-      <div class="hero-data" aria-label="What Rankwise does">
+      <div class="hero-data" aria-label="Why Rankwise">
         <div>
-          <strong>Google Business Profile</strong>
-          <span>set up, posted, and managed for you every week</span>
+          <strong>83% of searches</strong>
+          <span>show the Map Pack before a single website link</span>
         </div>
         <div>
-          <strong>Reviews &amp; local SEO</strong>
-          <span>built to clear the Map Pack bar in your city</span>
+          <strong>1 contractor per city</strong>
+          <span>your competitors can't hire us while you're a client</span>
         </div>
         <div>
-          <strong>Weekly scorecard</strong>
-          <span>rankings, calls, and next moves in plain English</span>
+          <strong>0 long-term contracts</strong>
+          <span>month to month — position milestones agreed in writing</span>
         </div>
       </div>
     </div>
@@ -2054,7 +2056,7 @@ footer{
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
           <span class="gb-icon">✓</span>
-          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. Miss it — billing pauses until we hit it.</span>
+          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
     </div>
@@ -2247,20 +2249,20 @@ footer{
       <h2>Questions we get a lot.</h2>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
-      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
-    </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in your city and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
+      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
       <div class="faq-a">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
+      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in your city and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+    </div>
+    <div class="faq-item reveal in" onclick="toggleFaq(this)">
+      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
+      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
     </div>
     <div class="faq-item reveal in" onclick="toggleFaq(this)">
       <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
@@ -2299,7 +2301,7 @@ footer{
   </div>
 </footer>
 
-<a class="mobile-sticky-cta" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book 15-minute call</a>
+<a class="mobile-sticky-cta" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book my free 15-min audit</a>
 
 <script>
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')})},{threshold:.1});
