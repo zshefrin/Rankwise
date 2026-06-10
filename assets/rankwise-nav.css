@@ -27,11 +27,11 @@
 .rw-nav__logo {
   flex: 0 0 auto;
   color: #fff;
-  font-family: var(--display, "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif);
+  font-family: var(--headline, "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif);
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.6;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
@@ -88,10 +88,35 @@
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.rw-nav__cta:hover {
+  background: rgba(242, 181, 51, 0.22);
+  border-color: rgba(242, 181, 51, 0.75);
+  color: #ffe49a;
+  transform: translateY(-1px);
+}
+
+.rw-nav__cta:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.rw-nav :focus-visible {
+  outline: 2px solid #f2c95a;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rw-nav,
+  .rw-nav * {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .rw-nav__hamburger {

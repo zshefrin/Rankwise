@@ -1185,6 +1185,7 @@ function toggleFaq(item){{const o=item.classList.contains('open');document.query
   var sticky=document.querySelector('.mobile-sticky-cta');
   var contact=document.getElementById('contact');
   if(!sticky)return;
+  window.__rwStickyCtaSync=true;
   function sync(){{
     var pastHero=window.scrollY>window.innerHeight*.6;
     var nearBooking=contact&&contact.getBoundingClientRect().top<window.innerHeight*.85;

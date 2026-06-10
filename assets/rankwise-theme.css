@@ -4,6 +4,23 @@
    cascade automatically adjusts to the light editorial theme */
 *,*::before,*::after{box-sizing:border-box}
 
+/* ── Self-hosted display faces (latin subsets) ───────────── */
+@font-face{
+  font-family:"Bricolage Grotesque";font-style:normal;font-weight:800;font-display:swap;
+  src:url(/assets/fonts/bricolage-grotesque-800-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"Instrument Serif";font-style:italic;font-weight:400;font-display:swap;
+  src:url(/assets/fonts/instrument-serif-italic-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"Headline Fallback";
+  src:local("Avenir Next Bold"),local("Avenir Next"),local("Segoe UI Bold"),local("Segoe UI"),local("Helvetica Neue"),local("Arial");
+  size-adjust:103%;
+}
+
 /* ── Retheme: dark vars → light editorial ─────────────────── */
 :root{
   --paper:#F7F0E3;
@@ -19,14 +36,46 @@
   --accent-2:#0F766E;
   --accent-3:#D95F42;
   --accent-4:#B84A32;
+  --headline:"Bricolage Grotesque","Headline Fallback","Avenir Next","Segoe UI",sans-serif;
   --display:"Avenir Next","Segoe UI","Trebuchet MS",sans-serif;
-  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --serif:"Instrument Serif","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
   --text:"Avenir Next","Segoe UI","Helvetica Neue",sans-serif;
+  --r-s:8px;
+  --r-m:14px;
+  --r-l:20px;
+  --hairline:1px solid rgba(23,35,31,.12);
+  --shadow-s:0 1px 0 rgba(23,35,31,.03),0 1px 3px rgba(23,35,31,.06),0 8px 22px -14px rgba(23,35,31,.16);
+  --shadow-m:0 2px 4px rgba(23,35,31,.05),0 18px 38px -18px rgba(23,35,31,.24);
 }
 body{
   background:linear-gradient(180deg,#F7F0E3 0%,#FFFDF7 50%,#E8F1EB 100%)!important;
   color:var(--ink)!important;
   -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:220px 220px;
+}
+::selection{background:rgba(242,181,51,.32);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent-2)!important;outline-offset:2px}
+footer :focus-visible,.rw-nav :focus-visible,.hero :focus-visible{outline-color:#F2C95A!important}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto!important}
+}
+/* ── Headline + serif voices on themed pages ─────────────── */
+h1,h2,.page-header h1,article h2{font-family:var(--headline)!important;font-weight:800!important;letter-spacing:-.018em!important}
+.post-title,.audit-cta h3{font-family:var(--headline)!important;font-weight:800!important}
+h1 .serif,h2 .serif,h1 em,h2 em{
+  font-family:var(--serif)!important;font-style:italic!important;font-weight:400!important;letter-spacing:.004em!important;font-size:1.04em;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 9' preserveAspectRatio='none'%3E%3Cpath d='M3 6.5C50 3.5 105 3 217 5.2' fill='none' stroke='%23F2B533' stroke-width='2.6' stroke-linecap='round' opacity='.62'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:0 96%;
+  background-size:100% .085em;
+  padding-bottom:.06em;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
 }
 /* ── Page headers ───────────────────────────────────────── */
 .page-header{
@@ -175,4 +224,74 @@ td{color:var(--ink-soft)!important}
 @media(max-width:700px){
   .page-header{padding:52px 18px 38px!important}
   article{padding:24px 18px 56px!important}
+}
+/* ── Pass 2 (2026-06-10): bolder editorial scale, same identity ── */
+/* City-page dark hero (h1 lives in .hero-left; audit's light hero is untouched) */
+.hero-left h1{
+  font-size:clamp(44px,5.8vw,82px)!important;
+  line-height:.95!important;
+  letter-spacing:-.026em!important;
+}
+.hero-left h1 .serif{
+  color:#F5C153!important;
+  background-image:none!important;
+  padding-bottom:0!important;
+}
+.hero-left .eyebrow::before{
+  width:7px!important;height:7px!important;
+  border-radius:1.5px!important;
+  transform:rotate(45deg);
+  background:#F2B533!important;
+}
+.hero-left .eyebrow::after{
+  content:"";
+  width:64px;height:1px;flex-shrink:0;
+  background:linear-gradient(90deg,rgba(255,255,255,.55),transparent);
+}
+.hero-left .hero-copy{
+  border-left:2px solid rgba(242,181,51,.7)!important;
+  padding-left:18px!important;
+}
+/* Signature CTA: rectangular stamp with amber offset shadow */
+.btn-primary,.audit-cta a,.cta-primary{
+  border-radius:12px!important;
+  box-shadow:5px 5px 0 rgba(242,181,51,.9)!important;
+}
+.btn-primary:hover,.audit-cta a:hover,.cta-primary:hover{
+  transform:translate(-2px,-2px)!important;
+  box-shadow:7px 7px 0 rgba(242,181,51,.95)!important;
+}
+.btn-primary:active,.audit-cta a:active,.cta-primary:active{
+  transform:translate(2px,2px)!important;
+  box-shadow:2px 2px 0 rgba(242,181,51,.9)!important;
+}
+/* Blog/Lab masthead: editorial display scale */
+.labx-mast{padding:64px 28px 44px!important}
+.labx-mast h1{
+  font-family:var(--headline)!important;
+  font-weight:800!important;
+  font-size:clamp(44px,6.2vw,82px)!important;
+  line-height:.96!important;
+  letter-spacing:-.026em!important;
+  max-width:920px!important;
+}
+.labx-eyebrow::before{
+  content:"";
+  width:7px;height:7px;flex-shrink:0;
+  border-radius:1.5px;
+  transform:rotate(45deg);
+  background:#F2B533;
+}
+/* Article/about page titles */
+article>h1,article .meta+h1{
+  font-size:clamp(38px,4.6vw,60px)!important;
+  line-height:.98!important;
+  letter-spacing:-.024em!important;
+}
+/* Audit hero scale-up (light hero) */
+.hero h1{font-size:clamp(34px,5.6vw,64px)}
+@media(max-width:700px){
+  .labx-mast{padding:44px 18px 30px!important}
+  .labx-mast h1{font-size:clamp(36px,9.6vw,44px)!important}
+  .hero-left h1{font-size:clamp(38px,10vw,48px)!important}
 }

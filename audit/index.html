@@ -337,6 +337,7 @@ footer{padding:20px 0 36px}
   var sticky=document.querySelector('.mobile-sticky-cta');
   var book=document.getElementById('book');
   if(!sticky)return;
+  window.__rwStickyCtaSync=true;
   function sync(){
     var pastHero=window.scrollY>window.innerHeight*.5;
     var nearBook=book&&book.getBoundingClientRect().top<window.innerHeight*.85;

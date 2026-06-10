@@ -49,6 +49,10 @@
     });
   }
 
+  // Fallback sticky-CTA sync for pages without their own (blog, lab, about).
+  // Pages with booking embeds (home, audit, city pages) ship an inline sync
+  // with proximity suppression and set window.__rwStickyCtaSync — defer to it,
+  // otherwise this unsuppressed toggle overlays the CTA on the Cal.com embed.
   var stickyCta = document.querySelector('.mobile-sticky-cta');
   function syncStickyCta(){
     if (!stickyCta) return;
@@ -56,7 +60,8 @@
     document.body.classList.toggle('show-mobile-cta', shouldShow);
   }
 
-  if (stickyCta) {
+  if (stickyCta && !window.__rwStickyCtaSync) {
+    window.__rwStickyCtaSync = true;
     syncStickyCta();
     window.addEventListener('scroll', syncStickyCta, { passive: true });
     window.addEventListener('resize', syncStickyCta);
