@@ -610,6 +610,25 @@ if len(_style_parts) != 2 or "</style>" not in _style_parts[1]:
     )
 CSS = _style_parts[1].split("</style>")[0]
 
+# Per-city market data is scraped from the home map's city pins (data-volume /
+# data-intent), so the map and the city pages always quote the same numbers.
+import re as _re
+
+_CITY_MAP_DATA: dict = {}
+for _m in _re.finditer(
+    r'class="metro-city[^"]*"[^>]*data-city="([^"]+)"[^>]*data-volume="([^"]+)"[^>]*data-intent="([^"]+)"',
+    _index_html,
+):
+    _CITY_MAP_DATA[_m.group(1)] = {
+        "volume": f"{_m.group(2)}/mo",
+        "terms": [t.strip() for t in _m.group(3).split(",")],
+    }
+if len(_CITY_MAP_DATA) < 15:
+    raise SystemExit(
+        f"fatal: only scraped map data for {len(_CITY_MAP_DATA)} cities from index.html "
+        f"metro-city pins — expected 17. Did the home map markup change?"
+    )
+
 # Nav markup — single source of truth shared with sync_nav.py (finding #6). Read it from
 # partials/nav.html instead of hardcoding a copy here, so a Codex/operator nav edit can't
 # silently drift the generated city pages from the rest of the site.
@@ -628,6 +647,18 @@ TESTIMONIALS_CSS = """
 """
 
 CITY_EXTRA_CSS = """
+.problem-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.problem-card{border:1px solid var(--line);border-radius:14px;padding:26px 24px;background:var(--surface);transition:transform .22s ease,border-color .22s ease}
+.problem-card:hover{transform:translateY(-2px);border-color:var(--link)}
+.problem-card h3{font-family:var(--display);font-size:19px;line-height:1.15;margin-bottom:10px;color:var(--ink)}
+.problem-card p{font-size:14px;color:var(--ink-soft);line-height:1.6}
+.how-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.how-grid .step{background:rgba(255,255,255,.05);border-radius:14px;padding:24px 22px}
+.how-grid .step-num{font-family:var(--display);font-size:12px;font-weight:800;letter-spacing:.08em;color:rgba(245,183,49,.78);margin-bottom:12px;display:block}
+/* !important needed: rankwise-theme.css forces article h3/p to ink colors
+   (meant for blog/lab article bodies) which camouflages text on this dark section */
+.how-grid .step h3{font-family:var(--display);font-size:19px;font-weight:700;margin-bottom:9px;color:#fff!important;line-height:1.1}
+.how-grid .step p{font-size:14px;color:rgba(245,240,232,.62)!important;line-height:1.65}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.58fr);gap:42px;align-items:end;width:100%}
 .hero-left{max-width:760px}
 .hero-lock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;max-width:640px}
@@ -662,7 +693,7 @@ CITY_EXTRA_CSS = """
 .city-links-list{display:flex;flex-wrap:wrap;gap:10px}
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
-@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}.problem-grid,.how-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.hero-right{display:none}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
 
@@ -729,9 +760,10 @@ def _aio_section_html(c: dict) -> str:
 
 
 def _market_snapshot_html(c: dict, tl: str) -> str:
-    terms = c.get("terms", [f"{tl} repair", f"{tl} service", f"{tl} installation"])
+    map_data = _CITY_MAP_DATA.get(c["name"], {})
+    terms = c.get("terms") or map_data.get("terms") or [f"{tl} repair", f"{tl} service", f"{tl} installation"]
     terms_html = "\n          ".join(f"<li>{term}</li>" for term in terms)
-    volume = c.get("volume", "Market check")
+    volume = c.get("volume") or map_data.get("volume") or "Market check"
     areas = c.get("areas", f"{c['name']} service area")
     first_move = c.get(
         "first_move",
