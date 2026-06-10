@@ -116,42 +116,34 @@
   z-index:1;
   opacity:.98;
 }
-.metro-water-shape{
-  fill:rgba(15,118,110,.15);
-  stroke:rgba(15,118,110,.20);
-  stroke-width:1.2;
+/* Water geometry is real OpenStreetMap data (bays/rivers/lakes projected into
+   the same equirectangular frame as the municipal outlines). The strait is a
+   constructed backdrop hugging the true west-coast land edges. Bays/rivers/
+   lakes render ABOVE the land tints — municipal boundaries legally extend
+   into water, so water-on-top is the geographically correct look. */
+.mw-strait{
+  fill:#C5E0DA;
+  stroke:none;
   pointer-events:none;
 }
-.metro-river{
-  fill:none;
-  stroke:rgba(15,118,110,.28);
-  stroke-width:4.2;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  pointer-events:none;
+.metro-water-over{pointer-events:none}
+.mw-bay{
+  fill:#C0DDD7;
+  stroke:#92BFB7;
+  stroke-width:.7;
+  vector-effect:non-scaling-stroke;
 }
-.metro-river-main{
-  stroke:rgba(15,118,110,.34);
-  stroke-width:8.5;
+.mw-river{
+  fill:#C8E2DC;
+  stroke:#9CC5BD;
+  stroke-width:.6;
+  vector-effect:non-scaling-stroke;
 }
-.metro-road{
-  fill:none;
-  stroke:rgba(216,95,66,.24);
-  stroke-width:2.1;
-  stroke-linecap:round;
-  stroke-dasharray:0;
-  pointer-events:none;
-}
-.metro-road-main{
-  stroke:rgba(15,118,110,.34);
-  stroke-width:2.8;
-}
-.metro-road-soft{
-  stroke:rgba(242,181,51,.32);
-  stroke-width:1.8;
-  stroke-dasharray:7 8;
-  pointer-events:none;
-  opacity:.7;
+.mw-lake{
+  fill:#BFDCD6;
+  stroke:#92BFB7;
+  stroke-width:.6;
+  vector-effect:non-scaling-stroke;
 }
 .metro-route-label,
 .metro-map-label,
@@ -187,8 +179,8 @@
   fill:rgba(23,35,31,.32);
 }
 .metro-area-context{
-  fill:rgba(255,253,247,.30);
-  stroke:rgba(23,35,31,.24);
+  fill:#F4EEE0;
+  stroke:rgba(23,35,31,.26);
   stroke-width:1.55;
   vector-effect:non-scaling-stroke;
   fill-rule:evenodd;
@@ -488,4 +480,15 @@
   .metro-market-index{grid-template-columns:repeat(2,minmax(0,1fr))}
   .metro-market-chip{font-size:11px}
   .metro-actions .btn-primary,.metro-page-link{width:100%}
+}
+.metro-data-line{
+  margin:0;
+  font-size:13px;
+  color:var(--ink-soft);
+  letter-spacing:.01em;
+}
+.metro-data-line strong{
+  font-family:var(--display);
+  color:var(--ink);
+  font-weight:800;
 }
