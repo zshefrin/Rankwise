@@ -39,318 +39,178 @@
 <link rel="preconnect" href="https://app.cal.com" crossorigin>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 :root{
-  --paper:#0C1220;
-  --paper-2:#111827;
-  --paper-3:#1A2332;
-  --ink:#F5F0E8;
-  --ink-soft:rgba(245,240,232,.68);
-  --line:rgba(245,240,232,.14);
-  --line-strong:rgba(245,240,232,.24);
-  --accent:#F5B731;
-  --accent-2:#2BA898;
-  --accent-3:#E8654A;
-  --accent-4:#D4553A;
-  --radius:18px;
+  /* Light editorial tokens — mirror rankwise-theme.css; kept inline as resilient fallbacks
+     (the previous build left dark-theme values here, which rendered broken on the light theme). */
+  --paper:#F7F0E3;
+  --paper-2:#FFFDF7;
+  --paper-3:#FFFFFF;
+  --ink:#17231F;
+  --ink-soft:rgba(23,35,31,.76);
+  --ink-muted:rgba(23,35,31,.54);
+  --line:rgba(23,35,31,.11);
+  --line-strong:rgba(23,35,31,.22);
+  --accent:#F2B533;
+  --accent-2:#0F766E;
+  --accent-3:#D95F42;
+  --accent-4:#B84A32;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(23,35,31,.04),0 10px 26px rgba(23,35,31,.06);
   --display:"Avenir Next","Segoe UI","Trebuchet MS",sans-serif;
   --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
   --text:"Avenir Next","Segoe UI","Helvetica Neue",sans-serif;
 }
 body{
   font-family:var(--text);
-  background:
-    radial-gradient(circle at 8% 0%,rgba(245,183,49,.10),transparent 28%),
-    radial-gradient(circle at 96% 7%,rgba(43,168,152,.12),transparent 33%),
-    linear-gradient(180deg,var(--paper),var(--paper-2) 55%,var(--paper) 100%);
+  background:linear-gradient(180deg,#F7F0E3 0%,#FFFDF7 50%,#E8F1EB 100%);
   color:var(--ink);
   line-height:1.6;
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
-.container{max-width:1100px;margin:0 auto}
+.wrap{max-width:820px;margin:0 auto;padding:0 24px}
 
-
-
-
-
-
-
-
-.back,
-.learn-more-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  border-radius:999px;
-  padding:10px 16px;
-  font-family:var(--display);
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.01em;
-  color:var(--paper);
-  background:linear-gradient(135deg,var(--accent),#F2C95A);
-  border:1px solid rgba(245,183,49,.65);
-  box-shadow:0 10px 24px rgba(245,183,49,.23);
-  transition:transform .2s ease, box-shadow .2s ease;
-  white-space:nowrap;
-}
-.back{
-  padding:9px 14px;
-}
-.back:hover,
-.learn-more-btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 14px 28px rgba(245,183,49,.30);
-}
-
+/* ── Hero ─────────────────────────────────────────────────── */
 .hero{
-  /* top padding clears the shared rw-nav (position:fixed, 76px) — the old nav was
-     sticky/in-flow so 32px was enough; +76 keeps the same visual gap below the nav. */
-  padding:108px 24px 8px;
-  /* rankwise-nav.css applies the dark HVAC photo as `.hero` background for the
-     marketing/city pages; this is a TEXT hero, so neutralise that leak and let the
-     light body show through (restores the pre-nav-refactor look). */
+  /* top padding clears the shared rw-nav (position:fixed, ~76px) */
+  padding:120px 0 8px;
+  text-align:center;
   background-image:none!important;
-}
-.hero-grid{
-  display:block;
-  max-width:920px;
-  margin:0 auto;
-}
-.hero-main{
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:28px 24px;
-  background:linear-gradient(170deg,rgba(255,255,255,.045),rgba(255,255,255,.01));
 }
 .eyebrow{
   display:inline-flex;align-items:center;gap:9px;
   font-family:var(--display);
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  font-size:11px;
-  color:var(--ink-soft);
-  margin-bottom:16px;
+  letter-spacing:.1em;text-transform:uppercase;
+  font-size:11px;font-weight:700;color:var(--accent-2);
+  margin-bottom:18px;
 }
-.eyebrow::before{
-  content:"";
-  width:8px;height:8px;border-radius:50%;
-  background:var(--accent-2);
-}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent-2)}
 h1{
-  font-family:var(--display);
-  font-size:clamp(34px,5.7vw,58px);
-  line-height:1;
-  letter-spacing:0;
-  margin-bottom:16px;
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(30px,5vw,52px);line-height:1.05;letter-spacing:-.02em;
+  max-width:16ch;margin:0 auto 18px;
+  overflow-wrap:break-word;
 }
 h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
-.sub{
-  font-size:17px;
-  color:var(--ink-soft);
-  max-width:710px;
-  margin-bottom:14px;
+.sub{font-size:18px;color:var(--ink-soft);max-width:620px;margin:0 auto 26px}
+.cta-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:16px 32px;border-radius:12px;text-decoration:none;
+  font-family:var(--display);font-size:17px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--accent-3),var(--accent-4));
+  box-shadow:0 10px 24px rgba(217,95,66,.28);
+  transition:transform .15s ease,box-shadow .15s ease;
 }
-.hero-actions{
-  display:flex;
-  gap:10px;
-  margin:0 0 12px;
-  flex-wrap:wrap;
-}
-.city-lock{
-  border:1px solid rgba(43,168,152,.42);
-  border-radius:8px;
-  background:rgba(43,168,152,.10);
-  color:var(--ink);
-  padding:11px 12px;
-  margin-bottom:12px;
-  font-size:14px;
-  line-height:1.35;
-}
-.city-lock strong{
-  color:var(--accent-2);
-  font-family:var(--display);
-}
-.call-preview{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-bottom:12px;
-}
-.call-item{
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:rgba(255,255,255,.035);
-  padding:12px;
-}
-.call-item strong{
-  display:block;
-  font-family:var(--display);
-  font-size:15px;
-  line-height:1.15;
-  margin-bottom:6px;
-}
-.call-item span{
-  display:block;
-  color:var(--ink-soft);
-  font-size:13px;
-  line-height:1.4;
-}
-.promise-wrap{
-  border:1px solid rgba(245,183,49,.35);
-  border-radius:8px;
-  background:linear-gradient(180deg,rgba(245,183,49,.11),rgba(245,183,49,.03));
-  padding:12px;
-  margin-bottom:0;
-}
-.promise-title{
-  font-family:var(--display);
-  font-size:18px;
-  margin-bottom:10px;
-}
-.promise-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-}
-.promise-item{
-  border:1px solid rgba(245,183,49,.32);
-  border-radius:8px;
-  background:rgba(12,18,32,.48);
-  padding:10px;
-  font-family:var(--display);
-  font-size:15px;
-  line-height:1.25;
-}
-.proof-badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:12px;
-}
-.proof-badge{
-  flex:1 1 130px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:10px 12px;
-  text-decoration:none;
-  color:var(--ink);
-  background:rgba(255,255,255,.028);
-  transition:border-color .2s ease,transform .2s ease;
-}
-.proof-badge:hover{
-  border-color:var(--accent);
-  transform:translateY(-1px);
-}
-.proof-badge strong{
-  display:block;
-  font-family:var(--display);
-  font-size:15px;
-  line-height:1.1;
-}
-.proof-badge span{
-  display:block;
-  color:var(--ink-soft);
-  font-size:12px;
-  margin-top:3px;
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(217,95,66,.36)}
+.hero-note{margin-top:15px;font-size:13.5px;color:var(--ink-muted)}
+.hero-note strong{color:var(--ink);font-family:var(--display);font-weight:700}
+
+/* ── Section scaffolding ──────────────────────────────────── */
+.section{padding:40px 0 0}
+.section-label{
+  font-family:var(--display);font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);
+  text-align:center;margin-bottom:18px;
 }
 
-.booking{
-  padding:8px 24px 28px;
-}
-.booking-shell{
+/* ── What we'll cover — numbered steps ────────────────────── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.step{
+  background:var(--paper-3);
   border:1px solid var(--line);
-  border-radius:18px;
-  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
-  padding:10px;
-  max-width:920px;
-  margin:0 auto;
+  border-radius:var(--radius);
+  padding:20px 18px;
+  box-shadow:var(--shadow);
 }
-#cal-embed{
-  width:100%;
-  min-height:700px;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid var(--line-strong);
+.step-num{
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:9px;
+  background:rgba(242,181,51,.18);color:#8a5e00;
+  font-family:var(--display);font-weight:800;font-size:15px;
+  margin-bottom:13px;
 }
-.cal-loading,
-.cal-fallback{
-  min-height:700px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-  text-align:center;
-  color:var(--ink-soft);
-  font-size:15px;
-  line-height:1.6;
-}
-.cal-fallback a{color:var(--accent);font-weight:700}
-.note{
-  text-align:center;
-  margin-top:12px;
-  color:var(--ink-soft);
-  font-size:13px;
-}
+.step-title{font-family:var(--display);font-weight:700;font-size:16px;margin-bottom:6px}
+.step-desc{font-size:14px;color:var(--ink-soft);line-height:1.5}
 
-footer{
-  padding:16px 24px 32px;
+/* ── How we work — clean term list ────────────────────────── */
+.terms{
+  margin-top:14px;
+  background:rgba(15,118,110,.055);
+  border:1px solid rgba(15,118,110,.18);
+  border-radius:var(--radius);
+  padding:20px 22px;
+  display:grid;gap:13px;
 }
-.footer-wrap{
-  max-width:1100px;
-  margin:0 auto;
-  border-top:1px solid var(--line);
-  padding-top:16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:8px;
-  color:var(--ink-soft);
-  font-size:13px;
-}
-.footer-wrap a{color:var(--ink-soft);text-decoration:none}
+.term{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:var(--ink-soft);line-height:1.45}
+.term svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--accent-2)}
+.term strong{font-family:var(--display);font-weight:700;color:var(--ink)}
+
+/* ── Booking ──────────────────────────────────────────────── */
+.booking{padding:44px 0 24px;scroll-margin-top:92px}
 .founder-strip{
-  display:flex;align-items:center;gap:14px;
-  border:1px solid var(--line);border-radius:12px;
-  background:rgba(255,255,255,.03);
-  padding:14px 16px;margin:6px 6px 16px;
+  display:flex;align-items:center;gap:15px;
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper-3);box-shadow:var(--shadow);
+  padding:16px 18px;margin-bottom:14px;
 }
-.founder-strip-avatar{
-  width:48px;height:48px;border-radius:50%;flex:none;
+.founder-avatar{
+  width:46px;height:46px;border-radius:50%;flex:none;
   display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,var(--accent),#F2C95A);
-  color:var(--paper);font-family:var(--display);font-weight:700;font-size:17px;
+  color:#3a2a00;font-family:var(--display);font-weight:800;font-size:16px;
 }
 .founder-strip strong{display:block;font-family:var(--display);font-size:15px;line-height:1.3}
-.founder-strip span{display:block;color:var(--ink-soft);font-size:13px;line-height:1.45;margin-top:2px}
-.book-direct-wrap{text-align:center;margin-bottom:20px}
-.book-direct-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:16px 32px;
-  background:linear-gradient(135deg,var(--accent-3),var(--accent-4));
-  color:#fff;border-radius:10px;text-decoration:none;
-  font-weight:700;font-size:17px;
-  box-shadow:0 10px 22px rgba(232,101,74,.26);
-  transition:transform .15s,box-shadow .15s;
+.founder-strip span{display:block;color:var(--ink-soft);font-size:13.5px;line-height:1.45;margin-top:3px}
+
+.proof-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.proof-badge{
+  flex:1 1 200px;display:flex;flex-direction:column;gap:3px;
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--paper-3);box-shadow:var(--shadow);
+  padding:13px 16px;text-decoration:none;color:var(--ink);
+  transition:border-color .15s ease,transform .15s ease;
 }
-.book-direct-btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(232,101,74,.38)}
-.book-direct-or{margin-top:10px;font-size:13px;color:var(--ink-soft)}
-@media(max-width:1000px){
+.proof-badge:hover{border-color:var(--accent-2);transform:translateY(-1px)}
+.proof-badge strong{font-family:var(--display);font-size:15px;line-height:1.1}
+.proof-badge span{font-size:12.5px;color:var(--ink-muted)}
 
+.cal-head{text-align:center;margin-bottom:14px}
+.cal-head .section-label{margin-bottom:6px}
+.cal-head p{font-size:14px;color:var(--ink-soft)}
+.cal-head .cal-reassure{margin-top:6px;font-size:13.5px;font-weight:700;color:#1F5C40}
+#cal-embed{
+  width:100%;min-height:640px;border-radius:14px;overflow:hidden;
+  border:1px solid var(--line-strong);background:var(--paper-3);
+}
+.cal-loading,.cal-fallback{
+  min-height:640px;display:flex;align-items:center;justify-content:center;
+  padding:24px;text-align:center;color:var(--ink-soft);font-size:15px;line-height:1.6;
+}
+.cal-fallback a{color:var(--accent-3);font-weight:700}
+.book-fallback{text-align:center;margin-top:14px;font-size:13.5px;color:var(--ink-muted)}
+.book-fallback a{color:var(--accent-3);font-weight:700;text-decoration:none}
 
+/* ── Footer ───────────────────────────────────────────────── */
+/* rankwise-theme.css forces footer{background:rgba(15,22,18,.96)!important} —
+   text here must be light or it disappears into that dark band. */
+footer{padding:20px 0 36px}
+.footer-wrap{
+  max-width:820px;margin:0 auto;padding:18px 24px 0;
+  border-top:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;color:rgba(255,255,255,.68);font-size:13px;
+}
+.footer-wrap a{color:rgba(255,255,255,.68);text-decoration:none}
 
-  .hero{padding:98px 16px 8px}
-  .booking{padding:8px 16px 24px}
-  .call-preview{grid-template-columns:1fr}
-  .promise-grid{grid-template-columns:1fr}
-  .promise-title{font-size:20px}
+@media(max-width:760px){
+  .hero{padding:104px 0 4px}
+  h1{font-size:clamp(27px,8vw,38px);max-width:18ch}
+  .section{padding:34px 0 0}
+  .steps{grid-template-columns:1fr}
   .sub{font-size:16px}
-  .hero-actions{margin-bottom:12px}
-  .learn-more-btn{font-size:12px;padding:9px 12px}
-  #cal-embed{min-height:480px}
-  .cal-loading,.cal-fallback{min-height:480px}
+  #cal-embed{min-height:520px}
+  .cal-loading,.cal-fallback{min-height:520px}
 }
 </style>
 <link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
@@ -376,69 +236,87 @@ footer{
 <main id="main-content">
 
 <section class="hero">
-  <div class="container hero-grid">
-    <div class="hero-main">
-      <div class="eyebrow">15-minute call · Lower Mainland HVAC</div>
-      <h1>Find the HVAC calls Google should be sending you.</h1>
-      <p class="sub">Book a 15-minute call with me — Zack, the operator behind Rankwise. I'll show how your company appears today, which calls in your city may be going to competitors, and what I'd do first to grow that call volume.</p>
-      <div class="city-lock"><strong>City lock:</strong> We only work with one HVAC contractor per city, based on the contractor's primary Google Business Profile city.</div>
-      <div class="hero-actions">
-        <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener" class="learn-more-btn">Book 15-minute call →</a>
-      </div>
+  <div class="wrap">
+    <div class="eyebrow">15-minute call · Lower Mainland HVAC</div>
+    <h1>Find the HVAC calls Google should be <span class="serif">sending you.</span></h1>
+    <p class="sub">Book a 15-minute call with me — Zack, the operator behind Rankwise. I'll show how your company appears today, which calls in your city may be going to competitors, and what I'd do first to grow your call volume.</p>
+    <a href="#book" class="cta-primary" data-cta="hero">Book your 15-minute call →</a>
+    <p class="hero-note"><strong>One HVAC contractor per city</strong> · Lower Mainland, BC only</p>
+  </div>
+</section>
 
-      <div class="call-preview" aria-label="What you get on the call">
-        <div class="call-item">
-          <strong>Call volume read</strong>
-          <span>Where ready-to-book homeowners are finding HVAC companies in your city.</span>
-        </div>
-        <div class="call-item">
-          <strong>Competitor snapshot</strong>
-          <span>The companies homeowners see first, and the proof signals helping them win calls.</span>
-        </div>
-        <div class="call-item">
-          <strong>90-day priority order</strong>
-          <span>The first moves for your Google listing, city pages, and booking path.</span>
-        </div>
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">What we'll cover on the call</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Call volume read</div>
+        <p class="step-desc">Where ready-to-book homeowners are finding HVAC companies in your city right now.</p>
       </div>
-
-      <div class="promise-wrap">
-        <div class="promise-title">Before you book</div>
-        <div class="promise-grid">
-          <div class="promise-item">No long contract. Month to month.</div>
-          <div class="promise-item">One HVAC contractor per city. No exceptions.</div>
-          <div class="promise-item">Position guarantee — agreed in writing before month one.</div>
-        </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Competitor snapshot</div>
+        <p class="step-desc">The companies homeowners see first, and the proof signals helping them win those calls.</p>
       </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">90-day priority order</div>
+        <p class="step-desc">The first moves for your Google listing, city pages, and booking path — in order.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <div class="proof-badges" aria-label="Verify Rankwise">
-        <a class="proof-badge" href="https://share.google/HpzICQISkfobGY5ot" target="_blank" rel="noopener">
-          <strong>Google</strong>
-          <span>Rankwise reviews on Google</span>
-        </a>
-        <a class="proof-badge" href="/lab/">
-          <strong>Rankwise Lab</strong>
-          <span>4 public market studies</span>
-        </a>
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">How we work</p>
+    <div class="terms">
+      <div class="term">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.7 5.3 8 14 3.3 9.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong>Month to month.</strong> No long contract — stay because it's working.</span>
+      </div>
+      <div class="term">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.7 5.3 8 14 3.3 9.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong>One HVAC contractor per city.</strong> Based on your primary Google Business Profile city — no exceptions.</span>
+      </div>
+      <div class="term">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.7 5.3 8 14 3.3 9.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong>Position guarantee.</strong> Agreed in writing before month one begins.</span>
       </div>
     </div>
   </div>
 </section>
 
 <section class="booking" id="book">
-  <div class="container booking-shell">
+  <div class="wrap">
+    <div class="cal-head">
+      <p class="section-label">Pick a time</p>
+      <p>Choose a 15-minute slot that works for you. You'll get a confirmation right away.</p>
+      <p class="cal-reassure">Free · No obligation · No pitch deck — and if your city's already taken, I'll tell you straight.</p>
+    </div>
+
     <div class="founder-strip">
-      <div class="founder-strip-avatar">ZS</div>
+      <div class="founder-avatar">ZS</div>
       <div>
         <strong>You book with me — Zack Shefrin, founder of Rankwise.</strong>
-        <span>Every audit lands in my inbox, not a team's. I pull your Map Pack numbers myself before the call.</span>
+        <span>Every call lands in my inbox, not a team's. I pull your Map Pack numbers myself before we talk.</span>
       </div>
     </div>
-    <div class="book-direct-wrap">
-      <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener" class="book-direct-btn">Book 15-minute call →</a>
-      <p class="book-direct-or">or pick a time using the calendar below</p>
+
+    <div class="proof-row" aria-label="Verify Rankwise">
+      <a class="proof-badge" href="https://share.google/HpzICQISkfobGY5ot" target="_blank" rel="noopener">
+        <strong>Google reviews</strong>
+        <span>See what clients say on Google</span>
+      </a>
+      <a class="proof-badge" href="/lab/">
+        <strong>Rankwise Lab</strong>
+        <span>4 public market studies</span>
+      </a>
     </div>
+
     <div id="cal-embed"></div>
-    <p class="note">Lower Mainland HVAC contractors only · One contractor per city (primary GBP city)</p>
+    <p class="book-fallback">Calendar not loading? <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener">Open the booking page directly →</a></p>
   </div>
 </section>
 
@@ -451,10 +329,31 @@ footer{
   </div>
 </footer>
 
+<a class="mobile-sticky-cta" href="#book" data-cta="mobile-sticky">Book my free 15-min audit</a>
+
+<script>
+(function(){
+  var sticky=document.querySelector('.mobile-sticky-cta');
+  var book=document.getElementById('book');
+  if(!sticky)return;
+  function sync(){
+    var pastHero=window.scrollY>window.innerHeight*.5;
+    var nearBook=book&&book.getBoundingClientRect().top<window.innerHeight*.85;
+    document.body.classList.toggle('show-mobile-cta',pastHero&&!nearBook);
+  }
+  sync();
+  window.addEventListener('scroll',sync,{passive:true});
+  window.addEventListener('resize',sync);
+})();
+</script>
+
 <script type="text/javascript">
 (function(){
   var params = new URLSearchParams(window.location.search);
-  var cfg = {"layout":"month_view","useSlotsViewOnSmallScreen":"true"};
+  // theme:"light" is set here (in the config that becomes the iframe URL) AND in the
+  // ui() call below — the ui() theme alone follows the visitor's OS scheme, so pinning
+  // it in the config keeps the calendar light for dark-mode visitors too.
+  var cfg = {"layout":"month_view","useSlotsViewOnSmallScreen":"true","theme":"light"};
   var embedEl = document.getElementById("cal-embed");
   var started = false;
   ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){
@@ -482,13 +381,16 @@ footer{
   }
 
   // Booking-intent signal: the Cal embed is cross-origin (GA4 can't see form_start
-  // inside it), so track clicks on the direct cal.com booking links as the
+  // inside it), so track clicks on the direct cal.com booking links AND the hero
+  // "book your call" button (which scrolls to the embedded calendar) as the
   // top-of-funnel event, mirroring audit_cta_clicked on the marketing pages.
   document.addEventListener("click",function(event){
     var link=event.target.closest("a");
     if(!link)return;
     var href=link.getAttribute("href")||"";
-    if(href.indexOf("cal.com")===-1)return;
+    var isCal=href.indexOf("cal.com")!==-1;
+    var isBookAnchor=href.indexOf("#book")!==-1;
+    if(!isCal && !isBookAnchor)return;
     if(typeof gtag!=="function")return;
     gtag("event","audit_cta_clicked",{
       page_path:window.location.pathname,
