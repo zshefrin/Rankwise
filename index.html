@@ -1422,6 +1422,26 @@ footer{
   h1{font-size:clamp(34px,10.5vw,44px);line-height:1.02}
   .hero-copy{font-size:15px;line-height:1.55}
 }
+/* ── chapter flow (homepage rebuild 2026-06) ───────────── */
+.mappack{padding:78px 52px 58px}
+.mappack .section-head{margin-bottom:42px}
+.mappack-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:40px;align-items:start}
+.mappack-side-sub{font-size:14px;color:var(--ink-soft);opacity:.88;margin-bottom:18px;max-width:430px;line-height:1.6}
+.mp-slot3{overflow:hidden}
+.mp-slot3-swap{position:relative;min-height:46px;flex:1}
+.mp-slot3-label,.mp-slot3-you{transition:transform .7s cubic-bezier(.22,.8,.3,1) .55s,opacity .7s ease .55s}
+.mp-slot3-you{position:absolute;inset:0;transform:translateY(135%);opacity:0}
+.mappack.anim .mp-slot3-label{transform:translateY(-135%);opacity:0}
+.mappack.anim .mp-slot3-you{transform:none;opacity:1}
+.hero-source{font-family:var(--display);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.45;margin-top:12px}
+.how-merged{padding-top:0}
+.cta-call-items{margin-top:10px}
+.services-grid .service-card:nth-child(2){transition-delay:.1s}
+.services-grid .service-card:nth-child(3){transition-delay:.2s}
+.how-steps .step:nth-child(3){transition-delay:.1s}
+.how-steps .step:nth-child(5){transition-delay:.2s}
+@media(prefers-reduced-motion:reduce){.mp-slot3-label,.mp-slot3-you{transition:none}.mappack .mp-slot3-label{transform:translateY(-135%);opacity:0}.mappack .mp-slot3-you{transform:none;opacity:1}}
+@media(max-width:900px){.mappack{padding:56px 18px 40px}.mappack-grid{grid-template-columns:1fr;gap:26px}}
 </style>
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
 <link rel="preload" href="/assets/home-map.css?v=metro-map-17-20260607" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -1463,58 +1483,111 @@ footer{
       <p class="hero-note">Free 15-minute audit · No pitch deck · One HVAC contractor per city</p>
       <div class="hero-data" aria-label="Rankwise market proof">
         <div>
-          <strong>17 markets</strong>
-          <span>tracked across the Lower Mainland</span>
-        </div>
-        <div>
-          <strong>25 terms</strong>
-          <span>HVAC search queries monitored weekly</span>
+          <strong>83%</strong>
+          <span>of homeowner HVAC searches show the Map Pack first</span>
         </div>
         <div>
           <strong>75</strong>
           <span>Map Pack positions tracked in public market studies</span>
         </div>
+        <div>
+          <strong>17 cities</strong>
+          <span>monitored weekly across the Lower Mainland</span>
+        </div>
+      </div>
+      <p class="hero-source">Rankwise Lab · May 2026 public dataset · no client data, no fabricated results</p>
+    </div>
+  </div>
+</section>
+
+<section class="mappack" id="mappack">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="label">01 · The prize</div>
+      <h2>Three slots.<br>Two are taken.<br><span class="serif">One rotates.</span></h2>
+      <p class="sub">The Map Pack shows up on 83% of homeowner HVAC searches — before a single website link. Across 12 tracked Metro Vancouver searches, two recurring businesses took nearly a third of all 36 slots. The third slot rotates. That's the slot we compete for.</p>
+    </div>
+    <div class="mappack-grid">
+      <div class="mp-panel reveal in">
+        <div class="mp-search">
+          <span style="font-size:12px;opacity:.5">🔍</span>
+          <span class="mp-search-q">hvac contractor near me</span>
+          <span class="mp-search-lbl">Google Map Pack</span>
+        </div>
+        <div class="mp-listings">
+          <div class="mp-item">
+            <div class="mp-pos">1</div>
+            <div>
+              <div class="mp-biz-name">North Van HVAC Co.</div>
+              <div><span class="mp-stars">★★★★★</span><span class="mp-rev">5.0 · 41 reviews</span></div>
+              <div class="mp-sub">HVAC Contractor · <span class="mp-open">Open</span> · North Vancouver</div>
+            </div>
+          </div>
+          <div class="mp-item">
+            <div class="mp-pos">2</div>
+            <div>
+              <div class="mp-biz-name">Metro Heating &amp; Cooling</div>
+              <div><span class="mp-stars">★★★★½</span><span class="mp-rev">4.8 · 278 reviews</span></div>
+              <div class="mp-sub">Air conditioning contractor · <span class="mp-open">Open</span> · Vancouver</div>
+            </div>
+          </div>
+          <div class="mp-item mp-slot3">
+            <div class="mp-pos mp-pos-you">3</div>
+            <div class="mp-slot3-swap">
+              <div class="mp-slot3-label">
+                <div class="mp-biz-name" style="opacity:.55">The rotating slot</div>
+                <div class="mp-sub">Changes by keyword, neighbourhood, and profile activity</div>
+              </div>
+              <div class="mp-slot3-you">
+                <div class="mp-biz-name mp-biz-name-you">Your company</div>
+                <div class="mp-sub"><span class="mp-open">Your reviews · your photos · your service area</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mp-footer">Slots 1–2 illustrative, from the May 2026 dataset — ratings there run 4.7–5.0 across the board. Slot 3 rotates; that's the opening.</div>
+      </div>
+      <div class="mappack-side reveal in">
+        <div class="label" style="margin-bottom:10px">The bar to clear</div>
+        <p class="mappack-side-sub">36 Map Pack appearances across 12 searches — review count is a band to clear, not a ladder to climb.</p>
+        <div class="rg-rows">
+          <div class="rg-row">
+            <div class="rg-pos">1</div>
+            <span class="rg-name">50+ reviews <span style="font-size:11px;opacity:.6;font-weight:400">(most of the pack · median 198)</span></span>
+            <div class="rg-track"><div class="rg-fill" style="width:100%"></div></div>
+            <span class="rg-n">21</span>
+          </div>
+          <div class="rg-row">
+            <div class="rg-pos">2</div>
+            <span class="rg-name">20–49 reviews</span>
+            <div class="rg-track"><div class="rg-fill" style="width:67%"></div></div>
+            <span class="rg-n">14</span>
+          </div>
+          <div class="rg-row">
+            <div class="rg-pos">3</div>
+            <span class="rg-name">Under 20 reviews <span style="font-size:11px;opacity:.6;font-weight:400">(the door isn't fully closed)</span></span>
+            <div class="rg-track"><div class="rg-fill" style="width:5%"></div></div>
+            <span class="rg-n">1</span>
+          </div>
+          <div class="rg-divider"><span>Outside Map Pack</span></div>
+          <div class="rg-row">
+            <div class="rg-pos rg-pos-you">?</div>
+            <span class="rg-name rg-name-you">Your company (typical entry)</span>
+            <div class="rg-track"><div class="rg-fill rg-fill-you" style="width:6%"></div></div>
+            <span class="rg-n rg-n-you">18</span>
+          </div>
+        </div>
+        <p class="rg-note">21 of 36 appearances carried 50+ reviews — median 198 — yet ratings were nearly uniform. Reviews get you considered; profile signals separate the three. <a href="/lab/metro-vancouver-hvac-map-pack-market-study-2026/" style="color:inherit;font-weight:700">Read the full study →</a></p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="audit-strip" aria-label="Free audit preview">
-  <div class="container audit-strip-grid">
-    <h2>What you see on the free audit call</h2>
-    <div class="audit-item">
-      <strong>Live Map Pack gap</strong>
-      <span>Who outranks you, where they win, and which city terms are most realistic.</span>
-    </div>
-    <div class="audit-item">
-      <strong>Call upside estimate</strong>
-      <span>A plain read on how much local demand is going to competitors each month.</span>
-    </div>
-    <div class="audit-item">
-      <strong>90-day first moves</strong>
-      <span>The fastest GBP, local SEO, and review actions to start compounding.</span>
-    </div>
-  </div>
-</section>
-
-<div class="data-band">
-  <div class="data-band-inner">
-    <span class="data-band-label">Rankwise Lab</span>
-    <div class="data-band-stats">
-      <span><strong>25</strong> HVAC search terms tracked</span>
-      <span><strong>17</strong> Lower Mainland service markets</span>
-      <span>Pack review median: <strong>198</strong></span>
-      <span><strong>21/36</strong> listings carry 50+ reviews</span>
-    </div>
-    <a href="/lab/" class="data-band-link">See the data →</a>
-  </div>
-</div>
-
 <section class="metro-map-section" id="cities">
   <div class="container">
     <div class="metro-map-head reveal in">
       <div>
-        <div class="label">Lower Mainland map</div>
+        <div class="label">02 · Your city</div>
         <h2>Pick a city.<br><span class="serif">See the local Map Pack angle.</span></h2>
       </div>
       <p class="metro-map-sub">Rankwise works with one HVAC contractor per city. Live markets stay focused on places with clear local HVAC demand; expansion markets stay on a watchlist until the search data earns a page.</p>
@@ -1664,96 +1737,10 @@ footer{
   </div>
 </section>
 
-<section>
-  <div class="container gap-layout reveal in">
-    <div class="gap-copy">
-      <div class="label">Why inbound stalls</div>
-      <h2>Three spots.<br>Hundreds of searches.<br><span class="serif">You're watching it happen.</span></h2>
-      <p class="sub">When a homeowner types "hvac repair near me," Google shows a Map Pack — three local businesses. Those three get the calls. Everyone else gets nothing, regardless of how good their work is.</p>
-      <div class="gap-stats">
-        <div><strong>3 spots</strong><span>where all local inbound demand concentrates</span></div>
-        <div><strong>93%</strong><span>more calls go to the Map Pack than page 2 (SOCi/Semrush Local Search 2024)</span></div>
-      </div>
-      <p class="gap-note">The gap is real, but the barrier isn't what most contractors think. With the right signals applied consistently, you move from buried to booked — faster than the competition expects.</p>
-    </div>
-    <div class="mp-panel">
-      <div class="mp-search">
-        <span style="font-size:12px;opacity:.5">🔍</span>
-        <span class="mp-search-q">hvac contractor near me</span>
-        <span class="mp-search-lbl">Google Map Pack</span>
-      </div>
-      <div class="mp-listings">
-        <div class="mp-item">
-          <div class="mp-pos">1</div>
-          <div>
-            <div class="mp-biz-name">North Van HVAC Co.</div>
-            <div><span class="mp-stars">★★★★★</span><span class="mp-rev">5.0 · 41 reviews</span></div>
-            <div class="mp-sub">HVAC Contractor · <span class="mp-open">Open</span> · North Vancouver</div>
-          </div>
-        </div>
-        <div class="mp-item">
-          <div class="mp-pos">2</div>
-          <div>
-            <div class="mp-biz-name">Metro Heating &amp; Cooling</div>
-            <div><span class="mp-stars">★★★★½</span><span class="mp-rev">4.8 · 278 reviews</span></div>
-            <div class="mp-sub">Air conditioning contractor · <span class="mp-open">Open</span> · Vancouver</div>
-          </div>
-        </div>
-        <div class="mp-item">
-          <div class="mp-pos mp-pos-you">?</div>
-          <div>
-            <div class="mp-biz-name mp-biz-name-you">Your company</div>
-            <div><span class="mp-stars mp-stars-dim">★★★</span><span class="mp-rev" style="color:rgba(232,101,74,.8)">4.1 · 18 reviews</span></div>
-            <div class="mp-sub"><span class="mp-pos-label">Not in Map Pack — page 2 or lower</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="mp-footer">Example pack from the May 2026 dataset — in it, ratings ran 4.7–5.0 across the board. Visibility, not quality, separates the three.</div>
-    </div>
-  </div>
-</section>
-
-<section class="review-gap">
-  <div class="container">
-    <div class="rg-head">
-      <div class="label">What actually determines Map Pack position</div>
-      <p>36 Map Pack appearances across 12 Metro Vancouver HVAC searches — May 2026 dataset, published as the Rankwise Lab flagship study. Review count is a band to clear, not a ladder to climb.</p>
-    </div>
-    <div class="rg-rows">
-      <div class="rg-row">
-        <div class="rg-pos">1</div>
-        <span class="rg-name">50+ reviews <span style="font-size:11px;opacity:.6;font-weight:400">(most of the pack · median 198)</span></span>
-        <div class="rg-track"><div class="rg-fill" style="width:100%"></div></div>
-        <span class="rg-n">21</span>
-      </div>
-      <div class="rg-row">
-        <div class="rg-pos">2</div>
-        <span class="rg-name">20–49 reviews</span>
-        <div class="rg-track"><div class="rg-fill" style="width:67%"></div></div>
-        <span class="rg-n">14</span>
-      </div>
-      <div class="rg-row">
-        <div class="rg-pos">3</div>
-        <span class="rg-name">Under 20 reviews <span style="font-size:11px;opacity:.6;font-weight:400">(the door isn't fully closed)</span></span>
-        <div class="rg-track"><div class="rg-fill" style="width:5%"></div></div>
-        <span class="rg-n">1</span>
-      </div>
-      <div class="rg-divider"><span>Outside Map Pack</span></div>
-      <div class="rg-row">
-        <div class="rg-pos rg-pos-you">?</div>
-        <span class="rg-name rg-name-you">Your company (typical entry)</span>
-        <div class="rg-track"><div class="rg-fill rg-fill-you" style="width:6%"></div></div>
-        <span class="rg-n rg-n-you">18</span>
-      </div>
-    </div>
-    <p class="rg-note">21 of 36 Map Pack appearances carried 50+ reviews — yet ratings were nearly uniform at 4.7–5.0. Reviews get you considered; profile signals separate the three. Both are levers Rankwise works on. <a href="/lab/metro-vancouver-hvac-map-pack-market-study-2026/" style="color:inherit;font-weight:700">Read the full study →</a></p>
-  </div>
-</section>
-
 <section class="signals" id="signals">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">How the Map Pack actually works</div>
+      <div class="label">03 · The four signals</div>
       <h2>Four signals.<br>Most contractors are <span class="serif">weak on all four.</span></h2>
       <p class="sub">Google weighs relevance, proximity, and prominence. These four working signals are where that translates into rank — and where most new entrants are weak.</p>
     </div>
@@ -1796,9 +1783,9 @@ footer{
 <section class="services" id="services">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What we do</div>
-      <h2>One operator.<br>Three engines.<br><span class="serif">One outcome.</span></h2>
-      <p class="sub">Everything points to one metric that matters: more qualified calls from homeowners ready to book.</p>
+      <div class="label">04 · The system</div>
+      <h2>One operator.<br>Three engines.<br><span class="serif">One weekly loop.</span></h2>
+      <p class="sub">Everything points to one metric that matters: more qualified calls from homeowners ready to book. Here's the system — and the three steps it runs on.</p>
     </div>
     <div class="services-grid">
       <article class="service-card reveal in">
@@ -1838,13 +1825,8 @@ footer{
   </div>
 </section>
 
-<section class="how" id="how">
+<section class="how how-merged" id="how">
   <div class="container">
-    <div class="section-head reveal in">
-      <div class="label">How it works</div>
-      <h2>You stay on jobs.<br>We keep the <span class="serif">calls coming in.</span></h2>
-      <p class="sub">Simple operating model. You keep the field running. We keep inbound momentum running.</p>
-    </div>
     <div class="how-steps reveal in">
       <article class="step">
         <span class="step-num">01</span>
@@ -1873,7 +1855,7 @@ footer{
 <section class="results" id="results">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">What to expect</div>
+      <div class="label">05 · Real expectations</div>
       <h2>Real timeline.<br>Real tradeoffs.<br><span class="serif">No fake promises.</span></h2>
     </div>
     <div class="rank-track reveal in">
@@ -1986,7 +1968,7 @@ footer{
 <section class="lab" id="lab">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">Rankwise Lab</div>
+      <div class="label">06 · The public record</div>
       <h2>Market studies.<br>Visibility experiments.<br><span class="serif">No fake case studies.</span></h2>
       <p class="sub">Before we publish client case studies, we show the work: public market data, owned-site experiments, clear limits, and practical next moves for HVAC owners.</p>
     </div>
@@ -2048,6 +2030,11 @@ footer{
         <span>Every audit lands in my inbox, not a team's. I work with HVAC contractors only, one per city, and I review the numbers myself before every call.</span>
       </div>
     </a>
+    <div class="cta-promise cta-call-items reveal in">
+      <div><strong>Live Map Pack gap</strong> — who outranks you, where they win, and which city terms are realistic.</div>
+      <div><strong>Call upside estimate</strong> — a plain read on how much local demand is going to competitors.</div>
+      <div><strong>90-day first moves</strong> — the fastest GBP, local SEO, and review actions to start compounding.</div>
+    </div>
     <div class="reveal in" id="cal-embed"></div>
     <p class="cta-note reveal in">Lower Mainland only · Position guarantee in writing before month one</p>
   </div>
@@ -2156,7 +2143,7 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
     }
     requestAnimationFrame(step);
   });
-  var gap=document.querySelector('.review-gap');
+  var gap=document.querySelector('.mappack');
   if(!gap)return;
   var fills=Array.prototype.slice.call(gap.querySelectorAll('.rg-fill'));
   var targets=fills.map(function(f){return f.style.width;});
@@ -2164,10 +2151,11 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
   var gapIO=new IntersectionObserver(function(es){
     es.forEach(function(e){
       if(!e.isIntersecting)return;
+      gap.classList.add('anim');
       fills.forEach(function(f,i){f.style.width=targets[i];});
       gapIO.disconnect();
     });
-  },{threshold:.4});
+  },{threshold:.35});
   gapIO.observe(gap);
 })();
 function rwTrack(name,params){
