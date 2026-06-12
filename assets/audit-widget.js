@@ -203,11 +203,108 @@
     return d;
   }
 
+  function num(n) { return (Number(n) || 0).toLocaleString("en-CA"); }
+
+  // Reviews gap bar — your count against the city median and the leader, the
+  // single most visceral line on the card. Bar is scaled to the leader (the max).
+  function reviewBar(you, median, top) {
+    you = Number(you) || 0;
+    median = Number(median) || 0;
+    top = Number(top) || 0;
+    var max = Math.max(you, median, top, 1);
+    var box = el("div", "aw-bar-box");
+    var track = el("div", "aw-bar");
+    var fill = el("div", "aw-bar-fill" + (median > 0 && you < median ? " aw-bar-low" : ""));
+    fill.style.width = Math.max(3, Math.round((you / max) * 100)) + "%";
+    track.appendChild(fill);
+    if (median > 0) {
+      var mark = el("div", "aw-bar-mark");
+      mark.style.left = Math.min(98, Math.round((median / max) * 100)) + "%";
+      mark.setAttribute("title", "City median: " + num(median));
+      track.appendChild(mark);
+    }
+    box.appendChild(track);
+    var legend = el("div", "aw-bar-legend");
+    legend.appendChild(el("span", "aw-bar-you", "You " + num(you)));
+    legend.appendChild(el("span", null, "Median " + num(median)));
+    legend.appendChild(el("span", null, "Leader " + num(top)));
+    box.appendChild(legend);
+    return box;
+  }
+
+  // Optional, post-scorecard. Captures an email onto the lead the audit already
+  // logged (action: lead_email). The widget never sends mail — copy must not
+  // promise one; the address is a warm-lead signal for the call.
+  function emailCapture(placeId) {
+    var box = el("div", "aw-email");
+    box.appendChild(el("p", "aw-email-copy",
+      "Your live Map Pack rank — the number that moves the phone — we reveal on the call. " +
+      "Leave your email and we'll have the full breakdown prepped and waiting."));
+    var f = el("form", "aw-email-form");
+    var i = el("input", "aw-email-input");
+    i.type = "email";
+    i.name = "email";
+    i.autocomplete = "email";
+    i.maxLength = 254;
+    i.placeholder = "you@yourcompany.com";
+    i.setAttribute("aria-label", "Email to prep your full audit");
+    var bb = el("button", "aw-email-btn", "Prep my breakdown");
+    bb.type = "submit";
+    f.appendChild(i);
+    f.appendChild(bb);
+    box.appendChild(f);
+    box.appendChild(el("p", "aw-email-note",
+      "No spam — we won't email you marketing. It's ready when you book."));
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = (i.value || "").trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { i.focus(); return; }
+      bb.disabled = true;
+      bb.textContent = "Saving…";
+      call({ action: "lead_email", placeId: placeId, email: email })
+        .then(function (r) {
+          track("audit_email_captured", { ok: !!(r && r.ok) });
+          box.textContent = "";
+          box.appendChild(el("p", "aw-email-done",
+            "Got it — your full breakdown will be ready at your audit. Grab a time:"));
+          box.appendChild(bookLink("Book your free 15-minute audit", "email-capture"));
+        })
+        .catch(function () {
+          bb.disabled = false;
+          bb.textContent = "Prep my breakdown";
+          i.value = "";
+          i.placeholder = "Didn't save — try again";
+        });
+    });
+    return box;
+  }
+
   function renderCard(card) {
     var b = card.benchmark;
     var c = el("div", "specimen-card");
     c.appendChild(el("div", "specimen-head",
       "Your instant profile check · live from Google · " + (card.city || "Metro Vancouver")));
+
+    // Gaps headline — count the cheap-to-name problems; the expensive one (live
+    // map-pack rank) stays gated to the call.
+    var gaps = [];
+    if (b.medianReviews != null && card.reviewCount < b.medianReviews) gaps.push("reviews under the city median");
+    if (!card.hasWebsite) gaps.push("no website linked");
+    if (card.photoCount <= 3) gaps.push("too few photos");
+    if (!card.hasHours) gaps.push("no hours listed");
+    var head = el("div", "aw-gaps " + (gaps.length ? "aw-gaps-warn" : "aw-gaps-ok"));
+    if (gaps.length) {
+      head.appendChild(el("strong", "aw-gaps-n", String(gaps.length)));
+      head.appendChild(el("span", null,
+        (gaps.length === 1 ? " gap is" : " gaps are") +
+        " holding your Map Pack visibility back — " + gaps.join(" · ") + "."));
+    } else {
+      head.appendChild(el("span", null,
+        "Fundamentals hold up. Your edge now is in what Google hides — description, posts, Q&A and your live map-pack rank."));
+    }
+    c.appendChild(head);
+
+    c.appendChild(reviewBar(card.reviewCount, b.medianReviews, b.topReviews));
 
     var grid = el("div", "specimen-grid");
     grid.appendChild(cell("Company", card.name + (card.city ? " · " + card.city : "")));
@@ -218,7 +315,7 @@
       card.photoDisplay + (card.photoCount <= 3 ? " — reads as inactive" : "")));
     grid.appendChild(cell("Website", card.hasWebsite ? "linked on profile" : "none on profile"));
     grid.appendChild(cell("Hours", card.hasHours ? "listed" : "missing"));
-    grid.appendChild(cell("Top competitor", Number(b.topReviews).toLocaleString("en-CA") + " reviews · " + b.city));
+    grid.appendChild(cell("Top competitor", num(b.topReviews) + " reviews · " + b.city));
     c.appendChild(grid);
 
     var finding = el("div", "specimen-finding");
@@ -229,6 +326,8 @@
     var cta = el("div", "aw-card-cta");
     cta.appendChild(bookLink("Get the full audit — free 15-minute call", "scorecard"));
     c.appendChild(cta);
+
+    c.appendChild(emailCapture(card.placeId));
 
     c.appendChild(el("p", "specimen-note",
       "This covers what Google's API shows. Profile description, posts, Q&A and your live " +
