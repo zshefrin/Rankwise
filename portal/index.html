@@ -218,12 +218,13 @@ async function render() {
   let h = '<div class="row" style="justify-content:space-between"><h1>Dial Console</h1>' +
     '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></div>' + hoursStatus();
 
-  // ── Operator only: preview any client dashboard (demo + QA) ───────────────
+  // ── Operator only: Ops rollup tab + preview any client dashboard ──────────
   if (role === "operator") {
+    h += '<div class="row"><button onclick="renderOps()">📊 Ops overview</button></div>';
     const cl = (await rest("client_portal_snapshot?select=client_key&order=client_key.asc")) || [];
     if (cl.length) {
       h += '<p class="mut">Client dashboards: ' + cl.map((c) =>
-        '<a href="#" style="color:var(--accent)" onclick="renderClient(\'' + esc(c.client_key) + '\');return false">' + esc(c.client_key) + '</a>').join(" · ") + '</p>';
+        '<a href="#" style="color:var(--accent)" onclick="renderClient(decodeURIComponent(\'' + encodeURIComponent(c.client_key).replace(/'/g, "%27") + '\'));return false">' + esc(c.client_key) + '</a>').join(" · ") + '</p>';
     }
   }
 
@@ -312,6 +313,48 @@ async function render() {
       rows.slice(0, 15).map((r) => '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
         (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</div>').join("") +
       '</details></div>';
+  }
+  app.innerHTML = h;
+}
+
+// ── Ops overview (role=operator only; data via operator_portal_snapshot RLS) ──
+async function renderOps() {
+  if (roleOf() !== "operator") return render();  // hygiene; RLS is the real gate
+  const app = $("#app");
+  app.innerHTML = '<h1>Ops overview</h1><p class="mut">Loading…</p>';
+  const rows = await rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1");
+  if (!rows) return;
+  const snap = rows[0] || null;
+  let h = '<div class="row" style="justify-content:space-between"><h1>Ops overview</h1>' +
+    '<span class="row"><button onclick="render()">← Console</button>' +
+    '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></span></div>';
+  if (!snap) {
+    h += '<div class="card mut">No rollup pushed yet — run push_operator_snapshot.py (rides the 10am briefing cron).</div>';
+    app.innerHTML = h; return;
+  }
+  const p = snap.payload || {};
+  h += '<p class="mut">updated ' + ptTime(snap.updated_at) + '</p>';
+  const pipe = (p.funnel && p.funnel.pipeline) || {};
+  h += '<div class="card"><b>Outreach funnel</b><div class="tally wk">' +
+    ["draft", "queued", "active", "booked_audit"].map((k) =>
+      '<div><b>' + (Number(pipe[k]) || 0) + '</b><span class="mut">' + k.replace("_", " ") + '</span></div>').join("") + '</div>' +
+    (p.funnel && p.funnel.gate ? '<p class="mut">send gate: ' + esc(JSON.stringify(p.funnel.gate)).slice(0, 120) + '</p>' : '') + '</div>';
+  const s = p.seller || {};
+  h += '<div class="card"><b>Seller</b><p class="mut">' + (s.active ? esc(s.name || "active") : "not hired yet") +
+    (s.callbacks_due ? ' · ' + (Number(s.callbacks_due) || 0) + ' callbacks due' : '') +
+    (s.pay_due_cad ? ' · <span class="pill warn">$' + s.pay_due_cad + ' pay due</span>' : '') + '</p>' +
+    (s.totals ? '<div class="tally wk">' + ["dials", "conversations", "bookings", "shows"].map((k) =>
+      '<div><b>' + (Number(s.totals[k]) || 0) + '</b><span class="mut">' + k + '</span></div>').join("") + '</div>' : '') + '</div>';
+  const sys = p.system || {};
+  const sysOk = sys.sources_ok === sys.sources_total;
+  h += '<div class="card"><b>Data integrity</b><p class="mut"><span class="pill ' + (sysOk ? "ok" : "warn") + '">' +
+    (Number(sys.sources_ok) || 0) + '/' + (Number(sys.sources_total) || 0) + ' sources OK</span> · checked ' +
+    (sys.data_truth_ran_at ? ptTime(sys.data_truth_ran_at) : "never") + '</p>' +
+    ((sys.not_ok || []).map((r) => '<div class="hist"><span class="pill warn">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) + '</div>';
+  if (p.signals) h += '<div class="card"><b>Signals</b><p class="mut">' + (Number(p.signals.triaged) || 0) + ' triaged · ' + (Number(p.signals.briefed) || 0) + ' briefed</p></div>';
+  if ((p.clients || []).length) {
+    h += '<div class="card"><b>Client dashboards</b>' + p.clients.map((c) =>
+      '<div class="hist"><a href="#" style="color:var(--accent)" onclick="renderClient(decodeURIComponent(\'' + encodeURIComponent(c.client_key).replace(/'/g, "%27") + '\'));return false">' + esc(c.client_key) + '</a> <span class="mut">updated ' + (c.updated_at ? ptTime(c.updated_at) : "—") + '</span></div>').join("") + '</div>';
   }
   app.innerHTML = h;
 }
