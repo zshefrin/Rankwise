@@ -205,8 +205,8 @@
 
   function num(n) { return (Number(n) || 0).toLocaleString("en-CA"); }
 
-  // Reviews gap bar — your count against the city median and the leader, the
-  // single most visceral line on the card. Bar is scaled to the leader (the max).
+  // Reviews gap bar — HVAC/trades only, where a city benchmark exists. Bar is
+  // scaled to the leader (the max).
   function reviewBar(you, median, top) {
     you = Number(you) || 0;
     median = Number(median) || 0;
@@ -239,7 +239,7 @@
     var box = el("div", "aw-email");
     box.appendChild(el("p", "aw-email-copy",
       "Your live Map Pack rank — the number that moves the phone — we reveal on the call. " +
-      "Leave your email and we'll have the full breakdown prepped and waiting."));
+      "Leave your email and we'll connect this profile to your booking."));
     var f = el("form", "aw-email-form");
     var i = el("input", "aw-email-input");
     i.type = "email";
@@ -254,7 +254,7 @@
     f.appendChild(bb);
     box.appendChild(f);
     box.appendChild(el("p", "aw-email-note",
-      "No spam — we won't email you marketing. It's ready when you book."));
+      "No automated email is sent. This only saves the profile signal."));
     f.addEventListener("submit", function (e) {
       e.preventDefault();
       var email = (i.value || "").trim();
@@ -280,7 +280,8 @@
   }
 
   function renderCard(card) {
-    var b = card.benchmark;
+    var b = card.benchmark || null;
+    var profileOnly = !b || card.vertical === "other_local";
     var c = el("div", "specimen-card");
     c.appendChild(el("div", "specimen-head",
       "Your instant profile check · live from Google · " + (card.city || "Metro Vancouver")));
@@ -288,12 +289,15 @@
     // Gaps headline — count the cheap-to-name problems; the expensive one (live
     // map-pack rank) stays gated to the call.
     var gaps = [];
-    if (b.medianReviews != null && card.reviewCount < b.medianReviews) gaps.push("reviews under the city median");
+    if (!profileOnly && b.medianReviews != null && card.reviewCount < b.medianReviews) gaps.push("reviews under the city median");
     if (!card.hasWebsite) gaps.push("no website linked");
     if (card.photoCount <= 3) gaps.push("too few photos");
     if (!card.hasHours) gaps.push("no hours listed");
     var head = el("div", "aw-gaps " + (gaps.length ? "aw-gaps-warn" : "aw-gaps-ok"));
-    if (gaps.length) {
+    if (profileOnly) {
+      head.appendChild(el("span", null,
+        "Collected for manual review. No local benchmark is applied to this business; this card only records the Google profile fields."));
+    } else if (gaps.length) {
       head.appendChild(el("strong", "aw-gaps-n", String(gaps.length)));
       head.appendChild(el("span", null,
         (gaps.length === 1 ? " gap is" : " gaps are") +
@@ -304,18 +308,25 @@
     }
     c.appendChild(head);
 
-    c.appendChild(reviewBar(card.reviewCount, b.medianReviews, b.topReviews));
+    if (!profileOnly) c.appendChild(reviewBar(card.reviewCount, b.medianReviews, b.topReviews));
 
     var grid = el("div", "specimen-grid");
     grid.appendChild(cell("Company", card.name + (card.city ? " · " + card.city : "")));
-    grid.appendChild(cell("Google reviews",
-      card.reviewCount + (card.rating ? " · " + card.rating + "★" : "") +
-      " · median " + b.medianReviews + " in " + b.city));
+    if (profileOnly) {
+      grid.appendChild(cell("Google reviews",
+        card.reviewCount + (card.rating ? " · " + card.rating + "★" : "") +
+        " · no industry benchmark applied"));
+    } else {
+      grid.appendChild(cell("Google reviews",
+        card.reviewCount + (card.rating ? " · " + card.rating + "★" : "") +
+        " · median " + b.medianReviews + " in " + b.city));
+    }
     grid.appendChild(cell("Profile photos",
       card.photoDisplay + (card.photoCount <= 3 ? " — reads as inactive" : "")));
     grid.appendChild(cell("Website", card.hasWebsite ? "linked on profile" : "none on profile"));
     grid.appendChild(cell("Hours", card.hasHours ? "listed" : "missing"));
-    grid.appendChild(cell("Top competitor", num(b.topReviews) + " reviews · " + b.city));
+    if (!profileOnly) grid.appendChild(cell("Top competitor", num(b.topReviews) + " reviews · " + b.city));
+    if (profileOnly) grid.appendChild(cell("Capture mode", "profile-only lead · no automated email or outreach"));
     c.appendChild(grid);
 
     var finding = el("div", "specimen-finding");
@@ -329,12 +340,19 @@
 
     c.appendChild(emailCapture(card.placeId));
 
-    c.appendChild(el("p", "specimen-note",
-      "This covers what Google's API shows. Profile description, posts, Q&A and your live " +
-      "map-pack position — the other half of the audit — we pull on the call."));
-    c.appendChild(el("p", "specimen-note aw-attrib",
-      "Benchmark: median of the " + b.label + " · " +
-      "as of " + b.asOf + " · listing data powered by Google"));
+    if (profileOnly) {
+      c.appendChild(el("p", "specimen-note",
+        "This covers what Google's API shows. We collected the profile fields only; no email or automated outreach is sent."));
+      c.appendChild(el("p", "specimen-note aw-attrib",
+        "No local benchmark applied · listing data powered by Google"));
+    } else {
+      c.appendChild(el("p", "specimen-note",
+        "This covers what Google's API shows. Profile description, posts, Q&A and your live " +
+        "map-pack position — the other half of the audit — we pull on the call."));
+      c.appendChild(el("p", "specimen-note aw-attrib",
+        "Benchmark: median of the " + b.label + " · " +
+        "as of " + b.asOf + " · listing data powered by Google"));
+    }
     setStatus(c);
     c.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
