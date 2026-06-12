@@ -92,6 +92,22 @@ async function login(e) {
   else $("#err").textContent = d.error_description || d.msg || "Login failed";
 }
 
+function googleLogin() {
+  // Supabase OAuth: provider must be enabled in dashboard → Auth → Providers,
+  // and this page's URL allow-listed under Auth → URL Configuration.
+  location.href = SB + "/auth/v1/authorize?provider=google&redirect_to=" +
+    encodeURIComponent(location.origin + location.pathname);
+}
+
+// Catch the OAuth redirect (implicit flow returns tokens in the URL hash).
+(function () {
+  if (!location.hash) return;
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get("access_token")) localStorage.setItem("rw_tok", h.get("access_token"));
+  else if (h.get("error_description") || h.get("error")) window._oauthErr = h.get("error_description") || "Google sign-in failed";
+  history.replaceState(null, "", location.pathname + location.search);
+})();
+
 async function rest(path) {
   const r = await fetch(SB + "/rest/v1/" + path, { headers: hdr() });
   if (r.status === 401) { localStorage.removeItem("rw_tok"); render(); return null; }
@@ -139,7 +155,11 @@ async function render() {
     app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Sign in with the login Zack set up for you.</p>' +
       '<form class="card" onsubmit="login(event)"><input id="em" type="email" placeholder="email" autocomplete="username"><br><br>' +
       '<input id="pw" type="password" placeholder="password" autocomplete="current-password"><br><br>' +
-      '<button class="primary" style="width:100%">Sign in</button><p id="err" class="mut" style="color:var(--bad)"></p></form>';
+      '<button class="primary" style="width:100%">Sign in</button>' +
+      '<p class="mut" style="text-align:center;margin:10px 0">or</p>' +
+      '<button type="button" style="width:100%" onclick="googleLogin()">Continue with Google</button>' +
+      '<p id="err" class="mut" style="color:var(--bad)"></p></form>';
+    if (window._oauthErr) $("#err").textContent = window._oauthErr;
     return;
   }
   const role = roleOf();
