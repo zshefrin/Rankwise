@@ -1,25 +1,323 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Log in | Rankwise</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta http-equiv="refresh" content="0; url=https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/seller-portal">
+<title>Rankwise — Dashboard</title>
 <style>
-  :root{--paper:#111916;--cream:#F5EFE3;--soft:#5D6A63;--accent:#F2B533}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);color:var(--cream);font:16px/1.6 Georgia,'Times New Roman',serif;
-       min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
-  .logo{font-size:28px;letter-spacing:.5px;margin-bottom:12px}
-  .logo span{color:var(--accent)}
-  p{color:#9aa7a0;font-size:15px}
-  a{color:var(--accent)}
+  :root { --bg:#101418; --card:#1a2026; --line:#2a323a; --text:#e8edf2; --mut:#8a97a3;
+          --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --accent:#60a5fa; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--text); font:16px/1.45 -apple-system, system-ui, sans-serif; padding:12px; max-width:560px; margin:0 auto; }
+  h1 { font-size:18px; margin:8px 0 2px; } .mut { color:var(--mut); font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin:10px 0; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  button { border:0; border-radius:9px; padding:10px 12px; font-size:14px; font-weight:600; cursor:pointer; background:#2b3640; color:var(--text); }
+  button.primary { background:var(--accent); color:#0b1220; }
+  button.disp { flex:1 1 30%; padding:12px 6px; }
+  button.disp.sel { outline:2px solid var(--accent); }
+  button:disabled { opacity:.45; }
+  input, textarea { width:100%; background:#0d1115; border:1px solid var(--line); border-radius:8px; color:var(--text); padding:10px; font-size:15px; }
+  a.tel { display:block; text-align:center; background:var(--ok); color:#06281c; font-weight:800; font-size:18px; padding:13px; border-radius:10px; text-decoration:none; margin:8px 0; }
+  .banner { padding:10px 12px; border-radius:10px; font-size:14px; margin:8px 0; }
+  .banner.bad { background:#3a1d1d; color:var(--bad); } .banner.ok { background:#15302a; color:var(--ok); }
+  .banner.warn { background:#332a12; color:var(--warn); }
+  .tally { display:flex; gap:6px; text-align:center; margin:8px 0; }
+  .tally div { flex:1; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 2px; }
+  .tally b { display:block; font-size:20px; }
+  .tally.wk b { font-size:16px; }
+  .bar { height:8px; background:#0d1115; border-radius:99px; overflow:hidden; margin:4px 0; }
+  .bar i { display:block; height:100%; background:var(--accent); }
+  .done { opacity:.55; } .pill { font-size:12px; padding:2px 8px; border-radius:99px; background:#2b3640; }
+  .pill.ok { background:#15302a; color:var(--ok); } .pill.warn { background:#332a12; color:var(--warn); }
+  details summary { cursor:pointer; color:var(--accent); font-size:14px; margin:6px 0; }
+  .opener { background:#0d1115; border-left:3px solid var(--accent); padding:10px; border-radius:8px; font-size:14px; margin:6px 0; font-style:italic; }
+  .kit { background:#0d1115; border-radius:8px; padding:10px; font-size:13px; white-space:pre-wrap; max-height:300px; overflow-y:auto; }
+  label.cb { display:flex; gap:8px; align-items:center; font-size:14px; margin:8px 0; }
+  label.cb input { width:auto; transform:scale(1.3); }
+  .hist { font-size:13px; border-top:1px solid var(--line); padding:6px 0; }
+  table.pay { width:100%; border-collapse:collapse; font-size:13px; }
+  table.pay td, table.pay th { padding:4px 6px; text-align:left; border-bottom:1px solid var(--line); }
+  #toast { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background:var(--accent); color:#0b1220; font-weight:700; padding:10px 18px; border-radius:99px; display:none; }
 </style>
-</head><body>
-<main>
-  <div class="logo">Rank<span>wise</span></div>
-  <p>Taking you to the login page&hellip;</p>
-  <p style="margin-top:10px"><a href="https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/seller-portal">Continue to login</a></p>
-</main>
-<script>location.replace("https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/seller-portal");</script>
-</body></html>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+const SB = "https://mxzkzgbonxrgkwanhnxs.supabase.co", KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14emt6Z2JvbnhyZ2t3YW5obnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTI1NTMsImV4cCI6MjA5MTk2ODU1M30.OCLEdrLTOjvEe6HMk5cGL9JqoWQ5t2nTInaveKLoQPQ";
+const $ = (s) => document.querySelector(s);
+const tok = () => localStorage.getItem("rw_tok") || "";
+const hdr = () => ({ apikey: KEY, Authorization: "Bearer " + tok(), "Content-Type": "application/json" });
+const toast = (m) => { const t = $("#toast"); t.textContent = m; t.style.display = "block"; setTimeout(() => t.style.display = "none", 1800); };
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function roleOf() {
+  // Role rides in the JWT's app_metadata (admin-set only; users can't change it).
+  try {
+    const p = JSON.parse(atob(tok().split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return (p.app_metadata && p.app_metadata.role) || "";
+  } catch { return ""; }
+}
+const PT = "America/Vancouver";
+const ptDay = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: PT });
+const ptTime = (d) => new Date(d).toLocaleString("en-CA", { timeZone: PT, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+function hoursStatus() {
+  // CRTC window, Pacific time (all prospects are Metro Vancouver).
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: PT }));
+  const d = now.getDay(), mins = now.getHours() * 60 + now.getMinutes();
+  const okNow = (d >= 1 && d <= 5) ? (mins >= 540 && mins <= 1290) : (mins >= 600 && mins <= 1080);
+  return okNow
+    ? '<div class="banner ok">✓ Inside calling hours (Pacific)</div>'
+    : '<div class="banner bad">⛔ OUTSIDE CALLING HOURS — weekdays 9:00am–9:30pm, weekends 10am–6pm Pacific. Do not dial.</div>';
+}
+
+function weekStartPT() {
+  // Monday 00:00 Pacific, as a YYYY-MM-DD string for date-key comparison.
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: PT }));
+  const back = (now.getDay() + 6) % 7;
+  now.setDate(now.getDate() - back);
+  return now.toLocaleDateString("en-CA");
+}
+
+async function login(e) {
+  e.preventDefault();
+  const r = await fetch(SB + "/auth/v1/token?grant_type=password", {
+    method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: $("#em").value.trim(), password: $("#pw").value }),
+  });
+  const d = await r.json();
+  if (d.access_token) { localStorage.setItem("rw_tok", d.access_token); render(); }
+  else $("#err").textContent = d.error_description || d.msg || "Login failed";
+}
+
+async function rest(path) {
+  const r = await fetch(SB + "/rest/v1/" + path, { headers: hdr() });
+  if (r.status === 401) { localStorage.removeItem("rw_tok"); render(); return null; }
+  return r.json();
+}
+
+window._nm = {}; // slug → business name (filled at render; avoids name-in-onclick escaping)
+
+async function logCall(slug) {
+  const card = document.querySelector('[data-card="' + slug + '"]');
+  const sel = card.querySelector(".disp.sel");
+  if (!sel) { toast("Pick a disposition first"); return; }
+  const body = {
+    prospect_slug: slug, prospect_name: window._nm[slug] || slug, disposition: sel.dataset.d,
+    note: card.querySelector(".note").value.trim(),
+    conversation: card.querySelector(".conv").checked,
+  };
+  const cbAt = card.querySelector(".cbat") ? card.querySelector(".cbat").value : "";
+  if (cbAt) body.callback_at = new Date(cbAt).toISOString();
+  let r = await fetch(SB + "/rest/v1/seller_call_log", { method: "POST", headers: hdr(), body: JSON.stringify(body) });
+  if (!r.ok && body.callback_at) {
+    // pre-migration-014 backend: retry without the callback column, keep it in the note
+    delete body.callback_at;
+    body.note = "CALLBACK " + cbAt + (body.note ? " — " + body.note : "");
+    r = await fetch(SB + "/rest/v1/seller_call_log", { method: "POST", headers: hdr(), body: JSON.stringify(body) });
+  }
+  if (r.ok) { toast("Logged: " + sel.dataset.d); render(); }
+  else toast("Log failed — try again");
+}
+
+const DISPS = ["connect", "voicemail", "no_answer", "declined", "wrong_number", "booked"];
+
+function logForm(slug, open) {
+  return '<details' + (open ? " open" : "") + '><summary>Log this call</summary><div class="row">' +
+    DISPS.map((d) => '<button class="disp" data-d="' + d + '" onclick="this.closest(\'.row\').querySelectorAll(\'.disp\').forEach(b=>b.classList.remove(\'sel\'));this.classList.add(\'sel\')">' + d.replace("_", " ") + '</button>').join("") +
+    '</div><label class="cb"><input type="checkbox" class="conv"> Real conversation (got past the opener)</label>' +
+    '<input class="note" placeholder="Note — callback time, objection, email given…">' +
+    '<label class="cb" style="display:block"><span class="mut">Call back at (optional):</span> <input type="datetime-local" class="cbat"></label>' +
+    '<button class="primary" style="width:100%;margin-top:8px" onclick="logCall(\'' + slug + '\')">Save call log</button></details>';
+}
+
+async function render() {
+  const app = $("#app");
+  if (!tok()) {
+    app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Sign in with the login Zack set up for you.</p>' +
+      '<form class="card" onsubmit="login(event)"><input id="em" type="email" placeholder="email" autocomplete="username"><br><br>' +
+      '<input id="pw" type="password" placeholder="password" autocomplete="current-password"><br><br>' +
+      '<button class="primary" style="width:100%">Sign in</button><p id="err" class="mut" style="color:var(--bad)"></p></form>';
+    return;
+  }
+  const role = roleOf();
+  if (role === "client") return renderClient();
+  if (role !== "seller" && role !== "operator") {
+    app.innerHTML = '<h1>Rankwise — Dashboard</h1>' +
+      '<div class="card">This account has no access assigned yet. Email <a href="mailto:zshef@rankwise.ca" style="color:var(--accent)">zshef@rankwise.ca</a> and Zack will set you up.</div>' +
+      '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button>';
+    return;
+  }
+  app.innerHTML = '<h1>Dial Console</h1><p class="mut">Loading…</p>';
+  const [queue, log, snapRows] = await Promise.all([
+    rest("seller_queue?select=*&order=rank.asc"),
+    rest("seller_call_log?select=*&order=called_at.desc&limit=1000"),
+    rest("seller_ops_snapshot?select=payload&id=eq.1"),
+  ]);
+  if (!queue) return;
+  const snap = (snapRows && snapRows[0] && snapRows[0].payload) || null;
+  const rows = log || [];
+  const today = ptDay(new Date());
+  const wkStart = weekStartPT();
+  const todayRows = rows.filter((r) => ptDay(r.called_at) === today);
+  const weekRows = rows.filter((r) => ptDay(r.called_at) >= wkStart);
+  const doneToday = {}; todayRows.forEach((r) => { if (r.prospect_slug && !doneToday[r.prospect_slug]) doneToday[r.prospect_slug] = r.disposition; });
+  const attempts = {}; rows.forEach((r) => { if (r.prospect_slug) (attempts[r.prospect_slug] = attempts[r.prospect_slug] || []).push(r); });
+  const phoneBySlug = {}; (queue || []).forEach((p) => { phoneBySlug[p.slug] = p.phone || ""; });
+  const cnt = (rs, f) => rs.filter(f).length;
+  const isPickup = (r) => ["connect", "declined", "booked"].includes(r.disposition);
+  const isConvo = (r) => r.conversation || r.disposition === "booked";
+
+  let h = '<div class="row" style="justify-content:space-between"><h1>Dial Console</h1>' +
+    '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></div>' + hoursStatus();
+
+  // ── Operator only: preview any client dashboard (demo + QA) ───────────────
+  if (role === "operator") {
+    const cl = (await rest("client_portal_snapshot?select=client_key&order=client_key.asc")) || [];
+    if (cl.length) {
+      h += '<p class="mut">Client dashboards: ' + cl.map((c) =>
+        '<a href="#" style="color:var(--accent)" onclick="renderClient(\'' + esc(c.client_key) + '\');return false">' + esc(c.client_key) + '</a>').join(" · ") + '</p>';
+    }
+  }
+
+  // ── Callbacks due ──────────────────────────────────────────────────────────
+  // Open = the newest log row per slug has a callback_at and nothing newer was
+  // logged after it (also picks up pre-migration "CALLBACK <when> —" notes).
+  const cbs = [];
+  for (const slug in attempts) {
+    const latest = attempts[slug][0]; // rows are newest-first
+    let at = latest.callback_at || null;
+    if (!at && /^CALLBACK ([0-9T:\-]+)/.test(latest.note || "")) at = (latest.note.match(/^CALLBACK ([0-9T:\-]+)/) || [])[1];
+    if (at) cbs.push({ slug, name: latest.prospect_name, at, note: latest.note || "" });
+  }
+  cbs.sort((a, b) => String(a.at).localeCompare(String(b.at)));
+  if (cbs.length) {
+    h += '<div class="card"><b>📞 Callbacks promised (' + cbs.length + ')</b>';
+    for (const c of cbs.slice(0, 8)) {
+      const overdue = new Date(c.at) <= new Date();
+      h += '<div class="hist"><span class="pill ' + (overdue ? "warn" : "") + '">' + (overdue ? "DUE" : ptTime(c.at)) + '</span> <b>' + esc(c.name) + '</b>' +
+        (phoneBySlug[c.slug] ? ' · <a href="tel:' + esc(phoneBySlug[c.slug]).replace(/[^0-9+]/g, "") + '" style="color:var(--ok)">call</a>' : '') +
+        (c.note ? '<br><span class="mut">' + esc(c.note) + '</span>' : '') + '</div>';
+    }
+    h += '<p class="mut">Logging any new call for that business clears its callback.</p></div>';
+  }
+
+  // ── Today + this-week tallies ──────────────────────────────────────────────
+  h += '<div class="tally"><div><b>' + todayRows.length + '</b><span class="mut">dials today</span></div>' +
+    '<div><b>' + cnt(todayRows, isPickup) + '</b><span class="mut">pickups</span></div>' +
+    '<div><b>' + cnt(todayRows, isConvo) + '</b><span class="mut">convos</span></div>' +
+    '<div><b>' + cnt(todayRows, (r) => r.disposition === "booked") + '</b><span class="mut">booked</span></div></div>' +
+    '<div class="tally wk"><div><b>' + weekRows.length + '</b><span class="mut">wk dials</span></div>' +
+    '<div><b>' + cnt(weekRows, isPickup) + '</b><span class="mut">wk pickups</span></div>' +
+    '<div><b>' + cnt(weekRows, isConvo) + '</b><span class="mut">wk convos</span></div>' +
+    '<div><b>' + cnt(weekRows, (r) => r.disposition === "booked") + '</b><span class="mut">wk booked</span></div></div>';
+
+  // ── Trial progress + pay (authoritative snapshot from the vault) ───────────
+  if (snap && snap.trial && snap.trial.configured) {
+    const t = snap.trial, needD = 200, needC = 5;
+    h += '<div class="card"><b>Trial: ' + esc(t.verdict || "") + '</b><p class="mut">window ' + esc(t.window || "") + '</p>' +
+      '<p class="mut" style="margin-top:6px">' + (t.dials || 0) + ' / ' + needD + ' dials</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.dials || 0) / needD) + '%"></i></div>' +
+      '<p class="mut">' + (t.conversations || 0) + ' / ' + needC + ' real conversations</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.conversations || 0) / needC) + '%"></i></div>';
+    const ledger = snap.pay_ledger || [];
+    if (ledger.length) {
+      h += '<details><summary>Pay ledger</summary><table class="pay"><tr><th>Week</th><th>Blocks</th><th>Shows</th><th>Due</th><th>Paid</th></tr>' +
+        ledger.map((w) => '<tr><td>' + esc(w.week) + '</td><td>' + (w.qualified_blocks || 0) + '</td><td>' + (w.shows || 0) + '</td><td>$' + (w.due_cad || 0) + '</td><td>' + (w.paid ? "✓" : "due Friday") + '</td></tr>').join("") +
+        '</table><p class="mut">Blocks count when a day hits the minimum dials. Bounties land the week of the show.</p></details>';
+    }
+    h += '</div>';
+  }
+
+  // ── Cheat sheet (pushed from the seller kit) ───────────────────────────────
+  if (snap && snap.kit && (snap.kit.objections || snap.kit.must_not_say)) {
+    h += '<div class="card"><b>📋 Cheat sheet</b>';
+    if (snap.kit.must_not_say) h += '<details><summary>Must-not-say (compliance)</summary><div class="kit">' + esc(snap.kit.must_not_say) + '</div></details>';
+    if (snap.kit.objections) h += '<details><summary>Objections + FAQ</summary><div class="kit">' + esc(snap.kit.objections) + '</div></details>';
+    h += '</div>';
+  }
+
+  h += '<p class="mut">Booking close: "I\'ll set that up right now — what\'s your email?" → book them at <b>rankwise.ca/audit</b> while you\'re on the line. Log every call. Real conversation = got past the opener.</p>';
+
+  // ── Dial cards ─────────────────────────────────────────────────────────────
+  const cards = (queue || []).slice().sort((a, b) => (a.slug in doneToday ? 1 : 0) - (b.slug in doneToday ? 1 : 0) || a.rank - b.rank);
+  window._nm = {};
+  for (const p of cards) {
+    window._nm[p.slug] = p.business_name;
+    const done = doneToday[p.slug];
+    const past = attempts[p.slug] || [];
+    const attemptPill = !done && past.length
+      ? '<span class="pill warn">attempt ' + (past.length + 1) + ' · last: ' + esc(past[0].disposition) + ' ' + ptTime(past[0].called_at) + '</span>'
+      : '';
+    h += '<div class="card' + (done ? " done" : "") + '" data-card="' + esc(p.slug) + '">' +
+      '<div class="row" style="justify-content:space-between"><b>' + p.rank + '. ' + esc(p.business_name) + '</b>' +
+      (done ? '<span class="pill ok">today: ' + esc(done) + '</span>' : '<span class="pill">score ' + (p.score || 0) + '</span>') + '</div>' +
+      (attemptPill ? '<p style="margin:4px 0">' + attemptPill + '</p>' : '') +
+      '<p class="mut">' + esc(p.city) + (p.signal ? ' · ' + esc(p.signal) : '') + '</p>' +
+      (p.phone ? '<a class="tel" href="tel:' + esc(p.phone).replace(/[^0-9+]/g, "") + '">📞 ' + esc(p.phone) + '</a>' : '') +
+      (p.opener ? '<details><summary>Opener</summary><div class="opener">' + esc(p.opener) + '</div></details>' : '') +
+      (p.audit_url ? '<p class="mut">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
+      logForm(p.slug, !done) + '</div>';
+  }
+  if (!cards.length) h += '<div class="card mut">No dial cards pushed yet — Zack runs push_seller_queue.py.</div>';
+
+  // ── Recent calls ───────────────────────────────────────────────────────────
+  if (rows.length) {
+    h += '<div class="card"><details><summary>My recent calls (' + rows.length + ' logged)</summary>' +
+      rows.slice(0, 15).map((r) => '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
+        (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</div>').join("") +
+      '</details></div>';
+  }
+  app.innerHTML = h;
+}
+
+// ── Client dashboard (role=client; operators pass an explicit key to preview) ─
+async function renderClient(key) {
+  const app = $("#app");
+  app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Loading…</p>';
+  let q = "client_portal_snapshot?select=client_key,payload,updated_at";
+  if (key) q += "&client_key=eq." + encodeURIComponent(key);
+  const rows = await rest(q);
+  if (!rows) return;
+  const snap = rows[0] || null;
+  const back = roleOf() === "operator" ? '<button onclick="render()">← Console</button> ' : '';
+  let h = '<div class="row" style="justify-content:space-between"><h1>' +
+    esc((snap && snap.payload && snap.payload.client_name) || "Rankwise — Dashboard") + '</h1>' +
+    '<span class="row">' + back + '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></span></div>';
+  if (!snap) {
+    h += '<div class="card">Your dashboard is being set up — the first data lands after the next weekly fetch (Mondays). ' +
+      'Questions? <a href="mailto:zshef@rankwise.ca" style="color:var(--accent)">zshef@rankwise.ca</a></div>';
+    app.innerHTML = h;
+    return;
+  }
+  const p = snap.payload || {};
+  h += '<p class="mut">' + esc(p.period || "") + (p.period ? ' · ' : '') + 'updated ' + ptTime(snap.updated_at) + '</p>';
+  if ((p.kpis || []).length) {
+    h += '<div class="tally">' + p.kpis.slice(0, 4).map((k) =>
+      '<div><b>' + esc(k.value) + '</b><span class="mut">' + esc(k.label) + '</span>' +
+      (k.delta ? '<br><span class="pill ' + (String(k.delta).startsWith("-") ? "warn" : "ok") + '">' + esc(k.delta) + '</span>' : '') + '</div>').join("") + '</div>';
+  }
+  if ((p.rankings || []).length) {
+    h += '<div class="card"><b>Where you rank on Google</b><table class="pay"><tr><th>Search</th><th>Maps</th><th>Organic</th></tr>' +
+      p.rankings.map((r) => '<tr><td>' + esc(r.keyword) + '</td><td>' + (r.local == null ? "—" : "#" + r.local) + '</td><td>' + (r.organic == null ? "—" : "#" + r.organic) + '</td></tr>').join("") +
+      '</table><p class="mut">— means not in the top results yet for that search. That\'s the gap we\'re closing.</p></div>';
+  }
+  if ((p.traffic || []).length) {
+    const mx = Math.max.apply(null, p.traffic.map((w) => w.clicks || 0).concat([1]));
+    h += '<div class="card"><b>Google Search clicks by week</b>' +
+      p.traffic.map((w) => '<p class="mut" style="margin:8px 0 2px">' + esc(w.week) + ' · <b style="color:var(--text)">' + (w.clicks || 0) + '</b> clicks · ' + (w.impressions || 0) + ' impressions</p>' +
+        '<div class="bar"><i style="width:' + Math.round(100 * (w.clicks || 0) / mx) + '%"></i></div>').join("") + '</div>';
+  }
+  if (p.reviews && p.reviews.count != null) {
+    h += '<div class="card"><b>Google reviews</b><p class="mut">' + p.reviews.count + ' reviews · ' + (p.reviews.rating != null ? p.reviews.rating + "★" : "—") +
+      (p.reviews.note ? ' · ' + esc(p.reviews.note) : '') + '</p></div>';
+  }
+  if ((p.wins || []).length) h += '<div class="card"><b>Done recently</b>' + p.wins.map((w) => '<div class="hist">✓ ' + esc(w) + '</div>').join("") + '</div>';
+  if ((p.next || []).length) h += '<div class="card"><b>Up next</b>' + p.next.map((w) => '<div class="hist">→ ' + esc(w) + '</div>').join("") + '</div>';
+  h += '<p class="mut">Questions any time: <a href="mailto:zshef@rankwise.ca" style="color:var(--accent)">zshef@rankwise.ca</a> · +1 778 887 0311</p>';
+  app.innerHTML = h;
+}
+render();
+</script>
+</body>
+</html>
