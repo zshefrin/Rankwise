@@ -125,7 +125,7 @@
       "name": "How much does it cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."
+        "text": "HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. For scale: a single furnace or heat-pump install is a $6,000–$15,000 ticket in Metro Vancouver — if better visibility books you one extra install a quarter, the fee has covered itself several times over. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."
       }
     },
     {
@@ -1398,6 +1398,119 @@ footer{
   border:1.5px solid var(--label);
   border-radius:3px;
 }
+/* ── Guarantee: the milestone document, itemized ─────────── */
+.guarantee-doc{margin-top:16px;border-bottom:1px solid rgba(23,35,31,.14)}
+.guarantee-doc-cap{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+}
+.gd-row{
+  border-top:1px solid rgba(23,35,31,.14);
+  padding:11px 0;
+  display:grid;
+  grid-template-columns:84px 1fr;
+  gap:14px;
+  align-items:baseline;
+  font-size:13.5px;
+  color:var(--ink-soft);
+  line-height:1.55;
+}
+.gd-row strong{
+  color:var(--label);
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+/* ── Founder: direct line + specimen audit card ──────────── */
+.founder-direct{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 30px;
+  align-items:baseline;
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid rgba(23,35,31,.14);
+}
+.founder-direct span{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--label);
+  margin-right:8px;
+}
+.founder-direct a{
+  font-size:15px;
+  font-weight:700;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:2px solid rgba(242,181,51,.55);
+  white-space:nowrap;
+  transition:color .2s ease,border-color .2s ease;
+}
+.founder-direct a:hover{color:var(--link);border-color:var(--link)}
+.specimen-card{
+  margin-top:42px;
+  background:var(--surface);
+  border:1.5px solid var(--ink);
+  border-radius:6px;
+  box-shadow:5px 5px 0 rgba(43,168,152,.22);
+  overflow:hidden;
+}
+.specimen-head{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  padding:12px 22px;
+  border-bottom:1px solid rgba(23,35,31,.14);
+  background:var(--surface-warm);
+}
+.specimen-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px 26px;
+  padding:20px 22px 16px;
+}
+.specimen-grid strong,.specimen-finding strong{
+  display:block;
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--label);
+  margin-bottom:3px;
+}
+.specimen-grid span,.specimen-finding span{font-size:14.5px;color:var(--ink);line-height:1.55}
+.specimen-redact{color:var(--ink-muted);letter-spacing:-1px}
+.specimen-finding{
+  padding:16px 22px 0;
+  border-top:1px dashed var(--line-strong);
+}
+.specimen-note{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+  padding:14px 22px 18px;
+  line-height:1.9;
+}
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media(max-width:860px){.specimen-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.specimen-grid{grid-template-columns:1fr}}
 /* ── Founder: pull quote + fact descriptions ─────────────── */
 .founder-quote{
   margin:22px 0 20px;
@@ -2401,6 +2514,13 @@ footer{
           <span class="gb-icon" aria-hidden="true">✓</span>
           <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
+        <div class="guarantee-doc">
+          <div class="guarantee-doc-cap">What the milestone document records — before your first payment</div>
+          <div class="gd-row"><strong>Baseline</strong><span>Your starting Map Pack position on 3–5 agreed search terms in your city</span></div>
+          <div class="gd-row"><strong>Target</strong><span>The 90-day position milestone we're signing up for</span></div>
+          <div class="gd-row"><strong>Method</strong><span>Checked weekly with the same tracking set up on day one — no moving goalposts</span></div>
+          <div class="gd-row"><strong>On a miss</strong><span>Billing pauses until we hit it — no arguing about whether it counts</span></div>
+        </div>
       </article>
     </div>
     <a class="bridge reveal" href="#founder">
@@ -2452,6 +2572,7 @@ footer{
         <p>I work with HVAC contractors only, one primary city at a time, so the local search plan is not split across companies competing for the same jobs.</p>
         <blockquote class="founder-quote"><span class="fq-u">"I built Rankwise around one question: why does the contractor who answers the phone in under 10 minutes lose the call to one who doesn't, just because their Google listing looks more active?"</span></blockquote>
         <p><strong>How it works:</strong> month-to-month, with position targets agreed in writing before month one. Miss the milestone — billing pauses until we hit it.</p>
+        <p><strong>Who you deal with:</strong> me. No account managers, no handoffs — the person reading your numbers is the person on this page, and my name is on every report that leaves this system.</p>
         <div class="founder-facts">
           <div>
             <strong>HVAC only</strong>
@@ -2466,7 +2587,24 @@ footer{
             <span>Your competitors can't join</span>
           </div>
         </div>
+        <div class="founder-direct">
+          <div><span>Direct line</span><a href="tel:+17788870311">+1 778 887 0311</a></div>
+          <div><span>Email</span><a href="mailto:zshef@rankwise.ca">zshef@rankwise.ca</a></div>
+        </div>
       </div>
+    </div>
+    <div class="specimen-card reveal in">
+      <div class="specimen-head">Specimen — real prospect audit · pulled from the live system · 2026-05-17</div>
+      <div class="specimen-grid">
+        <div><strong>Company</strong><span><span class="specimen-redact" aria-hidden="true">██████████</span><span class="visually-hidden">name withheld</span> · Abbotsford</span></div>
+        <div><strong>Best map position</strong><span>#3 — heat-pump install search</span></div>
+        <div><strong>Google reviews</strong><span>13 · 5.0★ · city average 216</span></div>
+        <div><strong>Google profile</strong><span>3 photos · empty description</span></div>
+        <div><strong>Website</strong><span>single page · no schema markup</span></div>
+        <div><strong>Top competitor</strong><span>1,700 reviews</span></div>
+      </div>
+      <div class="specimen-finding"><strong>Finding</strong><span>A 5-star operator Google barely shows: 13 reviews against a 216-review city average, an empty profile, a one-page site. The gap is visibility, not workmanship.</span></div>
+      <p class="specimen-note">Every engagement starts with a document like this — pulled from our live prospect system. Name withheld: we don't publish a contractor's gaps with their name attached. Yours stays private too.</p>
     </div>
     <a class="bridge reveal" href="#lab">
       <p class="bridge-q">I'd rather show you receipts than promises — so the research is public.</p>
@@ -2593,7 +2731,7 @@ footer{
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-1" onclick="toggleFaq(this)">How much does it cost?<span class="faq-icon" aria-hidden="true">+</span></button>
-      <div class="faq-a" id="faq-a-1" aria-hidden="true">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-a" id="faq-a-1" aria-hidden="true">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. For scale: a single furnace or heat-pump install is a $6,000–$15,000 ticket in Metro Vancouver — if better visibility books you one extra install a quarter, the fee has covered itself several times over. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-2" onclick="toggleFaq(this)">Am I locked into a contract?<span class="faq-icon" aria-hidden="true">+</span></button>

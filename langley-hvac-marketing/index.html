@@ -1298,6 +1298,119 @@ footer{
   border:1.5px solid var(--label);
   border-radius:3px;
 }
+/* ── Guarantee: the milestone document, itemized ─────────── */
+.guarantee-doc{margin-top:16px;border-bottom:1px solid rgba(23,35,31,.14)}
+.guarantee-doc-cap{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+}
+.gd-row{
+  border-top:1px solid rgba(23,35,31,.14);
+  padding:11px 0;
+  display:grid;
+  grid-template-columns:84px 1fr;
+  gap:14px;
+  align-items:baseline;
+  font-size:13.5px;
+  color:var(--ink-soft);
+  line-height:1.55;
+}
+.gd-row strong{
+  color:var(--label);
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+/* ── Founder: direct line + specimen audit card ──────────── */
+.founder-direct{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 30px;
+  align-items:baseline;
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid rgba(23,35,31,.14);
+}
+.founder-direct span{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--label);
+  margin-right:8px;
+}
+.founder-direct a{
+  font-size:15px;
+  font-weight:700;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:2px solid rgba(242,181,51,.55);
+  white-space:nowrap;
+  transition:color .2s ease,border-color .2s ease;
+}
+.founder-direct a:hover{color:var(--link);border-color:var(--link)}
+.specimen-card{
+  margin-top:42px;
+  background:var(--surface);
+  border:1.5px solid var(--ink);
+  border-radius:6px;
+  box-shadow:5px 5px 0 rgba(43,168,152,.22);
+  overflow:hidden;
+}
+.specimen-head{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  padding:12px 22px;
+  border-bottom:1px solid rgba(23,35,31,.14);
+  background:var(--surface-warm);
+}
+.specimen-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px 26px;
+  padding:20px 22px 16px;
+}
+.specimen-grid strong,.specimen-finding strong{
+  display:block;
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--label);
+  margin-bottom:3px;
+}
+.specimen-grid span,.specimen-finding span{font-size:14.5px;color:var(--ink);line-height:1.55}
+.specimen-redact{color:var(--ink-muted);letter-spacing:-1px}
+.specimen-finding{
+  padding:16px 22px 0;
+  border-top:1px dashed var(--line-strong);
+}
+.specimen-note{
+  font-family:var(--display);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+  padding:14px 22px 18px;
+  line-height:1.9;
+}
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media(max-width:860px){.specimen-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.specimen-grid{grid-template-columns:1fr}}
 /* ── Founder: pull quote + fact descriptions ─────────────── */
 .founder-quote{
   margin:22px 0 20px;
