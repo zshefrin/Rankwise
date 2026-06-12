@@ -99,14 +99,30 @@ function googleLogin() {
     encodeURIComponent(location.origin + location.pathname);
 }
 
-// Catch the OAuth redirect (implicit flow returns tokens in the URL hash).
+// Catch auth redirects (OAuth sign-in AND password-recovery links both return
+// tokens in the URL hash — implicit flow).
 (function () {
   if (!location.hash) return;
   const h = new URLSearchParams(location.hash.slice(1));
-  if (h.get("access_token")) localStorage.setItem("rw_tok", h.get("access_token"));
-  else if (h.get("error_description") || h.get("error")) window._oauthErr = h.get("error_description") || "Google sign-in failed";
+  if (h.get("access_token")) {
+    localStorage.setItem("rw_tok", h.get("access_token"));
+    if (h.get("type") === "recovery" || h.get("type") === "invite") window._recovery = true;
+  } else if (h.get("error_description") || h.get("error")) {
+    window._oauthErr = h.get("error_description") || "Sign-in failed";
+  }
   history.replaceState(null, "", location.pathname + location.search);
 })();
+
+async function setNewPassword(e) {
+  e.preventDefault();
+  const pw = $("#np").value;
+  if (pw.length < 8) { $("#err2").textContent = "Use at least 8 characters."; return; }
+  if (pw !== $("#np2").value) { $("#err2").textContent = "Passwords don't match."; return; }
+  const r = await fetch(SB + "/auth/v1/user", { method: "PUT", headers: hdr(), body: JSON.stringify({ password: pw }) });
+  const d = await r.json();
+  if (r.ok) { window._recovery = false; toast("Password saved"); render(); }
+  else $("#err2").textContent = d.error_description || d.msg || "Could not save — link may have expired; request a new one.";
+}
 
 async function rest(path) {
   const r = await fetch(SB + "/rest/v1/" + path, { headers: hdr() });
@@ -151,6 +167,15 @@ function logForm(slug, open) {
 
 async function render() {
   const app = $("#app");
+  if (tok() && window._recovery) {
+    app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Choose your new password.</p>' +
+      '<form class="card" onsubmit="setNewPassword(event)">' +
+      '<input id="np" type="password" placeholder="new password (8+ characters)" autocomplete="new-password"><br><br>' +
+      '<input id="np2" type="password" placeholder="repeat new password" autocomplete="new-password"><br><br>' +
+      '<button class="primary" style="width:100%">Save password</button>' +
+      '<p id="err2" class="mut" style="color:var(--bad)"></p></form>';
+    return;
+  }
   if (!tok()) {
     app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Sign in with the login Zack set up for you.</p>' +
       '<form class="card" onsubmit="login(event)"><input id="em" type="email" placeholder="email" autocomplete="username"><br><br>' +
