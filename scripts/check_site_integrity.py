@@ -15,8 +15,11 @@ STALE_STICKY_CTA_RE = re.compile(
     r"\.mobile-sticky-cta\{display:none\}\s*"
     r"@media\(max-width:1000px\)\{\.mobile-sticky-cta\{display:flex;position:fixed;"
 )
+# Must mirror scripts/sync_nav.py RW_NAV_RE: the shared block is the optional
+# skip link plus the header, and the hash compares that whole span to the partial.
 RW_NAV_RE = re.compile(
-    r'<header\s+class=["\']rw-nav["\']\s+role=["\']navigation["\']\s+aria-label=["\']Primary["\']>.*?</header>',
+    r'(?:<a\s+class=["\']skip-link["\'][^>]*>[^<]*</a>\s*)?'
+    r'<header\s+class=["\']rw-nav["\'][^>]*>.*?</header>',
     re.DOTALL | re.IGNORECASE,
 )
 JSON_LD_RE = re.compile(r'<script type="application/ld\+json">([\s\S]*?)</script>')

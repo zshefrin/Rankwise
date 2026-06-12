@@ -1073,11 +1073,16 @@ h2 .serif{font-family:var(--serif);font-style:italic;font-weight:400;color:#2230
 .faq-item{
   border-top:1px solid var(--line);
   padding:18px 0;
-  cursor:pointer;
 }
 .faq-item:last-child{border-bottom:1px solid var(--line)}
 .faq-q{
   display:flex;justify-content:space-between;gap:12px;
+  width:100%;
+  margin:0;padding:0;
+  background:none;border:0;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
   font-family:var(--headline);
   font-weight:800;
   letter-spacing:-.008em;
@@ -1825,11 +1830,19 @@ footer{
   z-index:90;
   display:none;
   flex-direction:column;
-  gap:13px;
+  gap:0;
 }
 @media(min-width:1280px){.chapter-rail{display:flex}}
 .chapter-rail a{
   position:relative;
+  width:24px;
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.chapter-rail a::before{
+  content:"";
   width:9px;
   height:9px;
   border-radius:50%;
@@ -1838,8 +1851,8 @@ footer{
   box-shadow:0 0 0 2px rgba(255,253,247,.45);
   transition:background .2s ease,border-color .2s ease,transform .2s ease;
 }
-.chapter-rail a:hover{border-color:var(--accent-2)}
-.chapter-rail a.active{
+.chapter-rail a:hover::before{border-color:var(--accent-2)}
+.chapter-rail a.active::before{
   background:var(--accent-2);
   border-color:var(--accent-2);
   transform:scale(1.25);
@@ -1847,7 +1860,7 @@ footer{
 .chapter-rail a::after{
   content:attr(data-title);
   position:absolute;
-  left:19px;
+  left:26px;
   top:50%;
   transform:translateY(-50%);
   padding:4px 9px;
@@ -1865,39 +1878,43 @@ footer{
   pointer-events:none;
   transition:opacity .18s ease;
 }
-.chapter-rail a:hover::after{opacity:1}
+.chapter-rail a:hover::after,.chapter-rail a:focus-visible::after{opacity:1}
 </style>
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-duotone-20260610">
-<link rel="preload" href="/assets/home-map.css?v=metro-map-20-20260610" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/home-map.css?v=metro-map-20-20260610"></noscript>
-<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
+<meta name="theme-color" content="#0F1815">
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
+<link rel="preload" href="/assets/home-map.css?v=metro-map-21-20260611" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/home-map.css?v=metro-map-21-20260611"></noscript>
+<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
 </head>
 <body>
 
-<nav class="chapter-rail" aria-label="Page chapters">
-  <a href="#mappack" data-title="01 · The prize"></a>
-  <a href="#cities" data-title="02 · Your city"></a>
-  <a href="#signals" data-title="03 · Six signals"></a>
-  <a href="#services" data-title="04 · The system"></a>
-  <a href="#results" data-title="05 · Expectations"></a>
-  <a href="#founder" data-title="06 · The founder"></a>
-  <a href="#lab" data-title="07 · The record"></a>
-  <a href="#contact" data-title="08 · Your move"></a>
-</nav>
-
-<header class="rw-nav" role="navigation" aria-label="Primary">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="rw-nav">
   <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
-  <ul class="rw-nav__links">
-    <li><a href="/#services">What we do</a></li>
-    <li><a href="/#how">How it works</a></li>
-    <li><a href="/#results">Results</a></li>
-    <li><a href="/#faq">FAQ</a></li>
-    <li><a href="/blog/">Blog</a></li>
-    <li><a href="/lab/">Lab</a></li>
-    <li><a href="/about/">About</a></li>
-  </ul>
+  <nav class="rw-nav__menu" aria-label="Primary">
+    <ul class="rw-nav__links">
+      <li><a href="/#services">What we do</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#results">Results</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/lab/">Lab</a></li>
+      <li><a href="/about/">About</a></li>
+    </ul>
+  </nav>
   <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
+
+<nav class="chapter-rail" aria-label="Page chapters">
+  <a href="#mappack" data-title="01 · The prize" aria-label="01 · The prize"></a>
+  <a href="#cities" data-title="02 · Your city" aria-label="02 · Your city"></a>
+  <a href="#signals" data-title="03 · Six signals" aria-label="03 · Six signals"></a>
+  <a href="#services" data-title="04 · The system" aria-label="04 · The system"></a>
+  <a href="#results" data-title="05 · Expectations" aria-label="05 · Expectations"></a>
+  <a href="#founder" data-title="06 · The founder" aria-label="06 · The founder"></a>
+  <a href="#lab" data-title="07 · The record" aria-label="07 · The record"></a>
+  <a href="#contact" data-title="08 · Your move" aria-label="08 · Your move"></a>
+</nav>
 
 <main id="main-content">
 
@@ -1958,7 +1975,7 @@ footer{
     <div class="mappack-grid">
       <div class="mp-panel reveal in">
         <div class="mp-search">
-          <span style="font-size:12px;opacity:.5">🔍</span>
+          <span style="font-size:12px;opacity:.5" aria-hidden="true">🔍</span>
           <span class="mp-search-q">hvac contractor near me</span>
           <span class="mp-search-lbl">Google Map Pack</span>
         </div>
@@ -1967,7 +1984,7 @@ footer{
             <div class="mp-pos">1</div>
             <div>
               <div class="mp-biz-name">North Van HVAC Co.</div>
-              <div><span class="mp-stars">★★★★★</span><span class="mp-rev">5.0 · 41 reviews</span></div>
+              <div><span class="mp-stars" aria-hidden="true">★★★★★</span><span class="mp-rev">5.0 · 41 reviews</span></div>
               <div class="mp-sub">HVAC Contractor · <span class="mp-open">Open</span> · North Vancouver</div>
             </div>
           </div>
@@ -1975,7 +1992,7 @@ footer{
             <div class="mp-pos">2</div>
             <div>
               <div class="mp-biz-name">Metro Heating &amp; Cooling</div>
-              <div><span class="mp-stars">★★★★½</span><span class="mp-rev">4.8 · 278 reviews</span></div>
+              <div><span class="mp-stars" aria-hidden="true">★★★★½</span><span class="mp-rev">4.8 · 278 reviews</span></div>
               <div class="mp-sub">Air conditioning contractor · <span class="mp-open">Open</span> · Vancouver</div>
             </div>
           </div>
@@ -2381,7 +2398,7 @@ footer{
         <p>We do not work with multiple HVAC companies in the same primary city. That keeps your market message focused and your growth plan clean.</p>
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
-          <span class="gb-icon">✓</span>
+          <span class="gb-icon" aria-hidden="true">✓</span>
           <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
@@ -2574,29 +2591,29 @@ footer{
       <div class="label">FAQ</div>
       <h2>Questions we get a lot.</h2>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-1" onclick="toggleFaq(this)">How much does it cost?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-1" aria-hidden="true">HVAC marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your market and your current ranking: a solo operator in Langley is a different situation than a 10-person crew covering all of Vancouver. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
-      <div class="faq-a">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-2" onclick="toggleFaq(this)">Am I locked into a contract?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-2" aria-hidden="true">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in your city and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-3" onclick="toggleFaq(this)">What if it doesn't work?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-3" aria-hidden="true">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in your city and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
-      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-4" onclick="toggleFaq(this)">How much of my time does this take?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-4" aria-hidden="true">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-5" onclick="toggleFaq(this)">How fast will I see results?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-5" aria-hidden="true">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Do you work with other HVAC contractors in my city?<span class="faq-icon">+</span></div>
-      <div class="faq-a">No. I take one HVAC contractor per city — that's a hard rule. If your city is open when you book the audit, your local competitors can't hire Rankwise while you're a client. It also means every strategy I build is built for your market, not split across five contractors competing for the same jobs.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-6" onclick="toggleFaq(this)">Do you work with other HVAC contractors in my city?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-6" aria-hidden="true">No. I take one HVAC contractor per city — that's a hard rule. If your city is open when you book the audit, your local competitors can't hire Rankwise while you're a client. It also means every strategy I build is built for your market, not split across five contractors competing for the same jobs.</div>
     </div>
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
@@ -2706,7 +2723,7 @@ document.addEventListener("click",function(event){
       cta_text:text,
       link_url:link.href
     });
-  }else if(href.charAt(0)==="#"){
+  }else if(href.charAt(0)==="#"&&href!=="#main-content"){
     rwTrack("section_nav_clicked",{
       cta_location:rwLocation(link),
       cta_text:text,
@@ -2714,13 +2731,21 @@ document.addEventListener("click",function(event){
     });
   }
 });
-function toggleFaq(item){
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
   const o=item.classList.contains('open');
-  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  document.querySelectorAll('.faq-item').forEach(i=>{
+    i.classList.remove('open');
+    const b=i.querySelector('.faq-q'),a=i.querySelector('.faq-a');
+    if(b)b.setAttribute('aria-expanded','false');
+    if(a)a.setAttribute('aria-hidden','true');
+  });
   if(!o){
     item.classList.add('open');
-    const q=item.querySelector('.faq-q');
-    rwTrack('faq_opened',{question:q?q.textContent.replace('+','').trim().slice(0,100):''});
+    btn.setAttribute('aria-expanded','true');
+    const a=item.querySelector('.faq-a');
+    if(a)a.setAttribute('aria-hidden','false');
+    rwTrack('faq_opened',{question:btn.textContent.replace('+','').trim().slice(0,100)});
   }
 }
 const stickyCta=document.querySelector('.mobile-sticky-cta');

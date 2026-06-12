@@ -666,10 +666,11 @@ CITY_EXTRA_CSS = """
 .hero-lock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;max-width:640px}
 .hero-lock div{border-left:2px solid var(--accent);padding-left:10px;color:rgba(255,255,255,.84);font-size:14px;line-height:1.35}
 .hero-right{align-self:end;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(12,18,15,.48);backdrop-filter:blur(10px);padding:22px 22px 20px;box-shadow:0 20px 44px rgba(0,0,0,.22)}
-.hero-right h3{font-family:var(--display);font-size:22px;line-height:1.05;color:#fff;margin:0 0 14px}
+.hero-right h2{font-family:var(--display)!important;font-weight:700!important;letter-spacing:normal!important;font-size:22px;line-height:1.05;color:#fff;margin:0 0 14px}
 .mini{border-top:1px solid rgba(255,255,255,.14);padding:12px 0 0;margin-top:12px}
 .mini strong{display:block;font-family:var(--display);font-size:14px;color:#fff;margin-bottom:4px}
 .mini span{display:block;font-size:13px;line-height:1.45;color:rgba(255,255,255,.70)}
+.cal-loading{position:absolute;inset:0;z-index:0;pointer-events:none}
 .city-proof{padding:42px 52px;background:linear-gradient(135deg,rgba(255,253,247,.94),rgba(232,241,235,.78));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .city-proof-grid{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,.85fr));gap:12px;align-items:stretch}
 .city-proof-copy{padding:6px 18px 6px 0}
@@ -696,7 +697,7 @@ CITY_EXTRA_CSS = """
 .city-links-list a{font-size:13px;color:var(--ink-soft);text-decoration:none;font-weight:600;padding:6px 14px;border:1px solid var(--line);border-radius:999px;transition:color .15s,border-color .15s}
 .city-links-list a:hover{color:var(--ink);border-color:var(--line-strong)}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}.problem-grid,.how-grid{grid-template-columns:1fr}}
-@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.city-slot-pill{font-size:12px;padding:6px 12px}.hero-right{margin-top:20px;padding:16px 16px 14px;box-shadow:none}.hero-right h3{font-size:17px;margin-bottom:10px}.hero-right .mini strong{font-size:13.5px}.hero-right .mini span{font-size:12.5px}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+@media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.city-slot-pill{font-size:12px;padding:6px 12px}.hero-right{margin-top:20px;padding:16px 16px 14px;box-shadow:none}.hero-right h2{font-size:17px;margin-bottom:10px}.hero-right .mini strong{font-size:13.5px}.hero-right .mini span{font-size:12.5px}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
 """
 
 
@@ -811,6 +812,7 @@ def build_page(c, cities_list):
     return f'''<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0F1815">
 <title>{c["meta_title"]}</title>
 <meta name="description" content="{c["meta_desc"]}">
 <link rel="canonical" href="{canonical}">
@@ -883,8 +885,8 @@ def build_page(c, cities_list):
 
 <style>{CSS}{CITY_EXTRA_CSS}{TESTIMONIALS_CSS}</style>
 <link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
-<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
+<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
 </head>
 <body>
 {NAV}
@@ -909,7 +911,7 @@ def build_page(c, cities_list):
       </div>
     </div>
     <aside class="hero-right reveal in">
-      <h3>What you get on the call</h3>
+      <h2>What you get on the call</h2>
       <div class="mini">
         <strong>Live map pack breakdown</strong>
         <span>See who outranks you and why in your {name} service area.</span>
@@ -1050,7 +1052,7 @@ def build_page(c, cities_list):
         <p>We do not work with multiple {tl} companies in {name}. That keeps your market message focused and your growth plan clean.</p>
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
-          <span class="gb-icon">✓</span>
+          <span class="gb-icon" aria-hidden="true">✓</span>
           <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
@@ -1087,7 +1089,7 @@ def build_page(c, cities_list):
         <span>Every audit lands in my inbox, not a team's. I work with {tl} contractors only, one per city, and I review the numbers myself before every call.</span>
       </div>
     </a>
-    <div class="reveal in" id="cal-embed"></div>
+    <div class="reveal in" id="cal-embed"><div class="cal-loading">Loading the booking calendar…</div></div>
     <p class="cta-note reveal in">{name} only · Position milestone agreed in writing before month one</p>
   </div>
 </section>
@@ -1098,29 +1100,29 @@ def build_page(c, cities_list):
       <div class="label">FAQ</div>
       <h2>Questions we get a lot.</h2>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much does it cost?<span class="faq-icon">+</span></div>
-      <div class="faq-a">{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-1" onclick="toggleFaq(this)">How much does it cost?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-1" aria-hidden="true">{tl} marketing in BC typically runs $500–$1,500/month, month-to-month — no long contracts. Where you land in that range depends on your {name} market and your current ranking. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Am I locked into a contract?<span class="faq-icon">+</span></div>
-      <div class="faq-a">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-2" onclick="toggleFaq(this)">Am I locked into a contract?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-2" aria-hidden="true">No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it. We don't believe in trapping people. The results keep you around, not a contract.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">What if it doesn't work?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-3" onclick="toggleFaq(this)">What if it doesn't work?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-3" aria-hidden="true">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How much of my time does this take?<span class="faq-icon">+</span></div>
-      <div class="faq-a">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-4" onclick="toggleFaq(this)">How much of my time does this take?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-4" aria-hidden="true">About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else. You'll get a monthly report and a check-in call, but the day-to-day work is all on us.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">How fast will I see results?<span class="faq-icon">+</span></div>
-      <div class="faq-a">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-5" onclick="toggleFaq(this)">How fast will I see results?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-5" aria-hidden="true">Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months.</div>
     </div>
-    <div class="faq-item reveal in" onclick="toggleFaq(this)">
-      <div class="faq-q">Do you work with other {tl} contractors in {name}?<span class="faq-icon">+</span></div>
-      <div class="faq-a">{c["faq_exclusivity"]}</div>
+    <div class="faq-item reveal in">
+      <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-6" onclick="toggleFaq(this)">Do you work with other {tl} contractors in {name}?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <div class="faq-a" id="faq-a-6" aria-hidden="true">{c["faq_exclusivity"]}</div>
     </div>
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
@@ -1176,11 +1178,11 @@ document.addEventListener("click",function(event){{
   const text=(link.textContent||"").replace(/\\s+/g," ").trim().slice(0,80);
   if(href.indexOf("/audit/")!==-1){{
     rwTrack("audit_cta_clicked",{{cta_location:rwLocation(link),cta_text:text,link_url:link.href}});
-  }}else if(href.charAt(0)==="#"){{
+  }}else if(href.charAt(0)==="#"&&href!=="#main-content"){{
     rwTrack("section_nav_clicked",{{cta_location:rwLocation(link),cta_text:text,target_section:href.slice(1)}});
   }}
 }});
-function toggleFaq(item){{const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!o){{item.classList.add('open');const q=item.querySelector('.faq-q');rwTrack('faq_opened',{{question:q?q.textContent.replace('+','').trim().slice(0,100):''}});}}}}
+function toggleFaq(btn){{const item=btn.closest('.faq-item');const o=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>{{i.classList.remove('open');const b=i.querySelector('.faq-q'),a=i.querySelector('.faq-a');if(b)b.setAttribute('aria-expanded','false');if(a)a.setAttribute('aria-hidden','true');}});if(!o){{item.classList.add('open');btn.setAttribute('aria-expanded','true');const a=item.querySelector('.faq-a');if(a)a.setAttribute('aria-hidden','false');rwTrack('faq_opened',{{question:btn.textContent.replace('+','').trim().slice(0,100)}});}}}}
 (function(){{
   var sticky=document.querySelector('.mobile-sticky-cta');
   var contact=document.getElementById('contact');

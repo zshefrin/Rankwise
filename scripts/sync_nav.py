@@ -5,14 +5,21 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 NAV = (ROOT / "partials" / "nav.html").read_text(encoding="utf-8").strip()
-NAV_CSS = '<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">'
-NAV_JS = '<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>'
+NAV_CSS = '<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">'
+NAV_JS = '<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>'
+THEME_META = '<meta name="theme-color" content="#0F1815">'
 
 OLD_NAV_RE = re.compile(r"<nav\b[^>]*>.*?</nav>", re.DOTALL | re.IGNORECASE)
+# Optional leading skip link is part of the nav block — matching it keeps re-runs
+# from stacking a second copy in front of the header.
 RW_NAV_RE = re.compile(
-    r'<header\s+class=["\']rw-nav["\']\s+role=["\']navigation["\']\s+aria-label=["\']Primary["\']>.*?</header>',
+    r'(?:<a\s+class=["\']skip-link["\'][^>]*>[^<]*</a>\s*)?'
+    r'<header\s+class=["\']rw-nav["\'][^>]*>.*?</header>',
     re.DOTALL | re.IGNORECASE,
 )
+# NOTE: flattens every theme-color meta to the single dark one — revisit before
+# introducing media-attributed light/dark theme-color pairs.
+THEME_META_RE = re.compile(r'<meta\s+name=["\']theme-color["\'][^>]*>')
 NAV_CSS_RE = re.compile(r'<link\s+rel=["\']stylesheet["\']\s+href=["\']/assets/rankwise-nav\.css[^"\']*["\']\s*>')
 NAV_JS_RE = re.compile(r'<script\s+src=["\']/assets/nav-mobile\.js[^"\']*["\']\s+defer></script>')
 
@@ -27,6 +34,10 @@ def sync_nav_assets(html: str) -> str:
     if NAV_CSS not in html:
         html = html.replace(NAV_JS, f"{NAV_CSS}\n{NAV_JS}", 1)
 
+    html = THEME_META_RE.sub(THEME_META, html)
+    if THEME_META not in html:
+        html = html.replace(NAV_CSS, f"{THEME_META}\n{NAV_CSS}", 1)
+
     return html
 
 
@@ -36,10 +47,14 @@ def sync_file(path: Path) -> bool:
 
     if RW_NAV_RE.search(html):
         html = RW_NAV_RE.sub(NAV, html, count=1)
-    elif OLD_NAV_RE.search(html):
-        html = OLD_NAV_RE.sub(NAV, html, count=1)
     else:
-        return False
+        old = OLD_NAV_RE.search(html)
+        # The legacy fallback must never eat a non-header <nav>: the homepage
+        # chapter rail, or the menu <nav> inside an rw-nav header that drifted
+        # out of RW_NAV_RE's shape (replacing that would nest headers).
+        if not old or "chapter-rail" in old.group(0) or "rw-nav__menu" in old.group(0):
+            return False
+        html = OLD_NAV_RE.sub(NAV, html, count=1)
 
     html = sync_nav_assets(html)
 

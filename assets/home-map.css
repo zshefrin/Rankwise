@@ -285,7 +285,6 @@
   background:#fff;
   transform:translate(-50%,-50%) scale(1.12);
   box-shadow:0 16px 34px rgba(10,103,95,.16);
-  outline:none;
   z-index:7;
 }
 .metro-city:hover::after,.metro-city:focus-visible::after,.metro-city.is-hover::after,.metro-city.is-active::after{
@@ -359,7 +358,6 @@
   background:#fff;
   border-color:rgba(15,118,110,.52);
   color:var(--ink);
-  outline:none;
 }
 .metro-market-chip.is-active{transform:translateY(-1px)}
 .metro-detail{

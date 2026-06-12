@@ -182,24 +182,28 @@ footer{position:relative;z-index:1;background:#101A16;border-top:1px solid rgba(
 @media(max-width:1000px){.mobile-sticky-cta{display:flex;position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:400;justify-content:center;align-items:center;text-decoration:none;background:linear-gradient(135deg,var(--lab-amber-bright),#E8B43A);color:#17231F;border:1px solid rgba(224,165,33,.6);font-family:var(--display);font-size:15px;font-weight:800;padding:14px 16px;border-radius:999px;box-shadow:0 12px 28px rgba(224,165,33,.35);letter-spacing:.01em}body{padding-bottom:92px}}
 @media(max-width:700px){main{padding-top:92px}.crumb{padding:14px 18px 0}.study-shell{padding:12px 18px 56px;gap:0}article.study h1{font-size:33px}article.study h2{font-size:22px;margin:42px 0 12px}article.study p,article.study li{font-size:16px}.study-lede{font-size:18px}.lab-fig{padding:16px 14px 12px;margin:28px 0}.audit-cta h3{font-size:20px}footer{padding:24px 20px;text-align:center}.footer-wrap{justify-content:center}}
 </style>
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
-<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
+<meta name="theme-color" content="#0F1815">
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
+<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
 </head>
 <body>
 
 <div class="study-progress" aria-hidden="true"><i></i></div>
 
-<header class="rw-nav" role="navigation" aria-label="Primary">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="rw-nav">
   <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
-  <ul class="rw-nav__links">
-    <li><a href="/#services">What we do</a></li>
-    <li><a href="/#how">How it works</a></li>
-    <li><a href="/#results">Results</a></li>
-    <li><a href="/#faq">FAQ</a></li>
-    <li><a href="/blog/">Blog</a></li>
-    <li><a href="/lab/">Lab</a></li>
-    <li><a href="/about/">About</a></li>
-  </ul>
+  <nav class="rw-nav__menu" aria-label="Primary">
+    <ul class="rw-nav__links">
+      <li><a href="/#services">What we do</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#results">Results</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/lab/">Lab</a></li>
+      <li><a href="/about/">About</a></li>
+    </ul>
+  </nav>
   <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
 

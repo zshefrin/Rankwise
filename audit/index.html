@@ -109,8 +109,9 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 /* ── Section scaffolding ──────────────────────────────────── */
 .section{padding:40px 0 0}
 .section-label{
-  font-family:var(--display);font-size:12px;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);
+  /* !important: these are h2s now and rankwise-theme.css forces bare-h2 typography */
+  font-family:var(--display)!important;font-size:12px;font-weight:700!important;
+  letter-spacing:.08em!important;text-transform:uppercase;color:var(--accent-2);
   text-align:center;margin-bottom:18px;
 }
 
@@ -181,9 +182,12 @@ h1 .serif{font-family:var(--serif);font-style:italic;font-weight:400}
 .cal-head p{font-size:14px;color:var(--ink-soft)}
 .cal-head .cal-reassure{margin-top:6px;font-size:13.5px;font-weight:700;color:#1F5C40}
 #cal-embed{
+  position:relative;
   width:100%;min-height:640px;border-radius:14px;overflow:hidden;
   border:1px solid var(--line-strong);background:var(--paper-3);
 }
+#cal-embed cal-inline{position:relative;z-index:1;display:block}
+.cal-loading{position:absolute;inset:0;z-index:0;pointer-events:none}
 .cal-loading,.cal-fallback{
   min-height:640px;display:flex;align-items:center;justify-content:center;
   padding:24px;text-align:center;color:var(--ink-soft);font-size:15px;line-height:1.6;
@@ -215,22 +219,26 @@ footer{padding:20px 0 36px}
 }
 </style>
 <link rel="stylesheet" href="/assets/rankwise-theme.css?v=rw-theme-perf-20260606">
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-perf-20260605">
-<script src="/assets/nav-mobile.js?v=rw-nav-track-20260605" defer></script>
+<meta name="theme-color" content="#0F1815">
+<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
+<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
 </head>
 <body>
 
-<header class="rw-nav" role="navigation" aria-label="Primary">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="rw-nav">
   <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
-  <ul class="rw-nav__links">
-    <li><a href="/#services">What we do</a></li>
-    <li><a href="/#how">How it works</a></li>
-    <li><a href="/#results">Results</a></li>
-    <li><a href="/#faq">FAQ</a></li>
-    <li><a href="/blog/">Blog</a></li>
-    <li><a href="/lab/">Lab</a></li>
-    <li><a href="/about/">About</a></li>
-  </ul>
+  <nav class="rw-nav__menu" aria-label="Primary">
+    <ul class="rw-nav__links">
+      <li><a href="/#services">What we do</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#results">Results</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/lab/">Lab</a></li>
+      <li><a href="/about/">About</a></li>
+    </ul>
+  </nav>
   <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
 </header>
 
@@ -248,21 +256,21 @@ footer{padding:20px 0 36px}
 
 <section class="section">
   <div class="wrap">
-    <p class="section-label">What we'll cover on the call</p>
+    <h2 class="section-label">What we'll cover on the call</h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-title">Call volume read</div>
+        <h3 class="step-title">Call volume read</h3>
         <p class="step-desc">Where ready-to-book homeowners are finding HVAC companies in your city right now.</p>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-title">Competitor snapshot</div>
+        <h3 class="step-title">Competitor snapshot</h3>
         <p class="step-desc">The companies homeowners see first, and the proof signals helping them win those calls.</p>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-title">90-day priority order</div>
+        <h3 class="step-title">90-day priority order</h3>
         <p class="step-desc">The first moves for your Google listing, city pages, and booking path — in order.</p>
       </div>
     </div>
@@ -271,7 +279,7 @@ footer{padding:20px 0 36px}
 
 <section class="section">
   <div class="wrap">
-    <p class="section-label">How we work</p>
+    <h2 class="section-label">How we work</h2>
     <div class="terms">
       <div class="term">
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.7 5.3 8 14 3.3 9.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -292,7 +300,7 @@ footer{padding:20px 0 36px}
 <section class="booking" id="book">
   <div class="wrap">
     <div class="cal-head">
-      <p class="section-label">Pick a time</p>
+      <h2 class="section-label">Pick a time</h2>
       <p>Choose a 15-minute slot that works for you. You'll get a confirmation right away.</p>
       <p class="cal-reassure">Free · No obligation · No pitch deck — and if your city's already taken, I'll tell you straight.</p>
     </div>
@@ -316,7 +324,7 @@ footer{padding:20px 0 36px}
       </a>
     </div>
 
-    <div id="cal-embed"></div>
+    <div id="cal-embed"><div class="cal-loading">Loading the booking calendar…</div></div>
     <p class="book-fallback">Calendar not loading? <a href="https://cal.com/zackary-shefrin-oy63zv/15min" target="_blank" rel="noopener">Open the booking page directly →</a></p>
   </div>
 </section>

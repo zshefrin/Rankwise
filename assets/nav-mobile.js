@@ -2,11 +2,15 @@
   var nav = document.querySelector('.rw-nav');
   if (!nav) return;
 
+  var linksEl = nav.querySelector('.rw-nav__links');
+  if (linksEl && !linksEl.id) linksEl.id = 'rw-nav-links';
+
   var btn = document.createElement('button');
   btn.className = 'rw-nav__hamburger';
   btn.type = 'button';
   btn.setAttribute('aria-label', 'Menu');
   btn.setAttribute('aria-expanded', 'false');
+  if (linksEl) btn.setAttribute('aria-controls', linksEl.id);
   btn.innerHTML = '<span></span><span></span><span></span>';
 
   var cta = nav.querySelector('.rw-nav__cta');
@@ -32,21 +36,28 @@
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
+  function closeMenu(){
+    nav.classList.remove('rw-nav--open');
+    btn.classList.remove('rw-nav__hamburger--open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
   document.addEventListener('click', function(e){
     if (!nav.contains(e.target) && nav.classList.contains('rw-nav--open')) {
-      nav.classList.remove('rw-nav--open');
-      btn.classList.remove('rw-nav__hamburger--open');
-      btn.setAttribute('aria-expanded', 'false');
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && nav.classList.contains('rw-nav--open')) {
+      closeMenu();
+      btn.focus();
     }
   });
 
   var links = nav.querySelectorAll('.rw-nav__links a');
   for (var i = 0; i < links.length; i++) {
-    links[i].addEventListener('click', function(){
-      nav.classList.remove('rw-nav--open');
-      btn.classList.remove('rw-nav__hamburger--open');
-      btn.setAttribute('aria-expanded', 'false');
-    });
+    links[i].addEventListener('click', closeMenu);
   }
 
   // Fallback sticky-CTA sync for pages without their own (blog, lab, about).

@@ -1,3 +1,31 @@
+:root {
+  color-scheme: light;
+}
+
+/* Semantic <nav> wrapper around the link list — transparent to the
+   header's flex layout. */
+.rw-nav__menu {
+  display: contents;
+}
+
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 600;
+  padding: 12px 20px;
+  background: #0f1815;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0 0 8px 8px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .rw-nav,
 .rw-nav * {
   box-sizing: border-box;
