@@ -131,9 +131,9 @@ async function rest(path) {
   return r.json();
 }
 
-async function enqueueAction(action) {
+async function enqueueAction(action, params) {
   const r = await fetch(SB + "/rest/v1/operator_action_queue", {
-    method: "POST", headers: hdr(), body: JSON.stringify({ action }),
+    method: "POST", headers: hdr(), body: JSON.stringify({ action, params: params || {} }),
   });
   if (r.ok) { toast("Queued — applies in ~2 min"); renderOps(); }
   else toast("Could not queue");
@@ -407,6 +407,23 @@ async function renderOps() {
   }
   const p = snap.payload || {};
   h += '<p class="mut">updated ' + ptTime(snap.updated_at) + '</p>';
+
+  // ── Pending expenses ───────────────────────────────────────────────────────
+  if ((p.pending_expenses || []).length) {
+    h += '<div class="card"><b>Pending expenses</b>';
+    for (const row of p.pending_expenses) {
+      h += '<div class="hist">' +
+        '<b>' + esc(row.vendor) + '</b> · ' + esc(row.amount) + ' ' + esc(row.currency) +
+        ' · <span class="mut">' + esc(row.date) + '</span>' +
+        (row.description ? ' · <span class="mut">' + esc(row.description) + '</span>' : '') +
+        '<div class="row" style="margin-top:6px;gap:6px">' +
+        '<button data-id="' + esc(row.id) + '" onclick="enqueueAction(\'confirm_expense\',{id:this.dataset.id})">Confirm</button>' +
+        '<button data-id="' + esc(row.id) + '" onclick="enqueueAction(\'reject_expense\',{id:this.dataset.id})">Reject</button>' +
+        '</div></div>';
+    }
+    h += '</div>';
+  }
+
   const fu = p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null;
   h += '<div class="card"><b>Outreach funnel</b><div class="tally wk">' +
     ["draft", "queued", "active", "booked_audit"].map((k) =>
