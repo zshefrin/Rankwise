@@ -64,6 +64,15 @@ def build_sitemap() -> str:
     if (ROOT / about_html).exists():
         urls.append((f"{BASE}/about/", git_lastmod(about_html), "monthly", "0.8"))
 
+    # Legal pages
+    terms_html = "terms/index.html"
+    if (ROOT / terms_html).exists():
+        urls.append((f"{BASE}/terms/", git_lastmod(terms_html), "yearly", "0.3"))
+
+    privacy_html = "privacy/index.html"
+    if (ROOT / privacy_html).exists():
+        urls.append((f"{BASE}/privacy/", git_lastmod(privacy_html), "yearly", "0.3"))
+
     # Decision/comparison pages — explicit list (not auto-discovered)
     for comp_slug in ("hvac-marketing-options-compared",):
         comp_html = f"{comp_slug}/index.html"
