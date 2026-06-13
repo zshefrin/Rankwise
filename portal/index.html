@@ -31,6 +31,7 @@
   .bar i { display:block; height:100%; background:var(--accent); }
   .done { opacity:.55; } .pill { font-size:12px; padding:2px 8px; border-radius:99px; background:#2b3640; }
   .pill.ok { background:#15302a; color:var(--ok); } .pill.warn { background:#332a12; color:var(--warn); }
+  .pill.bad { background:#3a1d1d; color:var(--bad); }
   details summary { cursor:pointer; color:var(--accent); font-size:14px; margin:6px 0; }
   .opener { background:#0d1115; border-left:3px solid var(--accent); padding:10px; border-radius:8px; font-size:14px; margin:6px 0; font-style:italic; }
   .kit { background:#0d1115; border-radius:8px; padding:10px; font-size:13px; white-space:pre-wrap; max-height:300px; overflow-y:auto; }
@@ -334,23 +335,41 @@ async function renderOps() {
   }
   const p = snap.payload || {};
   h += '<p class="mut">updated ' + ptTime(snap.updated_at) + '</p>';
-  const pipe = (p.funnel && p.funnel.pipeline) || {};
+  const fu = p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null;
   h += '<div class="card"><b>Outreach funnel</b><div class="tally wk">' +
     ["draft", "queued", "active", "booked_audit"].map((k) =>
       '<div><b>' + (Number(pipe[k]) || 0) + '</b><span class="mut">' + k.replace("_", " ") + '</span></div>').join("") + '</div>' +
-    (p.funnel && p.funnel.gate ? '<p class="mut">send gate: ' + esc(JSON.stringify(p.funnel.gate)).slice(0, 120) + '</p>' : '') + '</div>';
+    (fu.due ? '<p class="mut">calls due: ' + (Number(fu.due.count) || 0) + ' (' + (Number(fu.due.overdue) || 0) + ' overdue)' +
+      (fu.stuck_count ? ' · stuck: ' + (Number(fu.stuck_count) || 0) : '') + '</p>' : '') +
+    // Explicit gate fields (a truncated JSON dump used to cut sending_enabled out of view).
+    // live_mode = OUTREACH_LIVE_MODE as seen by the metrics regen process (fail-safe:
+    // BLOCKED unless exported there) — a green checklist never means sends are on.
+    (gate ? '<p class="mut">send gate: ' + (gate.sending_enabled ? 'OPEN' : 'closed') +
+      ' · live_mode ' + esc(gate.live_mode || 'BLOCKED') +
+      ' · checks ' + (Number(gate.checks_passing) || 0) + '/' + (Number(gate.checks_total) || 0) + '</p>' : '') +
+    (fu.as_of ? '<p class="mut">data as of ' + ptTime(fu.as_of) + '</p>' : '') + '</div>';
   const s = p.seller || {};
   h += '<div class="card"><b>Seller</b><p class="mut">' + (s.active ? esc(s.name || "active") : "not hired yet") +
     (s.callbacks_due ? ' · ' + (Number(s.callbacks_due) || 0) + ' callbacks due' : '') +
-    (s.pay_due_cad ? ' · <span class="pill warn">$' + s.pay_due_cad + ' pay due</span>' : '') + '</p>' +
+    (s.pay_due_cad ? ' · <span class="pill warn">$' + (Number(s.pay_due_cad) || 0) + ' pay due</span>' : '') + '</p>' +
     (s.totals ? '<div class="tally wk">' + ["dials", "conversations", "bookings", "shows"].map((k) =>
-      '<div><b>' + (Number(s.totals[k]) || 0) + '</b><span class="mut">' + k + '</span></div>').join("") + '</div>' : '') + '</div>';
+      '<div><b>' + (Number(s.totals[k]) || 0) + '</b><span class="mut">' + k + '</span></div>').join("") + '</div>' : '') +
+    (s.as_of ? '<p class="mut">data as of ' + ptTime(s.as_of) + '</p>' : '') + '</div>';
   const sys = p.system || {};
+  // sources_total excludes by-design SKIPs; sources_ok also excludes WARNs
+  // (sentinel vocabulary OK/SKIP/WARN/FAIL — WARN is advisory, never green).
+  // Pills: FAIL red, WARN amber, SKIP grey.
   const sysOk = sys.sources_ok === sys.sources_total;
   h += '<div class="card"><b>Data integrity</b><p class="mut"><span class="pill ' + (sysOk ? "ok" : "warn") + '">' +
-    (Number(sys.sources_ok) || 0) + '/' + (Number(sys.sources_total) || 0) + ' sources OK</span> · checked ' +
+    (Number(sys.sources_ok) || 0) + '/' + (Number(sys.sources_total) || 0) + ' sources OK</span>' +
+    (sys.warn_count ? ' · ' + (Number(sys.warn_count) || 0) + ' warning' + (sys.warn_count > 1 ? 's' : '') : '') +
+    (sys.skipped_count ? ' · ' + (Number(sys.skipped_count) || 0) + ' skipped (by design)' : '') + ' · checked ' +
     (sys.data_truth_ran_at ? ptTime(sys.data_truth_ran_at) : "never") + '</p>' +
-    ((sys.not_ok || []).map((r) => '<div class="hist"><span class="pill warn">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) + '</div>';
+    ((sys.not_ok || []).map((r) => '<div class="hist"><span class="pill bad">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
+    ((sys.warns || []).map((r) => '<div class="hist"><span class="pill warn">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
+    ((sys.skipped || []).map((r) => '<div class="hist"><span class="pill">SKIP</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
+    ((sys.clients_missing_dashboard || []).length ? '<div class="hist"><span class="pill warn">no dashboard</span> <span class="mut">' + sys.clients_missing_dashboard.map((k) => esc(k)).join(", ") + '</span></div>' : '') +
+    ((sys.orphaned_snapshots || []).length ? '<div class="hist"><span class="pill warn">orphaned snapshot</span> <span class="mut">' + sys.orphaned_snapshots.map((k) => esc(k)).join(", ") + '</span></div>' : '') + '</div>';
   if (p.signals) h += '<div class="card"><b>Signals</b><p class="mut">' + (Number(p.signals.triaged) || 0) + ' triaged · ' + (Number(p.signals.briefed) || 0) + ' briefed</p></div>';
   if ((p.clients || []).length) {
     h += '<div class="card"><b>Client dashboards</b>' + p.clients.map((c) =>
@@ -392,7 +411,7 @@ async function renderClient(key) {
   }
   if ((p.traffic || []).length) {
     const mx = Math.max.apply(null, p.traffic.map((w) => w.clicks || 0).concat([1]));
-    h += '<div class="card"><b>Google Search clicks by week</b>' +
+    h += '<div class="card"><b>Search clicks — rolling 28-day window, weekly capture</b>' +
       p.traffic.map((w) => '<p class="mut" style="margin:8px 0 2px">' + esc(w.week) + ' · <b style="color:var(--text)">' + (w.clicks || 0) + '</b> clicks · ' + (w.impressions || 0) + ' impressions</p>' +
         '<div class="bar"><i style="width:' + Math.round(100 * (w.clicks || 0) / mx) + '%"></i></div>').join("") + '</div>';
   }
