@@ -204,6 +204,8 @@ async function render() {
       '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button>';
     return;
   }
+  if (role === "operator" && !window._showConsole) return renderOps();
+  window._showConsole = false;
   app.innerHTML = '<h1>Dial Console</h1><p class="mut">Loading…</p>';
   const [queue, log, snapRows] = await Promise.all([
     rest("seller_queue?select=*&order=rank.asc"),
@@ -362,7 +364,7 @@ async function renderOps() {
   if (!rows) return;
   const snap = rows[0] || null;
   let h = '<div class="row" style="justify-content:space-between"><h1>Ops overview</h1>' +
-    '<span class="row"><button onclick="render()">← Console</button>' +
+    '<span class="row"><button onclick="window._showConsole=true;render()">← Console</button>' +
     '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></span></div>';
   if (!snap) {
     h += '<div class="card mut">No rollup pushed yet — run push_operator_snapshot.py (rides the 10am briefing cron).</div>';
@@ -410,6 +412,80 @@ async function renderOps() {
     h += '<div class="card"><b>Client dashboards</b>' + p.clients.map((c) =>
       '<div class="hist"><a href="#" style="color:var(--accent)" onclick="renderClient(decodeURIComponent(\'' + encodeURIComponent(c.client_key).replace(/'/g, "%27") + '\'));return false">' + esc(c.client_key) + '</a> <span class="mut">updated ' + (c.updated_at ? ptTime(c.updated_at) : "—") + '</span></div>').join("") + '</div>';
   }
+
+  // ── Recent leads (operator-only; phone/contact intentionally excluded) ────
+  if ((p.leads || []).length) {
+    h += '<div class="card"><b>Recent leads</b>';
+    for (const l of p.leads) {
+      h += '<div class="hist">' +
+        '<span class="pill">' + esc(l.date) + '</span> ' +
+        '<b>' + esc(l.name) + '</b>' +
+        (l.source ? ' <span class="mut">· ' + esc(l.source) + '</span>' : '') +
+        (l.status ? ' <span class="pill">' + esc(l.status) + '</span>' : '') +
+        (l.outcome ? ' <span class="mut">' + esc(l.outcome) + '</span>' : '') +
+        '</div>';
+    }
+    h += '</div>';
+  }
+
+  // ── Spend (this month) ─────────────────────────────────────────────────────
+  if (p.spend && p.spend.totals) {
+    const sp = p.spend;
+    h += '<div class="card"><b>Spend — ' + esc(sp.month || "") + '</b>' +
+      '<div class="tally wk">' +
+      '<div><b>$' + esc(Number(sp.totals.USD) || 0) + '</b><span class="mut">USD</span></div>' +
+      '<div><b>$' + esc(Number(sp.totals.CAD) || 0) + '</b><span class="mut">CAD</span></div>' +
+      '</div>' +
+      (sp.as_of ? '<p class="mut">as of ' + ptTime(sp.as_of) + '</p>' : '') +
+      '</div>';
+  }
+
+  // ── Calls due (from existing funnel.due + seller.callbacks_due) ───────────
+  const fu2 = p.funnel || {}, due2 = fu2.due || {}, sel2 = p.seller || {};
+  if (Number(due2.count) || Number(sel2.callbacks_due)) {
+    h += '<div class="card"><b>Calls due</b>' +
+      '<div class="tally wk">' +
+      '<div><b>' + (Number(due2.count) || 0) + '</b><span class="mut">due</span></div>' +
+      '<div><b>' + (Number(due2.overdue) || 0) + '</b><span class="mut">overdue</span></div>' +
+      '<div><b>' + (Number(sel2.callbacks_due) || 0) + '</b><span class="mut">callbacks</span></div>' +
+      '</div></div>';
+  }
+
+  // ── Content queue ──────────────────────────────────────────────────────────
+  if (p.content) {
+    const co = p.content;
+    h += '<div class="card"><b>Content queue</b>' +
+      (co.as_of ? '<p class="mut">as of ' + ptTime(co.as_of) + '</p>' : '') +
+      '<div class="tally wk">' +
+      '<div><b>' + (Number(co.inbox) || 0) + '</b><span class="mut">inbox</span></div>' +
+      '<div><b>' + (Number(co.hold) || 0) + '</b><span class="mut">hold</span></div>' +
+      '<div><b>' + (Number(co.outreach) || 0) + '</b><span class="mut">outreach</span></div>' +
+      '<div><b>' + (Number(co.approved) || 0) + '</b><span class="mut">approved</span></div>' +
+      '</div></div>';
+  }
+
+  // ── Go-live gate (per-check detail) ───────────────────────────────────────
+  if (p.go_live) {
+    const gl = p.go_live;
+    const glChecks = gl.checks || {};
+    h += '<div class="card"><b>Go-live gate</b>' +
+      '<div class="row" style="margin:6px 0;flex-wrap:wrap;gap:6px">' +
+      '<span class="pill ' + (gl.sending_enabled ? "ok" : "bad") + '">sending: ' + esc(gl.sending_enabled ? "OPEN" : "closed") + '</span>' +
+      '<span class="pill ' + (gl.live_mode && gl.live_mode !== "BLOCKED" ? "ok" : "warn") + '">mode: ' + esc(gl.live_mode || "BLOCKED") + '</span>' +
+      '<span class="pill ' + (Number(gl.vetted) >= Number(gl.min_vetted) ? "ok" : "warn") + '">vetted: ' + esc(Number(gl.vetted) || 0) + '/' + esc(Number(gl.min_vetted) || 0) + '</span>' +
+      '</div>';
+    const checkEntries = Object.entries(glChecks);
+    if (checkEntries.length) {
+      h += '<div style="margin-top:6px">';
+      for (const [name, passing] of checkEntries) {
+        h += '<div class="hist"><span class="pill ' + (passing ? "ok" : "bad") + '">' + (passing ? "✓" : "✗") + '</span> ' + esc(name) + '</div>';
+      }
+      h += '</div>';
+    }
+    if (gl.updated_at) h += '<p class="mut">updated ' + ptTime(gl.updated_at) + '</p>';
+    h += '</div>';
+  }
+
   app.innerHTML = h;
 }
 
