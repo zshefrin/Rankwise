@@ -452,7 +452,7 @@ async function render() {
       '<p class="mut">' + esc(p.city) + (p.signal ? ' · ' + esc(p.signal) : '') + '</p>' +
       (p.phone ? '<a class="tel" href="tel:' + esc(p.phone).replace(/[^0-9+]/g, "") + '">📞 ' + esc(p.phone) + '</a>' : '') +
       (p.opener ? '<details><summary>Opener</summary><div class="opener">' + esc(p.opener) + '</div></details>' : '') +
-      (p.audit_url ? '<p class="mut">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
+      ((p.audit_url && /^https?:\/\//.test(p.audit_url)) ? '<p class="mut">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
       logForm(p.slug, !done) + '</div>';
   }
   if (!cards.length) h += '<div class="card mut">No dial cards pushed yet — Zack runs push_seller_queue.py.</div>';
@@ -980,7 +980,7 @@ async function renderClient(key) {
         '<div class="bar"><i style="width:' + Math.round(100 * (w.clicks || 0) / mx) + '%"></i></div>').join("") + '</div>';
   }
   if (p.reviews && p.reviews.count != null) {
-    h += '<div class="card"><b>Google reviews</b><p class="mut">' + p.reviews.count + ' reviews · ' + (p.reviews.rating != null ? p.reviews.rating + "★" : "—") +
+    h += '<div class="card"><b>Google reviews</b><p class="mut">' + esc(String(p.reviews.count)) + ' reviews · ' + (p.reviews.rating != null ? esc(String(p.reviews.rating)) + "★" : "—") +
       (p.reviews.note ? ' · ' + esc(p.reviews.note) : '') + '</p></div>';
   }
   if ((p.wins || []).length) h += '<div class="card"><b>Done recently</b>' + p.wins.map((w) => '<div class="hist">✓ ' + esc(w) + '</div>').join("") + '</div>';
