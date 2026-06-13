@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Rankwise — TikTok Authorization</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f6f8;
+      --card:     #ffffff;
+      --border:   #dde1e7;
+      --text:     #1a1f27;
+      --muted:    #6b7280;
+      --accent:   #1e40af;
+      --accent-h: #1e3a8a;
+      --ok-bg:    #ecfdf5;
+      --ok-bd:    #a7f3d0;
+      --ok-text:  #065f46;
+      --err-bg:   #fef2f2;
+      --err-bd:   #fca5a5;
+      --err-text: #7f1d1d;
+      --code-bg:  #f0f2f5;
+      --radius:   10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+
+    .wordmark {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* state banners */
+    .banner {
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .banner.ok  { background: var(--ok-bg);  border: 1px solid var(--ok-bd);  color: var(--ok-text);  }
+    .banner.err { background: var(--err-bg); border: 1px solid var(--err-bd); color: var(--err-text); }
+
+    /* code box */
+    .code-wrap { display: none; }
+    .code-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .code-box {
+      font-family: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      word-break: break-all;
+      line-height: 1.5;
+      min-height: 56px;
+      color: var(--text);
+      user-select: all;
+    }
+
+    /* copy button */
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 9px 18px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .copy-btn:hover  { background: var(--accent-h); }
+    .copy-btn:active { transform: scale(.97); }
+    .copy-btn.copied { background: var(--ok-text); }
+
+    /* instruction */
+    .instruction {
+      display: none;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .instruction strong { color: var(--text); }
+    .instruction code {
+      font-family: "SFMono-Regular", Menlo, monospace;
+      font-size: 12px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 5px;
+    }
+
+    /* idle state */
+    .idle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="wordmark">Rankwise</div>
+  <h1>TikTok Authorization</h1>
+  <p>One-time OAuth callback — read the authorization code below and paste it into the terminal.</p>
+
+  <div class="banner err" id="err-banner"></div>
+  <div class="banner ok" id="ok-banner">Authorization code received. Copy it now — codes expire in a few minutes.</div>
+
+  <div class="code-wrap" id="code-wrap">
+    <div class="code-label">Authorization Code</div>
+    <div class="code-box" id="code-box"></div>
+    <button class="copy-btn" id="copy-btn" type="button">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Copy
+    </button>
+  </div>
+
+  <div class="instruction" id="instruction">
+    <strong>Next step —</strong> paste into:<br>
+    <code id="cmd-hint">python3 vault/_system/tiktok_api.py --exchange-code &lt;CODE&gt;</code>
+  </div>
+
+  <div class="idle" id="idle" style="display:none;">
+    No authorization code found in this URL. Navigate here only via the TikTok authorization flow.
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var params  = new URLSearchParams(window.location.search);
+  var code    = params.get("code")  || "";
+  var error   = params.get("error") || params.get("error_description") || "";
+
+  var errBanner   = document.getElementById("err-banner");
+  var okBanner    = document.getElementById("ok-banner");
+  var codeWrap    = document.getElementById("code-wrap");
+  var codeBox     = document.getElementById("code-box");
+  var copyBtn     = document.getElementById("copy-btn");
+  var instruction = document.getElementById("instruction");
+  var cmdHint     = document.getElementById("cmd-hint");
+  var idle        = document.getElementById("idle");
+
+  function show(el) { el.style.display = ""; }
+
+  if (error) {
+    errBanner.textContent = "TikTok returned an error: " + error;
+    errBanner.style.display = "block";
+    return;
+  }
+
+  if (!code) {
+    show(idle);
+    return;
+  }
+
+  okBanner.style.display = "block";
+  codeBox.textContent = code;
+  show(codeWrap);
+  show(instruction);
+
+  cmdHint.textContent = "python3 vault/_system/tiktok_api.py --exchange-code " + code;
+
+  var copyIcon =
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+    '<rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>' +
+    '<path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+    '</svg> Copy';
+
+  function flashCopied() {
+    copyBtn.textContent = "Copied!";
+    copyBtn.classList.add("copied");
+    setTimeout(function () {
+      copyBtn.innerHTML = copyIcon;
+      copyBtn.classList.remove("copied");
+    }, 2000);
+  }
+
+  function fallbackCopy() {
+    var ta = document.createElement("textarea");
+    ta.value = code;
+    ta.style.cssText = "position:fixed;opacity:0;";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); flashCopied(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  copyBtn.addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(flashCopied).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  });
+})();
+</script>
+</body>
+</html>
