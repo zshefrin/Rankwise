@@ -41,6 +41,109 @@
   table.pay { width:100%; border-collapse:collapse; font-size:13px; }
   table.pay td, table.pay th { padding:4px 6px; text-align:left; border-bottom:1px solid var(--line); }
   #toast { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background:var(--accent); color:#0b1220; font-weight:700; padding:10px 18px; border-radius:99px; display:none; }
+
+  /* ── Operator cockpit — scoped to body.ops only. Nothing below touches seller/client views. ── */
+  body.ops { max-width:1120px; background:radial-gradient(1200px 500px at 80% -10%,#14202c 0%,transparent 60%) var(--bg); padding:0; -webkit-font-smoothing:antialiased; }
+  body.ops .ops-wrap { max-width:1120px; margin:0 auto; padding:0 16px 64px; }
+  body.ops header.ops-top { display:flex; align-items:center; gap:12px; padding:18px 0 14px; flex-wrap:wrap; }
+  body.ops .ops-brand { display:flex; align-items:baseline; gap:10px; }
+  body.ops .ops-brand h1 { font-size:19px; font-weight:650; letter-spacing:-.01em; margin:0; }
+  body.ops .ops-brand .ops-tag { font-size:12px; color:#6b7884; }
+  body.ops .ops-spacer { flex:1; }
+  body.ops .ops-asof { font-size:12px; color:#6b7884; }
+  body.ops .ops-iconbtn { background:#141a20; border:1px solid #2a323a; color:#9aa7b3; border-radius:9px; height:34px; padding:0 12px; font-size:13px; font-weight:550; cursor:pointer; transition:.15s cubic-bezier(.22,.61,.36,1); }
+  body.ops .ops-iconbtn:hover { color:#eef2f6; border-color:#36424c; }
+  body.ops nav.ops-tabs { position:sticky; top:0; z-index:20; display:flex; gap:2px; background:rgba(14,18,22,.82); backdrop-filter:blur(8px); border-bottom:1px solid #222a31; margin:0 -16px; padding:0 12px; overflow-x:auto; scrollbar-width:none; }
+  body.ops nav.ops-tabs::-webkit-scrollbar { display:none; }
+  body.ops .ops-tab { appearance:none; background:none; border:0; color:#9aa7b3; font:550 14px/1 -apple-system,system-ui,sans-serif; cursor:pointer; padding:13px 14px; position:relative; white-space:nowrap; transition:color .15s cubic-bezier(.22,.61,.36,1); display:flex; gap:7px; align-items:center; }
+  body.ops .ops-tab:hover { color:#eef2f6; }
+  body.ops .ops-tab[aria-selected="true"] { color:#eef2f6; }
+  body.ops .ops-tab[aria-selected="true"]::after { content:""; position:absolute; left:14px; right:14px; bottom:-1px; height:2px; background:#60a5fa; border-radius:2px; }
+  body.ops .ops-tab .ops-badge { background:#1f272e; color:#9aa7b3; font-size:11px; font-weight:650; padding:1px 7px; border-radius:99px; border:1px solid #2a323a; }
+  body.ops .ops-tab .ops-badge.hot { background:#3a1c1c; color:#fca5a5; border-color:#4a2222; }
+  body.ops section.ops-view { padding-top:18px; animation:ops-rise .22s cubic-bezier(.22,.61,.36,1); }
+  body.ops section.ops-view[hidden] { display:none; }
+  @keyframes ops-rise { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+  @media (prefers-reduced-motion:reduce) { body.ops section.ops-view { animation:none; } }
+  body.ops h2.ops-sec { font-size:12.5px; font-weight:650; letter-spacing:.04em; text-transform:uppercase; color:#6b7884; margin:2px 2px 10px; }
+  body.ops .ops-nextmove { display:flex; align-items:center; gap:14px; background:linear-gradient(180deg,#18263a,#15202f); border:1px solid #2b3b53; border-radius:14px; padding:16px 18px; box-shadow:0 1px 0 rgba(255,255,255,.02) inset,0 8px 24px -16px rgba(0,0,0,.7); }
+  body.ops .ops-nextmove .nm-i { width:38px; height:38px; flex:none; display:grid; place-items:center; border-radius:10px; background:#60a5fa; color:#0b1220; font-size:19px; }
+  body.ops .ops-nextmove .nm-t { flex:1; min-width:0; }
+  body.ops .ops-nextmove .nm-k { font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:#7fa9e0; font-weight:650; }
+  body.ops .ops-nextmove .nm-h { font-size:16px; font-weight:600; margin-top:2px; }
+  body.ops .ops-nextmove .nm-h span { color:#9aa7b3; font-weight:400; }
+  body.ops .ops-grid-today { display:grid; gap:16px; margin-top:16px; grid-template-columns:1fr; }
+  @media(min-width:900px) { body.ops .ops-grid-today { grid-template-columns:1.55fr 1fr; align-items:start; } }
+  body.ops .ops-panel { background:#1a2026; border:1px solid #2a323a; border-radius:14px; box-shadow:0 1px 0 rgba(255,255,255,.02) inset,0 8px 24px -16px rgba(0,0,0,.7); }
+  body.ops .ops-panel-h { display:flex; align-items:center; gap:8px; padding:13px 15px; border-bottom:1px solid #222a31; }
+  body.ops .ops-panel-h b { font-size:14px; font-weight:600; }
+  body.ops .ops-panel-h .ops-count { margin-left:auto; font-size:12px; color:#6b7884; font-weight:550; }
+  body.ops ul.ops-needs { list-style:none; }
+  body.ops .ops-need { display:flex; align-items:center; gap:13px; padding:13px 15px; border-top:1px solid #222a31; transition:background .15s cubic-bezier(.22,.61,.36,1); }
+  body.ops .ops-need:first-child { border-top:0; }
+  body.ops .ops-need:hover { background:#1f272e; }
+  body.ops .ops-dot { width:9px; height:9px; border-radius:99px; flex:none; box-shadow:0 0 0 4px rgba(255,255,255,.02); }
+  body.ops .ops-dot.bad { background:#f87171; }
+  body.ops .ops-dot.warn { background:#fbbf24; }
+  body.ops .ops-dot.info { background:#60a5fa; }
+  body.ops .ops-dot.lo { background:#6b7884; }
+  body.ops .ops-need .ops-body { flex:1; min-width:0; }
+  body.ops .ops-need .ops-ttl { font-size:14.5px; font-weight:550; }
+  body.ops .ops-need .ops-sub { font-size:12.5px; color:#9aa7b3; margin-top:1px; }
+  body.ops .ops-need .ops-act { flex:none; }
+  body.ops .ops-btn { appearance:none; border:1px solid #2a323a; background:#1f272e; color:#eef2f6; font:600 12.5px/1 -apple-system,system-ui,sans-serif; padding:8px 12px; border-radius:9px; cursor:pointer; transition:.15s cubic-bezier(.22,.61,.36,1); white-space:nowrap; }
+  body.ops .ops-btn:hover { border-color:#3a4650; background:#252e36; }
+  body.ops .ops-btn.primary { background:#60a5fa; color:#0b1220; border-color:transparent; }
+  body.ops .ops-btn.primary:hover { filter:brightness(1.07); }
+  body.ops .ops-btn.ghost { background:transparent; color:#9aa7b3; }
+  body.ops .ops-btn.ghost:hover { color:#eef2f6; }
+  body.ops .ops-btn:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
+  body.ops .ops-rail { display:flex; flex-direction:column; gap:16px; }
+  body.ops .ops-pulse { padding:6px 15px 14px; }
+  body.ops .ops-pulse .ops-row { display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-top:1px solid #222a31; font-size:13.5px; }
+  body.ops .ops-pulse .ops-row:first-child { border-top:0; }
+  body.ops .ops-pulse .ops-row .ops-v { font-weight:650; font-size:15px; }
+  body.ops .ops-pulse .ops-row .ops-v small { color:#6b7884; font-weight:500; font-size:12px; }
+  body.ops .ops-loop { padding:6px 15px 13px; }
+  body.ops .ops-loop .ops-step { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid #222a31; font-size:13.5px; }
+  body.ops .ops-loop .ops-step:first-child { border-top:0; }
+  body.ops .ops-chk { width:18px; height:18px; border-radius:6px; border:1.5px solid #2a323a; flex:none; display:grid; place-items:center; font-size:11px; color:#34d399; }
+  body.ops .ops-chk.done { background:#13302a; border-color:#1f5a47; }
+  body.ops .ops-step-lbl { flex:1; }
+  body.ops .ops-step-n { font-size:12px; color:#9aa7b3; font-weight:600; }
+  body.ops .ops-tier { font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#6b7884; font-weight:650; padding:13px 15px 3px; }
+  body.ops .ops-tier:first-of-type { padding-top:6px; }
+  body.ops .ops-tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; padding:14px 15px; }
+  body.ops .ops-tile { background:#141a20; border:1px solid #222a31; border-radius:10px; padding:12px; }
+  body.ops .ops-tile .ops-b { font-size:22px; font-weight:680; letter-spacing:-.02em; }
+  body.ops .ops-tile .ops-l { font-size:12px; color:#9aa7b3; margin-top:2px; }
+  body.ops .ops-up { color:#34d399; }
+  body.ops .ops-down { color:#f87171; }
+  body.ops .ops-bar { height:7px; background:#0c1115; border-radius:99px; overflow:hidden; margin:7px 0 2px; }
+  body.ops .ops-bar > i { display:block; height:100%; background:#60a5fa; border-radius:99px; }
+  body.ops .ops-bar.ok > i { background:#34d399; }
+  body.ops .ops-bar.warn > i { background:#fbbf24; }
+  body.ops .ops-list { list-style:none; }
+  body.ops .ops-li { display:flex; align-items:center; gap:12px; padding:12px 15px; border-top:1px solid #222a31; font-size:13.5px; }
+  body.ops .ops-li:first-child { border-top:0; }
+  body.ops .ops-li .ops-grow { flex:1; min-width:0; }
+  body.ops .ops-li .ops-li-ttl { font-weight:550; }
+  body.ops .ops-li .ops-li-meta { font-size:12px; color:#9aa7b3; margin-top:1px; }
+  body.ops .ops-pill { font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; background:#1f272e; color:#9aa7b3; border:1px solid #2a323a; }
+  body.ops .ops-pill.ok { background:#13302a; color:#6ee7b7; border-color:#1f5a47; }
+  body.ops .ops-pill.warn { background:#33290f; color:#fcd34d; border-color:#574414; }
+  body.ops .ops-pill.bad { background:#3a1c1c; color:#fca5a5; border-color:#4a2222; }
+  body.ops .ops-pill.dim { color:#6b7884; }
+  body.ops .ops-colset { display:grid; gap:16px; grid-template-columns:1fr; }
+  @media(min-width:900px) { body.ops .ops-colset.two { grid-template-columns:1fr 1fr; } }
+  body.ops .ops-muted { color:#9aa7b3; font-size:13px; }
+  body.ops .ops-pad { padding:14px 15px; }
+  body.ops .ops-chanrow { display:flex; align-items:center; gap:10px; font-size:13px; padding:7px 0; }
+  body.ops .ops-chanrow .ops-chan-name { width:64px; color:#9aa7b3; }
+  body.ops .ops-chanrow .ops-chan-bar { flex:1; height:7px; background:#0c1115; border-radius:99px; overflow:hidden; }
+  body.ops .ops-chanrow .ops-chan-bar i { display:block; height:100%; background:#60a5fa; border-radius:99px; }
+  body.ops .ops-chanrow .ops-chan-n { width:84px; text-align:right; color:#9aa7b3; font-size:12px; }
+  body.ops footer.ops-note { margin-top:26px; padding-top:14px; border-top:1px solid #222a31; color:#6b7884; font-size:12px; text-align:center; }
 </style>
 </head>
 <body>
@@ -183,6 +286,7 @@ function logForm(slug, open) {
 }
 
 async function render() {
+  document.body.classList.remove('ops');
   const app = $("#app");
   if (tok() && window._recovery) {
     app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Choose your new password.</p>' +
@@ -363,11 +467,24 @@ async function render() {
   app.innerHTML = h;
 }
 
+// ── Ops tab switcher (global; called from inline onclick in renderOps HTML) ──
+window._opsTab = window._opsTab || 'today';
+function opsTab(id) {
+  window._opsTab = id;
+  const views = document.querySelectorAll('section.ops-view');
+  const tabs = document.querySelectorAll('.ops-tab');
+  views.forEach(function(v) { v.hidden = (v.id !== 'ops-' + id); });
+  tabs.forEach(function(t) { t.setAttribute('aria-selected', String(t.dataset.v === id)); });
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
 // ── Ops overview (role=operator only; data via operator_portal_snapshot RLS) ──
 async function renderOps() {
-  if (roleOf() !== "operator") return render();  // hygiene; RLS is the real gate
+  if (roleOf() !== 'operator') return render();  // hygiene; RLS is the real gate
+  document.body.classList.add('ops');
   const app = $("#app");
-  app.innerHTML = '<h1>Ops overview</h1><p class="mut">Loading…</p>';
+  app.innerHTML = '<p class="mut" style="padding:12px">Loading…</p>';
+
   const [rows, actionRows] = await Promise.all([
     rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
     rest("operator_action_queue?select=*&order=id.desc&limit=10"),
@@ -375,174 +492,458 @@ async function renderOps() {
   if (!rows) return;
   const snap = rows[0] || null;
   const recentActions = actionRows || [];
-  let h = '<div class="row" style="justify-content:space-between"><h1>Ops overview</h1>' +
-    '<span class="row"><button onclick="window._showConsole=true;render()">← Console</button>' +
-    '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></span></div>';
+  const p = (snap && snap.payload) ? snap.payload : {};
 
-  // ── Actions card (always visible, even before first snapshot) ────────────
-  h += '<div class="card"><b>Actions</b><div class="row" style="margin-top:8px">' +
-    '<button onclick="enqueueAction(\'refresh_seller\')">Refresh seller</button>' +
-    '<button onclick="enqueueAction(\'refresh_clients\')">Refresh clients</button>' +
-    '<button onclick="enqueueAction(\'refresh_ops\')">Refresh ops</button>' +
+  // ── Derived counts for tab badges ────────────────────────────────────────
+  const needsYou = p.needs_you || [];
+  const actNow = needsYou.filter(function(n) { return n.tier === 'act_now'; });
+  const todayNeeds = needsYou.filter(function(n) { return n.tier === 'today'; });
+  const backlog = needsYou.filter(function(n) { return n.tier === 'backlog'; });
+  const pendingExp = p.pending_expenses || [];
+  const contentItems = p.content_items || [];
+  const dueCalls = p.due_calls || [];
+  const fu = p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null, byChannel = fu.by_channel || {};
+  const s = p.seller || {}, trial = s.trial || {}, totals = s.totals || {};
+  const sys = p.system || {};
+  const gl = p.go_live || null;
+  const sp = p.spend || null;
+  const co = p.content || {};
+
+  // badge counts
+  const todayBadge = actNow.length + todayNeeds.length;
+  const outreachBadge = dueCalls.length;
+  const contentBadge = contentItems.length || (Number(co.inbox) || 0) + (Number(co.hold) || 0);
+  const moneyBadge = pendingExp.length + (s.pay_due_cad > 0 ? 1 : 0);
+
+  // ── Helper: dot color from severity ──────────────────────────────────────
+  function dotCls(sev) { return esc(sev === 'bad' ? 'bad' : sev === 'warn' ? 'warn' : sev === 'info' ? 'info' : 'lo'); }
+
+  // ── TODAY section ─────────────────────────────────────────────────────────
+  const nm = p.next_move || null;
+  let todayH = '';
+  // next-move hero
+  if (nm) {
+    todayH += '<div class="ops-nextmove">' +
+      '<div class="nm-i">→</div>' +
+      '<div class="nm-t"><div class="nm-k">Next best move</div>' +
+      '<div class="nm-h">' + esc(nm.title) + (nm.sub ? ' <span>— ' + esc(nm.sub) + '</span>' : '') + '</div></div>' +
+      '<button class="ops-btn primary" onclick="opsTab(\'' + esc(nm.tab || 'today') + '\')">' + 'Open' + '</button></div>';
+  } else {
+    todayH += '<div class="ops-nextmove">' +
+      '<div class="nm-i">→</div>' +
+      '<div class="nm-t"><div class="nm-k">Next best move</div>' +
+      '<div class="nm-h">No priority queued yet <span>— snapshot may be stale</span></div></div></div>';
+  }
+
+  todayH += '<div class="ops-grid-today">';
+
+  // ── Left: Your queue ──
+  todayH += '<div class="ops-panel"><div class="ops-panel-h"><b>Your queue</b><span class="ops-count">things only you can clear</span></div>';
+  if (!needsYou.length) {
+    todayH += '<p class="ops-muted ops-pad">Nothing needs you right now.</p>';
+  } else {
+    function renderTier(label, items) {
+      if (!items.length) return '';
+      let out = '<div class="ops-tier">' + esc(label) + '</div><ul class="ops-needs">';
+      for (const n of items) {
+        const tab = n.action_tab || 'today';
+        const btnStyle = n.severity === 'bad' ? ' primary' : n.severity === 'lo' ? ' ghost' : '';
+        out += '<li class="ops-need">' +
+          '<span class="ops-dot ' + dotCls(n.severity) + '"></span>' +
+          '<div class="ops-body"><div class="ops-ttl">' + esc(n.title) + '</div>' +
+          (n.sub ? '<div class="ops-sub">' + esc(n.sub) + '</div>' : '') + '</div>' +
+          '<div class="ops-act"><button class="ops-btn' + btnStyle + '" onclick="opsTab(\'' + esc(tab) + '\')">' + esc(n.action_label || 'View') + '</button></div></li>';
+      }
+      out += '</ul>';
+      return out;
+    }
+    todayH += renderTier('Act now', actNow);
+    todayH += renderTier('Today', todayNeeds);
+    todayH += renderTier('When you can', backlog);
+  }
+  todayH += '</div>'; // ops-panel
+
+  // ── Right rail ──
+  todayH += '<div class="ops-rail">';
+
+  // This week
+  const wkDials = Number(totals.dials) || Number(s.dials) || 0;
+  const wkConvos = Number(totals.conversations) || 0;
+  const wkAudits = Number(totals.audit_sales) || Number(totals.bookings) || 0;
+  const wkCollected = Number(totals.collected_cad) || 0;
+  const spendUSD = (sp && sp.totals) ? (Number(sp.totals.USD) || 0) : 0;
+  const spendCAD = (sp && sp.totals) ? (Number(sp.totals.CAD) || 0) : 0;
+  const trialDials = trial.configured ? (trial.dials || 0) : null;
+  const trialConvos = trial.configured ? (trial.conversations || 0) : null;
+  todayH += '<div class="ops-panel"><div class="ops-panel-h"><b>This week</b>' +
+    (sp && sp.month ? '<span class="ops-count">' + esc(sp.month) + '</span>' : '') + '</div>' +
+    '<div class="ops-pulse">' +
+    '<div class="ops-row"><span class="ops-muted">Dials</span><span class="ops-v">' + esc(wkDials) +
+    (trialDials !== null ? ' <small>/ 200 trial</small>' : '') + '</span></div>' +
+    '<div class="ops-row"><span class="ops-muted">Conversations</span><span class="ops-v">' + esc(wkConvos) +
+    (trialConvos !== null ? ' <small>/ 5 trial</small>' : '') + '</span></div>' +
+    '<div class="ops-row"><span class="ops-muted">Booked audits</span><span class="ops-v">' + esc(wkAudits) + '</span></div>' +
+    (wkCollected ? '<div class="ops-row"><span class="ops-muted">Collected</span><span class="ops-v">$' + esc(wkCollected) + ' <small>CAD</small></span></div>' : '') +
+    '<div class="ops-row"><span class="ops-muted">Spend (USD)</span><span class="ops-v">$' + esc(spendUSD) + ' <small>USD</small></span></div>' +
     '</div></div>';
 
-  // ── Recent actions card (always visible) ─────────────────────────────────
-  h += '<div class="card"><b>Recent actions</b>';
-  if (!recentActions.length) {
-    h += '<p class="mut">No actions queued yet.</p>';
+  // Griffin watch
+  const fueDue = fu.due || {};
+  const callsDueCount = Number(fueDue.count) || 0;
+  const callsOverdue = Number(fueDue.overdue) || 0;
+  const callbacksDue = Number(s.callbacks_due) || 0;
+  todayH += '<div class="ops-panel"><div class="ops-panel-h"><b>Griffin — today</b><span class="ops-count">watch · his queue</span></div>' +
+    '<div class="ops-pulse">' +
+    '<div class="ops-row"><span class="ops-muted">Calls due</span><span class="ops-v">' + esc(callsDueCount) +
+    (callsOverdue ? ' <small>' + esc(callsOverdue) + ' overdue</small>' : '') + '</span></div>' +
+    '<div class="ops-row"><span class="ops-muted">Callbacks promised</span><span class="ops-v">' + esc(callbacksDue) + '</span></div>' +
+    '<div class="ops-row"><span class="ops-muted">Convos this week</span><span class="ops-v">' + esc(wkConvos) +
+    (trialConvos !== null ? ' <small>/ 5 trial</small>' : '') + '</span></div>' +
+    '</div></div>';
+
+  // Daily loop
+  const contentPending = contentBadge;
+  const loopItems = [
+    { key: 'orient', label: 'Command — orient', n: null, done: snap !== null },
+    { key: 'signals', label: 'Signals — data confirmed', n: null, done: sys.sources_ok === sys.sources_total && sys.sources_total > 0 },
+    { key: 'content', label: 'Content — approve drafts', n: contentPending || null, done: contentPending === 0 },
+    { key: 'outreach', label: 'Outreach — due calls', n: callsDueCount || null, done: callsDueCount === 0 },
+    { key: 'money', label: 'Money — confirm invoices', n: pendingExp.length || null, done: pendingExp.length === 0 },
+  ];
+  const loopDoneCount = loopItems.filter(function(x) { return x.done; }).length;
+  todayH += '<div class="ops-panel"><div class="ops-panel-h"><b>Daily loop</b><span class="ops-count">' +
+    esc(loopDoneCount) + ' of ' + esc(loopItems.length) + '</span></div><div class="ops-loop">';
+  for (const item of loopItems) {
+    todayH += '<div class="ops-step">' +
+      '<span class="ops-chk' + (item.done ? ' done' : '') + '">' + (item.done ? '✓' : '') + '</span>' +
+      '<span class="ops-step-lbl">' + esc(item.label) + '</span>' +
+      (item.n ? '<span class="ops-step-n">' + esc(item.n) + '</span>' : '') + '</div>';
+  }
+  todayH += '</div></div>'; // loop panel + rail
+  todayH += '</div>'; // rail
+
+  todayH += '</div>'; // grid-today
+
+  // ── OUTREACH section ──────────────────────────────────────────────────────
+  const pipeReplied = Number(pipe.replied_interested) || 0;
+  const pipeCompleted = Number(pipe.completed) || 0;
+  const dnc = Number(fu.dnc_count) || 0;
+
+  let outH = '<div class="ops-colset two">';
+  // Funnel panel
+  outH += '<div class="ops-panel"><div class="ops-panel-h"><b>Funnel</b>' +
+    (Number(pipe.active) || Number(pipe.queued) || Number(pipe.draft) ? '<span class="ops-count">' + esc((Number(pipe.active)||0)+(Number(pipe.queued)||0)+(Number(pipe.draft)||0)) + ' in pipeline</span>' : '') + '</div>' +
+    '<div class="ops-tiles">' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(pipe.active)||0) + '</div><div class="ops-l">active</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(pipeReplied) + '</div><div class="ops-l">replied</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(pipe.booked_audit)||0) + '</div><div class="ops-l">booked</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(dnc) + '</div><div class="ops-l">do-not-contact</div></div>' +
+    '</div>';
+  // By-channel
+  const chans = Object.keys(byChannel);
+  if (chans.length) {
+    outH += '<div class="ops-pad" style="border-top:1px solid #222a31">';
+    for (const ch of chans) {
+      const cv = byChannel[ch] || {};
+      const replyRate = cv.reply_rate != null ? cv.reply_rate : null;
+      const pct = replyRate != null ? Math.min(100, Math.round(Number(replyRate) * 100)) : 0;
+      outH += '<div class="ops-chanrow">' +
+        '<span class="ops-chan-name">' + esc(ch) + '</span>' +
+        '<span class="ops-chan-bar"><i style="width:' + esc(pct) + '%"></i></span>' +
+        '<span class="ops-chan-n">' + (replyRate != null ? esc(Math.round(Number(replyRate)*100)) + '% reply' : '—') + '</span></div>';
+    }
+    outH += '</div>';
+  }
+  // Send gate line
+  if (gate) {
+    const gateOpen = gate.sending_enabled;
+    outH += '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">Send gate: <span class="ops-pill ' + (gateOpen ? 'ok' : 'bad') + '">' + esc(gateOpen ? 'open' : 'closed') + '</span>' +
+      ' live_mode ' + esc(gate.live_mode || 'BLOCKED') + ' · checks ' + esc(Number(gate.checks_passing)||0) + '/' + esc(Number(gate.checks_total)||0) + '</div>';
+  }
+  outH += '</div>'; // funnel panel
+
+  // Due calls panel
+  outH += '<div class="ops-panel"><div class="ops-panel-h"><b>Due calls</b>' +
+    (dueCalls.length ? '<span class="ops-count">' + esc(dueCalls.length) + ' · ' + esc(dueCalls.filter(function(c){return c.overdue;}).length) + ' overdue</span>' : '<span class="ops-count">none today</span>') + '</div>';
+  if (dueCalls.length) {
+    outH += '<ul class="ops-list">';
+    for (const c of dueCalls) {
+      const overduePill = c.overdue
+        ? '<span class="ops-pill bad">overdue</span>'
+        : '<span class="ops-pill">today</span>';
+      outH += '<li class="ops-li">' + overduePill +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(c.name) + '</div>' +
+        '<div class="ops-li-meta">' + esc(c.step || c.label || '') + (c.channel ? ' · ' + esc(c.channel) : '') + '</div></div></li>';
+    }
+    outH += '</ul>';
   } else {
-    const statusClass = { queued: "pill", processing: "pill warn", done: "pill ok", failed: "pill bad" };
-    for (const row of recentActions) {
-      const cls = statusClass[row.status] || "pill";
-      h += '<div class="hist"><span class="' + esc(cls) + '">' + esc(row.status) + '</span> ' +
-        esc(row.action) + ' <span class="mut">' + ptTime(row.created_at) + '</span>' +
-        (row.result ? ' <span class="mut">· ' + esc(row.result) + '</span>' : '') + '</div>';
-    }
+    outH += '<p class="ops-muted ops-pad">No calls due today.</p>';
   }
-  h += '</div>';
+  outH += '</div>';
+  outH += '</div>'; // colset
 
-  if (!snap) {
-    h += '<div class="card mut">No rollup pushed yet — run push_operator_snapshot.py (rides the 10am briefing cron).</div>';
-    app.innerHTML = h; return;
-  }
-  const p = snap.payload || {};
-  h += '<p class="mut">updated ' + ptTime(snap.updated_at) + '</p>';
-
-  // ── Pending expenses ───────────────────────────────────────────────────────
-  if ((p.pending_expenses || []).length) {
-    h += '<div class="card"><b>Pending expenses</b>';
-    for (const row of p.pending_expenses) {
-      h += '<div class="hist">' +
-        '<b>' + esc(row.vendor) + '</b> · ' + esc(row.amount) + ' ' + esc(row.currency) +
-        ' · <span class="mut">' + esc(row.date) + '</span>' +
-        (row.description ? ' · <span class="mut">' + esc(row.description) + '</span>' : '') +
-        '<div class="row" style="margin-top:6px;gap:6px">' +
-        '<button data-id="' + esc(row.id) + '" onclick="enqueueAction(\'confirm_expense\',{id:this.dataset.id})">Confirm</button>' +
-        '<button data-id="' + esc(row.id) + '" onclick="enqueueAction(\'reject_expense\',{id:this.dataset.id})">Reject</button>' +
-        '</div></div>';
-    }
-    h += '</div>';
-  }
-
-  const fu = p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null;
-  h += '<div class="card"><b>Outreach funnel</b><div class="tally wk">' +
-    ["draft", "queued", "active", "booked_audit"].map((k) =>
-      '<div><b>' + (Number(pipe[k]) || 0) + '</b><span class="mut">' + k.replace("_", " ") + '</span></div>').join("") + '</div>' +
-    (fu.due ? '<p class="mut">calls due: ' + (Number(fu.due.count) || 0) + ' (' + (Number(fu.due.overdue) || 0) + ' overdue)' +
-      (fu.stuck_count ? ' · stuck: ' + (Number(fu.stuck_count) || 0) : '') + '</p>' : '') +
-    // Explicit gate fields (a truncated JSON dump used to cut sending_enabled out of view).
-    // live_mode = OUTREACH_LIVE_MODE as seen by the metrics regen process (fail-safe:
-    // BLOCKED unless exported there) — a green checklist never means sends are on.
-    (gate ? '<p class="mut">send gate: ' + (gate.sending_enabled ? 'OPEN' : 'closed') +
-      ' · live_mode ' + esc(gate.live_mode || 'BLOCKED') +
-      ' · checks ' + (Number(gate.checks_passing) || 0) + '/' + (Number(gate.checks_total) || 0) + '</p>' : '') +
-    (fu.as_of ? '<p class="mut">data as of ' + ptTime(fu.as_of) + '</p>' : '') + '</div>';
-  const s = p.seller || {};
-  h += '<div class="card"><b>Seller</b><p class="mut">' + (s.active ? esc(s.name || "active") : "not hired yet") +
-    (s.callbacks_due ? ' · ' + (Number(s.callbacks_due) || 0) + ' callbacks due' : '') +
-    (s.pay_due_cad ? ' · <span class="pill warn">$' + (Number(s.pay_due_cad) || 0) + ' pay due</span>' : '') + '</p>' +
-    (s.totals ? '<div class="tally wk">' + ["dials", "conversations", "bookings", "shows"].map((k) =>
-      '<div><b>' + (Number(s.totals[k]) || 0) + '</b><span class="mut">' + k + '</span></div>').join("") + '</div>' : '') +
-    (s.as_of ? '<p class="mut">data as of ' + ptTime(s.as_of) + '</p>' : '') + '</div>';
-  const sys = p.system || {};
-  // sources_total excludes by-design SKIPs; sources_ok also excludes WARNs
-  // (sentinel vocabulary OK/SKIP/WARN/FAIL — WARN is advisory, never green).
-  // Pills: FAIL red, WARN amber, SKIP grey.
-  const sysOk = sys.sources_ok === sys.sources_total;
-  h += '<div class="card"><b>Data integrity</b><p class="mut"><span class="pill ' + (sysOk ? "ok" : "warn") + '">' +
-    (Number(sys.sources_ok) || 0) + '/' + (Number(sys.sources_total) || 0) + ' sources OK</span>' +
-    (sys.warn_count ? ' · ' + (Number(sys.warn_count) || 0) + ' warning' + (sys.warn_count > 1 ? 's' : '') : '') +
-    (sys.skipped_count ? ' · ' + (Number(sys.skipped_count) || 0) + ' skipped (by design)' : '') + ' · checked ' +
-    (sys.data_truth_ran_at ? ptTime(sys.data_truth_ran_at) : "never") + '</p>' +
-    ((sys.not_ok || []).map((r) => '<div class="hist"><span class="pill bad">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
-    ((sys.warns || []).map((r) => '<div class="hist"><span class="pill warn">' + esc(r.status) + '</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
-    ((sys.skipped || []).map((r) => '<div class="hist"><span class="pill">SKIP</span> <b>' + esc(r.source) + '</b><br><span class="mut">' + esc(r.detail) + '</span></div>').join("")) +
-    ((sys.clients_missing_dashboard || []).length ? '<div class="hist"><span class="pill warn">no dashboard</span> <span class="mut">' + sys.clients_missing_dashboard.map((k) => esc(k)).join(", ") + '</span></div>' : '') +
-    ((sys.orphaned_snapshots || []).length ? '<div class="hist"><span class="pill warn">orphaned snapshot</span> <span class="mut">' + sys.orphaned_snapshots.map((k) => esc(k)).join(", ") + '</span></div>' : '') + '</div>';
-  if (p.signals) h += '<div class="card"><b>Signals</b><p class="mut">' + (Number(p.signals.triaged) || 0) + ' triaged · ' + (Number(p.signals.briefed) || 0) + ' briefed</p></div>';
-  if ((p.clients || []).length) {
-    h += '<div class="card"><b>Client dashboards</b>' + p.clients.map((c) =>
-      '<div class="hist"><a href="#" style="color:var(--accent)" onclick="renderClient(decodeURIComponent(\'' + encodeURIComponent(c.client_key).replace(/'/g, "%27") + '\'));return false">' + esc(c.client_key) + '</a> <span class="mut">updated ' + (c.updated_at ? ptTime(c.updated_at) : "—") + '</span></div>').join("") + '</div>';
-  }
-
-  // ── Recent leads (operator-only; phone/contact intentionally excluded) ────
-  if ((p.leads || []).length) {
-    h += '<div class="card"><b>Recent leads</b>';
-    for (const l of p.leads) {
-      h += '<div class="hist">' +
-        '<span class="pill">' + esc(l.date) + '</span> ' +
-        '<b>' + esc(l.name) + '</b>' +
-        (l.source ? ' <span class="mut">· ' + esc(l.source) + '</span>' : '') +
-        (l.status ? ' <span class="pill">' + esc(l.status) + '</span>' : '') +
-        (l.outcome ? ' <span class="mut">' + esc(l.outcome) + '</span>' : '') +
+  // Seller trial panel
+  if (s.active || trial.configured) {
+    const trialDay = trial.day || null;
+    const trialWindow = trial.window || s.as_of || '';
+    const trialVerdict = trial.verdict || '';
+    const needD = 200, needC = 5;
+    const dPct = trialDials !== null ? Math.min(100, Math.round(100 * trialDials / needD)) : 0;
+    const cPct = trialConvos !== null ? Math.min(100, Math.round(100 * trialConvos / needC)) : 0;
+    outH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>Seller — ' + esc(s.name || 'Griffin') + '</b>' +
+      (trial.configured ? '<span class="ops-count">' + (trialVerdict ? esc(trialVerdict) + ' · ' : '') + (trialDay ? 'day ' + esc(trialDay) + ' of 14' : esc(trialWindow)) + '</span>' : '') + '</div>';
+    if (trial.configured) {
+      outH += '<div class="ops-pad">' +
+        '<div class="ops-muted">Dials toward keep/kill (200)</div>' +
+        '<div class="ops-bar"><i style="width:' + esc(dPct) + '%"></i></div>' +
+        '<div class="ops-muted" style="margin-top:8px">Real conversations (5)</div>' +
+        '<div class="ops-bar warn"><i style="width:' + esc(cPct) + '%"></i></div>' +
         '</div>';
     }
-    h += '</div>';
-  }
-
-  // ── Spend (this month) ─────────────────────────────────────────────────────
-  if (p.spend && p.spend.totals) {
-    const sp = p.spend;
-    h += '<div class="card"><b>Spend — ' + esc(sp.month || "") + '</b>' +
-      '<div class="tally wk">' +
-      '<div><b>$' + esc(Number(sp.totals.USD) || 0) + '</b><span class="mut">USD</span></div>' +
-      '<div><b>$' + esc(Number(sp.totals.CAD) || 0) + '</b><span class="mut">CAD</span></div>' +
-      '</div>' +
-      (sp.as_of ? '<p class="mut">as of ' + ptTime(sp.as_of) + '</p>' : '') +
-      '</div>';
-  }
-
-  // ── Calls due (from existing funnel.due + seller.callbacks_due) ───────────
-  const fu2 = p.funnel || {}, due2 = fu2.due || {}, sel2 = p.seller || {};
-  if (Number(due2.count) || Number(sel2.callbacks_due)) {
-    h += '<div class="card"><b>Calls due</b>' +
-      '<div class="tally wk">' +
-      '<div><b>' + (Number(due2.count) || 0) + '</b><span class="mut">due</span></div>' +
-      '<div><b>' + (Number(due2.overdue) || 0) + '</b><span class="mut">overdue</span></div>' +
-      '<div><b>' + (Number(sel2.callbacks_due) || 0) + '</b><span class="mut">callbacks</span></div>' +
+    outH += '<div class="ops-tiles" style="border-top:1px solid #222a31">' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(trialDials !== null ? trialDials : (Number(totals.dials)||0)) + '</div><div class="ops-l">dials</div></div>' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(Number(totals.pickups)||0) + '</div><div class="ops-l">pickups</div></div>' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(trialConvos !== null ? trialConvos : (Number(totals.conversations)||0)) + '</div><div class="ops-l">convos</div></div>' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(Number(totals.closes)||Number(totals.bookings)||0) + '</div><div class="ops-l">booked</div></div>' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(callbacksDue) + '</div><div class="ops-l">callbacks</div></div>' +
+      (s.pay_due_cad ? '<div class="ops-tile"><div class="ops-b ops-up">$' + esc(Number(s.pay_due_cad)) + '</div><div class="ops-l">pay due</div></div>' : '') +
       '</div></div>';
   }
 
-  // ── Content queue ──────────────────────────────────────────────────────────
-  if (p.content) {
-    const co = p.content;
-    h += '<div class="card"><b>Content queue</b>' +
-      (co.as_of ? '<p class="mut">as of ' + ptTime(co.as_of) + '</p>' : '') +
-      '<div class="tally wk">' +
-      '<div><b>' + (Number(co.inbox) || 0) + '</b><span class="mut">inbox</span></div>' +
-      '<div><b>' + (Number(co.hold) || 0) + '</b><span class="mut">hold</span></div>' +
-      '<div><b>' + (Number(co.outreach) || 0) + '</b><span class="mut">outreach</span></div>' +
-      '<div><b>' + (Number(co.approved) || 0) + '</b><span class="mut">approved</span></div>' +
-      '</div></div>';
-  }
-
-  // ── Go-live gate (per-check detail) ───────────────────────────────────────
-  if (p.go_live) {
-    const gl = p.go_live;
-    const glChecks = gl.checks || {};
-    h += '<div class="card"><b>Go-live gate</b>' +
-      '<div class="row" style="margin:6px 0;flex-wrap:wrap;gap:6px">' +
-      '<span class="pill ' + (gl.sending_enabled ? "ok" : "bad") + '">sending: ' + esc(gl.sending_enabled ? "OPEN" : "closed") + '</span>' +
-      '<span class="pill ' + (gl.live_mode && gl.live_mode !== "BLOCKED" ? "ok" : "warn") + '">mode: ' + esc(gl.live_mode || "BLOCKED") + '</span>' +
-      '<span class="pill ' + (Number(gl.vetted) >= Number(gl.min_vetted) ? "ok" : "warn") + '">vetted: ' + esc(Number(gl.vetted) || 0) + '/' + esc(Number(gl.min_vetted) || 0) + '</span>' +
-      '</div>';
-    const checkEntries = Object.entries(glChecks);
-    if (checkEntries.length) {
-      h += '<div style="margin-top:6px">';
-      for (const [name, passing] of checkEntries) {
-        h += '<div class="hist"><span class="pill ' + (passing ? "ok" : "bad") + '">' + (passing ? "✓" : "✗") + '</span> ' + esc(name) + '</div>';
-      }
-      h += '</div>';
+  // ── CONTENT section ───────────────────────────────────────────────────────
+  let contH = '';
+  contH += '<div class="ops-panel"><div class="ops-panel-h"><b>Awaiting your approval</b>' +
+    '<span class="ops-count">' + esc(contentItems.length) + '</span></div>';
+  if (contentItems.length) {
+    contH += '<ul class="ops-list">';
+    for (const ci of contentItems) {
+      const typePill = '<span class="ops-pill ' + (ci.readiness === 'ready' ? 'warn' : '') + '">' + esc(ci.type || '') + '</span>';
+      contH += '<li class="ops-li">' + typePill +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(ci.title) + '</div>' +
+        (ci.readiness ? '<div class="ops-li-meta">' + esc(ci.readiness) + '</div>' : '') + '</div>' +
+        '</li>';
     }
-    if (gl.updated_at) h += '<p class="mut">updated ' + ptTime(gl.updated_at) + '</p>';
-    h += '</div>';
+    contH += '</ul>';
+  } else {
+    contH += '<p class="ops-muted ops-pad">No items awaiting approval.</p>';
   }
+  contH += '</div>';
+
+  // Pipeline counts
+  contH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>Pipeline</b>' +
+    (co.as_of ? '<span class="ops-count">as of ' + esc(ptTime(co.as_of)) + '</span>' : '') + '</div>' +
+    '<div class="ops-tiles">' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(co.inbox)||0) + '</div><div class="ops-l">inbox</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(co.hold)||0) + '</div><div class="ops-l">hold</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(co.outreach)||0) + '</div><div class="ops-l">outreach</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">' + esc(Number(co.approved)||0) + '</div><div class="ops-l">approved</div></div>' +
+    (pipeCompleted ? '<div class="ops-tile"><div class="ops-b">' + esc(pipeCompleted) + '</div><div class="ops-l">completed</div></div>' : '') +
+    '</div></div>';
+
+  // ── MONEY section ─────────────────────────────────────────────────────────
+  let monH = '<div class="ops-colset two">';
+  // Pending expenses
+  monH += '<div class="ops-panel"><div class="ops-panel-h"><b>Invoices to confirm</b>' +
+    '<span class="ops-count">' + esc(pendingExp.length) + '</span></div>';
+  if (pendingExp.length) {
+    monH += '<ul class="ops-list">';
+    for (const row of pendingExp) {
+      monH += '<li class="ops-li"><div class="ops-grow">' +
+        '<div class="ops-li-ttl">' + esc(row.vendor) + '</div>' +
+        '<div class="ops-li-meta">' + esc(row.amount) + ' ' + esc(row.currency) +
+        (row.description ? ' · ' + esc(row.description) : '') + (row.date ? ' · ' + esc(row.date) : '') + '</div></div>' +
+        '<button class="ops-btn primary" data-id="' + esc(row.id) + '" onclick="enqueueAction(\'confirm_expense\',{id:this.dataset.id})">Confirm</button>' +
+        '<button class="ops-btn ghost" data-id="' + esc(row.id) + '" onclick="enqueueAction(\'reject_expense\',{id:this.dataset.id})">Reject</button>' +
+        '</li>';
+    }
+    monH += '</ul>';
+  } else {
+    monH += '<p class="ops-muted ops-pad">No pending invoices.</p>';
+  }
+  monH += '</div>';
+  // Spend
+  monH += '<div class="ops-panel"><div class="ops-panel-h"><b>Spend — this month</b>' +
+    (sp && sp.month ? '<span class="ops-count">' + esc(sp.month) + '</span>' : '') + '</div>' +
+    '<div class="ops-tiles">' +
+    '<div class="ops-tile"><div class="ops-b">$' + esc(spendUSD) + '</div><div class="ops-l">USD</div></div>' +
+    '<div class="ops-tile"><div class="ops-b">CAD ' + esc(spendCAD) + '</div><div class="ops-l">CAD</div></div>' +
+    '</div>' +
+    '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">' +
+    (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
+    '</div></div>';
+  monH += '</div>'; // colset
+  // Seller pay
+  if (s.active || s.pay_due_cad > 0) {
+    const ledger = p.pay_ledger || (p.seller && p.seller.pay_ledger) || [];
+    monH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>Seller pay</b>' +
+      (s.pay_due_cad ? '<span class="ops-count">$' + esc(Number(s.pay_due_cad)) + ' due</span>' : '<span class="ops-count">all paid</span>') + '</div>';
+    if (ledger.length) {
+      monH += '<ul class="ops-list">';
+      for (const w of ledger) {
+        const paid = w.paid || w.due_cad === 0;
+        monH += '<li class="ops-li">' +
+          '<span class="ops-pill ' + (paid ? 'ok' : 'bad') + '">' + (paid ? 'paid' : 'due Fri') + '</span>' +
+          '<div class="ops-grow"><div class="ops-li-ttl">' + esc(w.week || '') + '</div>' +
+          '<div class="ops-li-meta">' + (w.qualified_blocks ? esc(w.qualified_blocks) + ' blocks' : '') +
+          (w.shows ? ' · ' + esc(w.shows) + ' shows' : '') + '</div></div>' +
+          '<span' + (paid ? ' class="ops-muted"' : '') + '>$' + esc(w.due_cad || 0) + '</span>' +
+          // Mark paid: no action in frozen contract — omitted intentionally (consistent with Content approve/reject)
+
+          '</li>';
+      }
+      monH += '</ul>';
+    } else if (s.pay_due_cad) {
+      monH += '<p class="ops-muted ops-pad">$' + esc(Number(s.pay_due_cad)) + ' due — no ledger detail available.</p>';
+    } else {
+      monH += '<p class="ops-muted ops-pad">No pay due.</p>';
+    }
+    monH += '</div>';
+  }
+
+  // ── SYSTEM section ────────────────────────────────────────────────────────
+  const sysOk = sys.sources_ok === sys.sources_total;
+  let sysH = '<div class="ops-colset two">';
+  // Data integrity
+  sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Data integrity</b>' +
+    '<span class="ops-count">' + esc(Number(sys.sources_ok)||0) + ' / ' + esc(Number(sys.sources_total)||0) + ' OK</span></div>';
+  sysH += '<ul class="ops-list">';
+  if ((sys.not_ok || []).length) {
+    for (const r of sys.not_ok) {
+      sysH += '<li class="ops-li"><span class="ops-pill bad">' + esc(r.status) + '</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(r.source) + '</div>' +
+        '<div class="ops-li-meta">' + esc(r.detail) + '</div></div></li>';
+    }
+  }
+  if ((sys.warns || []).length) {
+    for (const r of sys.warns) {
+      sysH += '<li class="ops-li"><span class="ops-pill warn">stale</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(r.source) + '</div>' +
+        '<div class="ops-li-meta">' + esc(r.detail) + '</div></div></li>';
+    }
+  }
+  if (sysOk && !(sys.not_ok||[]).length && !(sys.warns||[]).length) {
+    sysH += '<li class="ops-li"><span class="ops-pill ok">ok</span>' +
+      '<div class="ops-grow"><div class="ops-li-ttl">All sources</div>' +
+      '<div class="ops-li-meta">checked ' + esc(sys.data_truth_ran_at ? ptTime(sys.data_truth_ran_at) : 'never') + '</div></div></li>';
+  }
+  if ((sys.skipped || []).length) {
+    sysH += '<li class="ops-li"><span class="ops-pill dim">skip</span>' +
+      '<div class="ops-grow"><div class="ops-li-ttl">' + esc(sys.skipped.map(function(r){return r.source;}).join(', ')) + '</div>' +
+      '<div class="ops-li-meta">skipped by design</div></div></li>';
+  }
+  sysH += '</ul></div>';
+
+  // Go-live gate
+  const glChecks = gl ? (gl.checks || {}) : {};
+  const glCheckEntries = Object.entries(glChecks);
+  sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Go-live gate</b></div>';
+  sysH += '<ul class="ops-list">';
+  if (gl) {
+    for (const [name, passing] of glCheckEntries) {
+      sysH += '<li class="ops-li"><span class="ops-pill ' + (passing ? 'ok' : 'bad') + '">' + (passing ? '✓' : '✗') + '</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(name) + '</div></div>' +
+        (!passing ? '<button class="ops-btn ghost" onclick="opsTab(\'outreach\')">Open</button>' : '') + '</li>';
+    }
+    if (!glCheckEntries.length) {
+      const gateOpen2 = gl.sending_enabled;
+      sysH += '<li class="ops-li"><span class="ops-pill ' + (gateOpen2 ? 'ok' : 'bad') + '">sending: ' + esc(gateOpen2 ? 'OPEN' : 'closed') + '</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">Send gate</div></div></li>';
+    }
+  } else {
+    sysH += '<li class="ops-li"><span class="ops-pill dim">—</span><div class="ops-grow"><div class="ops-li-ttl">No gate data</div></div></li>';
+  }
+  sysH += '</ul></div>';
+  sysH += '</div>'; // colset
+
+  // Client dashboards + recent actions
+  sysH += '<div class="ops-colset two" style="margin-top:16px">';
+  // Client dashboards
+  sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Client dashboards</b>' +
+    ((p.clients||[]).length ? '<span class="ops-count">' + esc((p.clients||[]).length) + '</span>' : '') + '</div>';
+  if ((p.clients||[]).length) {
+    sysH += '<ul class="ops-list">';
+    for (const c of p.clients) {
+      sysH += '<li class="ops-li"><div class="ops-grow">' +
+        '<div class="ops-li-ttl">' + esc(c.client_key) + '</div>' +
+        (c.updated_at ? '<div class="ops-li-meta">updated ' + esc(ptTime(c.updated_at)) + '</div>' : '') + '</div>' +
+        '<button class="ops-btn ghost" onclick="renderClient(decodeURIComponent(\'' + encodeURIComponent(c.client_key).replace(/'/g, "%27") + '\'))">Preview</button></li>';
+    }
+    sysH += '</ul>';
+  } else {
+    sysH += '<p class="ops-muted ops-pad">No client dashboards.</p>';
+  }
+  sysH += '</div>';
+
+  // Recent actions
+  const statusClass = { queued: 'dim', processing: 'warn', done: 'ok', failed: 'bad' };
+  sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Recent actions</b><span class="ops-count">last 10</span></div>' +
+    '<div class="ops-pad" style="border-bottom:1px solid #222a31"><div class="ops-muted" style="margin-bottom:8px">Queue</div>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="ops-btn ghost" onclick="enqueueAction(\'refresh_seller\')">Refresh seller</button>' +
+    '<button class="ops-btn ghost" onclick="enqueueAction(\'refresh_clients\')">Refresh clients</button>' +
+    '<button class="ops-btn ghost" onclick="enqueueAction(\'refresh_ops\')">Refresh ops</button>' +
+    '</div></div>';
+  if (recentActions.length) {
+    sysH += '<ul class="ops-list">';
+    for (const row of recentActions) {
+      const cls = statusClass[row.status] || 'dim';
+      sysH += '<li class="ops-li"><span class="ops-pill ' + esc(cls) + '">' + esc(row.status) + '</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(row.action) + '</div>' +
+        '<div class="ops-li-meta">' + esc(ptTime(row.created_at)) +
+        (row.result ? ' · ' + esc(row.result) : '') + '</div></div></li>';
+    }
+    sysH += '</ul>';
+  } else {
+    sysH += '<p class="ops-muted ops-pad">No actions queued yet.</p>';
+  }
+  sysH += '</div>';
+  sysH += '</div>'; // colset
+
+  // Signals
+  if (p.signals) {
+    sysH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>Signals</b></div>' +
+      '<div class="ops-tiles">' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(Number(p.signals.triaged)||0) + '</div><div class="ops-l">triaged</div></div>' +
+      '<div class="ops-tile"><div class="ops-b">' + esc(Number(p.signals.briefed)||0) + '</div><div class="ops-l">briefed</div></div>' +
+      '</div></div>';
+  }
+
+  // ── Assemble full cockpit HTML ─────────────────────────────────────────────
+  const asof = snap ? 'synced ' + esc(ptTime(snap.updated_at)) : 'no snapshot';
+  let h = '<div class="ops-wrap">' +
+    '<header class="ops-top">' +
+    '<div class="ops-brand"><h1>Rankwise</h1><span class="ops-tag">Operator</span></div>' +
+    '<span class="ops-spacer"></span>' +
+    '<span class="ops-asof">' + asof + '</span>' +
+    '<button class="ops-iconbtn" onclick="renderOps()">↻ Refresh</button>' +
+    '<button class="ops-iconbtn" onclick="window._showConsole=true;render()">Dial console →</button>' +
+    '<button class="ops-iconbtn" onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button>' +
+    '</header>' +
+    '<nav class="ops-tabs" role="tablist">' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Today' +
+    (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
+    (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + ' due</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='content'?'true':'false') + '" data-v="content" onclick="opsTab(\'content\')">Content' +
+    (contentBadge ? ' <span class="ops-badge">' + esc(contentBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='money'?'true':'false') + '" data-v="money" onclick="opsTab(\'money\')">Money' +
+    (moneyBadge ? ' <span class="ops-badge hot">' + esc(moneyBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='system'?'true':'false') + '" data-v="system" onclick="opsTab(\'system\')">System</button>' +
+    '</nav>' +
+    '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + todayH + '</section>' +
+    '<section class="ops-view" id="ops-outreach" role="tabpanel"' + (window._opsTab!=='outreach'?' hidden':'') + '>' + outH + '</section>' +
+    '<section class="ops-view" id="ops-content" role="tabpanel"' + (window._opsTab!=='content'?' hidden':'') + '>' + contH + '</section>' +
+    '<section class="ops-view" id="ops-money" role="tabpanel"' + (window._opsTab!=='money'?' hidden':'') + '>' + monH + '</section>' +
+    '<section class="ops-view" id="ops-system" role="tabpanel"' + (window._opsTab!=='system'?' hidden':'') + '>' + sysH + '</section>' +
+    '<footer class="ops-note">Rankwise operator cockpit · ' + asof + '</footer>' +
+    '</div>';
 
   app.innerHTML = h;
 }
 
 // ── Client dashboard (role=client; operators pass an explicit key to preview) ─
 async function renderClient(key) {
+  document.body.classList.remove('ops');
   const app = $("#app");
   app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Loading…</p>';
   let q = "client_portal_snapshot?select=client_key,payload,updated_at";
