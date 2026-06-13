@@ -284,6 +284,33 @@ async function render() {
     h += '</div>';
   }
 
+  // ── Coach card (pushed from vault/_export/seller-coach.json) ────────────────
+  if (snap && snap.coach) {
+    const co = snap.coach;
+    h += '<div class="card"><b>Coach</b>';
+    if (co.as_of) h += '<p class="mut">based on calls through ' + esc(co.as_of) + '</p>';
+    if (co.note) h += '<p class="mut">' + esc(co.note) + '</p>';
+    if (co.blocks && co.blocks.length) {
+      const b = co.blocks[0]; // most recent block
+      if (b.best_line) h += '<div class="opener">' + esc(b.best_line) + '</div>';
+      if (b.what_worked && b.what_worked.length)
+        h += '<details><summary>What worked (' + esc(b.date) + ', ' + (b.n_calls || 0) + ' calls)</summary><div class="kit">' + esc(b.what_worked.join('\n')) + '</div></details>';
+      if (b.what_to_fix && b.what_to_fix.length)
+        h += '<details><summary>Fix next block</summary><div class="kit">' + esc(b.what_to_fix.join('\n')) + '</div></details>';
+      if (b.themes && b.themes.length)
+        h += '<details><summary>Themes</summary><div class="kit">' + esc(b.themes.join('\n')) + '</div></details>';
+      if (co.blocks.length > 1) {
+        h += '<details><summary>Earlier blocks (' + (co.blocks.length - 1) + ')</summary>';
+        for (const ob of co.blocks.slice(1)) {
+          h += '<p class="mut"><b>' + esc(ob.date) + '</b> · ' + (ob.n_calls || 0) + ' calls</p>';
+          if (ob.best_line) h += '<div class="opener">' + esc(ob.best_line) + '</div>';
+        }
+        h += '</details>';
+      }
+    }
+    h += '</div>';
+  }
+
   // ── Cheat sheet (pushed from the seller kit) ───────────────────────────────
   if (snap && snap.kit && (snap.kit.objections || snap.kit.must_not_say)) {
     h += '<div class="card"><b>📋 Cheat sheet</b>';
