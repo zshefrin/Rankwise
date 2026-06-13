@@ -155,15 +155,23 @@ async function logCall(slug) {
   else toast("Log failed — try again");
 }
 
-const DISPS = ["connect", "voicemail", "no_answer", "declined", "wrong_number", "booked"];
+const DISPS = ["connect", "voicemail", "no_answer", "declined", "wrong_number", "booked", "do_not_contact"];
 
 function logForm(slug, open) {
+  const dispBtns = DISPS.map((d) => {
+    const isDnc = d === "do_not_contact";
+    const style = isDnc ? ' style="flex:1 1 30%;background:#3a1d1d;color:var(--bad)"' : '';
+    const label = isDnc ? "DO NOT CONTACT" : d.replace(/_/g, " ");
+    return '<button class="disp" data-d="' + esc(d) + '"' + style +
+      ' onclick="this.closest(\'.row\').querySelectorAll(\'.disp\').forEach(b=>b.classList.remove(\'sel\'));this.classList.add(\'sel\')">' +
+      esc(label) + '</button>';
+  }).join("");
   return '<details' + (open ? " open" : "") + '><summary>Log this call</summary><div class="row">' +
-    DISPS.map((d) => '<button class="disp" data-d="' + d + '" onclick="this.closest(\'.row\').querySelectorAll(\'.disp\').forEach(b=>b.classList.remove(\'sel\'));this.classList.add(\'sel\')">' + d.replace("_", " ") + '</button>').join("") +
+    dispBtns +
     '</div><label class="cb"><input type="checkbox" class="conv"> Real conversation (got past the opener)</label>' +
     '<input class="note" placeholder="Note — callback time, objection, email given…">' +
     '<label class="cb" style="display:block"><span class="mut">Call back at (optional):</span> <input type="datetime-local" class="cbat"></label>' +
-    '<button class="primary" style="width:100%;margin-top:8px" onclick="logCall(\'' + slug + '\')">Save call log</button></details>';
+    '<button class="primary" style="width:100%;margin-top:8px" onclick="logCall(\'' + esc(slug) + '\')">Save call log</button></details>';
 }
 
 async function render() {
