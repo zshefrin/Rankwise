@@ -131,6 +131,14 @@ async function rest(path) {
   return r.json();
 }
 
+async function enqueueAction(action) {
+  const r = await fetch(SB + "/rest/v1/operator_action_queue", {
+    method: "POST", headers: hdr(), body: JSON.stringify({ action }),
+  });
+  if (r.ok) { toast("Queued — applies in ~2 min"); renderOps(); }
+  else toast("Could not queue");
+}
+
 window._nm = {}; // slug → business name (filled at render; avoids name-in-onclick escaping)
 
 async function logCall(slug) {
@@ -360,12 +368,39 @@ async function renderOps() {
   if (roleOf() !== "operator") return render();  // hygiene; RLS is the real gate
   const app = $("#app");
   app.innerHTML = '<h1>Ops overview</h1><p class="mut">Loading…</p>';
-  const rows = await rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1");
+  const [rows, actionRows] = await Promise.all([
+    rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
+    rest("operator_action_queue?select=*&order=id.desc&limit=10"),
+  ]);
   if (!rows) return;
   const snap = rows[0] || null;
+  const recentActions = actionRows || [];
   let h = '<div class="row" style="justify-content:space-between"><h1>Ops overview</h1>' +
     '<span class="row"><button onclick="window._showConsole=true;render()">← Console</button>' +
     '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></span></div>';
+
+  // ── Actions card (always visible, even before first snapshot) ────────────
+  h += '<div class="card"><b>Actions</b><div class="row" style="margin-top:8px">' +
+    '<button onclick="enqueueAction(\'refresh_seller\')">Refresh seller</button>' +
+    '<button onclick="enqueueAction(\'refresh_clients\')">Refresh clients</button>' +
+    '<button onclick="enqueueAction(\'refresh_ops\')">Refresh ops</button>' +
+    '</div></div>';
+
+  // ── Recent actions card (always visible) ─────────────────────────────────
+  h += '<div class="card"><b>Recent actions</b>';
+  if (!recentActions.length) {
+    h += '<p class="mut">No actions queued yet.</p>';
+  } else {
+    const statusClass = { queued: "pill", processing: "pill warn", done: "pill ok", failed: "pill bad" };
+    for (const row of recentActions) {
+      const cls = statusClass[row.status] || "pill";
+      h += '<div class="hist"><span class="' + esc(cls) + '">' + esc(row.status) + '</span> ' +
+        esc(row.action) + ' <span class="mut">' + ptTime(row.created_at) + '</span>' +
+        (row.result ? ' <span class="mut">· ' + esc(row.result) + '</span>' : '') + '</div>';
+    }
+  }
+  h += '</div>';
+
   if (!snap) {
     h += '<div class="card mut">No rollup pushed yet — run push_operator_snapshot.py (rides the 10am briefing cron).</div>';
     app.innerHTML = h; return;
