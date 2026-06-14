@@ -10,6 +10,9 @@
           --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --accent:#60a5fa; }
   * { box-sizing:border-box; margin:0; }
   body { background:var(--bg); color:var(--text); font:16px/1.45 -apple-system, system-ui, sans-serif; padding:12px; max-width:560px; margin:0 auto; }
+  /* Dial Console gets a wide desktop canvas (list + dossier); text sections stay narrow for readability. */
+  body.dial { max-width:1180px; }
+  body.dial .dial-top { max-width:720px; }
   h1 { font-size:18px; margin:8px 0 2px; } .mut { color:var(--mut); font-size:13px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin:10px 0; }
   .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -75,6 +78,33 @@
   .sec--avoid .sec__l span { font-weight:500; color:var(--mut); }
   .tags { display:flex; flex-wrap:wrap; gap:6px; }
   .tag { font-size:12px; padding:3px 9px; border-radius:7px; background:rgba(248,113,113,.15); color:#f4a8a8; }
+  /* ── console: list rail + dossier ─────────────────────────────────────── */
+  .console { display:flex; gap:14px; align-items:flex-start; margin-top:10px; }
+  .rail { flex:0 0 270px; display:flex; flex-direction:column; gap:6px; max-height:calc(100vh - 40px); overflow-y:auto; position:sticky; top:8px; }
+  .dossier { flex:1; min-width:0; }
+  .railrow { width:100%; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 11px; cursor:pointer; color:var(--text); transition:border-color .12s, background .12s; }
+  .railrow:hover { border-color:#3a4652; }
+  .railrow.active { border-color:var(--accent); background:#18222c; }
+  .railrow.done { opacity:.5; }
+  .railrow__top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .railrow__nm { font-weight:650; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .railrow__sub { color:var(--mut); font-size:11.5px; margin-top:3px; display:flex; align-items:center; gap:6px; min-width:0; }
+  .railrow__sub span.t { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dossier-card { margin:0 !important; }
+  .dgrid { display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; margin-top:2px; }
+  .dcol { min-width:0; }
+  .dback { display:none; margin-bottom:10px; background:#222c34; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer; }
+  .verif { margin:11px 0 0; font-size:11.5px; color:var(--mut); display:flex; align-items:center; gap:7px; }
+  .verif b { color:#6ee7b7; font-weight:600; }
+  @media (max-width:900px) { .dgrid { grid-template-columns:1fr; gap:0; } }
+  @media (max-width:760px) {
+    .console { display:block; }
+    .console .dossier { display:none; }
+    .console.show .rail { display:none; }
+    .console.show .dossier { display:block; }
+    .console.show .dback { display:inline-flex; }
+    .rail { position:static; max-height:none; }
+  }
   .cond { font-size:12.5px; margin-top:6px; }
   .cond dl { display:grid; grid-template-columns:80px 1fr; gap:5px 10px; margin:0 0 4px; }
   .cond dt { color:var(--mut); } .cond dd { margin:0; }
@@ -414,35 +444,82 @@ function avoidTags(it) {
     '<div class="tags">' + d.map((s) => '<span class="tag">' + esc(s) + '</span>').join('') + '</div></div>';
 }
 
-function intelCard(p, done, attemptPill) {
+// ── Console: a clickable rail of prospects + a full dossier for the selected
+// one. Desktop shows both; phone shows the rail, tap → dossier, back to queue.
+function buildRail(cards, done, sel) {
+  if (!cards.length) return '<div class="rail"><div class="card mut">No dial cards pushed yet — Zack runs push_seller_queue.py.</div></div>';
+  return '<div class="rail">' + cards.map((p) => {
+    const it = p.intel || {};
+    const isDone = done[p.slug];
+    const dots = (it.map_pack && it.map_pack.length)
+      ? '<span class="dots">' + it.map_pack.map((m) => '<span class="dot' + (m.rank != null ? ' on' : '') + '"></span>').join('') + '</span>' : '';
+    return '<button class="railrow' + (p.slug === sel ? ' active' : '') + (isDone ? ' done' : '') +
+      '" data-slug="' + esc(p.slug) + '" onclick="selectProspect(\'' + esc(p.slug) + '\')">' +
+      '<div class="railrow__top"><span class="railrow__nm">' + esc(p.business_name) + '</span>' +
+      (isDone ? '<span class="chip chip--ok">✓</span>' : '<span class="dc__rk">#' + (p.rank || 0) + '</span>') + '</div>' +
+      '<div class="railrow__sub"><span class="t">' + esc(p.city) + (it.hook ? ' · ' + esc(clip(it.hook, 26)) : '') + '</span>' + dots + '</div>' +
+      '</button>';
+  }).join('') + '</div>';
+}
+
+function attemptPillFor(slug) {
+  if ((window._done || {})[slug]) return '';
+  const past = (window._attempts || {})[slug] || [];
+  if (!past.length) return '';
+  return '<span class="pill warn">attempt ' + (past.length + 1) + ' · last: ' + esc(past[0].disposition) + ' ' + ptTime(past[0].called_at) + '</span>';
+}
+
+function renderDossier(slug) {
+  window._sel = slug;
+  document.querySelectorAll('.railrow').forEach((r) => r.classList.toggle('active', r.dataset.slug === slug));
+  const p = (window._cards || []).find((c) => c.slug === slug);
+  const dz = document.getElementById('dossier');
+  if (dz && p) dz.innerHTML = buildDossier(p, (window._done || {})[slug], attemptPillFor(slug));
+}
+function selectProspect(slug) {
+  renderDossier(slug);
+  const con = document.querySelector('.console'); if (con) con.classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+function backToQueue() { const con = document.querySelector('.console'); if (con) con.classList.remove('show'); }
+
+function buildDossier(p, done, attemptPill) {
   const it = p.intel || {};
   const has = Object.keys(it).length > 0;
-  let h = '<div class="dc__hd"><div><div class="dc__nm">' + esc(p.business_name) + '</div>' +
+  let h = '<div class="card dossier-card" data-card="' + esc(p.slug) + '">' +
+    '<button class="dback" onclick="backToQueue()">← Queue</button>' +
+    '<div class="dc__hd"><div><div class="dc__nm">' + esc(p.business_name) + '</div>' +
     '<div class="dc__ct">' + esc(p.city) + (!has && p.signal ? ' · ' + esc(p.signal) : '') + '</div></div>' +
     (done ? '<span class="chip chip--ok">✓ ' + esc(done) + '</span>' : '<span class="dc__rk">#' + (p.rank || 0) + '</span>') + '</div>';
   if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
-  if (!has) return h + callBtn(p);                      // degrade
-  h += hookBlock(it) + chipsRow(it) + gapViz(it) + callBtn(p);
-  h += openWith(it) + proofList(it) + avoidTags(it);
-  h += '<details><summary>Full site condition + exact wording</summary>' + condBlock(it) + '</details>';
-  return h;
+  if (!has) return h + callBtn(p) + logForm(p.slug, false) + '</div>';   // degrade
+  h += hookBlock(it) + chipsRow(it) + callBtn(p);
+  h += '<div class="dgrid">' +
+    '<div class="dcol">' + openWith(it) + proofList(it) + avoidTags(it) + '</div>' +
+    '<div class="dcol">' + gapViz(it) + evidenceBlock(it) + '</div></div>';
+  h += '<details><summary>Exact verified wording (the receipts)</summary>' + wordingBlock(it) + '</details>';
+  if (p.opener) h += '<details><summary>Opener script</summary><div class="opener">' + esc(p.opener) + '</div></details>';
+  if (p.audit_url && /^https?:\/\//.test(p.audit_url)) h += '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>';
+  return h + logForm(p.slug, false) + '</div>';
 }
 
-function condBlock(it) {
+// The evidence half of the dossier — visible proof for due diligence.
+function evidenceBlock(it) {
   let dl = '';
   const w = it.website || {};
   if (w.status) {
-    const safeUrl = (w.url && /^https?:\/\//.test(w.url)) ? w.url : null;   // no javascript:/data: hrefs
-    const v = safeUrl ? ('<a href="' + esc(safeUrl) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + esc(safeUrl) + '</a>')
-      : (w.status === 'none-found' ? '<span style="color:var(--bad)">none — invisible online</span>'
-        : (w.status === 'candidate' ? '<span style="color:var(--warn)">parked / dead page</span>' : esc(w.url || w.status)));
+    const live = w.status === 'confirmed' && w.url && /^https?:\/\//.test(w.url);
+    const dom = w.url ? esc(w.url.replace(/^https?:\/\//, '').replace(/\/$/, '')) : '';
+    const v = live ? ('<a href="' + esc(w.url) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + dom + '</a> <span style="color:#6ee7b7">✓ live</span>')
+      : (w.status === 'candidate' ? ((dom ? dom + ' ' : '') + '<span style="color:var(--warn)">— parked / dead, goes nowhere</span>')
+        : (w.status === 'none-found' ? '<span style="color:var(--bad)">none — invisible online</span>' : esc(w.status)));
     dl += '<dt>Website</dt><dd>' + v + '</dd>';
   }
   if (it.gbp) {
     const g = it.gbp, parts = [];
     if (g.rating != null) parts.push('⭐ ' + esc(g.rating));
     if (g.reviews != null) parts.push(esc(num(g.reviews)) + ' reviews');
-    if (g.category) parts.push('<span' + (/hvac|heat/i.test(g.category) ? '' : ' style="color:var(--warn)"') + '>' + esc(g.category) + '</span>');
+    if (g.category) parts.push('<span' + (/hvac|heat/i.test(g.category) ? '' : ' style="color:var(--warn)"') + '>' + esc(g.category) + (/hvac|heat/i.test(g.category) ? '' : ' (not HVAC)') + '</span>');
     dl += '<dt>Google</dt><dd>' + (parts.join(' · ') || '—') + '</dd>';
   } else {
     dl += '<dt>Google</dt><dd><span style="color:var(--bad)">no Business Profile found</span></dd>';
@@ -462,21 +539,31 @@ function condBlock(it) {
       (c.reviews != null ? esc(num(c.reviews)) + ' rev' : '') + (c.rating != null ? ' · ⭐' + esc(c.rating) : '') + '</span></div>').join('');
     h += '</div>';
   }
-  // full, untruncated wording (the inline lists are clipped) so Griffin can
-  // quote a verified hook exactly, and read every don't-say in full.
-  if (it.safe_to_say && it.safe_to_say.length) {
-    h += '<div class="cond__sec">✅ Safe to say — full wording</div><ul style="margin:0;padding-left:16px">' +
-      it.safe_to_say.map((s) => '<li style="margin:3px 0;line-height:1.42">' + esc(s) + '</li>').join('') + '</ul>';
-  }
-  if (it.dont_say && it.dont_say.length) {
-    h += '<div class="cond__sec">❌ Don\'t say — full wording <span style="color:var(--bad)">(unverified)</span></div><ul style="margin:0;padding-left:16px">' +
-      it.dont_say.map((s) => '<li style="margin:3px 0;line-height:1.42;color:#f0a8a8">' + esc(s) + '</li>').join('') + '</ul>';
+  // verification status — surfaces the system's confidence so diligence is honest
+  if (it.trust === 'low') {
+    h += '<div class="verif" style="color:var(--warn)">⚠ Lower confidence — triple-check on the call before quoting anything</div>';
+  } else {
+    h += '<div class="verif">🛡 <b>Verified</b> · Google Places + adversarial crawl-check' + (it.trust ? ' · ' + esc(it.trust) + ' confidence' : '') + '</div>';
   }
   return h + '</div>';
 }
 
+// The verbatim verified hooks + the full don't-say list — the exact wording.
+function wordingBlock(it) {
+  let h = '';
+  if (it.safe_to_say && it.safe_to_say.length) {
+    h += '<div class="cond__sec">✅ Safe to say — exact wording</div><ul style="margin:0;padding-left:16px">' +
+      it.safe_to_say.map((s) => '<li style="margin:3px 0;line-height:1.42">' + esc(s) + '</li>').join('') + '</ul>';
+  }
+  if (it.dont_say && it.dont_say.length) {
+    h += '<div class="cond__sec">❌ Don\'t say — full list <span style="color:var(--bad)">(unverified)</span></div><ul style="margin:0;padding-left:16px">' +
+      it.dont_say.map((s) => '<li style="margin:3px 0;line-height:1.42;color:#f0a8a8">' + esc(s) + '</li>').join('') + '</ul>';
+  }
+  return '<div class="cond">' + (h || '<p class="mut">No further wording.</p>') + '</div>';
+}
+
 async function render() {
-  document.body.classList.remove('ops');
+  document.body.classList.remove('ops', 'dial');
   const app = $("#app");
   if (tok() && window._recovery) {
     app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Choose your new password.</p>' +
@@ -528,8 +615,10 @@ async function render() {
   const isPickup = (r) => ["connect", "declined", "booked"].includes(r.disposition);
   const isConvo = (r) => r.conversation || r.disposition === "booked";
 
+  document.body.classList.add('dial');
   let h = '<div class="row" style="justify-content:space-between"><h1>Dial Console</h1>' +
-    '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></div>' + hoursStatus();
+    '<button onclick="localStorage.removeItem(\'rw_tok\');render()">Log out</button></div>' + hoursStatus() +
+    '<div class="dial-top">';   // scorecard/coach/cheatsheet stay readable-width
 
   // ── Operator only: Ops rollup tab + preview any client dashboard ──────────
   if (role === "operator") {
@@ -625,32 +714,24 @@ async function render() {
 
   h += '<p class="mut">Booking close: "I\'ll set that up right now — what\'s your email?" → book them at <b>rankwise.ca/audit</b> while you\'re on the line. Log every call. Real conversation = got past the opener.</p>';
 
-  // ── Dial cards ─────────────────────────────────────────────────────────────
-  const cards = (queue || []).slice().sort((a, b) => (a.slug in doneToday ? 1 : 0) - (b.slug in doneToday ? 1 : 0) || a.rank - b.rank);
-  window._nm = {};
-  for (const p of cards) {
-    window._nm[p.slug] = p.business_name;
-    const done = doneToday[p.slug];
-    const past = attempts[p.slug] || [];
-    const attemptPill = !done && past.length
-      ? '<span class="pill warn">attempt ' + (past.length + 1) + ' · last: ' + esc(past[0].disposition) + ' ' + ptTime(past[0].called_at) + '</span>'
-      : '';
-    h += '<div class="card' + (done ? " done" : "") + '" data-card="' + esc(p.slug) + '">' +
-      intelCard(p, done, attemptPill) +
-      (p.opener ? '<details><summary>Opener</summary><div class="opener">' + esc(p.opener) + '</div></details>' : '') +
-      ((p.audit_url && /^https?:\/\//.test(p.audit_url)) ? '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
-      logForm(p.slug, false) + '</div>';
-  }
-  if (!cards.length) h += '<div class="card mut">No dial cards pushed yet — Zack runs push_seller_queue.py.</div>';
-
-  // ── Recent calls ───────────────────────────────────────────────────────────
+  // ── Recent calls (still inside the readable-width column) ────────────────────
   if (rows.length) {
     h += '<div class="card"><details><summary>My recent calls (' + rows.length + ' logged)</summary>' +
       rows.slice(0, 15).map((r) => '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
         (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</div>').join("") +
       '</details></div>';
   }
+  h += '</div>';   // close .dial-top
+
+  // ── Dial console: rail of prospects + dossier for the selected one ──────────
+  const cards = (queue || []).slice().sort((a, b) => (a.slug in doneToday ? 1 : 0) - (b.slug in doneToday ? 1 : 0) || a.rank - b.rank);
+  window._cards = cards; window._done = doneToday; window._attempts = attempts;
+  window._nm = {}; cards.forEach((p) => { window._nm[p.slug] = p.business_name; });
+  const sel = (window._sel && cards.some((c) => c.slug === window._sel)) ? window._sel : (cards[0] && cards[0].slug);
+  h += '<div class="console">' + buildRail(cards, doneToday, sel) + '<div class="dossier" id="dossier"></div></div>';
+
   app.innerHTML = h;
+  if (sel) renderDossier(sel);     // populate the dossier (no .show → phone shows the list first)
 }
 
 // ── Ops tab switcher (global; called from inline onclick in renderOps HTML) ──
@@ -1129,7 +1210,7 @@ async function renderOps() {
 
 // ── Client dashboard (role=client; operators pass an explicit key to preview) ─
 async function renderClient(key) {
-  document.body.classList.remove('ops');
+  document.body.classList.remove('ops', 'dial');
   const app = $("#app");
   app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Loading…</p>';
   let q = "client_portal_snapshot?select=client_key,payload,updated_at";
