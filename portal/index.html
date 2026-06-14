@@ -34,6 +34,56 @@
   .pill.bad { background:#3a1d1d; color:var(--bad); }
   details summary { cursor:pointer; color:var(--accent); font-size:14px; margin:6px 0; }
   .opener { background:#0d1115; border-left:3px solid var(--accent); padding:10px; border-radius:8px; font-size:14px; margin:6px 0; font-style:italic; }
+  /* ── dial card: site condition ─────────────────────────────────────── */
+  .dc__hd { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .dc__nm { font-size:16px; font-weight:700; letter-spacing:-.012em; line-height:1.2; }
+  .dc__ct { color:var(--mut); font-size:12.5px; margin-top:2px; }
+  .dc__rk { flex:none; font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--mut); padding-top:2px; }
+  .hook { display:flex; gap:8px; align-items:flex-start; margin:11px 0 0; padding:10px 12px; border-radius:10px; font-size:14.5px; font-weight:650; line-height:1.34; }
+  .hook i { font-style:normal; flex:none; }
+  .hook--bad  { background:rgba(248,113,113,.12); color:#fca5a5; }
+  .hook--warn { background:rgba(251,191,36,.13);  color:#fcd34d; }
+  .hook--info { background:rgba(96,165,250,.13);  color:#93c5fd; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0; align-items:center; }
+  .chip { font-size:11.5px; font-weight:600; padding:3px 8px; border-radius:7px; background:#222c34; color:#cdd6df; display:inline-flex; gap:5px; align-items:center; line-height:1.5; }
+  .chip--bad { background:rgba(248,113,113,.15); color:#fca5a5; }
+  .chip--ok  { background:rgba(52,211,153,.15);  color:#6ee7b7; }
+  .chip--warn{ background:rgba(251,191,36,.15);  color:#fcd34d; }
+  .dots { display:inline-flex; gap:3px; }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--bad); }
+  .dot.on { background:var(--ok); }
+  .gapv { margin:12px 0 0; padding:10px 12px; background:#0e141a; border:1px solid var(--line); border-radius:10px; }
+  .gapv__t { font-size:11px; color:var(--mut); margin-bottom:8px; }
+  .gr { display:flex; align-items:center; gap:9px; margin:5px 0; }
+  .gr__l { width:88px; flex:none; font-size:11.5px; color:#aab4bd; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gr__t { flex:1; height:8px; background:#141b22; border-radius:99px; overflow:hidden; }
+  .gr__f { display:block; height:100%; border-radius:99px; min-width:6px; }
+  .gr__f.them { background:#fb7185; } .gr__f.riv { background:#64748b; }
+  .gr__n { width:52px; flex:none; text-align:right; font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums; color:#cdd6df; }
+  .gr__n.them { color:#fca5a5; }
+  .dccall { display:flex; align-items:center; justify-content:center; gap:9px; margin:12px 0 0; background:var(--ok); color:#04130d; font-weight:800; font-size:18px; padding:14px; border-radius:11px; text-decoration:none; font-variant-numeric:tabular-nums; transition:transform .12s ease, filter .12s ease; }
+  .dccall:active { transform:scale(.985); filter:brightness(.94); }
+  .dccall.dnc { background:rgba(248,113,113,.12); color:#fca5a5; font-weight:700; font-size:14px; }
+  .sec { margin:11px 0 0; padding:10px 12px; border-radius:10px; }
+  .sec__l { font-size:11px; font-weight:700; margin-bottom:7px; }
+  .sec--open { background:rgba(96,165,250,.10); } .sec--open .sec__l { color:#93c5fd; }
+  .sec--open p { font-size:13.5px; line-height:1.4; color:#dbe7f5; margin:0; }
+  .sec--say { background:rgba(52,211,153,.08); } .sec--say .sec__l { color:#6ee7b7; }
+  .pt { display:flex; gap:8px; align-items:flex-start; font-size:13.5px; line-height:1.34; margin:5px 0; color:#dceee6; }
+  .pt b { color:#34d399; flex:none; font-weight:800; }
+  .sec--avoid { background:rgba(248,113,113,.09); } .sec--avoid .sec__l { color:#fca5a5; }
+  .sec--avoid .sec__l span { font-weight:500; color:var(--mut); }
+  .tags { display:flex; flex-wrap:wrap; gap:6px; }
+  .tag { font-size:12px; padding:3px 9px; border-radius:7px; background:rgba(248,113,113,.15); color:#f4a8a8; }
+  .cond { font-size:12.5px; margin-top:6px; }
+  .cond dl { display:grid; grid-template-columns:80px 1fr; gap:5px 10px; margin:0 0 4px; }
+  .cond dt { color:var(--mut); } .cond dd { margin:0; }
+  .cond__sec { font-size:11px; color:var(--mut); margin:11px 0 4px; }
+  .maprow { display:flex; justify-content:space-between; gap:8px; font-size:12px; padding:3px 0; }
+  .maprow + .maprow, .cgrid div + div { border-top:1px solid var(--line); }
+  .maprow .miss { color:var(--bad); font-weight:700; } .maprow .hit { color:var(--ok); font-weight:700; }
+  .cgrid div { display:flex; justify-content:space-between; gap:8px; padding:3px 0; }
+  @media (prefers-reduced-motion: reduce) { .dccall { transition:none; } }
   .kit { background:#0d1115; border-radius:8px; padding:10px; font-size:13px; white-space:pre-wrap; max-height:300px; overflow-y:auto; }
   label.cb { display:flex; gap:8px; align-items:center; font-size:14px; margin:8px 0; }
   label.cb input { width:auto; transform:scale(1.3); }
@@ -285,6 +335,146 @@ function logForm(slug, open) {
     '<button class="primary" style="width:100%;margin-top:8px" onclick="logCall(\'' + esc(slug) + '\')">Save call log</button></details>';
 }
 
+// ── dial-card site condition (Griffin's mid-call intel) ──────────────────────
+// Every field is optional — a card with intel={} (un-repushed / un-enriched row)
+// falls back to the flat signal line. The ✅/❌ split mirrors the handout: a fact
+// in dont_say was unprovable, so it is shown as "do not say", never as a hook.
+function num(n) { return (n == null || isNaN(n)) ? "" : Number(n).toLocaleString(); }
+function clip(s, n) { s = String(s == null ? "" : s); return s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, "") + "…"; }
+
+// The dial card is one function so the call button, DNC suppression, and the
+// trust-tiered ✅/❌ stay co-located. Every field is optional → degrades to a
+// name + flat signal line + call button when intel={}.
+function callBtn(p) {
+  if (p.intel && p.intel.dnc) return '<div class="dccall dnc">📵 DO NOT CALL — number withheld</div>';
+  if (!p.phone) return '';
+  return '<a class="dccall" href="tel:' + esc(p.phone).replace(/[^0-9+]/g, "") + '">📞 ' + esc(p.phone) + '</a>';
+}
+
+function hookBlock(it) {
+  if (it.dnc) return '<div class="hook hook--bad"><i>⛔</i><span>DO NOT CALL — ' + esc(it.dnc_reason || 'flagged') + '</span></div>';
+  if (!it.hook) return '';
+  const bad = /invisible|no website|no google|parked|reviews vs/i.test(it.hook);
+  const cls = it.is_icp === false ? 'warn' : (bad ? 'bad' : 'warn');
+  return '<div class="hook hook--' + cls + '"><i>' + (it.is_icp === false ? '⚠' : '🎯') + '</i><span>' + esc(it.hook) + '</span></div>';
+}
+
+function chipsRow(it) {
+  const c = [];
+  if (it.map_pack && it.map_pack.length) {
+    const hit = it.map_pack.filter((m) => m.rank != null).length;
+    const dots = it.map_pack.map((m) => '<span class="dot' + (m.rank != null ? ' on' : '') + '"></span>').join('');
+    c.push('<span class="chip' + (hit ? '' : ' chip--bad') + '"><span class="dots">' + dots + '</span> map ' + hit + '/' + it.map_pack.length + '</span>');
+  }
+  if (it.aeo && it.aeo.cited === false) c.push('<span class="chip">AI ✕</span>');
+  if (it.icp_label) c.push(it.is_icp === false
+    ? '<span class="chip chip--warn">' + esc(it.icp_label) + '</span>'
+    : '<span class="chip chip--ok">ICP ✓</span>');
+  if (it.trust) c.push('<span class="chip">trust ' + esc(it.trust) + '</span>');
+  return c.length ? '<div class="chips">' + c.join('') + '</div>' : '';
+}
+
+// review-gap as proportional bars — 9 vs 12,146 lands harder as a bar than text
+function gapViz(it) {
+  const bar = (lab, n, max, kind) => {
+    const w = max > 0 ? Math.max(n > 0 ? 5 : 2, Math.round((n / max) * 100)) : 2;
+    return '<div class="gr"><span class="gr__l">' + esc(clip(lab, 16)) + '</span>' +
+      '<span class="gr__t"><span class="gr__f ' + kind + '" style="width:' + w + '%"></span></span>' +
+      '<span class="gr__n ' + (kind === 'them' ? 'them' : '') + '">' + (n != null ? esc(num(n)) : '—') + '</span></div>';
+  };
+  if (it.review_gap) {
+    const t = Number(it.review_gap.theirs) || 0, r = Number(it.review_gap.rival_reviews) || 0, mx = Math.max(t, r, 1);
+    return '<div class="gapv"><div class="gapv__t">Google reviews — them vs the local leader</div>' +
+      bar('Them', t, mx, 'them') + bar(it.review_gap.rival, r, mx, 'riv') + '</div>';
+  }
+  if (it.competitors && it.competitors.length) {
+    const c0 = it.competitors[0];
+    return '<div class="gapv"><div class="gapv__t">Beating them on Google Maps</div>' +
+      bar(c0.name, c0.reviews, c0.reviews || 1, 'riv') + '</div>';
+  }
+  return '';
+}
+
+// Card-face sections are SHORT and labelled by action — the verbose verifier
+// wording lives only in the expand. Each is skipped when its data is absent.
+function openWith(it) {
+  if (!it.angle) return '';
+  return '<div class="sec sec--open"><div class="sec__l">↳ Open with</div><p>' + esc(clip(it.angle, 175)) + '</p></div>';
+}
+function proofList(it) {
+  const pts = it.talking_points || [];
+  if (!pts.length) return '';
+  return '<div class="sec sec--say"><div class="sec__l">Say this — verified facts</div>' +
+    pts.map((s) => '<div class="pt"><b>✓</b><span>' + esc(s) + '</span></div>').join('') + '</div>';
+}
+function avoidTags(it) {
+  const d = it.dont_claim || [];
+  if (!d.length) return '';
+  return '<div class="sec sec--avoid"><div class="sec__l">Don\'t claim <span>· unverified, would burn the call</span></div>' +
+    '<div class="tags">' + d.map((s) => '<span class="tag">' + esc(s) + '</span>').join('') + '</div></div>';
+}
+
+function intelCard(p, done, attemptPill) {
+  const it = p.intel || {};
+  const has = Object.keys(it).length > 0;
+  let h = '<div class="dc__hd"><div><div class="dc__nm">' + esc(p.business_name) + '</div>' +
+    '<div class="dc__ct">' + esc(p.city) + (!has && p.signal ? ' · ' + esc(p.signal) : '') + '</div></div>' +
+    (done ? '<span class="chip chip--ok">✓ ' + esc(done) + '</span>' : '<span class="dc__rk">#' + (p.rank || 0) + '</span>') + '</div>';
+  if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
+  if (!has) return h + callBtn(p);                      // degrade
+  h += hookBlock(it) + chipsRow(it) + gapViz(it) + callBtn(p);
+  h += openWith(it) + proofList(it) + avoidTags(it);
+  h += '<details><summary>Full site condition + exact wording</summary>' + condBlock(it) + '</details>';
+  return h;
+}
+
+function condBlock(it) {
+  let dl = '';
+  const w = it.website || {};
+  if (w.status) {
+    const safeUrl = (w.url && /^https?:\/\//.test(w.url)) ? w.url : null;   // no javascript:/data: hrefs
+    const v = safeUrl ? ('<a href="' + esc(safeUrl) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + esc(safeUrl) + '</a>')
+      : (w.status === 'none-found' ? '<span style="color:var(--bad)">none — invisible online</span>'
+        : (w.status === 'candidate' ? '<span style="color:var(--warn)">parked / dead page</span>' : esc(w.url || w.status)));
+    dl += '<dt>Website</dt><dd>' + v + '</dd>';
+  }
+  if (it.gbp) {
+    const g = it.gbp, parts = [];
+    if (g.rating != null) parts.push('⭐ ' + esc(g.rating));
+    if (g.reviews != null) parts.push(esc(num(g.reviews)) + ' reviews');
+    if (g.category) parts.push('<span' + (/hvac|heat/i.test(g.category) ? '' : ' style="color:var(--warn)"') + '>' + esc(g.category) + '</span>');
+    dl += '<dt>Google</dt><dd>' + (parts.join(' · ') || '—') + '</dd>';
+  } else {
+    dl += '<dt>Google</dt><dd><span style="color:var(--bad)">no Business Profile found</span></dd>';
+  }
+  if (it.owner) dl += '<dt>Owner</dt><dd>' + esc(it.owner.name) + (it.owner.title ? ' · ' + esc(it.owner.title) : '') +
+    (it.owner.unverified ? ' <span class="mut">⚠ unverified</span>' : '') + '</dd>';
+  if (it.email) dl += '<dt>Email</dt><dd>' + esc(it.email) + '</dd>';
+  let h = '<div class="cond"><dl>' + dl + '</dl>';
+  if (it.map_pack && it.map_pack.length) {
+    h += '<div class="cond__sec">Map pack — core queries</div>';
+    h += it.map_pack.map((m) => '<div class="maprow"><span>' + esc(m.q) + '</span>' +
+      (m.rank != null ? '<span class="hit">#' + esc(m.rank) + '</span>' : '<span class="miss">not in pack</span>') + '</div>').join('');
+  }
+  if (it.competitors && it.competitors.length) {
+    h += '<div class="cond__sec">Who\'s winning the map</div><div class="cgrid">';
+    h += it.competitors.map((c) => '<div><span>' + esc(c.name) + '</span><span class="mut">' +
+      (c.reviews != null ? esc(num(c.reviews)) + ' rev' : '') + (c.rating != null ? ' · ⭐' + esc(c.rating) : '') + '</span></div>').join('');
+    h += '</div>';
+  }
+  // full, untruncated wording (the inline lists are clipped) so Griffin can
+  // quote a verified hook exactly, and read every don't-say in full.
+  if (it.safe_to_say && it.safe_to_say.length) {
+    h += '<div class="cond__sec">✅ Safe to say — full wording</div><ul style="margin:0;padding-left:16px">' +
+      it.safe_to_say.map((s) => '<li style="margin:3px 0;line-height:1.42">' + esc(s) + '</li>').join('') + '</ul>';
+  }
+  if (it.dont_say && it.dont_say.length) {
+    h += '<div class="cond__sec">❌ Don\'t say — full wording <span style="color:var(--bad)">(unverified)</span></div><ul style="margin:0;padding-left:16px">' +
+      it.dont_say.map((s) => '<li style="margin:3px 0;line-height:1.42;color:#f0a8a8">' + esc(s) + '</li>').join('') + '</ul>';
+  }
+  return h + '</div>';
+}
+
 async function render() {
   document.body.classList.remove('ops');
   const app = $("#app");
@@ -446,14 +636,10 @@ async function render() {
       ? '<span class="pill warn">attempt ' + (past.length + 1) + ' · last: ' + esc(past[0].disposition) + ' ' + ptTime(past[0].called_at) + '</span>'
       : '';
     h += '<div class="card' + (done ? " done" : "") + '" data-card="' + esc(p.slug) + '">' +
-      '<div class="row" style="justify-content:space-between"><b>' + p.rank + '. ' + esc(p.business_name) + '</b>' +
-      (done ? '<span class="pill ok">today: ' + esc(done) + '</span>' : '<span class="pill">score ' + (p.score || 0) + '</span>') + '</div>' +
-      (attemptPill ? '<p style="margin:4px 0">' + attemptPill + '</p>' : '') +
-      '<p class="mut">' + esc(p.city) + (p.signal ? ' · ' + esc(p.signal) : '') + '</p>' +
-      (p.phone ? '<a class="tel" href="tel:' + esc(p.phone).replace(/[^0-9+]/g, "") + '">📞 ' + esc(p.phone) + '</a>' : '') +
+      intelCard(p, done, attemptPill) +
       (p.opener ? '<details><summary>Opener</summary><div class="opener">' + esc(p.opener) + '</div></details>' : '') +
-      ((p.audit_url && /^https?:\/\//.test(p.audit_url)) ? '<p class="mut">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
-      logForm(p.slug, !done) + '</div>';
+      ((p.audit_url && /^https?:\/\//.test(p.audit_url)) ? '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>' : '') +
+      logForm(p.slug, false) + '</div>';
   }
   if (!cards.length) h += '<div class="card mut">No dial cards pushed yet — Zack runs push_seller_queue.py.</div>';
 
