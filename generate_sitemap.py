@@ -124,6 +124,25 @@ def build_sitemap() -> str:
         rel = f"lab/{slug_dir.name}/index.html"
         urls.append((f"{BASE}/lab/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
 
+    # Audits hub index
+    audits_index = "audits/index.html"
+    if (ROOT / audits_index).exists():
+        urls.append((f"{BASE}/audits/", git_lastmod(audits_index), "monthly", "0.7"))
+
+    # Individual prospect audits — skip noindex pages (deliverables marked private)
+    audits_dir = ROOT / "audits"
+    if audits_dir.exists():
+        for slug_dir in sorted(audits_dir.iterdir()):
+            if not slug_dir.is_dir():
+                continue
+            audit_html = slug_dir / "index.html"
+            if not audit_html.exists():
+                continue
+            if 'name="robots" content="noindex' in audit_html.read_text():
+                continue
+            rel = f"audits/{slug_dir.name}/index.html"
+            urls.append((f"{BASE}/audits/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.6"))
+
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for loc, lastmod, changefreq, priority in urls:
