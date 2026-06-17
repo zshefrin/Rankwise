@@ -527,6 +527,22 @@ function evidenceBlock(it) {
   if (it.owner) dl += '<dt>Owner</dt><dd>' + esc(it.owner.name) + (it.owner.title ? ' · ' + esc(it.owner.title) : '') +
     (it.owner.unverified ? ' <span class="mut">⚠ unverified</span>' : '') + '</dd>';
   if (it.email) dl += '<dt>Email</dt><dd>' + esc(it.email) + '</dd>';
+  // A6 — site perf talking point (score + LCP from Places enrichment)
+  if (it.site_perf) {
+    const sp = it.site_perf;
+    const score = sp.score != null ? esc(String(sp.score)) + '/100' : null;
+    const lcp = sp.lcp ? 'LCP ' + esc(sp.lcp) : null;
+    const spTxt = [score, lcp].filter(Boolean).join(' · ');
+    if (spTxt) dl += '<dt>Site</dt><dd>' + spTxt + '</dd>';
+  }
+  // A5 — prior call history (most-recent seller disposition for this prospect)
+  if (it.prior_call && it.prior_call.disposition) {
+    const pc = it.prior_call;
+    let pcTxt = esc(pc.disposition);
+    if (pc.date) pcTxt += ' <span class="mut">(' + esc(pc.date) + ')</span>';
+    if (pc.note) pcTxt += ' — ' + esc(pc.note);
+    dl += '<dt>Last contact</dt><dd>' + pcTxt + '</dd>';
+  }
   let h = '<div class="cond"><dl>' + dl + '</dl>';
   if (it.map_pack && it.map_pack.length) {
     h += '<div class="cond__sec">Map pack — core queries</div>';
