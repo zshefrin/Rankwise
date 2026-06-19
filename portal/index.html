@@ -558,6 +558,23 @@ function roleOf() {
     return (p.app_metadata && p.app_metadata.role) || "";
   } catch { return ""; }
 }
+function sellerName() {
+  // The dial-card opener ships with a [SELLER NAME] placeholder; fill it with
+  // whoever is logged in (user_metadata.full_name, set at invite) so each
+  // seller's cards voice in their OWN name — multi-seller by construction, no
+  // server-side per-card baking. First name only (natural for a cold open).
+  try {
+    const p = JSON.parse(atob(tok().split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const full = (p.user_metadata && (p.user_metadata.full_name || p.user_metadata.name)) || "";
+    const first = full.trim().split(/\s+/)[0];
+    if (first) return first;
+    const lp = ((p.email || "").split("@")[0] || "").replace(/[._-]+/g, " ").trim().split(/\s+/)[0];
+    return lp ? lp.charAt(0).toUpperCase() + lp.slice(1) : "[SELLER NAME]";
+  } catch { return "[SELLER NAME]"; }
+}
+// Safe global placeholder fill (no regex pitfalls). Callers MUST esc() the result
+// (full_name is user-modifiable → self-XSS otherwise).
+function fillSellerName(s) { return (s || "").split("[SELLER NAME]").join(sellerName()); }
 const PT = "America/Vancouver";
 const ptDay = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: PT });
 const ptTime = (d) => new Date(d).toLocaleString("en-CA", { timeZone: PT, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -884,6 +901,7 @@ function buildDossier(p, done, attemptPill) {
     '<div class="dc__hd"><div><div class="dc__nm">' + esc(p.business_name) + '</div>' +
     '<div class="dc__ct">' + esc(p.city) + (!has && p.signal ? ' · ' + esc(p.signal) : '') + '</div></div>' +
     (done ? '<span class="chip chip--ok">✓ ' + esc(done) + '</span>' : '<span class="dc__rk">#' + (p.rank || 0) + '</span>') + '</div>';
+  if (p.pushed_at) h += '<div style="margin-top:5px">' + freshnessPill('pushed', p.pushed_at, 48, 168) + '</div>';
   if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
   if (!has) return h + callBtn(p) + logForm(p.slug, false) + '</div>';   // degrade
   h += hookBlock(it) + chipsRow(it) + callBtn(p);
@@ -891,7 +909,7 @@ function buildDossier(p, done, attemptPill) {
     '<div class="dcol">' + openWith(it) + proofList(it) + avoidTags(it) + '</div>' +
     '<div class="dcol">' + gapViz(it) + evidenceBlock(it) + '</div></div>';
   h += '<details><summary>Exact verified wording (the receipts)</summary>' + wordingBlock(it) + '</details>';
-  if (p.opener) h += '<details><summary>Opener script</summary><div class="opener">' + esc(p.opener) + '</div></details>';
+  if (p.opener) h += '<details><summary>Opener script</summary><div class="opener">' + esc(fillSellerName(p.opener)) + '</div></details>';
   if (p.audit_url && /^https?:\/\//.test(p.audit_url)) h += '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>';
   return h + logForm(p.slug, false) + '</div>';
 }
@@ -1068,7 +1086,7 @@ async function render() {
   const focusOutcome = dueCallbacks.length ? 'Log callback outcome' : 'Book audit or set callback';
   const coachBlock = snap && snap.coach && snap.coach.blocks && snap.coach.blocks[0] ? snap.coach.blocks[0] : {};
   const sellerKit = (snap && snap.kit) || {};
-  const focusOpener = focusIntel.opener || focusIntel.personalization_hook || focusCard && focusCard.opener || coachBlock.best_line || 'I found one local search gap that looks fixable. Want me to send the audit?';
+  const focusOpener = fillSellerName(focusIntel.opener || focusIntel.personalization_hook || focusCard && focusCard.opener || coachBlock.best_line || 'I found one local search gap that looks fixable. Want me to send the audit?');
   const focusObjection = sellerKit.objections || (coachBlock.what_to_fix && coachBlock.what_to_fix[0]) || 'If they already have SEO, ask whether maps and emergency searches are producing booked jobs.';
   const focusClose = sellerKit.close || 'If they want details, book the audit while you are still on the call.';
   const focusLogRule = dueCallbacks.length ? 'Callback first, then disposition + note.' : 'Every dial gets disposition, note, and callback time if promised.';
@@ -1956,6 +1974,14 @@ async function renderOps() {
   }
   const universalQueue = asArr(p.command_queue || p.execution_queue || p.universal_command_queue).map(normalizeCommand);
   function pushCommand(row) { universalQueue.push(normalizeCommand(row)); }
+  // Skip the fallback derivations the backend command_queue already covers
+  // (failed actions / due calls / content / onboarding) so rows don't render
+  // twice. Those fallback rows carry aspirational actions with no worker handler;
+  // the backend feed (honest, handler-backed actions) is preferred when present.
+  // Non-overlapping loops below (growth/sources/integrations/findings) are NOT in
+  // the backend queue, so they always run. Gating on universalQueue.length is
+  // robust to an empty array (JS-truthy) and the execution_queue aliases.
+  if (universalQueue.length === 0) {
   for (const row of failedActions.slice(0, 3)) pushCommand({
     type:'system', priority:'bad', title:'Action failed: ' + actionName(row.action), sub: row.result || ptTime(row.created_at),
     owner:'backend', lifecycle:'blocked', tab:'system', action:'refresh_ops', source:'operator_action_queue',
@@ -1980,6 +2006,7 @@ async function renderOps() {
       owner:item.owner || blocker.owner || 'operator', lifecycle:blocker.status || blocker.state || 'waiting', tab:'clients',
       action:'client_request.create', source:'client_onboarding',
     });
+  }
   }
   for (const row of localPresenceRows.concat(reputationRows).concat(competitorRows).concat(aiVisibilityRows).slice(0, 4)) pushCommand({
     type:'growth', priority:oldTone(row.status || row.state || row.severity), title:row.title || row.name || row.issue || 'Local growth item',
@@ -3152,6 +3179,7 @@ async function renderOps() {
   }
 
   // ── MONEY section ─────────────────────────────────────────────────────────
+  const costsP = p.costs || null;
   let monH = '<div class="ops-colset two">';
   // Pending expenses
   monH += '<div class="ops-panel"><div class="ops-panel-h"><b>Invoices to confirm</b>' +
@@ -3179,10 +3207,57 @@ async function renderOps() {
     '<div class="ops-tile"><div class="ops-b">$' + esc(spendUSD) + '</div><div class="ops-l">USD</div></div>' +
     '<div class="ops-tile"><div class="ops-b">CAD ' + esc(spendCAD) + '</div><div class="ops-l">CAD</div></div>' +
     '</div>' +
+    (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD: ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ return esc(costsP.ledger.ytdTotal[k]) + ' ' + esc(k); }).join(' · ') + '</div>' : '') +
     '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">' +
     (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
     '</div></div>';
   monH += '</div>'; // colset
+  // AI / API cost — the REAL console figure (spend-console.json) LEADS; the token-log
+  // estimate is demoted to a flagged secondary line (it only sees logged cron jobs,
+  // NOT interactive Claude Code / agent usage, so it reads ~order-of-magnitude low).
+  const apiCost = (costsP && costsP.apiEstimate && costsP.apiEstimate.ok) ? costsP.apiEstimate : null;
+  const consoleFig = (costsP && costsP.console) ? costsP.console : null;
+  if (apiCost || consoleFig) {
+    monH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>AI / API cost</b>' +
+      (apiCost && apiCost.month ? '<span class="ops-count">' + esc(apiCost.month) + '</span>' : '') + '</div>';
+    let stamp = costsP ? costsP.as_of : '';
+    // Headline: the REAL console spend per provider.
+    if (consoleFig) {
+      monH += '<div class="ops-tiles">';
+      for (const prov of Object.keys(consoleFig)) {
+        const cf = consoleFig[prov] || {};
+        if (cf.as_of) stamp = cf.as_of;
+        monH += '<div class="ops-tile"><div class="ops-b">$' + esc((Number(cf.usd) || 0).toFixed(2)) + '</div>' +
+          '<div class="ops-l">' + esc(prov) + ' console' + (cf.source === 'operator-confirmed' ? '' : ' (≥ alert)') + '</div></div>';
+      }
+      monH += '</div>';
+    }
+    // Secondary: the token-log estimate, clearly flagged as incomplete.
+    if (apiCost) {
+      monH += '<div class="ops-muted ops-pad"' + (consoleFig ? ' style="border-top:1px solid #222a31"' : '') + '>' +
+        'Tracked (logged jobs only): $' + esc((Number(apiCost.total) || 0).toFixed(2)) +
+        ' — excludes interactive Claude Code / agent usage.</div>';
+      const apiByModel = apiCost.byModel || {};
+      const apiModelKeys = Object.keys(apiByModel).slice(0, 6);
+      if (apiModelKeys.length) {
+        monH += '<ul class="ops-list">';
+        for (const m of apiModelKeys) {
+          monH += '<li class="ops-li"><div class="ops-grow"><div class="ops-li-meta">' + esc(m) + '</div></div>' +
+            '<span class="ops-muted">$' + esc((Number(apiByModel[m]) || 0).toFixed(3)) + '</span></li>';
+        }
+        monH += '</ul>';
+      }
+    }
+    monH += '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">' +
+      (stamp ? 'as of ' + esc(ptTime(stamp)) : '') +
+      (consoleFig ? '' : ' · estimate only — reconcile to provider consoles') + '</div>';
+    if (apiCost && (apiCost.consoles || []).length) {
+      monH += '<div class="ops-muted ops-pad">' +
+        apiCost.consoles.filter(function(cn){ return cn && /^https?:\/\//.test(cn.url); }).map(function(cn){ return '<a href="' + esc(cn.url) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + esc(cn.label) + '</a>'; }).join(' · ') +
+        '</div>';
+    }
+    monH += '</div>';
+  }
   // Seller pay
   if (s.active || s.pay_due_cad > 0) {
     const ledger = p.pay_ledger || (p.seller && p.seller.pay_ledger) || [];
@@ -4208,4 +4283,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: c042f3c4740d -->
+<!-- rankwise-portal-version: 01eeec7aeb18 -->
