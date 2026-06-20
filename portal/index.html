@@ -1354,14 +1354,18 @@ async function renderOps() {
   opsCloseRecord();
   app.innerHTML = '<p class="mut" style="padding:12px">Loading…</p>';
 
-  const [rows, actionRows] = await Promise.all([
+  const [rows, actionRows, marketRows] = await Promise.all([
     rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
     rest("operator_action_queue?select=*&order=id.desc&limit=10"),
+    rest("market_snapshot?select=payload,updated_at&id=eq.1"),
   ]);
   if (!rows) return;
   const snap = rows[0] || null;
   const recentActions = actionRows || [];
   const p = (snap && snap.payload) ? snap.payload : {};
+  // Market intel rides a separate table (market_snapshot, operator-only RLS).
+  const mktSnap = (marketRows && marketRows[0]) ? marketRows[0] : null;
+  const mkt = (mktSnap && mktSnap.payload) ? mktSnap.payload : {};
 
   // ── Derived counts for tab badges ────────────────────────────────────────
   const needsYou = p.needs_you || [];
@@ -3912,6 +3916,92 @@ async function renderOps() {
   }
   hqH += '</div></div>';
 
+  // ── MARKET section (operator-only; data via market_snapshot RLS) ──────────
+  // SerpAPI ownership/AEO/synthesis intel that used to dead-end in vault markdown.
+  const mktCons = asArr(mkt.consolidators);
+  const mktAeo = asArr(mkt.aeo_by_market);
+  const mktWho = asArr(mkt.who_beats_you);
+  const mktHeadlines = asArr(mkt.headlines);
+  const mktCited = asArr(mkt.top_ai_cited);
+  const mktTotals = mkt.totals || {};
+  const mktGen = mkt.generated_at || (mktSnap && mktSnap.updated_at) || '';
+  const marketBadge = mktCons.length ? String(mktCons.length) : '';
+  function mktNum(v) { const n = Number(v); return isFinite(n) ? n.toLocaleString() : v; }
+  let marketH = '';
+  if (!mktCons.length && !mktAeo.length && !mktWho.length) {
+    marketH = '<div class="ops-empty"><b>No market snapshot yet</b>Run <code>python3 vault/_system/push_market_snapshot.py</code> to populate the consolidator and AEO maps.</div>';
+  } else {
+    // Synthesis headlines (titles only — the "so what" from the burn-down).
+    if (mktHeadlines.length) {
+      marketH += '<div class="ops-panel"><div class="ops-panel-h"><b>Market synthesis</b><span class="ops-count">' + esc(mktHeadlines.length) + '</span></div><ul class="ops-list">';
+      for (const hl of mktHeadlines) {
+        marketH += '<li class="ops-li"><span class="ops-pill info">' + esc(hl.n || '•') + '</span><div class="ops-grow"><div class="ops-li-ttl">' + esc(hl.title || '') + '</div></div></li>';
+      }
+      marketH += '</ul></div>';
+    }
+    marketH += '<div class="ops-colset two">';
+    // Top consolidators — who owns the most map packs (combos out-review pure HVAC).
+    marketH += '<div class="ops-panel"><div class="ops-panel-h"><b>Top consolidators</b><span class="ops-count">' + esc(mktCons.length) + '</span></div>';
+    if (mktCons.length) {
+      marketH += '<ul class="ops-list">';
+      for (const c of mktCons) {
+        const m = Number(c.markets) || 0;
+        const cats = asArr(c.categories).join(' + ');
+        marketH += '<li class="ops-li"><span class="ops-pill ' + (m >= 8 ? 'bad' : (m >= 4 ? 'warn' : 'info')) + '">' + esc(m) + ' mkts</span>' +
+          '<div class="ops-grow"><div class="ops-li-ttl">' + esc(c.name) + '</div>' +
+          '<div class="ops-li-meta">' + esc(cats) +
+          (c.max_reviews ? ' · ' + esc(mktNum(c.max_reviews)) + ' reviews' : '') +
+          (c.cities_led ? ' · led ' + esc(c.cities_led) : '') + '</div></div></li>';
+      }
+      marketH += '</ul>';
+    } else { marketH += '<p class="ops-muted ops-pad">No ownership data.</p>'; }
+    marketH += '</div>';
+    // AEO coverage by market — computed covered/total (auditable).
+    marketH += '<div class="ops-panel"><div class="ops-panel-h"><b>AEO coverage by market</b><span class="ops-count">computed</span></div>';
+    if (mktAeo.length) {
+      marketH += '<ul class="ops-list">';
+      for (const a of mktAeo) {
+        const pct = Number(a.pct) || 0;
+        marketH += '<li class="ops-li"><span class="ops-pill ' + (pct >= 50 ? 'ok' : (pct >= 20 ? 'warn' : 'bad')) + '">' + esc(pct) + '%</span>' +
+          '<div class="ops-grow"><div class="ops-li-ttl">' + esc(a.market) + '</div>' +
+          '<div class="ops-li-meta">' + esc(a.covered) + '/' + esc(a.total) + ' cities have an AI Overview</div></div></li>';
+      }
+      marketH += '</ul>';
+      if (mkt.aeo_method) marketH += '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">' + esc(mkt.aeo_method) + '</div>';
+    } else { marketH += '<p class="ops-muted ops-pad">No AEO data.</p>'; }
+    marketH += '</div>';
+    marketH += '</div>'; // colset
+    marketH += '<div class="ops-colset two">';
+    // Who beats our prospects — named top competitor from prospect_signals.
+    marketH += '<div class="ops-panel"><div class="ops-panel-h"><b>Who beats our prospects</b><span class="ops-count">' + esc(mktTotals.prospects_with_competitor || mktWho.length) + '</span></div>';
+    if (mktWho.length) {
+      marketH += '<ul class="ops-list">';
+      for (const w of mktWho) {
+        marketH += '<li class="ops-li"><span class="ops-pill warn">' + esc(w.prospects) + 'x</span>' +
+          '<div class="ops-grow"><div class="ops-li-ttl">' + esc(w.name) + '</div>' +
+          '<div class="ops-li-meta">' + (w.max_reviews ? esc(mktNum(w.max_reviews)) + ' reviews' : '') + '</div></div></li>';
+      }
+      marketH += '</ul>';
+    } else { marketH += '<p class="ops-muted ops-pad">No competitor data.</p>'; }
+    marketH += '</div>';
+    // Who AI Overviews cite — earned third-party mentions, not own sites.
+    marketH += '<div class="ops-panel"><div class="ops-panel-h"><b>Who AI Overviews cite</b><span class="ops-count">' + esc(mktCited.length) + '</span></div>';
+    if (mktCited.length) {
+      marketH += '<ul class="ops-list">';
+      for (const t of mktCited) {
+        marketH += '<li class="ops-li"><span class="ops-pill info">' + esc(t.cited_count) + 'x</span>' +
+          '<div class="ops-grow"><div class="ops-li-meta">' + esc(t.name) + '</div></div></li>';
+      }
+      marketH += '</ul>';
+      marketH += '<div class="ops-muted ops-pad" style="border-top:1px solid #222a31">AIOs cite Reddit and "best-of" listicles, not contractors\' own sites — the AEO lever is earned third-party mentions.</div>';
+    } else { marketH += '<p class="ops-muted ops-pad">No citation data.</p>'; }
+    marketH += '</div>';
+    marketH += '</div>'; // colset
+    marketH += '<div class="ops-muted ops-pad">' + (mktGen ? 'snapshot ' + esc(ptTime(mktGen)) : '') +
+      (mktTotals.cities_mapped ? ' · ' + esc(mktTotals.cities_mapped) + ' cities mapped · ' + esc(mktTotals.owners_tracked) + ' owners tracked' : '') +
+      (mkt.source ? ' · ' + esc(mkt.source) : '') + '</div>';
+  }
+
   // ── Assemble full cockpit HTML ─────────────────────────────────────────────
   const snapFresh = freshnessInfo(generatedAt || (snap && snap.updated_at), 4, 24);
   const asof = snap ? 'generated ' + esc(snapFresh.label) + ' · synced ' + esc(ptTime(snap.updated_at)) : 'no snapshot';
@@ -3929,6 +4019,8 @@ async function renderOps() {
     (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='pipeline'?'true':'false') + '" data-v="pipeline" onclick="opsTab(\'pipeline\')">Pipeline' +
     (pipelineBadge ? ' <span class="ops-badge">' + esc(pipelineBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='market'?'true':'false') + '" data-v="market" onclick="opsTab(\'market\')">Market' +
+    (marketBadge ? ' <span class="ops-badge">' + esc(marketBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
     (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + ' due</span>' : '') + '</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='content'?'true':'false') + '" data-v="content" onclick="opsTab(\'content\')">Content' +
@@ -3947,6 +4039,7 @@ async function renderOps() {
     '</nav>' +
     '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + todayH + '</section>' +
     '<section class="ops-view" id="ops-pipeline" role="tabpanel"' + (window._opsTab!=='pipeline'?' hidden':'') + '>' + pipeH + '</section>' +
+    '<section class="ops-view" id="ops-market" role="tabpanel"' + (window._opsTab!=='market'?' hidden':'') + '>' + marketH + '</section>' +
     '<section class="ops-view" id="ops-outreach" role="tabpanel"' + (window._opsTab!=='outreach'?' hidden':'') + '>' + outH + '</section>' +
     '<section class="ops-view" id="ops-content" role="tabpanel"' + (window._opsTab!=='content'?' hidden':'') + '>' + contH + '</section>' +
     '<section class="ops-view" id="ops-clients" role="tabpanel"' + (window._opsTab!=='clients'?' hidden':'') + '>' + clientH + '</section>' +
@@ -4288,4 +4381,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 1849eb327160 -->
+<!-- rankwise-portal-version: 96736725b587 -->
