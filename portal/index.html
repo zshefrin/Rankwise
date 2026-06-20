@@ -3227,8 +3227,13 @@ async function renderOps() {
       for (const prov of Object.keys(consoleFig)) {
         const cf = consoleFig[prov] || {};
         if (cf.as_of) stamp = cf.as_of;
+        const floor = (cf.source === 'email-alert') ? ' (≥ alert)' : '';
         monH += '<div class="ops-tile"><div class="ops-b">$' + esc((Number(cf.usd) || 0).toFixed(2)) + '</div>' +
-          '<div class="ops-l">' + esc(prov) + ' console' + (cf.source === 'operator-confirmed' ? '' : ' (≥ alert)') + '</div></div>';
+          '<div class="ops-l">' + esc(prov) + ' this month' + floor + '</div></div>';
+        if (cf.total) {
+          monH += '<div class="ops-tile"><div class="ops-b">$' + esc((Number(cf.total) || 0).toFixed(2)) + '</div>' +
+            '<div class="ops-l">' + esc(prov) + ' total' + (cf.since ? ' · since ' + esc(cf.since) : '') + '</div></div>';
+        }
       }
       monH += '</div>';
     }
@@ -4283,4 +4288,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 01eeec7aeb18 -->
+<!-- rankwise-portal-version: 1849eb327160 -->
