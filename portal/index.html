@@ -482,6 +482,8 @@
   .client-ask__sub { color:var(--mut); font-size:12px; margin-top:2px; }
   .client-btnrow { display:flex; gap:7px; flex-wrap:wrap; }
   .client-action { border:1px solid var(--line); background:#151c22; color:#dce6ef; border-radius:8px; padding:8px 10px; font-size:12px; font-weight:750; }
+  .client-action:disabled { opacity:.5; cursor:default; }
+  .client-action .ca-soon { font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--mut); margin-left:5px; }
   .client-digest { border-color:#2b3b53; background:linear-gradient(180deg,#182330,#151c23); }
   .client-digest-grid { display:grid; grid-template-columns:1fr; gap:10px; }
   @media(min-width:760px) { .client-digest-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
@@ -662,6 +664,15 @@ function opsRunAction(id) {
 }
 function pendingFeature(label) {
   toast(label || "Backend wiring needed");
+}
+
+// Client-facing "soon" control: an intentionally-disabled action with a client-safe
+// label (no internal jargon). Until the self-serve approve/upload broker is wired, the
+// client's Rankwise contact handles these directly — so render it as clearly forthcoming,
+// not as a live button that toasts "backend needed". (portal-button-audit 2026-06-20 #1)
+function clientSoonBtn(label) {
+  return '<button class="client-action" disabled title="Coming soon — your Rankwise contact will set this up with you for now.">' +
+    esc(label) + ' <span class="ca-soon">soon</span></button>';
 }
 
 window._nm = {}; // slug → business name (filled at render; avoids name-in-onclick escaping)
@@ -4203,7 +4214,7 @@ async function renderClient(key) {
     '<div class="client-action-grid">' +
     '<div class="client-action-card"><div class="ca-k">Needs you now</div><div class="ca-v">' + esc(primaryClientAsk ? planParts(primaryClientAsk).title : 'Nothing pending') + '</div>' +
     '<div class="ca-n">' + esc(primaryClientAsk ? ([primaryClientAsk.status || primaryClientAsk.type || 'open', primaryClientAsk.due || primaryClientAsk.due_at || planParts(primaryClientAsk).date, planParts(primaryClientAsk).sub || primaryClientAsk.detail || primaryClientAsk.note].filter(Boolean).join(' · ')) : 'Approvals, uploads, or access requests will appear here.') + '</div>' +
-    (primaryClientAsk ? '<div class="client-btnrow"><button class="client-action" onclick="pendingFeature(\'Client action backend needed\')">Respond</button></div>' : '') + '</div>' +
+    (primaryClientAsk ? '<div class="client-btnrow">' + clientSoonBtn('Respond') + '</div>' : '') + '</div>' +
     '<div class="client-action-card"><div class="ca-k">Next publish</div><div class="ca-v">' + esc(nextClientWork ? planParts(nextClientWork).title : 'Plan being assembled') + '</div>' +
     '<div class="ca-n">' + esc(nextClientWork ? ([nextClientWork.status || nextClientWork.stage || nextClientWork.type, nextClientWork.due || nextClientWork.scheduled_for || planParts(nextClientWork).date, planParts(nextClientWork).sub].filter(Boolean).join(' · ')) : 'Content and delivery plan appears after kickoff.') + '</div></div>' +
     '<div class="client-action-card"><div class="ca-k">Latest proof</div><div class="ca-v">' + esc(latestClientProof ? planParts(latestClientProof).title : 'Proof pending') + '</div>' +
@@ -4246,8 +4257,8 @@ async function renderClient(key) {
         '<div class="client-ask__sub">' + esc([status, ask.due || ask.due_at || it.date, it.sub || ask.detail || ask.note].filter(Boolean).join(' · ')) + '</div></div>' +
         '<span class="pill warn">' + esc(status) + '</span></div>' +
         '<div class="client-btnrow">' +
-        '<button class="client-action" onclick="pendingFeature(\'Approval response backend needed\')">Approve</button>' +
-        '<button class="client-action" onclick="pendingFeature(\'Revision comment backend needed\')">Request changes</button>' +
+        clientSoonBtn('Approve') +
+        clientSoonBtn('Request changes') +
         '</div></div>';
     });
     clientUploads.slice(0, 4).forEach((ask) => {
@@ -4255,7 +4266,7 @@ async function renderClient(key) {
       h += '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(it.title || 'Upload requested asset') + '</div>' +
         '<div class="client-ask__sub">' + esc([ask.asset_type || ask.type || 'asset', ask.due || ask.due_at || it.date, it.sub || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
         '<span class="pill">upload</span></div>' +
-        '<div class="client-btnrow"><button class="client-action" onclick="pendingFeature(\'Secure upload broker needed\')">Upload file</button></div></div>';
+        '<div class="client-btnrow">' + clientSoonBtn('Upload file') + '</div></div>';
     });
     h += '</div>';
   } else {
@@ -4381,4 +4392,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 96736725b587 -->
+<!-- rankwise-portal-version: 06cb535becb8 -->
