@@ -824,6 +824,8 @@ async function dialBridge(btn) {
   const slug = btn.getAttribute("data-slug");
   const tel = btn.getAttribute("data-tel");
   if (!num) { if (tel) location.href = "tel:" + tel; return; }
+  // Guard against a misclick placing a real call: confirm, showing the number being dialed.
+  if (!confirm("📞 Call " + (tel || num) + "?\n\nYour phone rings first — answer it to be connected to the prospect.")) return;
   btn.disabled = true; const orig = btn.innerHTML; btn.textContent = "📞 Connecting…";
   try {
     const r = await fetch(SB + "/functions/v1/twilio-dial", {
@@ -4434,4 +4436,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 6adc2f2a4788 -->
+<!-- rankwise-portal-version: 5bc3fbcbba62 -->
