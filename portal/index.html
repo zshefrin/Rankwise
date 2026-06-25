@@ -66,6 +66,8 @@
   .gr__n.them { color:#fca5a5; }
   .dccall { display:flex; align-items:center; justify-content:center; gap:9px; margin:12px 0 0; background:var(--ok); color:#04130d; font-weight:800; font-size:18px; padding:14px; border-radius:11px; text-decoration:none; font-variant-numeric:tabular-nums; transition:transform .12s ease, filter .12s ease; }
   .dccall:active { transform:scale(.985); filter:brightness(.94); }
+  button.dccall { width:100%; border:0; font-family:inherit; cursor:pointer; }
+  button.dccall:disabled { opacity:.6; cursor:default; }
   .dccall.dnc { background:rgba(248,113,113,.12); color:#fca5a5; font-weight:700; font-size:14px; }
   .sec { margin:11px 0 0; padding:10px 12px; border-radius:10px; }
   .sec__l { font-size:11px; font-weight:700; margin-bottom:7px; }
@@ -799,7 +801,42 @@ function planParts(item) {
 function callBtn(p) {
   if (p.intel && p.intel.dnc) return '<div class="dccall dnc">📵 DO NOT CALL — number withheld</div>';
   if (!p.phone) return '';
-  return '<a class="dccall" href="tel:' + esc(p.phone).replace(/[^0-9+]/g, "") + '">📞 ' + esc(p.phone) + '</a>';
+  const e164 = toE164(p.phone);
+  const tel  = esc(p.phone).replace(/[^0-9+]/g, "");
+  // Click-to-call bridge: rings the seller's own cell, then bridges to the prospect (recorded).
+  // Degrades to the native tel: dialer on 503/error so the call always has a path.
+  return '<button class="dccall" data-dial="' + esc(e164) + '" data-slug="' + esc(p.slug || '') +
+         '" data-tel="' + esc(tel) + '">📞 ' + esc(p.phone) + '</button>';
+}
+
+// Mirror twilio-dial's server-side toE164NA so the POSTed number passes its E.164 gate.
+function toE164(s) {
+  const d = String(s || "").replace(/\D/g, "");
+  if (d.length === 10) return "+1" + d;
+  if (d.length === 11 && d[0] === "1") return "+" + d;
+  return d ? "+" + d : "";
+}
+
+// Initiates the bridge via the twilio-dial edge fn (rings the seller's cell). The seller's JWT
+// rides in hdr(); the edge fn re-checks role + queue membership. Falls back to tel: on any failure.
+async function dialBridge(btn) {
+  const num = btn.getAttribute("data-dial");
+  const slug = btn.getAttribute("data-slug");
+  const tel = btn.getAttribute("data-tel");
+  if (!num) { if (tel) location.href = "tel:" + tel; return; }
+  btn.disabled = true; const orig = btn.innerHTML; btn.textContent = "📞 Connecting…";
+  try {
+    const r = await fetch(SB + "/functions/v1/twilio-dial", {
+      method: "POST", headers: hdr(),
+      body: JSON.stringify({ prospect_number: num, slug: slug }),
+    });
+    if (r.ok) toast("Your phone is ringing — answer it and we'll connect you.");
+    else if (r.status === 503) { toast("Click-to-call isn't switched on yet — dialing manually."); location.href = "tel:" + tel; }
+    else if (r.status === 403) toast("This number isn't callable from the queue.");
+    else { toast("Call failed (" + r.status + ") — dialing manually."); location.href = "tel:" + tel; }
+  } catch (e) {
+    toast("Network error — dialing manually."); if (tel) location.href = "tel:" + tel;
+  } finally { btn.disabled = false; btn.innerHTML = orig; }
 }
 
 function hookBlock(it) {
@@ -1354,6 +1391,11 @@ function opsOpenRecord(id) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') opsCloseRecord();
+});
+// Delegated handler for click-to-call buttons — survives portal re-renders (innerHTML swaps).
+document.addEventListener('click', function(e) {
+  const b = e.target.closest && e.target.closest('button.dccall[data-dial]');
+  if (b) dialBridge(b);
 });
 
 // ── Ops overview (role=operator only; data via operator_portal_snapshot RLS) ──
@@ -4392,4 +4434,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 06cb535becb8 -->
+<!-- rankwise-portal-version: 6adc2f2a4788 -->
