@@ -267,6 +267,15 @@
   body.ops .ops-btn.ghost:hover { color:#eef2f6; }
   body.ops .ops-btn:disabled { opacity:.48; cursor:not-allowed; }
   body.ops .ops-btn:focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
+  body.ops .ops-input { width:100%; box-sizing:border-box; appearance:none; border:1px solid #2a323a; background:#1f272e; color:#eef2f6; font:500 13px/1.2 -apple-system,system-ui,sans-serif; padding:9px 11px; border-radius:9px; }
+  body.ops .ops-input::placeholder { color:#6b7682; }
+  body.ops .ops-input:focus-visible { outline:2px solid #60a5fa; outline-offset:1px; border-color:transparent; }
+  body.ops .ops-revform { display:flex; flex-direction:column; gap:8px; padding:12px; }
+  body.ops .ops-revrow { display:flex; gap:8px; }
+  body.ops .ops-revrow .ops-input { flex:1; min-width:0; }
+  body.ops .ops-revfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:2px; }
+  body.ops .ops-revfoot .ops-muted { font-size:11.5px; }
+  body.ops .ops-revenue { margin-bottom:16px; }
   body.ops .ops-command { border-top:1px solid #222a31; padding:14px 15px; background:#171e25; }
   body.ops .ops-command-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
   body.ops .ops-command-k { color:#6b7884; font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.05em; }
@@ -658,6 +667,29 @@ async function enqueueAction(action, params) {
   else toast("Could not queue");
 }
 
+// Money-in landing node: validate + confirm the operator-typed close, then enqueue
+// record_revenue. v1 founder-close only (the worker rejects seller-close). The worker
+// re-validates everything server-side; this is just guardrails + a confirm before money.
+async function submitRevenue() {
+  const g = function(id){ var el = document.getElementById(id); return el ? (el.value || "").trim() : ""; };
+  const business = g("rev-business");
+  const collected = g("rev-collected");
+  const mrr = g("rev-mrr"), city = g("rev-city"), clientId = g("rev-clientid"), note = g("rev-note");
+  if (!business) { toast("Business name required"); return; }
+  const c = Number(collected);
+  if (!collected || !isFinite(c) || c <= 0) { toast("Collected must be a positive number"); return; }
+  let msg = "Record closed-won?\n\n" + business + "\nCollected: CAD " + c.toFixed(0) +
+    (mrr ? "\nMRR: CAD " + Number(mrr).toFixed(0) : "") + (city ? "\nCity: " + city : "") +
+    "\nSource: founder-close (no commission)";
+  if (!confirm(msg)) return;
+  const params = { business: business, collected: c, source: "founder-close" };
+  if (mrr) params.mrr = Number(mrr);
+  if (city) params.city = city;
+  if (clientId) params.client_id = clientId;
+  if (note) params.note = note;
+  await enqueueAction("record_revenue", params);
+}
+
 window._opsActionParams = {};
 function opsRunAction(id) {
   const cfg = window._opsActionParams && window._opsActionParams[id];
@@ -680,7 +712,8 @@ function clientSoonBtn(label) {
 window._nm = {}; // slug → business name (filled at render; avoids name-in-onclick escaping)
 
 async function logCall(slug) {
-  const card = document.querySelector('[data-card="' + slug + '"]');
+  // ultrareview #13: escape the slug before building the CSS attribute selector.
+  const card = document.querySelector('[data-card="' + CSS.escape(slug) + '"]');
   const sel = card.querySelector(".disp.sel");
   if (!sel) { toast("Pick a disposition first"); return; }
   const body = {
@@ -3239,7 +3272,27 @@ async function renderOps() {
 
   // ── MONEY section ─────────────────────────────────────────────────────────
   const costsP = p.costs || null;
-  let monH = '<div class="ops-colset two">';
+  let monH = '';
+  // Money-in landing node (build-roadmap money-in-landing-node): record a closed-won deal
+  // from the portal → operator_action_queue 'record_revenue' → worker → mark_closed_won.py.
+  // v1 founder-close ONLY (no commission); seller-close stays on the reviewed CLI.
+  monH += '<div class="ops-panel ops-revenue"><div class="ops-panel-h"><b>Record a closed-won deal</b>' +
+    '<span class="ops-count">money-in</span></div>' +
+    '<div class="ops-revform">' +
+    '<input id="rev-business" class="ops-input" placeholder="Business name — must match a lead *">' +
+    '<div class="ops-revrow">' +
+    '<input id="rev-collected" class="ops-input" type="number" min="1" step="1" inputmode="numeric" placeholder="Collected CAD *">' +
+    '<input id="rev-mrr" class="ops-input" type="number" min="0" step="1" inputmode="numeric" placeholder="MRR CAD (optional)">' +
+    '</div>' +
+    '<div class="ops-revrow">' +
+    '<input id="rev-city" class="ops-input" placeholder="City (optional)">' +
+    '<input id="rev-clientid" class="ops-input" placeholder="client-id slug (optional)">' +
+    '</div>' +
+    '<input id="rev-note" class="ops-input" placeholder="Note (optional)">' +
+    '<div class="ops-revfoot"><span class="ops-muted">Founder-close · no commission. Seller-close runs via CLI.</span>' +
+    '<button class="ops-btn primary" onclick="submitRevenue()">Record revenue</button></div>' +
+    '</div></div>';
+  monH += '<div class="ops-colset two">';
   // Pending expenses
   monH += '<div class="ops-panel"><div class="ops-panel-h"><b>Invoices to confirm</b>' +
     '<span class="ops-count">' + esc(pendingExp.length) + '</span></div>';
@@ -4436,4 +4489,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 5bc3fbcbba62 -->
+<!-- rankwise-portal-version: 3d14f8855237 -->
