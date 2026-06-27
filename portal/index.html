@@ -690,6 +690,25 @@ async function submitRevenue() {
   await enqueueAction("record_revenue", params);
 }
 
+// outreach.log_call (operator cockpit): log a prospect call disposition → operator_action_queue
+// → worker → call_log_capture.py (updates outreach sequence state). FORM action: collects a
+// disposition (+ optional note) at click time. The prospect NAME rides a data-name attribute
+// (esc()-escaped, HTML-attribute context — no value is interpolated into onclick). The worker
+// re-validates disposition against VALID_DISPOSITIONS + caps/strips note server-side.
+async function submitLogCall(btn) {
+  const wrap = btn.closest(".ops-logcall");
+  if (!wrap) { toast("Card not found"); return; }
+  const disp = (wrap.querySelector(".ops-disp") || {}).value || "";
+  if (!disp) { toast("Pick a disposition first"); return; }
+  const name = (wrap.dataset.name || "").trim();
+  if (!name) { toast("No prospect name on this card"); return; }
+  const note = ((wrap.querySelector(".ops-lc-note") || {}).value || "").trim();
+  if (!confirm("Log call outcome for " + name + "?\n\nDisposition: " + disp + (note ? "\nNote: " + note : ""))) return;
+  const params = { prospect: name, disposition: disp };
+  if (note) params.notes = note;
+  await enqueueAction("outreach.log_call", params);
+}
+
 window._opsActionParams = {};
 function opsRunAction(id) {
   const cfg = window._opsActionParams && window._opsActionParams[id];
@@ -2494,7 +2513,14 @@ async function renderOps() {
       outH += '<div class="ops-contract"><div class="ops-contract-top"><div><div class="ops-contract-title">' + esc(title) + '</div>' +
         '<div class="ops-contract-sub">' + esc(sub || 'seller call record') + '</div></div><span class="ops-pill ' + (c.overdue ? 'bad' : 'info') + '">' + esc(c.overdue ? 'overdue' : 'due') + '</span></div>' +
         '<div class="ops-command-actions">' +
-        actionButton('outreach.log_call', 'Log outcome', { prospect_slug: slug }, { primary:true, sub:'requires disposition' }) +
+        '<div class="ops-logcall" data-name="' + esc(title) + '" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
+          '<select class="ops-input ops-disp" aria-label="call disposition" style="max-width:160px">' +
+            '<option value="">disposition…</option>' +
+            DISPS.map(function(d){ return '<option value="' + esc(d) + '">' + esc(d.replace(/_/g, " ")) + '</option>'; }).join('') +
+          '</select>' +
+          '<input class="ops-input ops-lc-note" placeholder="note (optional)" maxlength="280" style="max-width:180px">' +
+          '<button class="ops-btn primary" onclick="submitLogCall(this)">Log outcome</button>' +
+        '</div>' +
         actionButton('outreach.reset_sequence', 'Reset sequence', { prospect_slug: slug }, { ghost:true, sub:'reason required' }) +
         actionButton('outreach.add_dnc', 'DNC', { prospect_slug: slug }, { ghost:true, sub:'compliance guard' }) +
         '</div></div>';
@@ -4489,4 +4515,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 3d14f8855237 -->
+<!-- rankwise-portal-version: 953dfc23d7cc -->
