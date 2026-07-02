@@ -1032,7 +1032,13 @@ function evidenceBlock(it) {
     const g = it.gbp, parts = [];
     if (g.rating != null) parts.push('⭐ ' + esc(g.rating));
     if (g.reviews != null) parts.push(esc(num(g.reviews)) + ' reviews');
-    if (g.category) parts.push('<span' + (/hvac|heat/i.test(g.category) ? '' : ' style="color:var(--warn)"') + '>' + esc(g.category) + (/hvac|heat/i.test(g.category) ? '' : ' (not HVAC)') + '</span>');
+    if (g.category) {
+      // Mirror render_call_sheets.gbp_category_gap: a specific HVAC category is fine,
+      // a generic/too-broad primary ranks weaker, a wrong trade is worse.
+      const _good = /hvac|heat|air.?condition|furnace|cooling|ventilat/i.test(g.category);
+      const _tag = _good ? '' : (/^\s*(general\s+)?(contractor|home\s+services?|business|establishment|repair\s+service)\s*$/i.test(g.category) ? ' (too generic)' : ' (not HVAC)');
+      parts.push('<span' + (_good ? '' : ' style="color:var(--warn)"') + '>' + esc(g.category) + _tag + '</span>');
+    }
     dl += '<dt>Google</dt><dd>' + (parts.join(' · ') || '—') + '</dd>';
   } else {
     dl += '<dt>Google</dt><dd><span style="color:var(--bad)">no Business Profile found</span></dd>';
@@ -1331,8 +1337,9 @@ async function render() {
   }
 
   // ── Cheat sheet (pushed from the seller kit) ───────────────────────────────
-  if (snap && snap.kit && (snap.kit.objections || snap.kit.must_not_say)) {
+  if (snap && snap.kit && (snap.kit.script || snap.kit.objections || snap.kit.must_not_say)) {
     h += '<div class="card"><b>📋 Cheat sheet</b>';
+    if (snap.kit.script) h += '<details><summary>Phone script</summary><div class="kit">' + esc(snap.kit.script) + '</div></details>';
     if (snap.kit.must_not_say) h += '<details><summary>Must-not-say (compliance)</summary><div class="kit">' + esc(snap.kit.must_not_say) + '</div></details>';
     if (snap.kit.objections) h += '<details><summary>Objections + FAQ</summary><div class="kit">' + esc(snap.kit.objections) + '</div></details>';
     h += '</div>';
@@ -1585,7 +1592,7 @@ async function renderOps() {
   const neededBackendActions = [
     'content.approve','content.reject','content.rewrite_preview','content.apply_rewrite','publishing.dispatch',
     'outreach.log_call','outreach.reset_sequence','outreach.add_dnc','client_request.create','client_request.resolve',
-    'client_approval.respond','system.retry_source','system.resolve_finding','autofix.preview','autofix.queue',
+    'client_approval.respond','system.retry_source','system.resolve_finding','system.dismiss_finding','autofix.preview','autofix.queue',
     'golive.gate_check','golive.dry_run','golive.preflight','golive.mark_verified',
     'campaign.launch','campaign.pause','campaign.adjust_targeting','lead.approve','lead.reject','lead.assign_seller',
     'lead.add_to_sequence','reply.mark_interested','reply.mark_not_fit','booking.confirm','booking.no_show',
@@ -3440,7 +3447,47 @@ async function renderOps() {
     { name:'Unified dispatcher', status: mediaReady ? 'partial' : 'blocked', detail:'only stages manifests; downstream platform gates still decide send readiness' },
   ];
   const sysOk = sys.sources_ok === sys.sources_total;
-  let sysH = '<div class="ops-colset two">';
+  let sysH = '';
+  // Brain liveness (R3 — brain-ops review 2026-06-24 §5). Top-of-System glance: "is the
+  // night-shift brain alive & running well?" without opening a file. Read-only, no action
+  // button. Server-computed (brain_metrics.liveness) → all values are numbers/known strings;
+  // reasons are esc()'d. HONEST: green = "ran and reported quiet" (not "ran correctly");
+  // 'disarmed' (kill-switch) renders as its own state, never a dead-rail red.
+  const bl = p.brain_liveness || {};
+  if (bl && bl.state) {
+    const blState = String(bl.state).toLowerCase();
+    // Tones map to defined .status-pill.* classes (ok/warn/bad/info); 'disarmed' uses the
+    // base grey pill (empty tone) — a neutral kill-switch look, never a dead-rail red.
+    const blTone = blState === 'green' ? 'ok' : (blState === 'red' ? 'bad'
+                 : (blState === 'disarmed' ? '' : 'warn'));
+    sysH += '<div class="ops-panel" style="margin-bottom:16px"><div class="ops-panel-h"><b>Brain liveness</b>' +
+      '<span class="ops-count">night-shift manager</span></div><div class="ops-pad">' +
+      '<div class="status-row" style="margin:0 0 8px">' +
+      statusPill(compact(bl.label, blState), '', blTone);
+    if (blState !== 'disarmed') {
+      const det = bl.deterministic || {}, adv = bl.advisory || {}, c = bl.counts || {};
+      // Rail pills always show — present/missing IS the liveness signal.
+      sysH += statusPill('Night-shift', det.present ? ((det.age_h != null ? det.age_h : '?') + 'h') : 'missing',
+                         (det.present && !det.stale) ? 'ok' : 'bad') +
+        statusPill('Advisory', adv.present ? ((adv.age_h != null ? adv.age_h : '?') + 'h') : 'missing',
+                   (adv.present && !adv.stale) ? 'ok' : 'warn');
+      // Data-derived pills ONLY when the deterministic digest is present — a dark rail must not
+      // render a healthy-looking 'FAIL 0 / WARN 0' (the unknown-looks-healthy trap, in miniature).
+      if (det.present) {
+        sysH += statusPill('data-truth', 'FAIL ' + (Number(c.data_truth_fail) || 0) + ' / WARN ' + (Number(c.data_truth_warn) || 0),
+                   (Number(c.data_truth_fail) || 0) ? 'bad' : ((Number(c.data_truth_warn) || 0) ? 'warn' : 'ok')) +
+          statusPill('routed', Number(c.routed) || 0, 'info') +
+          statusPill('FYI', Number(c.diverted_fyi) || 0, 'info');
+      }
+    }
+    sysH += '</div>';
+    if (asArr(bl.reasons).length) {
+      sysH += '<div class="ops-li-meta" style="font-size:12px;color:#9aa7b3;margin-top:6px">' +
+        esc(asArr(bl.reasons).join(' · ')) + '</div>';
+    }
+    sysH += '</div></div>';
+  }
+  sysH += '<div class="ops-colset two">';
   // Snapshot contract
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Snapshot contract</b>' +
     '<span class="ops-count">' + esc(schemaVersion || 'missing schema') + '</span></div>' +
@@ -3736,7 +3783,8 @@ async function renderOps() {
         '<div class="ops-li-meta">' + esc([cat, state, f.owner ? 'owner ' + f.owner : '', f.sub].filter(Boolean).join(' · ')) + '</div></div>' +
         actionButton('autofix.preview', 'Preview fix', { finding_id: findingId }, { primary: sev === 'critical' || sev === 'high', sub:'no write' }) +
         actionButton('autofix.queue', 'Queue fix', { finding_id: findingId }, { ghost:true, sub:'deterministic only' }) +
-        actionButton('system.resolve_finding', 'Resolve', { finding_id: findingId }, { ghost:true, sub:'audit reason' }) +
+        actionButton('system.resolve_finding', 'Resolve', { finding_id: findingId }, { ghost:true, sub:'fixed — reopens if seen again' }) +
+        actionButton('system.dismiss_finding', 'Dismiss', { finding_id: findingId }, { ghost:true, sub:'never show again' }) +
         '<span class="ops-pill dim">' + esc(state) + '</span></li>';
     }
     sysH += '</ul>';
@@ -4515,4 +4563,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 953dfc23d7cc -->
+<!-- rankwise-portal-version: e77fe50d019d -->
