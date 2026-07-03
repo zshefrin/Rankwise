@@ -552,6 +552,17 @@
     body.ops .ops-mobile-dock .ops-btn { min-width:0; padding:9px 6px; text-align:center; }
   }
   body.ops footer.ops-note { margin-top:26px; padding-top:14px; border-top:1px solid #222a31; color:#6b7884; font-size:12px; text-align:center; }
+/* Market relationship map (ops Market tab; canvas engine near opsTab) */
+.mmap-legend { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; padding:10px 14px 4px; font-size:12px; color:#9fb0bd; }
+.mmap-legend i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+.mmap-kind { display:inline-flex; gap:5px; align-items:center; cursor:pointer; }
+.mmap-legend .mmap-kind:first-of-type { margin-left:auto; }
+.mmap-wrap { position:relative; padding:8px 12px 12px; }
+#mmap-cv { display:block; width:100%; height:520px; border-radius:8px; background:#0d1216; cursor:grab; touch-action:none; }
+#mmap-tip { position:absolute; pointer-events:none; background:#161d23; border:1px solid #222a31; border-radius:8px; padding:8px 11px; font-size:12px; max-width:300px; z-index:5; color:#dfe7ec; box-shadow:0 4px 18px rgba(0,0,0,.4); }
+#mmap-tip h4 { margin:0 0 3px; font-size:12px; }
+#mmap-tip .k { color:#7c8b96; }
+#mmap-tip .row { display:flex; gap:10px; justify-content:space-between; }
 </style>
 </head>
 <body>
@@ -1375,7 +1386,207 @@ function opsTab(id) {
   const tabs = document.querySelectorAll('.ops-tab');
   views.forEach(function(v) { v.hidden = (v.id !== 'ops-' + id); });
   tabs.forEach(function(t) { t.setAttribute('aria-selected', String(t.dataset.v === id)); });
+  if (id === 'market') opsMmapBoot();  // canvas can only size itself once visible
   window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// ── Market relationship map (canvas; payload = market_map_snapshot, mig 043) ──
+// Compact port of vault/_system/node_map_template.py's engine. Fixed dark palette
+// (validated dataviz dark steps — the portal is always dark). All tooltip strings
+// pass through esc(); node/edge data is service-key-written but treated as data.
+window._mmapKinds = { adjacency: false, corr: true };
+function opsMmapToggle(kind, on) {
+  window._mmapKinds[kind] = on;
+  const st = window._mmapState;
+  if (st) { st.alpha = Math.max(st.alpha, .3); st.needsDraw = true; }
+}
+function opsMmapBoot() {
+  const cvEl = document.getElementById('mmap-cv');
+  if (!cvEl || !window._mmapPayload || cvEl.dataset.booted) return;
+  if (!cvEl.offsetParent) return;  // Market tab hidden — opsTab('market') re-boots
+  cvEl.dataset.booted = '1';
+  opsMmapRun(cvEl, window._mmapPayload);
+}
+function opsMmapRun(cv, data) {
+  const COLORS = { keyword: '#3987e5', domain: '#d95926', page: '#9085e9', engine: '#d55181', hub: '#ffffff' };
+  const LABELS = { keyword: 'Keyword', domain: 'Domain', page: 'Our page', engine: 'AI engine', hub: 'rankwise.ca' };
+  const ANCH = { hub: [.42, .60], keyword: [.48, .46], domain: [.64, .38], page: [.28, .74], engine: [.16, .18] };
+  const GRAV = { hub: .008, keyword: .005, domain: .004, page: .010, engine: .02 };
+  const SPREAD = { keyword: .22, domain: .18, page: .08, engine: .04 };
+  const EDGE = {
+    rank:      { a: .25, w: .8, rest: 95, k: .006, c: 'rgba(255,255,255,.14)' },
+    local:     { a: .45, w: .8, rest: 75, k: .008, c: '#199e70' },
+    gsc:       { a: .55, w: 1,  rest: 60, k: .015, c: '#9085e9' },
+    cites:     { a: .5,  w: 1,  rest: 80, k: .010, c: '#d55181' },
+    adjacency: { a: .35, w: 1,  rest: 34, k: .03,  c: 'rgba(255,255,255,.25)', dash: [4, 3] },
+    corr:      { a: .7,  w: 1.2, rest: 46, k: .02, c: '#c98500', dash: [2, 2.5] },
+  };
+  const RING = { top3: '#0ca30c', ranking: '#0ca30c', page2: '#fab219', tracked: null };
+  const nodes = asArr(data.nodes), edges = asArr(data.edges);
+  const byId = new Map(nodes.map(function(n) { return [n.id, n]; }));
+  edges.forEach(function(e) { e.sn = byId.get(e.s); e.tn = byId.get(e.t); });
+  const ctx = cv.getContext('2d');
+  const tip = document.getElementById('mmap-tip');
+  const W = function() { return cv.clientWidth; }, H = function() { return cv.clientHeight; };
+  nodes.forEach(function(n) {
+    const a = ANCH[n.store] || [.5, .5], sp = SPREAD[n.store] || .06;
+    n.x = (a[0] + (Math.random() - .5) * sp * 2.4) * W();
+    n.y = (a[1] + (Math.random() - .5) * sp * 2.4) * H();
+    n.vx = n.vy = 0; n.dim = false;
+  });
+  const st = window._mmapState = { alpha: 1, needsDraw: true, view: { x: 0, y: 0, k: 1 } };
+  let dragNode = null, panning = false, hoverNode = null, pinned = null, px = 0, py = 0;
+  const kindOn = function(e) { const t = window._mmapKinds; return (e.k in t) ? t[e.k] : true; };
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = cv.clientWidth * dpr; cv.height = cv.clientHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); st.needsDraw = true;
+  }
+  function tick() {
+    const w = W(), h = H();
+    for (const n of nodes) {
+      const a = ANCH[n.store] || [.5, .5], g = GRAV[n.store] || .012;
+      n.vx += (a[0] * w - n.x) * g * st.alpha;
+      n.vy += (a[1] * h - n.y) * g * st.alpha;
+    }
+    for (const e of edges) {
+      const s = e.sn, t = e.tn;
+      if (!s || !t || !kindOn(e)) continue;
+      const es = EDGE[e.k] || {};
+      const dx = t.x - s.x, dy = t.y - s.y, d = Math.hypot(dx, dy) || 1;
+      const rest = (es.rest || 26) + s.r + t.r;
+      const f = (d - rest) / d * (es.k || .02) * st.alpha * (e.w ? Math.min(e.w, 2) : 1);
+      s.vx += dx * f; s.vy += dy * f; t.vx -= dx * f; t.vy -= dy * f;
+    }
+    const cell = 56, grid = new Map();
+    for (const n of nodes) {
+      const key = ((n.x / cell) | 0) + ',' + ((n.y / cell) | 0);
+      (grid.get(key) || grid.set(key, []).get(key)).push(n);
+    }
+    for (const n of nodes) {
+      const cx = (n.x / cell) | 0, cy = (n.y / cell) | 0;
+      for (let gx = cx - 1; gx <= cx + 1; gx++) for (let gy = cy - 1; gy <= cy + 1; gy++) {
+        const bucket = grid.get(gx + ',' + gy); if (!bucket) continue;
+        for (const m of bucket) {
+          if (m === n) continue;
+          const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy;
+          if (d2 > cell * cell) continue;
+          const d = Math.sqrt(d2) || .5, min = n.r + m.r + 4;
+          const f = Math.min(2.2, (min * min) / (d2 + 8)) * .8 * st.alpha;
+          n.vx += dx / d * f; n.vy += dy / d * f;
+        }
+      }
+    }
+    for (const n of nodes) {
+      if (n === dragNode) { n.vx = n.vy = 0; continue; }
+      n.vx *= .55; n.vy *= .55;
+      n.x = Math.max(8, Math.min(w - 8, n.x + n.vx));
+      n.y = Math.max(8, Math.min(h - 8, n.y + n.vy));
+    }
+    st.alpha = Math.max(0, st.alpha * .992 - .0004);
+  }
+  function draw() {
+    const w = W(), h = H(), v = st.view;
+    ctx.clearRect(0, 0, w, h);
+    ctx.save(); ctx.translate(v.x, v.y); ctx.scale(v.k, v.k);
+    for (const e of edges) {
+      const s = e.sn, t = e.tn;
+      if (!s || !t || !kindOn(e)) continue;
+      const es = EDGE[e.k] || {};
+      ctx.strokeStyle = es.c || 'rgba(255,255,255,.14)';
+      ctx.setLineDash(es.dash || []);
+      ctx.lineWidth = ((es.w || 1) * (e.w ? Math.min(e.w, 3) : 1)) / v.k;
+      ctx.globalAlpha = (s.dim || t.dim) ? .08 : (es.a || .5);
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y); ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    for (const n of nodes) {
+      ctx.globalAlpha = n.dim ? .10 : (n.status === 'unranked' ? .38 : 1);
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, 7);
+      ctx.fillStyle = COLORS[n.store] || '#3987e5'; ctx.fill();
+      const ring = RING[n.status];
+      if (ring) {
+        ctx.lineWidth = 1.1 / v.k; ctx.strokeStyle = ring;
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 1.6, 0, 7); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    const cand = nodes.filter(function(n) { return !n.dim && (n.r >= 10 || n === hoverNode || n === pinned); })
+      .sort(function(a, b) { return b.r - a.r; });
+    const placed = [];
+    for (const n of cand) {
+      const forced = n === hoverNode || n === pinned;
+      if (!forced && placed.some(function(p) { return Math.hypot(p[0] - n.x, p[1] - n.y) < 30 / v.k; })) continue;
+      placed.push([n.x, n.y]);
+      ctx.font = (n.store === 'hub' ? '650 13px' : '500 11px') + ' system-ui';
+      ctx.fillStyle = '#dfe7ec';
+      const raw = String(n.label || '');
+      const lbl = raw.length > 28 ? raw.slice(0, 27) + '…' : raw;
+      ctx.fillText(lbl, n.x + n.r + 4, n.y + 3.5);
+    }
+    ctx.restore();
+  }
+  function frame() {
+    if (!document.body.contains(cv)) { window.removeEventListener('resize', resize); window._mmapState = null; return; }  // re-render tore us down
+    if (st.alpha > 0.004) { tick(); st.needsDraw = true; }
+    if (st.needsDraw) { draw(); st.needsDraw = false; }
+    requestAnimationFrame(frame);
+  }
+  function toWorld(mx, my) { return [(mx - st.view.x) / st.view.k, (my - st.view.y) / st.view.k]; }
+  function pick(mx, my) {
+    const p = toWorld(mx, my); let best = null, bd = 1e9;
+    for (const n of nodes) {
+      if (n.dim) continue;
+      const d = Math.hypot(n.x - p[0], n.y - p[1]);
+      if (d < Math.max(n.r + 3, 7) && d < bd) { best = n; bd = d; }
+    }
+    return best;
+  }
+  function showTip(n, mx, my) {
+    let html = '<h4>' + esc(n.label) + '</h4><div class="k">' + esc(LABELS[n.store] || n.store) + (n.status ? ' · ' + esc(n.status) : '') + '</div>';
+    for (const kv of Object.entries(n.meta || {})) {
+      if (kv[1] === '' || kv[1] == null) continue;
+      html += '<div class="row"><span class="k">' + esc(kv[0]) + '</span><span>' + esc(kv[1]) + '</span></div>';
+    }
+    tip.innerHTML = html; tip.hidden = false;
+    const r = cv.getBoundingClientRect(), wr = tip.parentElement.getBoundingClientRect();
+    tip.style.left = Math.min(mx + (r.left - wr.left) + 14, wr.width - 310) + 'px';
+    tip.style.top = Math.min(my + (r.top - wr.top) + 14, wr.height - 120) + 'px';
+  }
+  cv.addEventListener('pointerdown', function(e) {
+    const r = cv.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top;
+    dragNode = pick(px, py);
+    if (!dragNode) panning = true;
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove', function(e) {
+    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    if (dragNode) { const p = toWorld(mx, my); dragNode.x = p[0]; dragNode.y = p[1]; st.alpha = Math.max(st.alpha, .25); }
+    else if (panning) { st.view.x += mx - px; st.view.y += my - py; px = mx; py = my; st.needsDraw = true; }
+    else {
+      hoverNode = pick(mx, my);
+      if (hoverNode) showTip(hoverNode, mx, my);
+      else if (!pinned) tip.hidden = true;
+      st.needsDraw = true;
+    }
+  });
+  cv.addEventListener('pointerup', function() { dragNode = null; panning = false; });
+  cv.addEventListener('click', function(e) {
+    const r = cv.getBoundingClientRect();
+    const n = pick(e.clientX - r.left, e.clientY - r.top);
+    if (n) { pinned = n; showTip(n, e.clientX - r.left, e.clientY - r.top); }
+    else { pinned = null; tip.hidden = true; }
+    st.needsDraw = true;
+  });
+  cv.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    const v = st.view, k2 = Math.max(.25, Math.min(6, v.k * (e.deltaY < 0 ? 1.12 : .89)));
+    v.x = mx - (mx - v.x) * (k2 / v.k); v.y = my - (my - v.y) * (k2 / v.k);
+    v.k = k2; st.needsDraw = true;
+  }, { passive: false });
+  window.addEventListener('resize', resize);
+  resize(); frame();
 }
 function opsApplyRowVisibility(row) {
   row.hidden = row.dataset.filterHidden === '1' || row.dataset.searchHidden === '1';
@@ -1468,10 +1679,11 @@ async function renderOps() {
   opsCloseRecord();
   app.innerHTML = '<p class="mut" style="padding:12px">Loading…</p>';
 
-  const [rows, actionRows, marketRows] = await Promise.all([
+  const [rows, actionRows, marketRows, mapRows] = await Promise.all([
     rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
     rest("operator_action_queue?select=*&order=id.desc&limit=10"),
     rest("market_snapshot?select=payload,updated_at&id=eq.1"),
+    rest("market_map_snapshot?select=payload,updated_at&id=eq.1"),
   ]);
   if (!rows) return;
   const snap = rows[0] || null;
@@ -1480,6 +1692,11 @@ async function renderOps() {
   // Market intel rides a separate table (market_snapshot, operator-only RLS).
   const mktSnap = (marketRows && marketRows[0]) ? marketRows[0] : null;
   const mkt = (mktSnap && mktSnap.payload) ? mktSnap.payload : {};
+  // Relationship map rides its own table (market_map_snapshot, operator-only RLS,
+  // migration 043) — pushed by build_market_node_map.py --push on the briefing cron.
+  // Array.isArray guard: a missing table returns a PostgREST error OBJECT, not rows.
+  const mmap = (Array.isArray(mapRows) && mapRows[0] && mapRows[0].payload) ? mapRows[0].payload : null;
+  window._mmapPayload = mmap;
 
   // ── Derived counts for tab badges ────────────────────────────────────────
   const needsYou = p.needs_you || [];
@@ -4184,6 +4401,29 @@ async function renderOps() {
       (mkt.source ? ' · ' + esc(mkt.source) : '') + '</div>';
   }
 
+  // Relationship map panel (market_map_snapshot, migration 043; canvas engine near
+  // opsTab below). Rendered even when the intel snapshot above is empty.
+  marketH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><b>Relationship map</b><span class="ops-count">' +
+    (mmap ? esc(asArr(mmap.nodes).length + ' nodes · ' + asArr(mmap.edges).length + ' edges') : 'not pushed') + '</span></div>';
+  if (mmap) {
+    marketH += '<div class="mmap-legend">' +
+      '<span><i style="background:#3987e5"></i>Keywords</span>' +
+      '<span><i style="background:#d95926"></i>Domains</span>' +
+      '<span><i style="background:#9085e9"></i>Our pages</span>' +
+      '<span><i style="background:#d55181"></i>AI engines</span>' +
+      '<span><i style="background:#ffffff"></i>rankwise.ca</span>' +
+      '<label class="mmap-kind"><input type="checkbox" onchange="opsMmapToggle(\'adjacency\', this.checked)"> adjacency</label>' +
+      '<label class="mmap-kind"><input type="checkbox" checked onchange="opsMmapToggle(\'corr\', this.checked)"> co-movement</label>' +
+      '</div>' +
+      '<div class="mmap-wrap"><canvas id="mmap-cv"></canvas><div id="mmap-tip" hidden></div></div>' +
+      '<div class="ops-muted ops-pad">Edges are observed relationships (latest observation): rank · map pack · GSC query→page · AI cites. ' +
+      'Adjacency = two keywords share ≥50% of their top-10 domains; co-movement = Spearman |ρ|≥0.75 on GSC impressions (≥6 shared periods — small samples, leads not proof). ' +
+      'Generated ' + esc(mmap.generatedAt || '') + ' · full explorer: <code>vault/_dev/market-node-map.html</code></div>';
+  } else {
+    marketH += '<div class="ops-empty"><b>No relationship-map snapshot yet</b>Apply migration 043, then run <code>python3 vault/_system/build_market_node_map.py --push</code> (rides the 10am briefing cron thereafter).</div>';
+  }
+  marketH += '</div>';
+
   // ── Assemble full cockpit HTML ─────────────────────────────────────────────
   const snapFresh = freshnessInfo(generatedAt || (snap && snap.updated_at), 4, 24);
   const asof = snap ? 'generated ' + esc(snapFresh.label) + ' · synced ' + esc(ptTime(snap.updated_at)) : 'no snapshot';
@@ -4242,6 +4482,7 @@ async function renderOps() {
     '</div>';
 
   app.innerHTML = h;
+  opsMmapBoot();  // relationship-map canvas (no-op unless the Market tab is visible)
 }
 
 // ── Client dashboard (role=client; operators pass an explicit key to preview) ─
@@ -4563,4 +4804,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: e77fe50d019d -->
+<!-- rankwise-portal-version: 0f641f35e505 -->
