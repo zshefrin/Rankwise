@@ -1527,7 +1527,7 @@ function opsMmapRun(cv, data) {
     ctx.restore();
   }
   function frame() {
-    if (!document.body.contains(cv)) { window.removeEventListener('resize', resize); window._mmapState = null; return; }  // re-render tore us down
+    if (!document.body.contains(cv)) { window.removeEventListener('resize', resize); if (window._mmapState === st) window._mmapState = null; return; }  // re-render tore us down; only clear the global if it is still OURS (a new boot may have claimed it)
     if (st.alpha > 0.004) { tick(); st.needsDraw = true; }
     if (st.needsDraw) { draw(); st.needsDraw = false; }
     requestAnimationFrame(frame);
@@ -4412,8 +4412,8 @@ async function renderOps() {
       '<span><i style="background:#9085e9"></i>Our pages</span>' +
       '<span><i style="background:#d55181"></i>AI engines</span>' +
       '<span><i style="background:#ffffff"></i>rankwise.ca</span>' +
-      '<label class="mmap-kind"><input type="checkbox" onchange="opsMmapToggle(\'adjacency\', this.checked)"> adjacency</label>' +
-      '<label class="mmap-kind"><input type="checkbox" checked onchange="opsMmapToggle(\'corr\', this.checked)"> co-movement</label>' +
+      '<label class="mmap-kind"><input type="checkbox" ' + (window._mmapKinds.adjacency ? 'checked ' : '') + 'onchange="opsMmapToggle(\'adjacency\', this.checked)"> adjacency</label>' +
+      '<label class="mmap-kind"><input type="checkbox" ' + (window._mmapKinds.corr ? 'checked ' : '') + 'onchange="opsMmapToggle(\'corr\', this.checked)"> co-movement</label>' +
       '</div>' +
       '<div class="mmap-wrap"><canvas id="mmap-cv"></canvas><div id="mmap-tip" hidden></div></div>' +
       '<div class="ops-muted ops-pad">Edges are observed relationships (latest observation): rank · map pack · GSC query→page · AI cites. ' +
@@ -4804,4 +4804,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 0f641f35e505 -->
+<!-- rankwise-portal-version: 13078b2be77e -->
