@@ -1528,6 +1528,7 @@ function opsMmapRun(cv, data) {
   }
   function frame() {
     if (!document.body.contains(cv)) { window.removeEventListener('resize', resize); if (window._mmapState === st) window._mmapState = null; return; }  // re-render tore us down; only clear the global if it is still OURS (a new boot may have claimed it)
+    if (!cv.offsetParent) { setTimeout(function() { requestAnimationFrame(frame); }, 400); return; }  // panel hidden (other ops tab) — idle poll; display:none is NOT browser-throttled like a hidden browser tab
     if (st.alpha > 0.004) { tick(); st.needsDraw = true; }
     if (st.needsDraw) { draw(); st.needsDraw = false; }
     requestAnimationFrame(frame);
@@ -1683,7 +1684,10 @@ async function renderOps() {
     rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
     rest("operator_action_queue?select=*&order=id.desc&limit=10"),
     rest("market_snapshot?select=payload,updated_at&id=eq.1"),
-    rest("market_map_snapshot?select=payload,updated_at&id=eq.1"),
+    // Largest payload of the four (~280 KB) — fetch once per page load, not on
+    // every action-triggered re-render; a null (not-pushed) result retries.
+    window._mmapPayload ? Promise.resolve([{ payload: window._mmapPayload }])
+                        : rest("market_map_snapshot?select=payload,updated_at&id=eq.1"),
   ]);
   if (!rows) return;
   const snap = rows[0] || null;
@@ -3664,47 +3668,7 @@ async function renderOps() {
     { name:'Unified dispatcher', status: mediaReady ? 'partial' : 'blocked', detail:'only stages manifests; downstream platform gates still decide send readiness' },
   ];
   const sysOk = sys.sources_ok === sys.sources_total;
-  let sysH = '';
-  // Brain liveness (R3 — brain-ops review 2026-06-24 §5). Top-of-System glance: "is the
-  // night-shift brain alive & running well?" without opening a file. Read-only, no action
-  // button. Server-computed (brain_metrics.liveness) → all values are numbers/known strings;
-  // reasons are esc()'d. HONEST: green = "ran and reported quiet" (not "ran correctly");
-  // 'disarmed' (kill-switch) renders as its own state, never a dead-rail red.
-  const bl = p.brain_liveness || {};
-  if (bl && bl.state) {
-    const blState = String(bl.state).toLowerCase();
-    // Tones map to defined .status-pill.* classes (ok/warn/bad/info); 'disarmed' uses the
-    // base grey pill (empty tone) — a neutral kill-switch look, never a dead-rail red.
-    const blTone = blState === 'green' ? 'ok' : (blState === 'red' ? 'bad'
-                 : (blState === 'disarmed' ? '' : 'warn'));
-    sysH += '<div class="ops-panel" style="margin-bottom:16px"><div class="ops-panel-h"><b>Brain liveness</b>' +
-      '<span class="ops-count">night-shift manager</span></div><div class="ops-pad">' +
-      '<div class="status-row" style="margin:0 0 8px">' +
-      statusPill(compact(bl.label, blState), '', blTone);
-    if (blState !== 'disarmed') {
-      const det = bl.deterministic || {}, adv = bl.advisory || {}, c = bl.counts || {};
-      // Rail pills always show — present/missing IS the liveness signal.
-      sysH += statusPill('Night-shift', det.present ? ((det.age_h != null ? det.age_h : '?') + 'h') : 'missing',
-                         (det.present && !det.stale) ? 'ok' : 'bad') +
-        statusPill('Advisory', adv.present ? ((adv.age_h != null ? adv.age_h : '?') + 'h') : 'missing',
-                   (adv.present && !adv.stale) ? 'ok' : 'warn');
-      // Data-derived pills ONLY when the deterministic digest is present — a dark rail must not
-      // render a healthy-looking 'FAIL 0 / WARN 0' (the unknown-looks-healthy trap, in miniature).
-      if (det.present) {
-        sysH += statusPill('data-truth', 'FAIL ' + (Number(c.data_truth_fail) || 0) + ' / WARN ' + (Number(c.data_truth_warn) || 0),
-                   (Number(c.data_truth_fail) || 0) ? 'bad' : ((Number(c.data_truth_warn) || 0) ? 'warn' : 'ok')) +
-          statusPill('routed', Number(c.routed) || 0, 'info') +
-          statusPill('FYI', Number(c.diverted_fyi) || 0, 'info');
-      }
-    }
-    sysH += '</div>';
-    if (asArr(bl.reasons).length) {
-      sysH += '<div class="ops-li-meta" style="font-size:12px;color:#9aa7b3;margin-top:6px">' +
-        esc(asArr(bl.reasons).join(' · ')) + '</div>';
-    }
-    sysH += '</div></div>';
-  }
-  sysH += '<div class="ops-colset two">';
+  let sysH = '<div class="ops-colset two">';
   // Snapshot contract
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><b>Snapshot contract</b>' +
     '<span class="ops-count">' + esc(schemaVersion || 'missing schema') + '</span></div>' +
@@ -4419,6 +4383,15 @@ async function renderOps() {
       '<div class="ops-muted ops-pad">Edges are observed relationships (latest observation): rank · map pack · GSC query→page · AI cites. ' +
       'Adjacency = two keywords share ≥50% of their top-10 domains; co-movement = Spearman |ρ|≥0.75 on GSC impressions (≥6 shared periods — small samples, leads not proof). ' +
       'Generated ' + esc(mmap.generatedAt || '') + ' · full explorer: <code>vault/_dev/market-node-map.html</code></div>';
+    // Data-through honesty line: generatedAt is stamped fresh at every push, so
+    // without this a dead fetcher renders weeks-old data as current (review #2).
+    const mmapDT = asArr(mmap.tiles).find(function(t) { return t && t[1] === 'Data through'; });
+    if (mmapDT) {
+      const dtAge = (Date.now() - new Date(String(mmapDT[0]) + 'T00:00:00Z').getTime()) / 864e5;
+      marketH += '<div class="ops-muted ops-pad">' + (dtAge > 14 ? '⚠️ ' : '') +
+        'Data through <b>' + esc(mmapDT[0]) + '</b> · ' + esc(mmapDT[2] || '') +
+        (dtAge > 14 ? ' — oldest source is ' + Math.round(dtAge) + ' days stale; check its fetcher' : '') + '</div>';
+    }
   } else {
     marketH += '<div class="ops-empty"><b>No relationship-map snapshot yet</b>Apply migration 043, then run <code>python3 vault/_system/build_market_node_map.py --push</code> (rides the 10am briefing cron thereafter).</div>';
   }
@@ -4804,4 +4777,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 13078b2be77e -->
+<!-- rankwise-portal-version: 238846fe8001 -->
