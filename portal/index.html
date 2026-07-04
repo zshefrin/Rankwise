@@ -720,6 +720,44 @@ async function submitLogCall(btn) {
   await enqueueAction("outreach.log_call", params);
 }
 
+// client_request.create (operator cockpit): raise a client-safe ask → operator_action_queue →
+// worker → client_request table (M4). FORM action: client_key (pre-filled per client) + title +
+// optional detail + kind. Reads from the form wrapper (closest) so per-client forms don't collide
+// on element ids. The worker re-validates client_key slug + non-empty title + kind server-side.
+async function submitClientRequest(btn) {
+  const wrap = btn.closest(".ops-creq");
+  if (!wrap) { toast("Form not found"); return; }
+  const ck = (wrap.dataset.clientKey || "").trim();
+  const title = ((wrap.querySelector(".creq-title") || {}).value || "").trim();
+  const detail = ((wrap.querySelector(".creq-detail") || {}).value || "").trim();
+  const kind = ((wrap.querySelector(".creq-kind") || {}).value || "ask");
+  if (!ck) { toast("No client on this form"); return; }
+  if (!title) { toast("Ask title required"); return; }
+  if (!confirm("Raise client ask?\n\nClient: " + ck + "\nTitle: " + title + "\nKind: " + kind)) return;
+  const params = { client_key: ck, title: title, kind: kind };
+  if (detail) params.detail = detail;
+  await enqueueAction("client_request.create", params);
+}
+
+// client_approval.respond (operator cockpit): record a client's response to a request →
+// client_approval table (+ flips the request to responded). FORM action: request_id (from the ask
+// card; only sent when numeric) + kind + optional response text. Worker re-validates server-side.
+async function submitClientResponse(btn) {
+  const wrap = btn.closest(".ops-cresp");
+  if (!wrap) { toast("Form not found"); return; }
+  const ck = (wrap.dataset.clientKey || "").trim();
+  const rid = (wrap.dataset.requestId || "").trim();
+  const kind = ((wrap.querySelector(".cresp-kind") || {}).value || "respond");
+  const response = ((wrap.querySelector(".cresp-text") || {}).value || "").trim();
+  if (!ck) { toast("No client on this form"); return; }
+  if (!confirm("Record client response?\n\nClient: " + ck + (/^\d+$/.test(rid) ? "\nRequest #" + rid : "") +
+    "\nKind: " + kind + (response ? "\nResponse: " + response : ""))) return;
+  const params = { client_key: ck, kind: kind };
+  if (/^\d+$/.test(rid)) params.request_id = rid;
+  if (response) params.response = response;
+  await enqueueAction("client_approval.respond", params);
+}
+
 window._opsActionParams = {};
 function opsRunAction(id) {
   const cfg = window._opsActionParams && window._opsActionParams[id];
@@ -737,6 +775,66 @@ function pendingFeature(label) {
 function clientSoonBtn(label) {
   return '<button class="client-action" disabled title="Coming soon — your Rankwise contact will set this up with you for now.">' +
     esc(label) + ' <span class="ca-soon">soon</span></button>';
+}
+
+// Client self-serve (client role): write a client_approval row via the client's OWN JWT. RLS
+// (migration 038) scopes the write to the client's client_key (responded_by defaults to auth.uid(),
+// request_id must belong to the client), so a client can only respond as themselves to their own
+// requests — the security boundary is server-side RLS, not this UI. Operator side: submitClientResponse.
+async function clientApprovalWrite(requestId, kind, responseText, uploadRef) {
+  const ck = window._clientKey;
+  if (!ck) { toast("Account not identified — please reload"); return; }
+  const body = { client_key: ck, kind: kind };
+  if (requestId) body.request_id = Number(requestId);
+  if (responseText) body.response = responseText;
+  if (uploadRef) body.upload_ref = uploadRef;
+  const r = await fetch(SB + "/rest/v1/client_approval", {
+    method: "POST", headers: hdr(), body: JSON.stringify(body),
+  });
+  if (r.ok) { toast("Sent to your Rankwise team"); renderClient(); }
+  else toast("Could not send — your Rankwise contact will follow up");
+}
+// golive.mark_verified (form-internal): attest a named go-live check. Picks the check from a
+// small select (the worker only accepts the two named checks; it does NOT enable sending).
+async function submitGoliveVerified(btn) {
+  const wrap = btn.closest(".ops-golive-verify");
+  const check = wrap ? ((wrap.querySelector(".gv-check") || {}).value || "") : "";
+  if (!check) { toast("Pick a check first"); return; }
+  if (!confirm("Mark go-live check verified?\n\n" + check + "\n\nThis does NOT enable sending.")) return;
+  await enqueueAction("golive.mark_verified", { check: check });
+}
+
+// publishing.dispatch (form-only): DRY-RUN preview only. The worker refuses a real publish
+// server-side (targeted publish+push is a tracked follow-up), so this shows what WOULD publish in
+// the action result; real go-live stays on the CLI/cron.
+async function submitPublishPreview(contentId) {
+  if (!contentId) { toast("No content id"); return; }
+  await enqueueAction("publishing.dispatch", { content_id: contentId });
+}
+
+function clientApprove(id) { if (confirm("Approve this request?")) clientApprovalWrite(id, "approve", ""); }
+function clientRequestChanges(id) { const t = prompt("What changes would you like?"); if (t && t.trim()) clientApprovalWrite(id, "request_changes", t.trim()); }
+function clientRespond(id) { const t = prompt("Your response:"); if (t && t.trim()) clientApprovalWrite(id, "respond", t.trim()); }
+
+// Client file upload (M4): upload to the PRIVATE client-uploads Storage bucket under the client's
+// OWN client_key folder via their JWT (Storage RLS, migration 042, scopes the write to that folder),
+// then record a client_approval row (kind='upload', upload_ref=path). client_key (slug) + the
+// sanitized filename ([a-zA-Z0-9._-]) are URL-safe, so the object path needs no further encoding.
+async function clientUpload(requestId, inputEl) {
+  const ck = window._clientKey;
+  if (!ck) { toast("Account not identified — please reload"); return; }
+  const file = inputEl && inputEl.files && inputEl.files[0];
+  if (!file) return;
+  if (file.size > 25 * 1024 * 1024) { toast("File too large (max 25 MB)"); inputEl.value = ""; return; }
+  const safe = (file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
+  const objName = ck + "/" + Date.now() + "_" + safe;
+  toast("Uploading…");
+  const r = await fetch(SB + "/storage/v1/object/client-uploads/" + objName, {
+    method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + tok() }, body: file,
+  });
+  inputEl.value = "";
+  if (!r.ok) { toast("Upload failed — please email your Rankwise contact"); return; }
+  await clientApprovalWrite(requestId, "upload", "uploaded: " + safe, objName);
 }
 
 window._nm = {}; // slug → business name (filled at render; avoids name-in-onclick escaping)
@@ -3092,7 +3190,7 @@ async function renderOps() {
         (lane === 'approval' || lane === 'ready' ? actionButton('content.approve', 'Approve', { content_id: contentId, client_key: key }, { primary: lane === 'approval', sub:'audit required' }) : '') +
         (lane === 'approval' ? actionButton('content.reject', 'Changes', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') +
         (lane === 'draft' || lane === 'approval' ? actionButton('content.rewrite_preview', 'Preview rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') +
-        (lane === 'ready' || lane === 'scheduled' ? actionButton('publishing.dispatch', 'Dispatch', { content_id: contentId, client_key: key }, { ghost:true, sub:'dry-run first' }) : '') +
+        (lane === 'ready' || lane === 'scheduled' ? '<button class="ops-btn ghost ops-actionbtn" onclick="submitPublishPreview(decodeURIComponent(\'' + encodeURIComponent(contentId).replace(/'/g, "%27") + '\'))" title="dry-run preview — nothing published"><b>Preview publish</b><span>dry-run</span></button>' : '') +
         '</li>';
     }
     contH += '</ul>';
@@ -3449,13 +3547,22 @@ async function renderOps() {
       if (cRequests.length || cApprovals.length || cUploads.length) {
         clientH += '<div class="ops-pad">';
         for (const ask of cApprovals.concat(cRequests).slice(0, 6)) {
-          const askId = ask.id || ask.approval_id || ask.request_id || ask.title || ask.name;
+          // request_id for resolve/respond must be the PARENT request (ultrareview RLS-1): an
+          // APPROVAL row carries request_id (its parent) + its OWN id (a different, overlapping
+          // bigserial); a REQUEST row carries only id. Prefer request_id so an approval card never
+          // sends its own id (which would collide with an unrelated request). The worker also
+          // scopes the PATCH by client_key, so a stray id is a clean no-op.
+          const askId = ask.request_id || ask.id || ask.approval_id || ask.title || ask.name;
           clientH += '<div class="ops-client-ask"><div class="ops-client-ask-head"><div><div class="ops-client-ask-title">' + esc(ask.title || ask.name || ask.type || 'Client approval') + '</div>' +
             '<div class="ops-client-ask-sub">' + esc([ask.status || ask.stage || 'open', ask.due || ask.due_at, ask.note || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
             '<span class="ops-pill ' + (ask.status === 'blocked' ? 'bad' : 'warn') + '">' + esc(ask.status || 'open') + '</span></div>' +
             '<div class="ops-command-actions">' +
             actionButton('client_request.resolve', 'Resolve', { client_key: key, request_id: askId }, { sub:'audit closeout' }) +
-            actionButton('client_approval.respond', 'Record response', { client_key: key, approval_id: askId }, { ghost:true, sub:'client-safe' }) +
+            '</div>' +
+            '<div class="ops-cresp" data-client-key="' + esc(key) + '" data-request-id="' + esc(String(askId)) + '" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">' +
+            '<select class="ops-input cresp-kind" aria-label="response kind" style="max-width:150px"><option value="respond">respond</option><option value="approve">approve</option><option value="request_changes">request changes</option><option value="upload">upload</option></select>' +
+            '<input class="ops-input cresp-text" placeholder="response (optional)" maxlength="280" style="max-width:200px">' +
+            '<button class="ops-btn ghost" onclick="submitClientResponse(this)">Record response</button>' +
             '</div></div>';
         }
         for (const up of cUploads.slice(0, 4)) {
@@ -3467,8 +3574,15 @@ async function renderOps() {
         }
         clientH += '</div>';
       } else {
-        clientH += '<div class="ops-empty"><b>No open client asks</b>Claude can emit client_requests, approvals and upload_requests to power this collaboration layer.</div>';
+        clientH += '<div class="ops-empty"><b>No open client asks</b>Raise one below — it appears in this client\'s portal for them to respond to.</div>';
       }
+      // Raise a new client-safe ask (client_request.create). client_key is pre-filled per client.
+      clientH += '<div class="ops-creq" data-client-key="' + esc(key) + '" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #2a323a">' +
+        '<input class="ops-input creq-title" placeholder="Raise an ask — title *" maxlength="200" style="flex:1;min-width:140px">' +
+        '<input class="ops-input creq-detail" placeholder="detail (optional)" maxlength="280" style="flex:1;min-width:140px">' +
+        '<select class="ops-input creq-kind" aria-label="ask kind" style="max-width:130px"><option value="ask">ask</option><option value="approval">approval</option><option value="upload">upload</option></select>' +
+        '<button class="ops-btn primary" onclick="submitClientRequest(this)">Raise ask</button>' +
+        '</div>';
       clientH += '</div>';
       clientH += '<div class="ops-panel"><div class="ops-panel-h"><b>Activity / audit trail</b><span class="ops-count">' + esc(cAudit.length) + '</span></div>';
       if (cAudit.length) {
@@ -3744,7 +3858,10 @@ async function renderOps() {
     actionButton('golive.gate_check', 'Gate check', {}, { sub:'read checks' }) +
     actionButton('golive.dry_run', 'Dry run', {}, { ghost:true, sub:'no public send' }) +
     actionButton('golive.preflight', 'Preflight', {}, { primary:true, sub:'safe launch check' }) +
-    actionButton('golive.mark_verified', 'Mark verified', {}, { ghost:true, sub:'requires system id' }) +
+    '<span class="ops-golive-verify" style="display:inline-flex;gap:6px;align-items:center">' +
+    '<select class="ops-input gv-check" aria-label="go-live check" style="max-width:210px"><option value="tracking_pipeline_verified">tracking pipeline verified</option><option value="reply_polling_verified">reply polling verified</option></select>' +
+    '<button class="ops-btn ghost" onclick="submitGoliveVerified(this)">Mark verified</button>' +
+    '</span>' +
     '</div></div></div>';
   sysH += '</div>'; // colset
 
@@ -4483,6 +4600,16 @@ async function renderClient(key) {
     return;
   }
   const p = snap.payload || {};
+  // Client self-serve (M4): the client's own client_key + their OPEN requests from the operator
+  // (client_request table, RLS-scoped to this client by their JWT). Fail-soft to [] if the table
+  // isn't applied yet or the read errors. Used to render real Approve/Respond buttons below.
+  window._clientKey = snap.client_key || (key || "");
+  // Scope by client_key explicitly (not just RLS): for a CLIENT this matches their own rows (RLS
+  // would scope it anyway); for an OPERATOR PREVIEW (sees all via RLS) it limits to the previewed
+  // client, so an operator can't accidentally act on another client's request (edge-fn-security #1).
+  const myRequests = (window._clientKey ? (await rest("client_request?status=eq.open&order=id.desc&limit=20" +
+    "&client_key=eq." + encodeURIComponent(window._clientKey) +
+    "&select=id,kind,title,detail,created_at")) : []) || [];
   const clientGeneratedAt = p.generated_at || p.generatedAt || snap.updated_at;
   const clientSourceStatus = asArr(p.source_status || p.sources);
   const clientSourceBad = clientSourceStatus.filter((s) => s.status && s.status !== 'ok').length;
@@ -4607,6 +4734,26 @@ async function renderClient(key) {
     '<div class="client-action-card"><div class="ca-k">Outcome watch</div><div class="ca-v">' + esc(clientOutcomeWatch ? planParts(clientOutcomeWatch).title : 'Signals warming up') + '</div>' +
     '<div class="ca-n">' + esc(clientOutcomeWatch ? ([clientOutcomeWatch.type || clientOutcomeWatch.status || 'tracking', clientOutcomeWatch.goal || clientOutcomeWatch.next_action || planParts(clientOutcomeWatch).sub].filter(Boolean).join(' · ')) : 'Rankings, traffic, reviews, and AI visibility are monitored here.') + '</div></div>' +
     '</div></section>';
+
+  // Requests from your Rankwise team (M4 client_request rows). Real self-serve buttons that write
+  // a client_approval row via the client's own JWT (RLS-scoped). id is a number → safe in onclick.
+  if (myRequests.length) {
+    h += '<section class="role-card"><h3>Requests from your Rankwise team</h3><div class="client-workspace">' +
+      myRequests.map(function(rq) {
+        return '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
+          '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
+          '<span class="pill warn">open</span></div>' +
+          '<div class="client-btnrow">' +
+          '<button class="client-action" onclick="clientApprove(' + Number(rq.id) + ')">Approve</button>' +
+          '<button class="client-action" onclick="clientRequestChanges(' + Number(rq.id) + ')">Request changes</button>' +
+          '<button class="client-action" onclick="clientRespond(' + Number(rq.id) + ')">Respond</button>' +
+          (rq.kind === 'upload' ?
+            '<input type="file" id="cu-' + Number(rq.id) + '" style="display:none" onchange="clientUpload(' + Number(rq.id) + ', this)">' +
+            '<button class="client-action" onclick="document.getElementById(\'cu-' + Number(rq.id) + '\').click()">Upload file</button>'
+            : '') +
+          '</div></div>';
+      }).join('') + '</div></section>';
+  }
 
   h += '<section class="role-card"><h3>Setup and first 30 days</h3>' +
     '<div class="client-workspace">' + clientSetupSteps.slice(0, 8).map((step) => {
@@ -4777,4 +4924,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 238846fe8001 -->
+<!-- rankwise-portal-version: 971664254300 -->
