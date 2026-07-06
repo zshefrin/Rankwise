@@ -1086,7 +1086,7 @@ def build_page(c, cities_list):
       <img class="founder-avatar" src="/assets/zack-shefrin.jpg" alt="Zack Shefrin, founder of Rankwise" width="46" height="46" loading="lazy">
       <div class="founder-text">
         <strong>Zack Shefrin — Founder, Rankwise</strong>
-        <span>Every audit lands in my inbox, not a team's. I work with {tl} contractors only, one per city, and I review the numbers myself before every call.</span>
+        <span>Every audit lands in my inbox, not a team's. I work with one {tl} contractor per city, and I review the numbers myself before every call.</span>
       </div>
     </a>
     <div class="reveal in" id="cal-embed"><div class="cal-loading">Loading the booking calendar…</div></div>
