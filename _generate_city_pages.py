@@ -595,38 +595,21 @@ PLUMBING_LANDING = {
     "trade_label": "Plumbing",
 }
 
-# Shared CSS is scraped from index.html's single inline <style> block (finding #23 —
-# this couples city-page CSS to whatever index.html currently contains; the longer-term
-# fix is to move shared CSS into /assets/rankwise-theme.css). Guard the scrape so a
-# missing/duplicated block fails loudly instead of an IndexError or silently grabbing
-# the wrong block.
-_index_html = open(os.path.join(os.path.dirname(__file__), "index.html")).read()
-_style_parts = _index_html.split("<style>")
-if len(_style_parts) != 2 or "</style>" not in _style_parts[1]:
+# Shared CSS is frozen in assets/city-shared.css (finding #23). It was previously scraped
+# live from index.html's inline <style>, but home-e4 (eb89a6c) swapped index.html's theme —
+# scraping now would silently restyle all 17 live city pages on the next regenerate. This
+# file holds the exact pre-home-e4 <style> inner (eb89a6c^) that the live pages carry, so
+# regenerating stays a byte-identical no-op. To intentionally restyle city pages, edit it.
+#
+# (Per-city market data now comes solely from HVAC_MARKET_DATA above. The old home-map
+# `metro-city` pin scrape was dead code — HVAC_MARKET_DATA already populated every city's
+# terms/volume, so the merged dict always won — and it hard-crashed once home-e4 rebuilt
+# the map without those pins. Removed.)
+_css_path = os.path.join(os.path.dirname(__file__), "assets", "city-shared.css")
+CSS = open(_css_path, encoding="utf-8").read()
+if not CSS.strip():
     raise SystemExit(
-        f"fatal: expected exactly one <style>...</style> block in index.html to scrape "
-        f"shared CSS (found {len(_style_parts) - 1}). Fix index.html or migrate the shared "
-        f"CSS into /assets/rankwise-theme.css (see audit finding #23)."
-    )
-CSS = _style_parts[1].split("</style>")[0]
-
-# Per-city market data is scraped from the home map's city pins (data-volume /
-# data-intent), so the map and the city pages always quote the same numbers.
-import re as _re
-
-_CITY_MAP_DATA: dict = {}
-for _m in _re.finditer(
-    r'class="metro-city[^"]*"[^>]*data-city="([^"]+)"[^>]*data-volume="([^"]+)"[^>]*data-intent="([^"]+)"',
-    _index_html,
-):
-    _CITY_MAP_DATA[_m.group(1)] = {
-        "volume": f"{_m.group(2)}/mo",
-        "terms": [t.strip() for t in _m.group(3).split(",")],
-    }
-if len(_CITY_MAP_DATA) < 15:
-    raise SystemExit(
-        f"fatal: only scraped map data for {len(_CITY_MAP_DATA)} cities from index.html "
-        f"metro-city pins — expected 17. Did the home map markup change?"
+        f"fatal: {_css_path} is missing or empty — shared city-page CSS not found."
     )
 
 # Nav markup — single source of truth shared with sync_nav.py (finding #6). Read it from
@@ -763,10 +746,9 @@ def _aio_section_html(c: dict) -> str:
 
 
 def _market_snapshot_html(c: dict, tl: str) -> str:
-    map_data = _CITY_MAP_DATA.get(c["name"], {})
-    terms = c.get("terms") or map_data.get("terms") or [f"{tl} repair", f"{tl} service", f"{tl} installation"]
+    terms = c.get("terms") or [f"{tl} repair", f"{tl} service", f"{tl} installation"]
     terms_html = "\n          ".join(f"<li>{term}</li>" for term in terms)
-    volume = c.get("volume") or map_data.get("volume") or "Market check"
+    volume = c.get("volume") or "Market check"
     areas = c.get("areas", f"{c['name']} service area")
     first_move = c.get(
         "first_move",
