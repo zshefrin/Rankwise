@@ -606,11 +606,15 @@ PLUMBING_LANDING = {
 # terms/volume, so the merged dict always won — and it hard-crashed once home-e4 rebuilt
 # the map without those pins. Removed.)
 _css_path = os.path.join(os.path.dirname(__file__), "assets", "city-shared.css")
-CSS = open(_css_path, encoding="utf-8").read()
-if not CSS.strip():
+try:
+    CSS = open(_css_path, encoding="utf-8").read()
+except FileNotFoundError:
     raise SystemExit(
-        f"fatal: {_css_path} is missing or empty — shared city-page CSS not found."
+        f"fatal: {_css_path} not found — shared city-page CSS is missing. Restore it "
+        f"from git (the frozen pre-home-e4 <style> inner) before regenerating."
     )
+if not CSS.strip():
+    raise SystemExit(f"fatal: {_css_path} is empty — shared city-page CSS not found.")
 
 # Nav markup — single source of truth shared with sync_nav.py (finding #6). Read it from
 # partials/nav.html instead of hardcoding a copy here, so a Codex/operator nav edit can't
