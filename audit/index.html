@@ -163,6 +163,7 @@ main{padding-top:76px}
 }
 .hero-closer::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold-on-forest);flex-shrink:0}
 .hero-note{font-size:.8125rem;color:var(--on-forest-dim)}
+.market-echo{display:inline-block;margin:0 0 16px;padding:6px 13px;border:1px solid rgba(255,255,255,.22);border-radius:999px;font-size:.8125rem;color:var(--on-forest);letter-spacing:.01em}
 @media(max-width:640px){.audit-hero{padding:52px 20px 44px}}
 
 /* ── STEPS (01) ──────────────────────────────────────────────────── */
@@ -407,6 +408,7 @@ html.js .reveal.in{opacity:1;transform:none}
 <section class="audit-hero">
   <div class="hero-inner">
     <p class="hero-eyebrow">Free 15-minute local search audit · Lower Mainland, BC</p>
+    <p class="market-echo" id="marketEcho" hidden></p>
     <h1>See where you show up on Google — and where you don't.</h1>
     <p class="hero-copy">Book a 15-minute call with me, Zack, the operator behind Rankwise. I'll show how your business appears in local search today, who's showing up ahead of you in your city, and the first moves I'd make to fix it.</p>
     <div class="hero-actions">
@@ -666,6 +668,26 @@ document.addEventListener('click', function(event){
     link_url: link.href
   });
 });
+</script>
+
+<script>
+// ?trade=&city= echo — carried from the homepage pickers (persona re-run
+// 2026-07-08: the picks were being thrown away). Allowlist-only: raw query
+// input NEVER reaches the DOM (labels come from the maps below, set via
+// textContent). No/invalid params -> chip stays hidden, page unchanged.
+(function(){
+  var el = document.getElementById('marketEcho');
+  if (!el || !window.URLSearchParams) return;
+  var TRADE = {plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',roofer:'Roofer',landscaper:'Landscaper',auto:'Auto repair',dentist:'Dentist',chiropractor:'Chiropractor',medspa:'Med spa',lawyer:'Lawyer',vet:'Veterinarian'};
+  var CITIES = ['Vancouver','North Vancouver','West Vancouver','Burnaby','Richmond','New Westminster','Coquitlam','Port Moody','Port Coquitlam','Pitt Meadows','Maple Ridge','Surrey','Delta','White Rock','Langley','Abbotsford','Mission','Chilliwack'];
+  var p = new URLSearchParams(location.search);
+  var t = TRADE[(p.get('trade') || '').toLowerCase()] || '';
+  var cRaw = (p.get('city') || '').toLowerCase(), c = '';
+  for (var i = 0; i < CITIES.length; i++) { if (CITIES[i].toLowerCase() === cRaw) { c = CITIES[i]; break; } }
+  if (!t && !c) return;
+  el.textContent = 'Your market: ' + (t && c ? t + ' · ' + c : (t || c));
+  el.hidden = false;
+})();
 </script>
 
 <!--

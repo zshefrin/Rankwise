@@ -2949,5 +2949,30 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   cityEl.addEventListener('change',check);
 })();
 </script>
+<script>
+/* Audit-link market carry: the hero/claim-check picks ride to /audit/ as
+   ?trade=&city= (persona re-run 2026-07-08 — the picks were being thrown
+   away). Listener-only: no picker behavior changes; until the visitor
+   actually picks something, the links are untouched. */
+(function(){
+  if (!window.URLSearchParams) return;
+  var TRADES = {plumber:1,electrician:1,hvac:1,roofer:1,landscaper:1,auto:1,dentist:1,chiropractor:1,medspa:1,lawyer:1,vet:1};
+  var trade = '', city = '';
+  function sync(){
+    var links = document.querySelectorAll('a[href^="/audit/"]');
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i], href = a.getAttribute('href'), qi = href.indexOf('?');
+      var params = new URLSearchParams(qi > -1 ? href.slice(qi + 1) : '');
+      if (trade) params.set('trade', trade);
+      if (city) params.set('city', city);
+      a.setAttribute('href', '/audit/?' + params.toString());
+    }
+  }
+  document.addEventListener('rw:trade', function(e){ if (TRADES[e.detail]) { trade = e.detail; sync(); } });
+  var tSel = document.getElementById('ccTrade'), cSel = document.getElementById('ccCity');
+  if (tSel) tSel.addEventListener('change', function(){ if (TRADES[tSel.value]) { trade = tSel.value; sync(); } });
+  if (cSel) cSel.addEventListener('change', function(){ if (cSel.value) { city = cSel.value; sync(); } });
+})();
+</script>
 </body>
 </html>
