@@ -967,6 +967,13 @@ section{padding:80px 24px}
 .svc-list{border-top:1px solid var(--hairline)}
 .svc-list div{padding:8px 0;border-bottom:1px solid var(--hairline);font-size:.875rem;color:var(--ink)}
 .svc-source{font-size:.6875rem;color:var(--muted);margin-top:8px;letter-spacing:.04em}
+.addon-band{margin-top:34px;padding-top:18px;border-top:1px solid var(--hairline)}
+.addon-kicker{font-size:.6875rem;color:var(--muted);letter-spacing:.08em;margin:0 0 14px}
+.addon-items{display:grid;grid-template-columns:1fr 1fr;gap:12px 36px}
+.addon-items div{font-size:.875rem;line-height:1.55;color:var(--muted)}
+.addon-items strong{color:var(--ink);font-weight:700}
+.addon-note{font-size:.875rem;color:var(--ink);margin:16px 0 0}
+@media(max-width:760px){.addon-items{grid-template-columns:1fr}}
 
 @media(max-width:760px){
   .services-grid{grid-template-columns:1fr}
@@ -2030,6 +2037,16 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <div>Action-first weekly scorecard</div>
         </div>
       </article>
+    </div>
+    <div class="addon-band reveal in">
+      <p class="addon-kicker">ALSO ON TAP · ADD-ONS WHEN THEY EARN THEIR KEEP, NEVER THE HEADLINE</p>
+      <div class="addon-items">
+        <div><strong>AI-answer tracking (AEO).</strong> We track whether ChatGPT and Google&rsquo;s AI answers name you for local searches, and build toward being the name they give.</div>
+        <div><strong>AI receptionist.</strong> Missed and after-hours calls answered and captured, so the searches we win still become booked jobs.</div>
+        <div><strong>Call tracking &amp; recording.</strong> Tracked lines with transcripts, so results get counted in booked work, not clicks.</div>
+        <div><strong>Content engine.</strong> City pages and answer-first posts, drafted from real search data and published under your review.</div>
+      </div>
+      <p class="addon-note">The digital side of getting local customers, handled in one place, without the generic-agency sprawl.</p>
     </div>
     <!-- Steps cut (redundant with the audit section + the ch.05 timeline): engines above tell the system, ch.05 tells the timeline. Bridge kept, carries the #how nav anchor. -->
     <a class="bridge reveal" id="how" href="#results" aria-label="How it works: continue to the timeline">
