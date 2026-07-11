@@ -2350,13 +2350,23 @@ function evidenceBlock(it) {
     if (g.rating != null) parts.push('⭐ ' + esc(g.rating));
     if (g.reviews != null) parts.push(esc(num(g.reviews)) + ' reviews');
     if (g.category) {
-      // Trade-agnostic category read (W-5): the pipeline now spans 11 categories, so the
-      // old hardcoded HVAC vocab mislabelled a correct "Plumber"/"Electrician" as "(not HVAC)".
-      // With no trade/expected-vocab in the payload we only flag a genuinely generic primary
-      // — never assert a wrong trade. (A positive trade-match highlight returns once ingest
-      // carries the expected category — deferred to the backend gbp_category_gap.)
-      const _generic = /^\s*(general\s+)?(contractor|home\s+services?|business|establishment|repair\s+service|services?)\s*$/i.test(g.category);
-      parts.push('<span' + (_generic ? ' style="color:var(--warn)"' : '') + '>' + esc(g.category) + (_generic ? ' (too generic)' : '') + '</span>');
+      // Trade-aware category read (W / 023579d): the backend now emits gbp.category_match
+      // ('match' | 'generic' | 'wrong-trade') + gbp.trade. Render the POSITIVE match, an
+      // ACCURATE wrong-trade flag naming the emitted trade (never a false "not HVAC"), or the
+      // generic flag. Fall back to the old generic-only heuristic — which never asserts a
+      // wrong trade — when category_match is absent (older / un-repushed rows).
+      const _cm = g.category_match ? String(g.category_match).toLowerCase() : '';
+      const _trade = g.trade ? String(g.trade) : '';
+      if (_cm === 'match') {
+        parts.push('<span style="color:var(--ok)">' + esc(g.category) + (_trade ? ' ✓ matches ' + esc(_trade) : ' ✓ category match') + '</span>');
+      } else if (_cm === 'wrong-trade') {
+        parts.push('<span style="color:var(--bad)">' + esc(g.category) + (_trade ? ' — not ' + esc(_trade) : ' — wrong trade') + '</span>');
+      } else if (_cm === 'generic') {
+        parts.push('<span style="color:var(--warn)">' + esc(g.category) + ' (too generic)</span>');
+      } else {
+        const _generic = /^\s*(general\s+)?(contractor|home\s+services?|business|establishment|repair\s+service|services?)\s*$/i.test(g.category);
+        parts.push('<span' + (_generic ? ' style="color:var(--warn)"' : '') + '>' + esc(g.category) + (_generic ? ' (too generic)' : '') + '</span>');
+      }
     }
     dl += '<dt>Google</dt><dd>' + (parts.join(' · ') || '—') + '</dd>';
   } else {
@@ -3900,6 +3910,10 @@ async function renderOps() {
   const clientsCaption = clientsCount ? (clientsCount + ' external' + (internalClients ? ' · ' + internalClients + ' internal (Rankwise)' : '')) : (internalClients ? '0 external · ' + internalClients + ' internal (Rankwise)' : 'none mapped');
   const clientChanges = asArr(p.client_changes || p.client_activity || p.changes || p.recent_changes);
   const plannedContent = asArr(p.content_calendar || p.content_plan || p.planned_content || p.calendar || co.calendar || co.plan);
+  // Held content (46d1f73): a SEPARATE array (approval_status:'hold') the backend keeps out
+  // of content_items on purpose — held items are itemized for review but NOT one-tap-publishable.
+  // Never fold these into the approvable lane; render View-only below.
+  const onHoldItems = asArr(p.on_hold_items);
   const workerRows = asArr(p.worker_health || p.workers || sys.worker_health || sys.workers || p.runs);
   const allowlist = asArr(p.action_allowlist || sys.action_allowlist || p.allowed_actions);
   const roleMappings = asArr(p.role_mappings || sys.role_mappings || p.users);
@@ -5428,6 +5442,52 @@ async function renderOps() {
     }
   } else {
     contH += '<div class="ops-empty"><b>No workflow rows yet</b>The content refresher fills this board as drafts and calendar items arrive.</div>';
+  }
+  contH += '</div>';
+
+  // On hold — human-flagged content (on_hold_items, 46d1f73). View-only: these are parked,
+  // NOT approvable, so no Approve / one-tap-publish button rides them. Itemized when the
+  // snapshot carries them; an honest count-only fallback keeps a bare hold count from reading
+  // as "nothing here".
+  contH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">On hold — human-flagged</h3>' +
+    '<span class="ops-count">' + (onHoldItems.length ? esc(plural(onHoldItems.length, 'item')) : (contentHold ? esc(contentHold) + ' held' : 'none')) + '</span></div>';
+  if (onHoldItems.length) {
+    contH += '<div class="ops-pad" style="border-bottom:1px solid var(--border-1)"><p class="ops-muted" style="margin:0">Parked by a human pass — review only, not one-tap publishable. Clear the hold at the source before these can move.</p></div>';
+    contH += '<ul class="ops-list">';
+    for (const item of onHoldItems.slice(0, 12)) {
+      const _reason = item.hold_reason || item.reason || item.flag_reason || '';
+      const _rec = {
+        kind: 'Content on hold',
+        title: contentTitle(item),
+        sub: contentMeta(item) || _reason,
+        meta: [
+          { label:'Status', value:'On hold', tone:'warn' },
+          { label:'Client', value:item.client_name || item.client_key || item.client, tone:'info' },
+          { label:'Flagged by', value:item.flagged_by || item.owner, tone:'info' },
+        ],
+        bodyHtml:
+          drawerSection('Why it is held', _reason ? '<p class="ops-muted" style="margin:0">' + esc(_reason) + '</p>' : '<p class="ops-muted" style="margin:0">A human flagged this item to hold; no reason recorded in this snapshot.</p>') +
+          drawerSection('Details', drawerFields([
+            ['Title', contentTitle(item)],
+            ['Client', item.client_name || item.client_key || item.client],
+            ['Channel', item.channel || item.target || item.type],
+            ['Flagged by', item.flagged_by || item.owner],
+            ['Held at', item.held_at || item.updated_at || item.created_at],
+          ])),
+      };
+      contH += '<li class="ops-li"><span class="ops-pill warn">hold</span>' +
+        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(contentTitle(item)) + '</div>' +
+        '<div class="ops-li-meta">' + esc(contentMeta(item) || _reason || 'human-flagged, on hold') + '</div></div>' +
+        recordButton(_rec, 'View') + '</li>';
+    }
+    contH += '</ul>';
+    if (onHoldItems.length > 12) {
+      contH += '<p class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">Showing 12 of ' + esc(onHoldItems.length) + ' held items.</p>';
+    }
+  } else if (contentHold) {
+    contH += '<div class="ops-empty"><b>' + esc(contentHold) + ' on hold</b>Held items are counted upstream but not itemized in this snapshot.</div>';
+  } else {
+    contH += '<div class="ops-empty"><b>Nothing on hold</b>Human-flagged items that need a manual pass before they can move appear here.</div>';
   }
   contH += '</div>';
 
@@ -7429,10 +7489,15 @@ async function renderClient(key) {
       h += '<section class="role-card"><h3>Where you rank on Google</h3>' +
         '<p class="role-empty">Baseline captured for <b>' + esc(rankTotal) + '</b> target terms — none are in the tracked top results yet. This is the starting line we grow from; first movement usually shows over the first few content + local cycles.</p></section>';
     } else {
+      // Per-row measurement provenance (46d1f73): device / location / checked_at now ride
+      // each ranking row. Show a compact "desktop · <location> · checked <date>" subline so a
+      // client can tell where/when/how a rank was measured. Honest-omit any field the row lacks.
+      const _rankProv = (r) => [r.device, r.location, r.checked_at ? 'checked ' + ptDayShort(r.checked_at) : ''].filter(Boolean).join(' · ');
       h += '<section class="role-card"><h3>Where you rank on Google</h3>' +
         '<p class="mut" style="margin:0 0 8px">Ranking in <b>' + esc(_rankedRows) + '</b> of ' + esc(rankTotal) + ' tracked terms.</p>' +
         '<table class="role-table"><tr><th>Search</th><th class="num">Maps</th><th class="num">Organic</th></tr>' +
-        p.rankings.map((r) => '<tr><td>' + esc(r.keyword) + '</td><td class="num">' + (r.local == null ? "—" : "#" + esc(r.local)) + '</td><td class="num">' + (r.organic == null ? "—" : "#" + esc(r.organic)) + '</td></tr>').join("") +
+        p.rankings.map((r) => { const _prov = _rankProv(r);
+          return '<tr><td>' + esc(r.keyword) + (_prov ? '<span class="mut" style="display:block;font-size:var(--fs-1);font-weight:400">' + esc(_prov) + '</span>' : '') + '</td><td class="num">' + (r.local == null ? "—" : "#" + esc(r.local)) + '</td><td class="num">' + (r.organic == null ? "—" : "#" + esc(r.organic)) + '</td></tr>'; }).join("") +
         '</table><p class="mut" style="margin-top:9px">A dash means the term is not in the tracked top results yet.' + esc(rankCapNote) + '</p></section>';
     }
   } else {
@@ -7562,4 +7627,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: d449490d0d9e -->
+<!-- rankwise-portal-version: e47d623f532d -->
