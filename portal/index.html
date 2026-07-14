@@ -977,6 +977,7 @@ const ACTIONS = Object.assign(Object.create(null), {
   opsClientDetail: (arg) => opsClientDetail(arg),
   opsClientDetailFromRecord: (arg) => { opsCloseRecord(); opsClientDetail(arg); },
   submitPublishPreview: (arg) => submitPublishPreview(arg),
+  submitPublishLive: (arg) => submitPublishLive(arg),
   // Pass Y: the (i) affordance on a metric — surfaces its jargon explanation (was
   // title=-only, unreachable on touch/keyboard) into the aria-live toast on tap/Enter.
   metricInfo: (_arg, el) => { const tip = el.getAttribute("data-tip") || ""; if (tip) toast(tip, "", 6000); },
@@ -1049,8 +1050,8 @@ function sellerName() {
     return lp ? lp.charAt(0).toUpperCase() + lp.slice(1) : "[SELLER NAME]";
   } catch { return "[SELLER NAME]"; }
 }
-// Safe global placeholder fill (no regex pitfalls). Callers MUST esc() the result
-// (full_name is user-modifiable → self-XSS otherwise).
+// Safe global placeholder fill (no regex pitfalls). full_name is user-modifiable,
+// so callers MUST esc() the result before inserting it into markup.
 function fillSellerName(s) { return (s || "").split("[SELLER NAME]").join(sellerName()); }
 const PT = "America/Vancouver";
 const ptDay = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: PT });
@@ -1226,15 +1227,35 @@ function googleLogin() {
 
 // Catch auth redirects (OAuth sign-in AND password-recovery links both return
 // tokens in the URL hash — implicit flow).
+// Pass V-b: only adopt a hash token that is shaped like a genuine auth callback
+// for THIS project — a well-formed JWT issued by our own auth server and not yet
+// expired. A link crafted with a foreign or malformed token pair is ignored (and
+// the hash is still stripped) so a URL can never silently seed someone else's session.
+function _isProjectAuthToken(t) {
+  try {
+    const parts = String(t || "").split(".");
+    if (parts.length !== 3) return false;
+    const p = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (typeof p.iss !== "string" || p.iss.indexOf(SB) !== 0) return false;      // our project only
+    if (typeof p.exp !== "number" || p.exp * 1000 <= Date.now()) return false;   // not already expired
+    return true;
+  } catch { return false; }
+}
 (function () {
   if (!location.hash) return;
   const h = new URLSearchParams(location.hash.slice(1));
   let hadAuth = false;
   if (h.get("access_token")) {
     hadAuth = true;
-    localStorage.setItem("rw_tok", h.get("access_token"));
-    if (h.get("refresh_token")) localStorage.setItem("rw_rtok", h.get("refresh_token"));
-    if (h.get("type") === "recovery" || h.get("type") === "invite") window._recovery = true;
+    const at = h.get("access_token");
+    if (_isProjectAuthToken(at)) {
+      localStorage.setItem("rw_tok", at);
+      if (h.get("refresh_token")) localStorage.setItem("rw_rtok", h.get("refresh_token"));
+      if (h.get("type") === "recovery" || h.get("type") === "invite") window._recovery = true;
+    } else {
+      // Unverifiable token in the URL — never adopt it; surface a benign error instead.
+      window._oauthErr = "Sign-in link could not be verified — request a fresh one.";
+    }
   } else if (h.get("error_description") || h.get("error")) {
     hadAuth = true;
     window._oauthErr = h.get("error_description") || "Sign-in failed";
@@ -1269,8 +1290,25 @@ async function setNewPassword(e) {
 // The access token expires (Supabase default 1h). Before this, the first 401
 // after expiry dumped the user to the login screen mid-shift with full state
 // loss. Now we keep the refresh token and renew silently, once, then retry.
-function clearTokens() { localStorage.removeItem("rw_tok"); localStorage.removeItem("rw_rtok"); }
-function logout() { clearTokens(); render(); }
+function clearTokens() {
+  localStorage.removeItem("rw_tok"); localStorage.removeItem("rw_rtok");
+  // Pass V-d: purge role-gated cached payloads on every session teardown so a shared
+  // device never retains the previous login's data. The 513KB market-map cache and the
+  // client-only milestone flags both rebuild from the server on the next authed load.
+  localStorage.removeItem("rw_mmap_payload"); localStorage.removeItem("rw_mmap_ver");
+  localStorage.removeItem("rw_seller_milestones");
+}
+// Pass V-a: an explicit Log out must end the session server-side, not just drop the
+// local copy — clearing localStorage alone leaves the refresh token usable, so whoever
+// held it could keep renewing. Revoke first (best-effort: a dead or offline token must
+// still log out locally), then clear + repaint.
+async function logout() {
+  try {
+    if (tok()) await fetch(SB + "/auth/v1/logout?scope=global", { method: "POST", headers: hdr() });
+  } catch (e) { /* offline / already-expired: fall through to local teardown */ }
+  clearTokens();
+  render();
+}
 // Single-flight the session-give-up (finding 11). refreshSession() is already collapsed
 // onto one round-trip, but the give-up path was not: a burst of concurrent 401s each ran
 // clearTokens()+render() → N logins painted. The FIRST give-up clears the token; the rest
@@ -1516,12 +1554,21 @@ async function submitGoliveVerified(btn) {
   await enqueueAction("golive.mark_verified", { check: check });
 }
 
-// publishing.dispatch (form-only): DRY-RUN preview only. The worker refuses a real publish
-// server-side (targeted publish+push is a tracked follow-up), so this shows what WOULD publish in
-// the action result; real go-live stays on the CLI/cron.
+// publishing.dispatch (form-only): DRY-RUN preview only — shows what WOULD publish in the
+// action result. Nothing is written; the sibling submitPublishLive() (below) is the button
+// that actually ships a draft live.
 async function submitPublishPreview(contentId) {
   if (!contentId) { toast("No content id", "err"); return; }
   await enqueueAction("publishing.dispatch", { content_id: contentId });
+}
+
+// publishing.dispatch confirm=true (form-only, operator-only): the ONLY control that ships a
+// draft live to rankwise.ca. A native confirm() gate (mirrors submitGoliveVerified/submitRevenue)
+// before the queue write — the worker re-validates + stamps approvedBy server-side regardless.
+async function submitPublishLive(contentId) {
+  if (!contentId) { toast("No content id", "err"); return; }
+  if (!confirm("This publishes to the live rankwise.ca site. Continue?")) return;
+  await enqueueAction("publishing.dispatch", { content_id: contentId, confirm: true });
 }
 
 // A paying customer should never type into a native `rankwise.ca says…` prompt().
@@ -3304,7 +3351,7 @@ function opsMmapRun(cv, data) {
 // approved _dev/system-map-2026-07-05.html form (3 swimlanes, elbow edges,
 // gate/lock pills, inspector) onto the portal's own tokens. ALL payload
 // strings land via textContent/createElementNS — never string-built markup —
-// so the service-key-written block is still treated as data (XSS hygiene).
+// so the payload is always treated as data, never as markup.
 const SYSMAP_DOT = { LIVE:'var(--ok)', ARMED:'var(--warn)', GATED:'var(--accent)', DEAD:'var(--bad)', UNKNOWN:'#9aa7b1' };
 const SYSMAP_LBL = { LIVE:'LIVE', ARMED:'ARMED', GATED:'BLOCKED', DEAD:'BROKEN', UNKNOWN:'UNKNOWN' };
 function opsSysmapBoot() {
@@ -5434,6 +5481,7 @@ async function renderOps() {
         (lane === 'approval' ? actionButton('content.reject', 'Changes', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') +
         (lane === 'draft' || lane === 'approval' ? actionButton('content.rewrite_preview', 'Preview rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') +
         (lane === 'ready' || lane === 'scheduled' ? '<button class="ops-btn ghost ops-actionbtn" data-act="submitPublishPreview" data-arg="' + esc(contentId) + '" title="dry-run preview — nothing published"><b>Preview publish</b><span>dry-run</span></button>' : '') +
+        (lane === 'ready' || lane === 'scheduled' ? '<button class="ops-btn primary ops-actionbtn" data-act="submitPublishLive" data-arg="' + esc(contentId) + '" title="publishes to the live rankwise.ca site"><b>Publish (go live)</b><span>ships now</span></button>' : '') +
         '</li>';
     }
     contH += '</ul>';
@@ -6406,7 +6454,9 @@ async function renderOps() {
           ['Integration', item.integration || item.name || item.label],
           ['Next prerequisite', item.next_prerequisite || item.next],
           ['Missing', item.missing || item.blocker || item.blocked_by],
-          ['Credential state', item.credential_status || item.credentials || item.secret_status],
+          // Pass V-c: render only a non-sensitive state enum (configured/missing/expired).
+          // Never fall back to item.credentials — that key can carry a raw secret value.
+          ['Credential state', item.credential_status || item.secret_status],
           ['Outward send', item.outward_send || item.public_send],
           ['Notes', item.note || item.detail],
         ])) +
@@ -6584,13 +6634,15 @@ async function renderOps() {
       const live = actionAllowed(a);
       return '<span class="ops-pill ' + (live ? 'ok' : 'dim') + '">' + esc(a) + '</span>';
     }).join('') + '</div></div></div>';
+  // Pass V-e: describe each handoff by its FUNCTION, not by backend table/column
+  // identifiers — internal schema names must not ship in the operator artifact.
   const handoffRows = [
-    { title:'Universal command queue', read:universalCommands.length, write:'command_queue/execution_queue optional', note:'Emit owner, priority, lifecycle, due, tab, action and params.' },
-    { title:'Object lifecycle states', read:'frontend-ready', write:'lifecycle_state on command/content/client/proof rows', note:'Use new, waiting, doing, blocked, shipped, proof, seen.' },
-    { title:'Client proof digest', read:proofEvents.length + clientDigests.length, write:'client progress_digest/client_digest', note:'Keep client-safe. Include highlights, proof, next, asks, artifact URLs.' },
-    { title:'Seller call cockpit', read:s.active ? 'seller live' : 'needs seller snapshot', write:'seller_ops_snapshot coaching fields', note:'Emit call priorities, lead quality reason, objections, disposition history.' },
+    { title:'Universal command queue', read:universalCommands.length, write:'command queue (optional)', note:'Emit owner, priority, lifecycle, due, tab, action and params.' },
+    { title:'Object lifecycle states', read:'frontend-ready', write:'lifecycle state per object', note:'Use new, waiting, doing, blocked, shipped, proof, seen.' },
+    { title:'Client proof digest', read:proofEvents.length + clientDigests.length, write:'client progress digest', note:'Keep client-safe. Include highlights, proof, next, asks, artifact URLs.' },
+    { title:'Seller call cockpit', read:s.active ? 'seller live' : 'needs seller snapshot', write:'seller snapshot coaching fields', note:'Emit call priorities, lead quality reason, objections, disposition history.' },
     { title:'Record drawer detail', read:'frontend-ready', write:'child rows on each payload group', note:'Every object needs source, owner, freshness, action, evidence and audit IDs.' },
-    { title:'Write handlers + audit', read:allowlist.length || 'safe defaults', write:'operator_action_queue workers', note:'Do not expose allowlist actions until CHECK constraints, RLS and audit events exist.' },
+    { title:'Write handlers + audit', read:allowlist.length || 'safe defaults', write:'action-queue workers', note:'Do not expose allowlist actions until constraints, role isolation and audit events exist.' },
   ];
   settingsH += '<details style="margin-top:16px"><summary style="cursor:pointer;color:var(--text-2);padding:8px 0;font-size:var(--fs-3)">Developer / QA tools — allowlist, backend handoff map + RLS check</summary>';
   settingsH += allowlistPanel;
@@ -6601,7 +6653,7 @@ async function renderOps() {
         '<div class="ops-handoff-sub">' + esc(row.note) + '</div></div>';
     }).join('') + '</div></div>';
   settingsH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">RLS QA ergonomics</h3><span class="ops-count">local checks</span></div>' +
-    '<div class="ops-pad"><div class="ops-codeblock">RW_PORTAL_OPERATOR_TOKEN=... RW_PORTAL_SELLER_TOKEN=... RW_PORTAL_CLIENT_TOKEN=... npm run test:portal:rls</div>' +
+    '<div class="ops-pad"><div class="ops-muted">Role-isolation (RLS) checks run from the internal ops toolkit; the exact command and tokens live in the internal QA runbook, deliberately kept out of this artifact.</div>' +
     '<div class="ops-muted" style="margin-top:10px">Expected: operator sees every command surface, seller sees only outreach, client sees only one mapped snapshot.</div></div></div>';
   settingsH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Snapshot telemetry</h3><span class="ops-count">internal identifiers</span></div>' +
     '<div class="ops-pad"><div class="status-row" style="margin:0">' +
@@ -7627,4 +7679,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: e47d623f532d -->
+<!-- rankwise-portal-version: b7f4612e6e67 -->
