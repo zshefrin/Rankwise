@@ -128,7 +128,7 @@
       "name": "How much does it cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Rankwise has two set rates: Foundation at $750 per month and Growth at $1,250 per month — month-to-month, no long contracts, no negotiation. Foundation is the core Maps program for one city; Growth adds city expansion and content — a wider footprint, not a bigger version of the same plan. For scale: across these categories, one new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself. Book the free audit and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call."
+        "text": "Rankwise has three set rates: Starter at $450 per month, Foundation at $750, and Growth at $1,250 — month-to-month, no long contracts, no negotiation. Starter gets your Google Business Profile fully optimized, with weekly rank tracking. Foundation is the complete Maps engine for one city. Growth adds analytics, content, and room to expand across 2 to 3 cities. For scale: across these categories, one new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself. Book the free audit and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call."
       }
     },
     {
@@ -2294,10 +2294,95 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
   </div>
 </section>
 
+<style>
+/* one artifact: a single filed table. Shadow needs breathing room inside the
+   scroll container or overflow-x clips it. */
+.cmp5-wrap{margin-top:48px;overflow-x:auto;padding:2px 14px 16px 2px}
+.cmp5{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;
+  border:1.5px solid var(--ink);background:#FCFBF6;box-shadow:8px 8px 0 rgba(0,0,0,.32)}
+.cmp5 th,.cmp5 td{text-align:center;vertical-align:top}
+.cmp5 .feat,.cmp5 .grp td{text-align:left}
+.cmp5 thead th{padding:50px 18px 18px;border-bottom:1.5px solid var(--ink);position:relative}
+.cmp5 thead th.hl-h{background:rgba(198,138,58,.07)}
+.cmp5 .t-name{display:block;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:1.0625rem;color:var(--ink);letter-spacing:-.01em}
+.cmp5 .t-price{display:block;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:1.875rem;letter-spacing:-.02em;color:var(--ink);margin-top:6px}
+.cmp5 .t-price span{font-size:.8125rem;font-weight:400;color:var(--muted);font-family:inherit;letter-spacing:0}
+.cmp5 .t-who{display:block;font-weight:400;font-size:.78rem;color:var(--muted);margin-top:6px;line-height:1.45}
+.cmp5 .t-chip{position:absolute;top:17px;left:50%;transform:translateX(-50%);background:var(--forest);color:var(--on-forest);font-size:.59rem;font-weight:700;letter-spacing:.12em;padding:3px 9px;border-radius:var(--pill-radius);white-space:nowrap}
+.cmp5 .grp td{padding:26px 18px 6px;font-size:.6875rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:rgba(27,28,24,.45)}
+.cmp5 tbody td{padding:13px 18px;border-top:1px solid rgba(27,28,24,.1)}
+.cmp5 tbody tr.grp td{border-top:none}
+.cmp5 .feat{font-size:.875rem;color:var(--ink);width:44%;line-height:1.45}
+.cmp5 .feat small{display:block;font-size:.75rem;color:var(--muted);margin-top:3px;line-height:1.5;font-weight:400}
+.cmp5 td.yes{color:var(--good-text);font-weight:700;font-size:1.0625rem}
+.cmp5 td.no{color:rgba(27,28,24,.22);font-size:1rem}
+.cmp5 td.txt{font-size:.75rem;color:var(--ink);line-height:1.5;padding-top:15px}
+.cmp5 col.hl{background:rgba(198,138,58,.05)}
+.cmp5 tfoot td{border-top:1.5px solid var(--ink);padding:14px 18px;font-size:.6875rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,24,.55);text-align:center}
+.cmp5-cta{margin-top:26px;text-align:center;font-size:.9375rem}
+.cmp5-cta a{color:var(--amber-text);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.cmp5-hint{display:none;text-align:right;font-size:.6875rem;letter-spacing:.06em;color:var(--muted);margin:0 6px 6px 0}
+/* mobile: pin the feature column, let tier columns swipe under it */
+@media(max-width:760px){
+  .cmp5{min-width:600px}
+  .cmp5 .feat{width:172px;min-width:172px;max-width:172px}
+  .cmp5 td.feat,.cmp5 th.feat,.cmp5 .grp td{position:sticky;left:0;background:#FCFBF6;z-index:1;box-shadow:1px 0 0 rgba(27,28,24,.12)}
+  .cmp5 thead th{padding:42px 12px 14px}
+  .cmp5 .t-price{font-size:1.4375rem}
+  .cmp5 tbody td{padding:12px 12px}
+  .cmp5-hint{display:block}
+}
+</style>
+
+<section id="plans">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="section-label">08 · The plans, stated plainly</div>
+      <h2 style="max-width:720px">Three set rates. Compare them line by line.</h2>
+      <p class="section-sub">Fixed plans, month to month &mdash; not negotiation. Every line below is work we actually do &mdash; and your portal shows you the numbers as they move.</p>
+    </div>
+    <div class="cmp5-wrap reveal in">
+      <p class="cmp5-hint" aria-hidden="true">Swipe to compare &rarr;</p>
+      <table class="cmp5">
+        <colgroup><col><col><col class="hl"><col></colgroup>
+        <thead><tr>
+          <th class="feat" aria-label="Feature"></th>
+          <th><span class="t-name">Starter</span><span class="t-price">$450<span>/mo</span></span><span class="t-who">Get the profile right, then upgrade</span></th>
+          <th class="hl-h"><span class="t-chip">MOST POPULAR</span><span class="t-name">Foundation</span><span class="t-price">$750<span>/mo</span></span><span class="t-who">The full engine, one city</span></th>
+          <th><span class="t-name">Growth</span><span class="t-price">$1,250<span>/mo</span></span><span class="t-who">Analytics, content + room to grow</span></th>
+        </tr></thead>
+        <tbody>
+<tr class="grp"><td colspan="4">The engine</td></tr>
+<tr><td class="feat">Google Business Profile — full audit + optimization<small>Category, description, services, service area, Q&amp;A</small></td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Profile actively maintained, month after month</td><td class="no">&mdash;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Live profile performance in your portal<small>Searches, calls, direction requests — from Google&rsquo;s own API</small></td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Weekly rank tracking — 5 core searches<small>Your true Map Pack position, every week</small></td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Competitor watch<small>The three Map Pack slots, their review counts, their movement</small></td><td class="no">&mdash;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr class="grp"><td colspan="4">Reviews &amp; content</td></tr>
+<tr><td class="feat">Review request system — templates + timing</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">AI-drafted review responses — you approve</td><td class="no">&mdash;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">4 profile posts a month, written + published</td><td class="no">&mdash;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">1 local SEO article a month<small>Aimed at within-reach Search Console terms</small></td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+<tr class="grp"><td colspan="4">Intelligence &amp; reach</td></tr>
+<tr><td class="feat">Google Analytics + Search Console wired in<small>Real traffic, engagement, and form-fill data</small></td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Quarterly competitor gap deep-dive</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Multi-city expansion — 2&ndash;3 cities<small>Optional, as you grow</small></td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+<tr class="grp"><td colspan="4">Reporting &amp; the guarantee</td></tr>
+<tr><td class="feat">Client portal login — your numbers, live</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+<tr><td class="feat">Plain-English monthly report</td><td class="txt">Snapshot</td><td class="txt">Full one-pager</td><td class="txt">Full one-pager</td></tr>
+<tr><td class="feat">The written billing-pause guarantee<small>Documented before month one; miss it and billing pauses</small></td><td class="txt">Optimization done in 30 days</td><td class="txt">90-day Map Pack milestone</td><td class="txt">90-day milestone, primary city</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="4">Month to month &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Three set rates &mdash; not negotiation</td></tr></tfoot>
+      </table>
+    </div>
+    <p class="cmp5-cta reveal in">See your own numbers first &mdash; <a href="#contact">book the free 15-minute audit</a>. We&rsquo;ll tell you which plan fits, or if none does.</p>
+  </div>
+</section>
+
 <section class="s-dark" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="section-label">08 · Your move: free audit</div>
+      <div class="section-label">09 · Your move: free audit</div>
       <h2 style="max-width:720px">See your Map Pack standing in 15 minutes.</h2>
       <p class="section-sub">We pull your live Map Pack data before the call, so you are looking at your own numbers, not someone else's testimonial.</p>
     </div>
@@ -2324,8 +2409,8 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         </div>
         <div class="rate-block">
           <span class="rate-kicker">THE RATE, STATED PLAINLY</span>
-          <p class="rate-line"><strong>Two set rates: $750/mo or $1,250/mo</strong>, month to month. Fixed plans, not negotiation.</p>
-          <p style="margin-top:8px;font-size:.875rem;color:var(--muted);line-height:1.6">Foundation at $750 covers the core Maps program for one city. Growth at $1,250 adds city expansion and content — a wider footprint, not a bigger version of the same plan.</p>
+          <p class="rate-line"><strong>Three set rates: $450, $750 or $1,250/mo</strong>, month to month. Fixed plans, not negotiation.</p>
+          <p style="margin-top:8px;font-size:.875rem;color:var(--muted);line-height:1.6">Starter gets your profile right. Foundation runs the complete Maps engine in one city. Growth adds analytics, content and room to expand. The full line-by-line comparison is one section up.</p>
         </div>
       </div>
       <div class="close-right">
@@ -2361,7 +2446,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <div class="faq-list reveal in">
     <details class="faq-entry" name="rw-faq" open>
       <summary><span class="faq-num" aria-hidden="true">A&middot;01</span><span class="faq-question">How much does it cost?</span><span class="faq-x" aria-hidden="true">+</span></summary>
-      <div class="faq-answer">Rankwise has two set rates: Foundation at $750 per month and Growth at $1,250 per month — month-to-month, no long contracts, no negotiation. Foundation is the core Maps program for one city; Growth adds city expansion and content — a wider footprint, not a bigger version of the same plan. For scale: across these categories, one new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself. Book the free audit and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call.</div>
+      <div class="faq-answer">Rankwise has three set rates: Starter at $450 per month, Foundation at $750, and Growth at $1,250 — month-to-month, no long contracts, no negotiation. Starter gets your Google Business Profile fully optimized, with weekly rank tracking. Foundation is the complete Maps engine for one city. Growth adds analytics, content, and room to expand across 2 to 3 cities. For scale: across these categories, one new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself. Book the free audit and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call.</div>
     </details>
     <details class="faq-entry" name="rw-faq">
       <summary><span class="faq-num" aria-hidden="true">A&middot;02</span><span class="faq-question">Am I locked into a contract?</span><span class="faq-x" aria-hidden="true">+</span></summary>
