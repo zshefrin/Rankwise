@@ -1960,11 +1960,12 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="readout-sub">Monthly local searches</span>
         </div>
         <ol class="readout-list" id="readoutList">
-          <li class="readout-row" data-city="Vancouver"><span class="readout-rank">1</span><span class="readout-name">Vancouver</span><span class="readout-val">520</span><span class="readout-bar"><i style="width:100%"></i></span></li>
-          <li class="readout-row" data-city="Surrey"><span class="readout-rank">2</span><span class="readout-name">Surrey</span><span class="readout-val">470</span><span class="readout-bar"><i style="width:90%"></i></span></li>
-          <li class="readout-row" data-city="Burnaby"><span class="readout-rank">3</span><span class="readout-name">Burnaby</span><span class="readout-val">310</span><span class="readout-bar"><i style="width:60%"></i></span></li>
+          <li class="readout-row" data-city="Vancouver"><span class="readout-rank">1</span><span class="readout-name">Vancouver</span><span class="readout-val">3600</span><span class="readout-bar"><i style="width:100%"></i></span></li>
+          <li class="readout-row" data-city="Surrey"><span class="readout-rank">2</span><span class="readout-name">Surrey</span><span class="readout-val">1900</span><span class="readout-bar"><i style="width:53%"></i></span></li>
+          <li class="readout-row" data-city="Coquitlam"><span class="readout-rank">3</span><span class="readout-name">Coquitlam</span><span class="readout-val">1600</span><span class="readout-bar"><i style="width:44%"></i></span></li>
         </ol>
-        <p class="readout-foot" id="readoutTotal">About <strong>3,230</strong> searches a month across these regions. Most go to the top three. That is the demand we win for you.</p>
+        <p class="readout-foot" id="readoutTotal">About <strong>13,900</strong> searches a month across these regions. Most go to the top three. That is the demand we win for you.</p>
+        <p class="readout-foot" style="margin-top:6px;font-size:.75rem;opacity:.72">Google search volume for each trade's lead search term by city, pulled July 2026. Cities under the 10-search reporting floor show as &lt;10.</p>
       </aside>
     </div>
     <div class="region-under reveal in">
@@ -2663,29 +2664,28 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
 </script>
 
 <script>
-/* Region demand map, illustrative monthly local-search estimates (no network) */
+/* Region demand map — real monthly Google search volume (Keyword Planner data)
+   for each trade's lead search term + city, e.g. "plumber Vancouver"; the HVAC
+   lane uses "furnace repair" (how homeowners actually search). Fetched
+   2026-07-18; 0 = below the reporting floor (<10/mo), rendered as "<10".
+   Data is baked in at edit time — no network calls at runtime. */
 (function(){
   var root=document.getElementById('cities');
   if(!root)return;
   var SEARCHES={
-    plumber:{"Vancouver":520,"Surrey":470,"Burnaby":310,"Richmond":300,"Coquitlam":210,"Langley":200,"Abbotsford":180,"North Vancouver":170,"Maple Ridge":150,"Delta":140,"New Westminster":120,"Port Coquitlam":110,"Mission":90,"West Vancouver":80,"Port Moody":75,"White Rock":60,"Pitt Meadows":45},
-    electrician:{"Vancouver":410,"Surrey":380,"Burnaby":250,"Richmond":240,"Coquitlam":170,"Langley":160,"Abbotsford":145,"North Vancouver":135,"Maple Ridge":120,"Delta":110,"New Westminster":95,"Port Coquitlam":90,"Mission":70,"West Vancouver":65,"Port Moody":60,"White Rock":50,"Pitt Meadows":35},
-    hvac:{"Vancouver":470,"Surrey":420,"Burnaby":280,"Richmond":270,"Coquitlam":190,"Langley":180,"Abbotsford":160,"North Vancouver":150,"Maple Ridge":135,"Delta":125,"New Westminster":105,"Port Coquitlam":100,"Mission":80,"West Vancouver":70,"Port Moody":65,"White Rock":55,"Pitt Meadows":40},
-    dentist:{"Vancouver":680,"Surrey":610,"Burnaby":400,"Richmond":390,"Coquitlam":270,"Langley":260,"Abbotsford":230,"North Vancouver":220,"Maple Ridge":195,"Delta":180,"New Westminster":155,"Port Coquitlam":145,"Mission":115,"West Vancouver":105,"Port Moody":95,"White Rock":80,"Pitt Meadows":60},
-    auto:{"Vancouver":570,"Surrey":520,"Burnaby":340,"Richmond":330,"Coquitlam":230,"Langley":220,"Abbotsford":200,"North Vancouver":185,"Maple Ridge":165,"Delta":155,"New Westminster":130,"Port Coquitlam":120,"Mission":100,"West Vancouver":88,"Port Moody":82,"White Rock":66,"Pitt Meadows":50},
-    roofer:{"Vancouver":340,"Surrey":305,"Burnaby":200,"Richmond":195,"Coquitlam":135,"Langley":130,"Abbotsford":117,"North Vancouver":110,"Maple Ridge":98,"Delta":90,"New Westminster":78,"Port Coquitlam":72,"Mission":58,"West Vancouver":52,"Port Moody":48,"White Rock":39,"Pitt Meadows":29},
-    landscaper:{"Vancouver":380,"Surrey":350,"Burnaby":230,"Richmond":220,"Coquitlam":160,"Langley":150,"Abbotsford":135,"North Vancouver":125,"Maple Ridge":115,"Delta":105,"New Westminster":90,"Port Coquitlam":85,"Mission":70,"West Vancouver":62,"Port Moody":56,"White Rock":46,"Pitt Meadows":34},
-    medspa:{"Vancouver":460,"Surrey":410,"Burnaby":270,"Richmond":260,"Coquitlam":185,"Langley":175,"Abbotsford":150,"North Vancouver":140,"Maple Ridge":125,"Delta":115,"New Westminster":100,"Port Coquitlam":92,"Mission":72,"West Vancouver":64,"Port Moody":58,"White Rock":48,"Pitt Meadows":36},
-    lawyer:{"Vancouver":540,"Surrey":430,"Burnaby":290,"Richmond":280,"Coquitlam":195,"Langley":180,"Abbotsford":155,"North Vancouver":145,"Maple Ridge":125,"Delta":115,"New Westminster":100,"Port Coquitlam":90,"Mission":72,"West Vancouver":65,"Port Moody":58,"White Rock":48,"Pitt Meadows":36},
-    chiropractor:{"Vancouver":440,"Surrey":390,"Burnaby":260,"Richmond":250,"Coquitlam":180,"Langley":170,"Abbotsford":145,"North Vancouver":135,"Maple Ridge":120,"Delta":110,"New Westminster":95,"Port Coquitlam":88,"Mission":70,"West Vancouver":62,"Port Moody":56,"White Rock":46,"Pitt Meadows":34},
-    vet:{"Vancouver":480,"Surrey":430,"Burnaby":285,"Richmond":275,"Coquitlam":195,"Langley":185,"Abbotsford":160,"North Vancouver":150,"Maple Ridge":132,"Delta":122,"New Westminster":105,"Port Coquitlam":96,"Mission":76,"West Vancouver":68,"Port Moody":62,"White Rock":50,"Pitt Meadows":38},
-    cleaning:{"Vancouver":450,"Surrey":405,"Burnaby":270,"Richmond":260,"Coquitlam":180,"Langley":175,"Abbotsford":155,"North Vancouver":145,"Maple Ridge":130,"Delta":120,"New Westminster":105,"Port Coquitlam":95,"Mission":80,"West Vancouver":70,"Port Moody":65,"White Rock":50,"Pitt Meadows":40},
-    painter:{"Vancouver":360,"Surrey":325,"Burnaby":215,"Richmond":210,"Coquitlam":145,"Langley":140,"Abbotsford":125,"North Vancouver":120,"Maple Ridge":105,"Delta":95,"New Westminster":85,"Port Coquitlam":75,"Mission":60,"West Vancouver":55,"Port Moody":50,"White Rock":40,"Pitt Meadows":30},
-    mover:{"Vancouver":330,"Surrey":300,"Burnaby":195,"Richmond":190,"Coquitlam":135,"Langley":125,"Abbotsford":115,"North Vancouver":110,"Maple Ridge":95,"Delta":90,"New Westminster":75,"Port Coquitlam":70,"Mission":55,"West Vancouver":50,"Port Moody":50,"White Rock":40,"Pitt Meadows":30},
-    pest:{"Vancouver":290,"Surrey":260,"Burnaby":175,"Richmond":165,"Coquitlam":115,"Langley":110,"Abbotsford":100,"North Vancouver":95,"Maple Ridge":85,"Delta":80,"New Westminster":65,"Port Coquitlam":60,"Mission":50,"West Vancouver":45,"Port Moody":40,"White Rock":35,"Pitt Meadows":25},
-    garagedoor:{"Vancouver":260,"Surrey":235,"Burnaby":155,"Richmond":150,"Coquitlam":105,"Langley":100,"Abbotsford":90,"North Vancouver":85,"Maple Ridge":75,"Delta":70,"New Westminster":60,"Port Coquitlam":55,"Mission":45,"West Vancouver":40,"Port Moody":40,"White Rock":30,"Pitt Meadows":20}
+    plumber:{"Vancouver":3600,"Surrey":1900,"Burnaby":1000,"Richmond":590,"Coquitlam":1600,"Langley":1000,"Abbotsford":720,"North Vancouver":1000,"Maple Ridge":720,"Delta":70,"New Westminster":390,"Port Coquitlam":480,"Mission":110,"West Vancouver":260,"Port Moody":170,"White Rock":260,"Pitt Meadows":30},
+    electrician:{"Vancouver":1000,"Surrey":480,"Burnaby":480,"Richmond":170,"Coquitlam":480,"Langley":480,"Abbotsford":880,"North Vancouver":390,"Maple Ridge":170,"Delta":30,"New Westminster":170,"Port Coquitlam":70,"Mission":170,"West Vancouver":70,"Port Moody":140,"White Rock":50,"Pitt Meadows":20},
+    hvac:{"Vancouver":390,"Surrey":480,"Burnaby":260,"Richmond":30,"Coquitlam":320,"Langley":320,"Abbotsford":110,"North Vancouver":170,"Maple Ridge":110,"Delta":10,"New Westminster":30,"Port Coquitlam":50,"Mission":30,"West Vancouver":20,"Port Moody":30,"White Rock":10,"Pitt Meadows":10},
+    roofer:{"Vancouver":1000,"Surrey":260,"Burnaby":210,"Richmond":50,"Coquitlam":110,"Langley":110,"Abbotsford":0,"North Vancouver":170,"Maple Ridge":70,"Delta":0,"New Westminster":20,"Port Coquitlam":30,"Mission":0,"West Vancouver":30,"Port Moody":0,"White Rock":0,"Pitt Meadows":0},
+    landscaper:{"Vancouver":1300,"Surrey":720,"Burnaby":10,"Richmond":10,"Coquitlam":10,"Langley":390,"Abbotsford":10,"North Vancouver":210,"Maple Ridge":210,"Delta":0,"New Westminster":0,"Port Coquitlam":0,"Mission":0,"West Vancouver":40,"Port Moody":0,"White Rock":10,"Pitt Meadows":0},
+    auto:{"Vancouver":480,"Surrey":880,"Burnaby":590,"Richmond":170,"Coquitlam":70,"Langley":480,"Abbotsford":1300,"North Vancouver":260,"Maple Ridge":210,"Delta":30,"New Westminster":90,"Port Coquitlam":50,"Mission":40,"West Vancouver":20,"Port Moody":70,"White Rock":30,"Pitt Meadows":30},
+    painter:{"Vancouver":390,"Surrey":40,"Burnaby":20,"Richmond":390,"Coquitlam":30,"Langley":140,"Abbotsford":10,"North Vancouver":140,"Maple Ridge":90,"Delta":0,"New Westminster":0,"Port Coquitlam":0,"Mission":0,"West Vancouver":0,"Port Moody":0,"White Rock":0,"Pitt Meadows":0},
+    mover:{"Vancouver":4400,"Surrey":2400,"Burnaby":880,"Richmond":590,"Coquitlam":720,"Langley":1300,"Abbotsford":720,"North Vancouver":590,"Maple Ridge":260,"Delta":40,"New Westminster":260,"Port Coquitlam":110,"Mission":30,"West Vancouver":210,"Port Moody":90,"White Rock":210,"Pitt Meadows":20},
+    cleaning:{"Vancouver":720,"Surrey":170,"Burnaby":480,"Richmond":70,"Coquitlam":480,"Langley":140,"Abbotsford":480,"North Vancouver":590,"Maple Ridge":210,"Delta":10,"New Westminster":70,"Port Coquitlam":90,"Mission":10,"West Vancouver":30,"Port Moody":10,"White Rock":90,"Pitt Meadows":10},
+    pest:{"Vancouver":1300,"Surrey":1900,"Burnaby":590,"Richmond":390,"Coquitlam":880,"Langley":590,"Abbotsford":480,"North Vancouver":390,"Maple Ridge":320,"Delta":110,"New Westminster":170,"Port Coquitlam":90,"Mission":20,"West Vancouver":260,"Port Moody":40,"White Rock":70,"Pitt Meadows":30},
+    garagedoor:{"Vancouver":1300,"Surrey":720,"Burnaby":880,"Richmond":590,"Coquitlam":390,"Langley":480,"Abbotsford":210,"North Vancouver":260,"Maple Ridge":260,"Delta":70,"New Westminster":260,"Port Coquitlam":70,"Mission":20,"West Vancouver":170,"Port Moody":40,"White Rock":210,"Pitt Meadows":50}
   };
-  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",dentist:"Dentist",auto:"Auto repair",roofer:"Roofer",landscaper:"Landscaper",chiropractor:"Chiropractor",medspa:"Med spa",lawyer:"Lawyer",vet:"Veterinarian",painter:"Painter",mover:"Moving company",cleaning:"Cleaning service",pest:"Pest control",garagedoor:"Garage doors"};
+  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",auto:"Auto repair",roofer:"Roofer",landscaper:"Landscaper",painter:"Painter",mover:"Moving company",cleaning:"Cleaning service",pest:"Pest control",garagedoor:"Garage doors"};
   var areas=[].slice.call(root.querySelectorAll('.rm-area'));
   var btns=[].slice.call(root.querySelectorAll('.trade-btn'));
   var list=document.getElementById('readoutList');
@@ -2762,11 +2762,12 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
     if(topEl)topEl.textContent=rows[0].city;
     var html='';
     rows.forEach(function(r,i){
-      var pct=Math.round((r.v/max)*100);
+      var pct=max?Math.max(Math.round((r.v/max)*100),2):0;
+      var shown=r.v?r.v:'&lt;10';
       html+='<li class="readout-row" data-city="'+esc(r.city)+'">'+
         '<span class="readout-rank">'+(i+1)+'</span>'+
         '<span class="readout-name">'+esc(r.city)+'</span>'+
-        '<span class="readout-val">'+r.v+'</span>'+
+        '<span class="readout-val">'+shown+'</span>'+
         '<span class="readout-bar"><i style="width:'+pct+'%"></i></span></li>';
     });
     list.innerHTML=html;
