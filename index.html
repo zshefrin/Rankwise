@@ -480,6 +480,17 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
 .pack-search .ps-caret{width:11px;height:11px;flex-shrink:0;stroke:currentColor;transition:transform .16s ease}
 .pack-search[aria-expanded="true"] .ps-caret{transform:rotate(180deg)}
 .pack-search .loc{color:var(--muted);font-size:.75rem;white-space:nowrap;flex-shrink:0}
+.ps-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.ps-main>svg:first-child{width:16px;height:16px;flex-shrink:0;stroke:var(--muted)}
+.ps-loc{display:inline-flex;align-items:center;gap:4px;background:none;border:0;padding:0;margin:0;font:inherit;color:var(--muted);cursor:pointer;flex-shrink:0}
+.ps-loc .ps-caret{width:11px;height:11px;flex-shrink:0;stroke:currentColor;transition:transform .16s ease}
+.ps-loc .ps-pin{display:none;width:14px;height:14px;flex-shrink:0;stroke:currentColor}
+.ps-loc:hover,.ps-loc[aria-expanded="true"]{color:var(--amber-text)}
+.ps-loc:hover .loc,.ps-loc[aria-expanded="true"] .loc{color:var(--amber-text)}
+.ps-main[aria-expanded="true"] .ps-caret,.ps-loc[aria-expanded="true"] .ps-caret{transform:rotate(180deg)}
+.ps-main[aria-expanded="true"] .ps-trade{background:var(--amber);border-color:var(--amber);color:#fff}
+.pack-search:has([aria-expanded="true"]){border-color:var(--amber);background:#EFEDE4}
+.home-hero .ps-main:focus-visible,.home-hero .ps-loc:focus-visible{outline:3px solid var(--forest);outline-offset:2px}
 
 /* the inline trade menu, anchored under the search bar */
 .trade-menu{
@@ -600,6 +611,7 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
   .map-cluster{padding-top:80px}
   .pin-site{left:38px}
   .pack-search .loc{display:none}
+  .ps-loc .ps-pin{display:block}
   .row-held{display:none}
 }
 
@@ -737,6 +749,10 @@ section{padding:80px 24px}
   display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);
   gap:20px;align-items:center;
 }
+.region-under{
+  display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);
+  gap:20px;align-items:start;margin-top:20px;
+}
 .region-board{
   position:relative;
   border:1.5px solid var(--ink);
@@ -834,6 +850,7 @@ section{padding:80px 24px}
 .readout-foot strong{font-family:'Cabinet Grotesk',sans-serif;color:var(--good-text);font-weight:700}
 @media(max-width:800px){
   .region-shell{grid-template-columns:1fr}
+  .region-under{grid-template-columns:1fr}
 }
 @media(max-width:760px){
   /* >=44px tap targets for the trade chips on touch */
@@ -1154,7 +1171,7 @@ section{padding:80px 24px}
 }
 
 /* ── CITY CLAIM-CHECK ─ reads the roster behind one-per-city ──────── */
-#citycheck{background:#FFFFFF;border-top:1px solid rgba(27,28,24,.12);border-bottom:1px solid rgba(27,28,24,.12);padding:64px 24px}
+#claim{background:#FFFFFF;border-top:1px solid rgba(27,28,24,.12);border-bottom:1px solid rgba(27,28,24,.12);padding:64px 24px}
 .cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;max-width:1084px;margin:0 auto}
 .cc-copy p{font-size:1.0625rem;line-height:1.65;color:var(--muted);max-width:480px;margin:0 0 14px}
 .cc-copy .cc-note{font-size:.8125rem;margin:0}
@@ -1565,12 +1582,16 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 
         <div class="pack-card" id="packCard">
           <span class="visually-hidden">Illustration of a local Map Pack with your business in the third spot, the winnable one. An example, not a client result.</span>
-          <button type="button" class="pack-search" id="packSearchBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradeMenu" aria-label="Change your trade. Showing plumber near me.">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-            <span class="q" id="heroQ">plumber near me</span>
-            <span class="ps-trade" aria-hidden="true">Your trade<svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-            <span class="loc" aria-hidden="true">Burnaby, BC</span>
-          </button>
+          <div class="pack-search" id="packBar">
+            <button type="button" class="ps-main" id="packSearchBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradeMenu" aria-label="Change your trade. Showing plumber near me.">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+              <span class="q" id="heroQ">plumber</span>
+              <span class="ps-trade" aria-hidden="true">Your trade<svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </button>
+            <button type="button" class="ps-loc" id="locBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityMenu" aria-label="Choose your city. Currently showing Burnaby.">
+              <svg class="ps-pin" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="loc" id="heroLoc">Burnaby, BC</span><svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
 
           <div class="pack-head">
             <span class="pack-title">The Map Pack · Top 3</span>
@@ -1614,11 +1635,32 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <li role="option" id="trade-roofer" data-trade="roofer" aria-selected="false">Roofer</li>
           <li role="option" id="trade-landscaper" data-trade="landscaper" aria-selected="false">Landscaper</li>
           <li role="option" id="trade-auto" data-trade="auto" aria-selected="false">Auto repair</li>
-          <li role="option" id="trade-dentist" data-trade="dentist" aria-selected="false">Dentist</li>
-          <li role="option" id="trade-chiropractor" data-trade="chiropractor" aria-selected="false">Chiropractor</li>
-          <li role="option" id="trade-medspa" data-trade="medspa" aria-selected="false">Med spa</li>
-          <li role="option" id="trade-lawyer" data-trade="lawyer" aria-selected="false">Lawyer</li>
-          <li role="option" id="trade-vet" data-trade="vet" aria-selected="false">Veterinarian</li>
+          <li role="option" id="trade-painter" data-trade="painter" aria-selected="false">Painter</li>
+          <li role="option" id="trade-mover" data-trade="mover" aria-selected="false">Moving</li>
+          <li role="option" id="trade-cleaning" data-trade="cleaning" aria-selected="false">Cleaning</li>
+          <li role="option" id="trade-pest" data-trade="pest" aria-selected="false">Pest control</li>
+          <li role="option" id="trade-garagedoor" data-trade="garagedoor" aria-selected="false">Garage doors</li>
+        </ul>
+        <ul class="trade-menu" id="cityMenu" role="listbox" aria-label="Choose your city" tabindex="-1" hidden style="max-height:340px;overflow-y:auto">
+          <li class="tm-head" role="presentation">Choose your city</li>
+          <li role="option" id="city-vancouver" data-cityopt="Vancouver" aria-selected="false">Vancouver</li>
+          <li role="option" id="city-north-vancouver" data-cityopt="North Vancouver" aria-selected="false">North Vancouver</li>
+          <li role="option" id="city-west-vancouver" data-cityopt="West Vancouver" aria-selected="false">West Vancouver</li>
+          <li role="option" id="city-burnaby" data-cityopt="Burnaby" aria-selected="false">Burnaby</li>
+          <li role="option" id="city-richmond" data-cityopt="Richmond" aria-selected="false">Richmond</li>
+          <li role="option" id="city-new-westminster" data-cityopt="New Westminster" aria-selected="false">New Westminster</li>
+          <li role="option" id="city-coquitlam" data-cityopt="Coquitlam" aria-selected="false">Coquitlam</li>
+          <li role="option" id="city-port-moody" data-cityopt="Port Moody" aria-selected="false">Port Moody</li>
+          <li role="option" id="city-port-coquitlam" data-cityopt="Port Coquitlam" aria-selected="false">Port Coquitlam</li>
+          <li role="option" id="city-pitt-meadows" data-cityopt="Pitt Meadows" aria-selected="false">Pitt Meadows</li>
+          <li role="option" id="city-maple-ridge" data-cityopt="Maple Ridge" aria-selected="false">Maple Ridge</li>
+          <li role="option" id="city-surrey" data-cityopt="Surrey" aria-selected="false">Surrey</li>
+          <li role="option" id="city-delta" data-cityopt="Delta" aria-selected="false">Delta</li>
+          <li role="option" id="city-white-rock" data-cityopt="White Rock" aria-selected="false">White Rock</li>
+          <li role="option" id="city-langley" data-cityopt="Langley" aria-selected="false">Langley</li>
+          <li role="option" id="city-abbotsford" data-cityopt="Abbotsford" aria-selected="false">Abbotsford</li>
+          <li role="option" id="city-mission" data-cityopt="Mission" aria-selected="false">Mission</li>
+          <li role="option" id="city-chilliwack" data-cityopt="Chilliwack" aria-selected="false">Chilliwack</li>
         </ul>
         <p class="pack-cap"><span class="pack-cap-badge">Illustrative</span> The kind of result we build toward, not a client outcome.</p>
       </div>
@@ -1661,11 +1703,11 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <button type="button" class="trade-btn" data-mptrade="roofer" aria-pressed="false">Roofer</button>
         <button type="button" class="trade-btn" data-mptrade="landscaper" aria-pressed="false">Landscaper</button>
         <button type="button" class="trade-btn" data-mptrade="auto" aria-pressed="false">Auto repair</button>
-        <button type="button" class="trade-btn" data-mptrade="dentist" aria-pressed="false">Dentist</button>
-        <button type="button" class="trade-btn" data-mptrade="chiropractor" aria-pressed="false">Chiropractor</button>
-        <button type="button" class="trade-btn" data-mptrade="medspa" aria-pressed="false">Med spa</button>
-        <button type="button" class="trade-btn" data-mptrade="lawyer" aria-pressed="false">Lawyer</button>
-        <button type="button" class="trade-btn" data-mptrade="vet" aria-pressed="false">Veterinarian</button>
+        <button type="button" class="trade-btn" data-mptrade="painter" aria-pressed="false">Painter</button>
+        <button type="button" class="trade-btn" data-mptrade="mover" aria-pressed="false">Moving</button>
+        <button type="button" class="trade-btn" data-mptrade="cleaning" aria-pressed="false">Cleaning</button>
+        <button type="button" class="trade-btn" data-mptrade="pest" aria-pressed="false">Pest control</button>
+        <button type="button" class="trade-btn" data-mptrade="garagedoor" aria-pressed="false">Garage doors</button>
       </div>
     </div>
     <div class="mappack-grid">
@@ -1733,7 +1775,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <div class="barclear-take">
           <strong>Your opening:</strong> clear the bar, then win slot 3 on the signals they ignore. Week after week.
         </div>
-        <p class="map-note">Each clears a credible review count (roughly 50+); profile signals decide the order — <a href="/lab/metro-vancouver-hvac-map-pack-market-study-2026/" style="color:var(--good-text);font-weight:700">see how we measured it on HVAC</a>.</p>
+        <p class="map-note">Each clears a credible review count (roughly 50+); profile signals decide the order — <a href="/lab/" style="color:var(--good-text);font-weight:700">see how we measure it</a>.</p>
       </div>
     </div>
     <a class="bridge reveal" href="#results">
@@ -1821,7 +1863,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
       <h2>Your customers are already searching.<br>Right now they find someone else.</h2>
     </div>
     <p class="cities-intro">
-      Pick your line of work. This is the local search demand across the areas we cover, every month. Most of it goes to the top three on the map. Today, that is not you.
+      Pick your line of work. This is the local search demand across the areas we cover, every month. Most of it goes to the top three on the map. Today, that is not you. Tap your city to check if it is still open.
     </p>
     <div class="region-pick reveal in">
       <span class="pick-label">Choose your line of work</span>
@@ -1832,11 +1874,11 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <button type="button" class="trade-btn" data-rtrade="roofer" aria-pressed="false">Roofer</button>
         <button type="button" class="trade-btn" data-rtrade="landscaper" aria-pressed="false">Landscaper</button>
         <button type="button" class="trade-btn" data-rtrade="auto" aria-pressed="false">Auto repair</button>
-        <button type="button" class="trade-btn" data-rtrade="dentist" aria-pressed="false">Dentist</button>
-        <button type="button" class="trade-btn" data-rtrade="chiropractor" aria-pressed="false">Chiropractor</button>
-        <button type="button" class="trade-btn" data-rtrade="medspa" aria-pressed="false">Med spa</button>
-        <button type="button" class="trade-btn" data-rtrade="lawyer" aria-pressed="false">Lawyer</button>
-        <button type="button" class="trade-btn" data-rtrade="vet" aria-pressed="false">Veterinarian</button>
+        <button type="button" class="trade-btn" data-rtrade="painter" aria-pressed="false">Painter</button>
+        <button type="button" class="trade-btn" data-rtrade="mover" aria-pressed="false">Moving</button>
+        <button type="button" class="trade-btn" data-rtrade="cleaning" aria-pressed="false">Cleaning</button>
+        <button type="button" class="trade-btn" data-rtrade="pest" aria-pressed="false">Pest control</button>
+        <button type="button" class="trade-btn" data-rtrade="garagedoor" aria-pressed="false">Garage doors</button>
       </div>
     </div>
     <div class="region-shell reveal in">
@@ -1925,11 +1967,36 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <p class="readout-foot" id="readoutTotal">About <strong>3,230</strong> searches a month across these regions. Most go to the top three. That is the demand we win for you.</p>
       </aside>
     </div>
-    <div class="aeo-callout reveal in">
+    <div class="region-under reveal in">
+        <div id="rmCheck" aria-live="polite">
+          <div class="cc-card" id="rmOpen" hidden>
+            <div class="cc-card-head">Roster check &middot; live read &middot; <span class="rmDate"></span></div>
+            <div class="cc-card-body">
+              <span class="cc-verdict cc-verdict--open">Open</span>
+              <div class="cc-title" id="rmOpenTitle"></div>
+              <p class="cc-line">No business holds this city yet. First to claim it locks it.</p>
+              <a class="cc-claim-btn" id="rmClaimBtn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=map-city-check" data-cta-location="map-city-check">Claim this city first</a>
+              <span class="cc-sub">Free 15-minute audit &middot; no pitch deck</span>
+            </div>
+            <div class="cc-card-foot">One business per city, per category. A claim closes the city.</div>
+          </div>
+          <div class="cc-card" id="rmClaimed" hidden>
+            <div class="cc-card-head">Roster check &middot; live read &middot; <span class="rmDate"></span></div>
+            <div class="cc-card-body">
+              <span class="cc-verdict cc-verdict--claimed">Claimed</span>
+              <div class="cc-title" id="rmClaimedTitle"></div>
+              <p class="cc-line">A business already holds this category in this city.</p>
+              <a class="cc-notify" href="mailto:zshef@rankwise.ca?subject=Tell%20me%20if%20my%20city%20opens">Ask to be told if this city opens</a>
+            </div>
+            <div class="cc-card-foot">Name withheld. We do not publish who holds a city.</div>
+          </div>
+        </div>
+      <div class="aeo-callout reveal in">
       <span class="aeo-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/><path d="M18 14.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8.8-1.9z"/></svg></span>
       <div>
         <p class="aeo-text">Almost every one of these searches now also shows a Google AI answer at the top, and almost no local business is named in it yet. <strong>That is the next slot to claim.</strong></p>
         <p class="aeo-src">Rankwise tracking, 2026</p>
+      </div>
       </div>
     </div>
     <p class="city-note reveal in">Illustrative local-search demand. Real figures come from live keyword data. Coverage also includes Chilliwack, plus neighbourhood-level work in Tsawwassen, North Delta, Metrotown, and South Surrey within the mapped regions.</p>
@@ -2215,74 +2282,21 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 </section>
 
 <!-- ── 08 CONTACT / CTA ────────────────────────────────────────────── -->
-<section id="citycheck">
-  <div class="cc-grid reveal in">
-    <div class="cc-copy">
-      <div class="section-label">Is your city open?</div>
-      <h2>One category, one city, one client.</h2>
-      <p>This check reads the same roster we sell from. If your city shows open, nobody holds it and the first to claim it locks it. If it shows claimed, we cannot take you there, and we will not pretend otherwise.</p>
-      <p class="cc-note">The roster changes when a client signs or leaves. Never on a timer.</p>
-    </div>
-    <div>
-      <div class="cc-selects">
-        <select class="cc-select" id="ccTrade" aria-label="Your trade">
-          <option value="" selected disabled>Your trade</option>
-          <option value="plumber">Plumber</option>
-          <option value="electrician">Electrician</option>
-          <option value="hvac">HVAC</option>
-          <option value="roofer">Roofer</option>
-          <option value="landscaper">Landscaper</option>
-          <option value="auto">Auto repair</option>
-          <option value="painter">Painter</option>
-          <option value="mover">Moving company</option>
-          <option value="cleaning">Cleaning service</option>
-          <option value="pest">Pest control</option>
-          <option value="garagedoor">Garage doors</option>
-        </select>
-        <select class="cc-select" id="ccCity" aria-label="Your city">
-          <option value="" selected disabled>Your city</option>
-          <option>Vancouver</option><option>North Vancouver</option><option>West Vancouver</option>
-          <option>Burnaby</option><option>Richmond</option><option>New Westminster</option>
-          <option>Coquitlam</option><option>Port Moody</option><option>Port Coquitlam</option>
-          <option>Pitt Meadows</option><option>Maple Ridge</option><option>Surrey</option>
-          <option>Delta</option><option>White Rock</option><option>Langley</option>
-          <option>Abbotsford</option><option>Mission</option><option>Chilliwack</option>
-        </select>
+
+
+<!-- ── CLAIM BAND (slim pre-pricing claim moment; roster-truthful) ── -->
+<section id="claim">
+  <div class="container" style="max-width:760px">
+    <div class="cc-card reveal in">
+      <div class="cc-card-head">Roster check &middot; live read &middot; <span class="rmDate"></span></div>
+      <div class="cc-card-body">
+        <span class="cc-verdict cc-verdict--open">Open</span>
+        <div class="cc-title" id="claimTitle">Every city on the roster is still open.</div>
+        <p class="cc-line">One category, one city, one client. The first business to claim its city locks it. No timers, no manufactured scarcity.</p>
+        <a class="cc-claim-btn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=claim-band" data-cta-location="claim-band">Claim your city first</a>
+        <span class="cc-sub">Free 15-minute audit &middot; no pitch deck</span>
       </div>
-      <div class="cc-stage" id="ccStage" aria-live="polite">
-        <div class="cc-idle" id="ccIdle">Pick a category and a city. The answer is read straight from the client roster.</div>
-        <div class="cc-card" id="ccChecking" hidden>
-          <div class="cc-card-head">Roster check · reading</div>
-          <div class="cc-card-body">
-            <span class="cc-skel-cap">Reading the roster...</span>
-            <div class="cc-skel-bar" style="width:72%"></div>
-            <div class="cc-skel-bar" style="width:46%"></div>
-          </div>
-          <div class="cc-card-foot">One business per city, per category</div>
-        </div>
-        <div class="cc-card" id="ccOpen" hidden>
-          <div class="cc-card-head">Roster check · live read · <span class="ccDate"></span></div>
-          <div class="cc-card-body">
-            <span class="cc-verdict cc-verdict--open">Open</span>
-            <div class="cc-title" id="ccOpenTitle"></div>
-            <p class="cc-line">No business holds this city yet. First to claim it locks it.</p>
-            <a class="cc-claim-btn" id="ccClaimBtn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=city-check" data-cta-location="city-check">Claim this city first</a>
-            <span class="cc-sub">Free 15-minute audit · no pitch deck</span>
-          </div>
-          <div class="cc-card-foot">One business per city, per category. A claim closes the city.</div>
-        </div>
-        <div class="cc-card" id="ccClaimed" hidden>
-          <div class="cc-card-head">Roster check · live read · <span class="ccDate"></span></div>
-          <div class="cc-card-body">
-            <span class="cc-verdict cc-verdict--claimed">Claimed</span>
-            <div class="cc-title" id="ccClaimedTitle"></div>
-            <p class="cc-line">A business already holds this category in this city. Held since <span id="ccHeld"></span>.</p>
-            <a class="cc-notify" href="mailto:zshef@rankwise.ca?subject=Tell%20me%20if%20my%20city%20opens">Ask to be told if this city opens</a>
-          </div>
-          <div class="cc-card-foot">Name withheld. We do not publish who holds a city.</div>
-        </div>
-      </div>
-      <p class="cc-foot">Read live from the roster. No timers, no manufactured scarcity.</p>
+      <div class="cc-card-foot">One business per city, per category. A claim closes the city.</div>
     </div>
   </div>
 </section>
@@ -2341,7 +2355,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <thead><tr>
           <th class="feat" aria-label="Feature"></th>
           <th><span class="t-name">Starter</span><span class="t-price">$450<span>/mo</span></span><span class="t-who">Get the profile right, then upgrade</span></th>
-          <th class="hl-h"><span class="t-chip">MOST POPULAR</span><span class="t-name">Foundation</span><span class="t-price">$750<span>/mo</span></span><span class="t-who">The full engine, one city</span></th>
+          <th class="hl-h"><span class="t-chip">RECOMMENDED</span><span class="t-name">Foundation</span><span class="t-price">$750<span>/mo</span></span><span class="t-who">The full engine, one city</span></th>
           <th><span class="t-name">Growth</span><span class="t-price">$1,250<span>/mo</span></span><span class="t-who">Analytics, content + room to grow</span></th>
         </tr></thead>
         <tbody>
@@ -2599,13 +2613,32 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
       r2:{n:"Lions Gate Law",g:"4.8",v:"187",c:"Lawyer",city:"Vancouver"}},
     vet:{q:"veterinarian near me",
       r1:{n:"Cedar Animal Hospital",g:"4.9",v:"108",c:"Veterinarian",city:"Burnaby"},
-      r2:{n:"Westside Vet Clinic",g:"4.8",v:"256",c:"Veterinary clinic",city:"Vancouver"}}
+      r2:{n:"Westside Vet Clinic",g:"4.8",v:"256",c:"Veterinary clinic",city:"Vancouver"}},
+    painter:{q:"painter near me",
+      r1:{n:"Established local business",generic:true,c:"Painter",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Painting contractor",city:"Nearby"}},
+    mover:{q:"movers near me",
+      r1:{n:"Established local business",generic:true,c:"Moving company",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Mover",city:"Nearby"}},
+    cleaning:{q:"cleaning service near me",
+      r1:{n:"Established local business",generic:true,c:"Cleaning service",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"House cleaning service",city:"Nearby"}},
+    pest:{q:"pest control near me",
+      r1:{n:"Established local business",generic:true,c:"Pest control service",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Exterminator",city:"Nearby"}},
+    garagedoor:{q:"garage door repair near me",
+      r1:{n:"Established local business",generic:true,c:"Garage door supplier",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Garage door service",city:"Nearby"}}
   };
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function row(p,d){
     var n=document.getElementById(p+'n'); if(n)n.textContent=d.n;
-    var g=document.getElementById(p+'g'); if(g)g.textContent=d.g;
-    var v=document.getElementById(p+'v'); if(v)v.textContent='('+d.v+')';
+    var g=document.getElementById(p+'g');
+    var v=document.getElementById(p+'v');
+    var stars=g&&g.parentNode?g.parentNode.querySelector('.g-stars'):null;
+    if(g){g.textContent=d.generic?'Established listing':d.g;}
+    if(stars)stars.hidden=!!d.generic;
+    if(v){v.hidden=!!d.generic;v.textContent=d.generic?'':'('+d.v+')';}
     var m=document.getElementById(p+'m'); if(m)m.innerHTML=esc(d.c)+' · <span class="g-open">Open</span> · '+esc(d.city);
   }
   function render(t){
@@ -2645,9 +2678,14 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
     medspa:{"Vancouver":460,"Surrey":410,"Burnaby":270,"Richmond":260,"Coquitlam":185,"Langley":175,"Abbotsford":150,"North Vancouver":140,"Maple Ridge":125,"Delta":115,"New Westminster":100,"Port Coquitlam":92,"Mission":72,"West Vancouver":64,"Port Moody":58,"White Rock":48,"Pitt Meadows":36},
     lawyer:{"Vancouver":540,"Surrey":430,"Burnaby":290,"Richmond":280,"Coquitlam":195,"Langley":180,"Abbotsford":155,"North Vancouver":145,"Maple Ridge":125,"Delta":115,"New Westminster":100,"Port Coquitlam":90,"Mission":72,"West Vancouver":65,"Port Moody":58,"White Rock":48,"Pitt Meadows":36},
     chiropractor:{"Vancouver":440,"Surrey":390,"Burnaby":260,"Richmond":250,"Coquitlam":180,"Langley":170,"Abbotsford":145,"North Vancouver":135,"Maple Ridge":120,"Delta":110,"New Westminster":95,"Port Coquitlam":88,"Mission":70,"West Vancouver":62,"Port Moody":56,"White Rock":46,"Pitt Meadows":34},
-    vet:{"Vancouver":480,"Surrey":430,"Burnaby":285,"Richmond":275,"Coquitlam":195,"Langley":185,"Abbotsford":160,"North Vancouver":150,"Maple Ridge":132,"Delta":122,"New Westminster":105,"Port Coquitlam":96,"Mission":76,"West Vancouver":68,"Port Moody":62,"White Rock":50,"Pitt Meadows":38}
+    vet:{"Vancouver":480,"Surrey":430,"Burnaby":285,"Richmond":275,"Coquitlam":195,"Langley":185,"Abbotsford":160,"North Vancouver":150,"Maple Ridge":132,"Delta":122,"New Westminster":105,"Port Coquitlam":96,"Mission":76,"West Vancouver":68,"Port Moody":62,"White Rock":50,"Pitt Meadows":38},
+    cleaning:{"Vancouver":450,"Surrey":405,"Burnaby":270,"Richmond":260,"Coquitlam":180,"Langley":175,"Abbotsford":155,"North Vancouver":145,"Maple Ridge":130,"Delta":120,"New Westminster":105,"Port Coquitlam":95,"Mission":80,"West Vancouver":70,"Port Moody":65,"White Rock":50,"Pitt Meadows":40},
+    painter:{"Vancouver":360,"Surrey":325,"Burnaby":215,"Richmond":210,"Coquitlam":145,"Langley":140,"Abbotsford":125,"North Vancouver":120,"Maple Ridge":105,"Delta":95,"New Westminster":85,"Port Coquitlam":75,"Mission":60,"West Vancouver":55,"Port Moody":50,"White Rock":40,"Pitt Meadows":30},
+    mover:{"Vancouver":330,"Surrey":300,"Burnaby":195,"Richmond":190,"Coquitlam":135,"Langley":125,"Abbotsford":115,"North Vancouver":110,"Maple Ridge":95,"Delta":90,"New Westminster":75,"Port Coquitlam":70,"Mission":55,"West Vancouver":50,"Port Moody":50,"White Rock":40,"Pitt Meadows":30},
+    pest:{"Vancouver":290,"Surrey":260,"Burnaby":175,"Richmond":165,"Coquitlam":115,"Langley":110,"Abbotsford":100,"North Vancouver":95,"Maple Ridge":85,"Delta":80,"New Westminster":65,"Port Coquitlam":60,"Mission":50,"West Vancouver":45,"Port Moody":40,"White Rock":35,"Pitt Meadows":25},
+    garagedoor:{"Vancouver":260,"Surrey":235,"Burnaby":155,"Richmond":150,"Coquitlam":105,"Langley":100,"Abbotsford":90,"North Vancouver":85,"Maple Ridge":75,"Delta":70,"New Westminster":60,"Port Coquitlam":55,"Mission":45,"West Vancouver":40,"Port Moody":40,"White Rock":30,"Pitt Meadows":20}
   };
-  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",dentist:"Dentist",auto:"Auto repair",roofer:"Roofer",landscaper:"Landscaper",chiropractor:"Chiropractor",medspa:"Med spa",lawyer:"Lawyer",vet:"Veterinarian"};
+  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",dentist:"Dentist",auto:"Auto repair",roofer:"Roofer",landscaper:"Landscaper",chiropractor:"Chiropractor",medspa:"Med spa",lawyer:"Lawyer",vet:"Veterinarian",painter:"Painter",mover:"Moving company",cleaning:"Cleaning service",pest:"Pest control",garagedoor:"Garage doors"};
   var areas=[].slice.call(root.querySelectorAll('.rm-area'));
   var btns=[].slice.call(root.querySelectorAll('.trade-btn'));
   var list=document.getElementById('readoutList');
@@ -2655,6 +2693,36 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   var footEl=document.getElementById('readoutTotal');
   var areaByCity={};
   areas.forEach(function(a){areaByCity[a.getAttribute('data-city')]=a;});
+  /* Roster behind one-per-city. LIVE: every city is open today (0 clients).
+     Never invent claimed cities here. */
+  var ROSTER={};
+  var current='plumber',lastCity=null,bandActive=false;
+  var openEl=document.getElementById('rmOpen'),claimedEl=document.getElementById('rmClaimed');
+  var _d=new Date().toISOString().slice(0,10);
+  [].slice.call(document.querySelectorAll('.rmDate')).forEach(function(el){el.textContent=_d;});
+  (function(){var ct=document.getElementById('claimTitle');
+    if(ct&&Object.keys(ROSTER).length>0){ct.textContent='Most cities on the roster are still open.';}})();
+  function showVerdict(city,opts){
+    opts=opts||{};
+    if(!openEl||!claimedEl)return;
+    var held=ROSTER[current+'|'+city];
+    var title=(LABEL[current]||current)+' \u00b7 '+city;
+    openEl.hidden=!!held;
+    claimedEl.hidden=!held;
+    document.getElementById(held?'rmClaimedTitle':'rmOpenTitle').textContent=title;
+    if(opts.band)bandActive=true;
+    if(bandActive){
+      var ct=document.getElementById('claimTitle');
+      if(ct&&!held){ct.textContent=title+' is still open.';}
+    }
+    if(opts.scroll){
+      var rc=document.getElementById('rmCheck');
+      if(rc){var b=rc.getBoundingClientRect();
+        if(b.top<0||b.bottom>window.innerHeight){
+          rc.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
+        }}
+    }
+  }
 
   function rowByCity(city){
     var rows=list?list.querySelectorAll('.readout-row'):[];
@@ -2669,7 +2737,8 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
     areas.forEach(function(a){a.classList.remove('is-hot');});
     if(list){[].slice.call(list.querySelectorAll('.readout-row')).forEach(function(r){r.classList.remove('is-hot');});}
   }
-  function tap(city){clearHot();hot(city,true);}
+  function tap(city){clearHot();hot(city,true);lastCity=city;showVerdict(city,{band:true,scroll:true});
+    document.dispatchEvent(new CustomEvent('rw:city',{detail:city}));}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
   function render(trade){
@@ -2714,6 +2783,9 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
       footEl.innerHTML='About <strong>'+total.toLocaleString('en-US')+'</strong> searches a month across these regions. Most go to the top three. That is the demand we win for you.';
       if(window.rwCountTotal)window.rwCountTotal(footEl,prevTotal,total);
     }
+    current=trade;
+    if(!lastCity)lastCity=rows[0].city;
+    showVerdict(lastCity);
   }
 
   areas.forEach(function(a){
@@ -2735,6 +2807,12 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   });
   // shared trade state: repaint when either picker changes the selection
   document.addEventListener('rw:trade',function(e){applyTrade(e.detail);});
+  document.addEventListener('rw:city',function(e){
+    var c=e.detail;
+    if(c===lastCity)return;
+    lastCity=c;clearHot();hot(c,true);
+    showVerdict(c,{band:true});
+  });
   render('plumber');
 })();
 </script>
@@ -2748,14 +2826,15 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   var btn=document.getElementById('packSearchBtn');
   var menu=document.getElementById('tradeMenu');
   var card=document.getElementById('packCard');
+  var bar=document.getElementById('packBar')||btn;
   var cat=document.getElementById('heroCat');
   var q=document.getElementById('heroQ');
   if(!btn||!menu||!card||!cat||!q)return;
 
-  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",roofer:"Roofer",landscaper:"Landscaper",auto:"Auto repair",dentist:"Dentist",chiropractor:"Chiropractor",medspa:"Med spa",lawyer:"Lawyer",vet:"Veterinarian"};
+  var LABEL={plumber:"Plumber",electrician:"Electrician",hvac:"HVAC",roofer:"Roofer",landscaper:"Landscaper",auto:"Auto repair",dentist:"Dentist",chiropractor:"Chiropractor",medspa:"Med spa",lawyer:"Lawyer",vet:"Veterinarian",painter:"Painter",mover:"Moving",cleaning:"Cleaning",pest:"Pest control",garagedoor:"Garage doors"};
   /* full query strings, matching the wording used in #01's mp-q so the
      hero card and the Map Pack section always agree once synced */
-  var QUERY={plumber:"plumber near me",electrician:"electrician near me",hvac:"hvac contractor near me",roofer:"roofer near me",landscaper:"landscaper near me",auto:"auto repair near me",dentist:"dentist near me",chiropractor:"chiropractor near me",medspa:"med spa near me",lawyer:"lawyer near me",vet:"veterinarian near me"};
+  var QUERY={plumber:"plumber near me",electrician:"electrician near me",hvac:"hvac contractor near me",roofer:"roofer near me",landscaper:"landscaper near me",auto:"auto repair near me",dentist:"dentist near me",chiropractor:"chiropractor near me",medspa:"med spa near me",lawyer:"lawyer near me",vet:"veterinarian near me",painter:"painter near me",mover:"movers near me",cleaning:"cleaning service near me",pest:"pest control near me",garagedoor:"garage door repair near me"};
 
   var items=[].slice.call(menu.querySelectorAll('[role="option"]'));
   var activeIdx=-1;
@@ -2771,7 +2850,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   }
   function position(){
     /* anchor the menu just below the search bar, inside the map cluster */
-    menu.style.top=(card.offsetTop+btn.offsetTop+btn.offsetHeight+6)+'px';
+    menu.style.top=(card.offsetTop+bar.offsetTop+bar.offsetHeight+6)+'px';
   }
   function open(){
     position();
@@ -2792,7 +2871,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   function updateUI(t){
     if(!LABEL[t])return;
     var query=QUERY[t]||(t+' near me');
-    q.textContent=query;
+    q.textContent=(LABEL[t]||t).toLowerCase();
     cat.textContent=LABEL[t];
     btn.setAttribute('aria-label','Change your trade. Showing '+query+'.');
     for(var i=0;i<items.length;i++){
@@ -2847,6 +2926,92 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
   // a pick in #01 Map Pack or the cities demand map updates the hero card too
   document.addEventListener('rw:trade',function(e){updateUI(e.detail);});
   updateUI('plumber');
+})();
+</script>
+
+<script>
+/* Hero city selector: mirrors the trade menu on the rw:city bus. Hero picks
+   drive the demand map + claim band; map taps update the hero label back. */
+(function(){
+  var btn=document.getElementById('locBtn');
+  var menu=document.getElementById('cityMenu');
+  var card=document.getElementById('packCard');
+  var bar=document.getElementById('packBar');
+  var lab=document.getElementById('heroLoc');
+  if(!btn||!menu||!card||!bar||!lab)return;
+  var items=[].slice.call(menu.querySelectorAll('[role="option"]'));
+  var activeIdx=-1;
+  function setActive(i){
+    if(i<0)i=items.length-1;
+    if(i>=items.length)i=0;
+    if(activeIdx>-1)items[activeIdx].classList.remove('active');
+    activeIdx=i;
+    items[i].classList.add('active');
+    menu.setAttribute('aria-activedescendant',items[i].id);
+    if(items[i].scrollIntoView)items[i].scrollIntoView({block:'nearest'});
+  }
+  function position(){menu.style.top=(card.offsetTop+bar.offsetTop+bar.offsetHeight+6)+'px';}
+  function open(){
+    position();
+    menu.hidden=false;
+    btn.setAttribute('aria-expanded','true');
+    var sel=-1;
+    for(var i=0;i<items.length;i++){if(items[i].getAttribute('aria-selected')==='true'){sel=i;break}}
+    setActive(sel>-1?sel:0);
+    menu.focus();
+  }
+  function close(refocus){
+    if(menu.hidden)return;
+    menu.hidden=true;
+    btn.setAttribute('aria-expanded','false');
+    if(activeIdx>-1){items[activeIdx].classList.remove('active');activeIdx=-1}
+    if(refocus)btn.focus();
+  }
+  function setCity(c){
+    lab.textContent=c+', BC';
+    btn.setAttribute('aria-label','Choose your city. Currently showing '+c+'.');
+    items.forEach(function(li){li.setAttribute('aria-selected',li.getAttribute('data-cityopt')===c?'true':'false');});
+  }
+  function choose(li){
+    var c=li.getAttribute('data-cityopt');
+    if(!c)return;
+    document.dispatchEvent(new CustomEvent('rw:city',{detail:c}));
+    close(true);
+  }
+  btn.addEventListener('click',function(){menu.hidden?open():close(true)});
+  btn.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(menu.hidden)open()}
+  });
+  menu.addEventListener('click',function(e){
+    var li=e.target.closest?e.target.closest('[role="option"]'):null;
+    if(li)choose(li);
+  });
+  menu.addEventListener('mousemove',function(e){
+    var li=e.target.closest?e.target.closest('[role="option"]'):null;
+    if(li){var i=items.indexOf(li);if(i>-1&&i!==activeIdx)setActive(i)}
+  });
+  menu.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();setActive(activeIdx+1)}
+    else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();setActive(activeIdx-1)}
+    else if(e.key==='Home'){e.preventDefault();setActive(0)}
+    else if(e.key==='End'){e.preventDefault();setActive(items.length-1)}
+    else if(e.key==='Enter'||e.key===' '){e.preventDefault();if(activeIdx>-1)choose(items[activeIdx])}
+    else if(e.key==='Escape'){e.preventDefault();close(true)}
+    else if(e.key==='Tab'){close(false)}
+    else if(/^[a-z]$/i.test(e.key)){
+      var k=e.key.toLowerCase();
+      for(var i=1;i<=items.length;i++){
+        var j=(activeIdx+i)%items.length;
+        if(items[j].textContent.trim().toLowerCase().indexOf(k)===0){setActive(j);break}
+      }
+    }
+  });
+  document.addEventListener('pointerdown',function(e){
+    if(menu.hidden)return;
+    if(!menu.contains(e.target)&&!btn.contains(e.target))close(false);
+  });
+  window.addEventListener('resize',function(){if(!menu.hidden)position()});
+  document.addEventListener('rw:city',function(e){setCity(e.detail);});
 })();
 </script>
 
@@ -2985,48 +3150,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
 })();
 </script>
 
-<script>
-/* City claim-check: reads a roster keyed trade|city.
-   LIVE: roster reflects the real client roster, which today has every city
-   open (0 clients). Never invent claimed cities here. */
-(function(){
-  var TRADES={plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',roofer:'Roofer',landscaper:'Landscaper',auto:'Auto repair',painter:'Painter',mover:'Moving company',cleaning:'Cleaning service',pest:'Pest control',garagedoor:'Garage doors'};
-  var ROSTER={};
-  var tradeEl=document.getElementById('ccTrade'),cityEl=document.getElementById('ccCity');
-  if(!tradeEl||!cityEl)return;
-  var panes={idle:document.getElementById('ccIdle'),checking:document.getElementById('ccChecking'),open:document.getElementById('ccOpen'),claimed:document.getElementById('ccClaimed')};
-  var dateStr=new Date().toISOString().slice(0,10);
-  Array.prototype.forEach.call(document.querySelectorAll('.ccDate'),function(el){el.textContent=dateStr;});
-  var timer=null;
-  function show(which){
-    Object.keys(panes).forEach(function(k){
-      if(panes[k])panes[k].hidden=(k!==which);
-    });
-  }
-  function check(){
-    var t=tradeEl.value,c=cityEl.value;
-    clearTimeout(timer);
-    if(!t||!c){show('idle');return;}
-    show('checking');
-    timer=setTimeout(function(){
-      var held=ROSTER[t+'|'+c];
-      var title=TRADES[t]+' · '+c;
-      if(held){
-        document.getElementById('ccClaimedTitle').textContent=title;
-        document.getElementById('ccHeld').textContent=held;
-        show('claimed');
-      }else{
-        document.getElementById('ccOpenTitle').textContent=title;
-        var btn=document.getElementById('ccClaimBtn');
-        btn.textContent='Claim '+c+' first';
-        show('open');
-      }
-    },650);
-  }
-  tradeEl.addEventListener('change',check);
-  cityEl.addEventListener('change',check);
-})();
-</script>
+
 <script>
 /* Audit-link market carry: the hero/claim-check picks ride to /audit/ as
    ?trade=&city= (persona re-run 2026-07-08 — the picks were being thrown
@@ -3034,7 +3158,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
    actually picks something, the links are untouched. */
 (function(){
   if (!window.URLSearchParams) return;
-  var TRADES = {plumber:1,electrician:1,hvac:1,roofer:1,landscaper:1,auto:1,dentist:1,chiropractor:1,medspa:1,lawyer:1,vet:1};
+  var TRADES = {plumber:1,electrician:1,hvac:1,roofer:1,landscaper:1,auto:1,painter:1,mover:1,cleaning:1,pest:1,garagedoor:1};
   var trade = '', city = '';
   function sync(){
     var links = document.querySelectorAll('a[href^="/audit/"]');
@@ -3047,6 +3171,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
     }
   }
   document.addEventListener('rw:trade', function(e){ if (TRADES[e.detail]) { trade = e.detail; sync(); } });
+  document.addEventListener('rw:city', function(e){ if (e.detail) { city = e.detail; sync(); } });
   var tSel = document.getElementById('ccTrade'), cSel = document.getElementById('ccCity');
   if (tSel) tSel.addEventListener('change', function(){ if (TRADES[tSel.value]) { trade = tSel.value; sync(); } });
   if (cSel) cSel.addEventListener('change', function(){ if (cSel.value) { city = cSel.value; sync(); } });
