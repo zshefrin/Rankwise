@@ -2238,11 +2238,6 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <option value="cleaning">Cleaning service</option>
           <option value="pest">Pest control</option>
           <option value="garagedoor">Garage doors</option>
-          <option value="dentist">Dentist</option>
-          <option value="chiropractor">Chiropractor</option>
-          <option value="medspa">Med spa</option>
-          <option value="lawyer">Lawyer</option>
-          <option value="vet">Veterinarian</option>
         </select>
         <select class="cc-select" id="ccCity" aria-label="Your city">
           <option value="" selected disabled>Your city</option>
@@ -2995,7 +2990,7 @@ Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-s
    LIVE: roster reflects the real client roster, which today has every city
    open (0 clients). Never invent claimed cities here. */
 (function(){
-  var TRADES={plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',roofer:'Roofer',landscaper:'Landscaper',auto:'Auto repair',painter:'Painter',mover:'Moving company',cleaning:'Cleaning service',pest:'Pest control',garagedoor:'Garage doors',dentist:'Dentist',chiropractor:'Chiropractor',medspa:'Med spa',lawyer:'Lawyer',vet:'Veterinarian'};
+  var TRADES={plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',roofer:'Roofer',landscaper:'Landscaper',auto:'Auto repair',painter:'Painter',mover:'Moving company',cleaning:'Cleaning service',pest:'Pest control',garagedoor:'Garage doors'};
   var ROSTER={};
   var tradeEl=document.getElementById('ccTrade'),cityEl=document.getElementById('ccCity');
   if(!tradeEl||!cityEl)return;
