@@ -1,0 +1,105 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rankwise ctOS — System Map</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0B1117; color: #D7E3EC;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+  #frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: none; }
+  .state { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .card { max-width: 380px; text-align: center; }
+  .card .mark { font-size: 15px; font-weight: 700; letter-spacing: .12em; margin-bottom: 14px; }
+  .card .mark b { color: #35C7E8; }
+  .card h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: .04em; }
+  .card p { font-size: 12.5px; line-height: 1.7; color: #7C8FA0; margin: 0 0 18px; }
+  .card a, .card button { font-family: inherit; font-size: 12px; letter-spacing: .06em; color: #35C7E8;
+    background: transparent; border: 1px solid #2A3E52; border-radius: 3px; padding: 9px 16px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .card a:hover, .card button:hover { border-color: #35C7E8; }
+  .spin { color: #54677A; font-size: 12px; letter-spacing: .1em; }
+  @keyframes pulse { 0%,100% { opacity: .4 } 50% { opacity: 1 } }
+  .spin { animation: pulse 1.4s ease-in-out infinite; }
+  .err { color: #E8B33F; }
+</style>
+
+<iframe id="frame" title="Rankwise system map" sandbox="allow-scripts"></iframe>
+<div class="state" id="state"><div class="card"><div class="mark">RANKWISE<b>//</b>ctOS</div><div class="spin">◍ loading system map…</div></div></div>
+
+<script>
+/* Production loader for the ctOS atlas — the portal SYSTEM tab.
+   Owns auth: reads the portal's Supabase session, fetches the operator-only
+   system_map rows, and hosts the (unmodified) atlas in a sandboxed iframe with
+   the data injected. The atlas shell carries NO embedded ops data of its own. */
+const SUPABASE_URL = 'https://mxzkzgbonxrgkwanhnxs.supabase.co';
+const ANON_KEY = 'sb_publishable_ePTp0sAZlV89R68y-R9w3A_JrwqFLik';
+const PROJECT_REF = 'mxzkzgbonxrgkwanhnxs';
+
+const $state = document.getElementById('state');
+const $frame = document.getElementById('frame');
+const show = (html) => { $state.innerHTML = '<div class="card">' + html + '</div>'; $state.style.display = 'flex'; };
+const MARK = '<div class="mark">RANKWISE<b>//</b>ctOS</div>';
+
+function readToken() {
+  /* Supabase-js stores the session under sb-<ref>-auth-token; shape has drifted across
+     versions (top-level access_token, or nested .currentSession). Handle both + a manual override. */
+  try {
+    if (window.RW_MAP_CONFIG && window.RW_MAP_CONFIG.access_token) return window.RW_MAP_CONFIG.access_token;
+    const raw = localStorage.getItem('sb-' + PROJECT_REF + '-auth-token');
+    if (!raw) return null;
+    const o = JSON.parse(raw);
+    return o.access_token || (o.currentSession && o.currentSession.access_token) || null;
+  } catch (e) { return null; }
+}
+
+function signInState() {
+  show(MARK + '<h1>Operator sign-in required</h1>'
+    + '<p>The system map shows live operations data — schedules, armed rails, the gap register — and is visible to operators only. Sign in through the portal, then reopen this tab.</p>'
+    + '<a href="/portal/">Go to portal sign-in</a>');
+}
+
+async function load() {
+  const token = readToken();
+  if (!token) return signInState();
+  let rows;
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/system_map?select=kind,payload', {
+      headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + token }, cache: 'no-store',
+    });
+    if (r.status === 401 || r.status === 403) return signInState();
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    rows = await r.json();
+  } catch (e) {
+    return show(MARK + '<h1 class="err">Map data unavailable</h1><p>Could not reach the map service. Your session may have expired — try the portal sign-in, or retry.</p><button onclick="location.reload()">Retry</button>');
+  }
+  const registry = (rows.find((x) => x.kind === 'registry') || {}).payload;
+  const scan = (rows.find((x) => x.kind === 'scan') || {}).payload;
+  if (!registry) {
+    /* rows filtered out by RLS (non-operator) or table genuinely empty → treat as sign-in */
+    return rows.length ? show(MARK + '<h1>No operator access</h1><p>This account is signed in but is not an operator. The system map is restricted to operator accounts.</p>') : signInState();
+  }
+  buildFrame(registry, scan);
+}
+
+async function buildFrame(registry, scan) {
+  let shell;
+  try {
+    const r = await fetch('rankwise-atlas-shell.html', { cache: 'no-store' });
+    if (!r.ok) throw new Error('shell HTTP ' + r.status);
+    shell = await r.text();
+  } catch (e) {
+    return show(MARK + '<h1 class="err">Map shell missing</h1><p>The map viewer failed to load. This is a deploy issue — the atlas shell is not published alongside this page.</p>');
+  }
+  /* inject the model (reusing the build marker) + the scan overlay global, then host in the sandbox.
+     safe() escapes '<' so a '</script>' smuggled into any DB string value cannot break out of the
+     injected <script> element (edge-fn-security-review 2026-07-19, HIGH). Both injection points use
+     a FUNCTION replacer so a '$'-sequence in the payload can't trigger String.replace specials (MED). */
+  const safe = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
+  const scanScript = scan ? '<script>window.__RW_SCAN__=' + safe(scan) + '<\/script>' : '';
+  const doc = shell
+    .replace('/*__MODEL__*/null', () => safe(registry))
+    .replace('<script>', () => scanScript + '<script>');
+  $frame.setAttribute('srcdoc', doc);
+  $frame.style.display = 'block';
+  $state.style.display = 'none';
+}
+
+load();
+</script>
