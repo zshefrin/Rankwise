@@ -101,6 +101,7 @@
   button[aria-busy="true"] { opacity:.6; cursor:progress; }
   .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   button { border:0; border-radius:var(--r-md); padding:10px 12px; font-size:var(--fs-4); font-weight:600; cursor:pointer; background:var(--border-3); color:var(--text); }
+  button.link-btn { background:transparent; color:var(--ok); padding:0 2px; font:600 var(--fs-3)/1.3 inherit; text-decoration:underline; }
   button.primary { background:var(--accent); color:var(--on-accent); }
   button.disp { flex:1 1 30%; padding:12px 6px; }
   button.disp.sel { outline:2px solid var(--accent); }
@@ -283,6 +284,21 @@
   .role-hero { border:1px solid var(--border-3); background:var(--surface-2); border-radius:var(--r-lg); padding:14px; margin:10px 0; }
   .role-hero h2 { font-size:var(--fs-5); line-height:1.22; margin:0 0 3px; letter-spacing:0; }
   .role-hero p { color:var(--text-2); font-size:var(--fs-3); margin:0; }
+  .workflow-strip { display:grid; gap:8px; border:1px solid var(--border-3); border-radius:var(--r-lg); padding:11px 13px; margin:10px 0; background:linear-gradient(120deg,#182d26,var(--surface-2)); }
+  .workflow-strip-k { color:#78d5ad; font-size:var(--fs-1); font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+  .workflow-strip-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+  .workflow-strip-step { display:flex; align-items:center; gap:7px; min-width:0; color:var(--text-2); font-size:var(--fs-2); line-height:1.25; }
+  .workflow-strip-step b { display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; border-radius:50%; background:var(--surface-0); border:1px solid var(--border-2); color:var(--mut); font-size:var(--fs-2); }
+  .workflow-strip-step.active { color:var(--text-1); font-weight:700; }
+  .workflow-strip-step.active b { background:#78d5ad; border-color:#78d5ad; color:#10221b; }
+  .client-next-action { display:grid; gap:5px; border:1px solid #385c70; border-radius:var(--r-lg); padding:14px; margin:10px 0; background:radial-gradient(circle at 95% 0%,rgba(96,165,250,.16),transparent 38%),linear-gradient(145deg,#172936,var(--surface-1) 72%); }
+  .client-next-action h2 { margin:0; font-size:var(--fs-5); line-height:1.22; }
+  .client-next-action p { margin:0; color:var(--text-2); font-size:var(--fs-3); }
+  .client-next-action .role-btn { justify-self:start; margin-top:4px; }
+  @media(max-width:767.98px) {
+    .workflow-strip-steps { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .workflow-strip-step { min-height:34px; }
+  }
   .metric-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:10px 0; }
   @media(min-width:768px) { .metric-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
   /* Stat primitive (finding 71): the canonical KPI tile — uppercase kicker in the
@@ -430,6 +446,32 @@
   body.ops .ops-nextmove .nm-k { font-size:var(--fs-2); letter-spacing:.05em; text-transform:uppercase; color:#7fa9e0; font-weight:600; }
   body.ops .ops-nextmove .nm-h { font-size:var(--fs-5); font-weight:600; margin-top:2px; }
   body.ops .ops-nextmove .nm-h span { color:var(--text-2); font-weight:400; }
+  /* Workflow-first home surface: the operator should see one decision, its owner,
+     and the few lanes that can unblock the business before the diagnostic panels. */
+  body.ops .ops-command-deck { margin-bottom:16px; padding:18px; border:1px solid #355878; border-radius:16px; background:radial-gradient(circle at 92% 0%,rgba(96,165,250,.18),transparent 36%),linear-gradient(145deg,#152638,#111a23 64%); box-shadow:0 18px 40px -28px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.05) inset; }
+  body.ops .ops-deck-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  body.ops .ops-deck-k { color:#9bc8f7; font-size:var(--fs-1); font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+  body.ops .ops-deck-title { margin-top:5px; font-size:clamp(22px,3vw,30px); line-height:1.08; letter-spacing:-.03em; font-weight:750; max-width:680px; }
+  body.ops .ops-deck-sub { max-width:680px; color:#b5c6d6; font-size:var(--fs-3); margin-top:7px; }
+  body.ops .ops-deck-state { flex:none; border:1px solid rgba(147,197,253,.3); background:rgba(5,14,24,.35); border-radius:var(--r-pill); color:#c8e2ff; padding:6px 10px; font-size:var(--fs-2); font-weight:700; }
+  body.ops .ops-deck-main { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(220px,.8fr); gap:10px; margin-top:16px; }
+  body.ops .ops-deck-next, body.ops .ops-deck-context { min-width:0; border:1px solid rgba(147,197,253,.18); border-radius:12px; background:rgba(7,15,23,.38); padding:13px; }
+  body.ops .ops-deck-label { color:#94aac0; font-size:var(--fs-1); font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+  body.ops .ops-deck-next-title { font-size:var(--fs-5); font-weight:700; margin-top:5px; overflow-wrap:anywhere; }
+  body.ops .ops-deck-next-sub { color:#b5c6d6; font-size:var(--fs-2); margin-top:4px; }
+  body.ops .ops-deck-next .ops-btn { margin-top:12px; }
+  body.ops .ops-deck-context { display:grid; gap:8px; align-content:start; }
+  body.ops .ops-deck-context-row { display:flex; justify-content:space-between; gap:10px; border-top:1px solid rgba(147,197,253,.13); padding-top:8px; color:#b5c6d6; font-size:var(--fs-2); }
+  body.ops .ops-deck-context-row:first-of-type { border-top:0; padding-top:0; }
+  body.ops .ops-deck-context-row b { color:var(--text-0); font-size:var(--fs-4); }
+  body.ops .ops-deck-lanes { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:10px; }
+  body.ops .ops-deck-lane { min-width:0; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,15,23,.25); padding:10px; }
+  body.ops .ops-deck-lane button { width:100%; margin-top:8px; padding:6px 8px; font-size:var(--fs-1); }
+  body.ops .ops-deck-lane-k { color:#94aac0; font-size:var(--fs-1); font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  body.ops .ops-deck-lane-v { font-size:var(--fs-5); font-weight:750; margin-top:2px; }
+  body.ops .ops-deck-lane-n { color:#a8bbcc; font-size:var(--fs-1); margin-top:2px; line-height:1.3; }
+  @media(max-width:760px) { body.ops .ops-deck-main { grid-template-columns:1fr; } body.ops .ops-deck-lanes { grid-template-columns:repeat(2,minmax(0,1fr)); } body.ops .ops-deck-state { display:none; } }
+  @media(prefers-reduced-motion:reduce) { body.ops .ops-command-deck { box-shadow:0 1px 0 rgba(255,255,255,.05) inset; } }
   body.ops .ops-grid-today { display:grid; gap:16px; margin-top:16px; grid-template-columns:1fr; }
   @media(min-width:1024px) {
     body.ops .ops-grid-today { grid-template-columns:1.55fr 1fr; align-items:start; }
@@ -928,7 +970,12 @@ function roleOf() {
 // before the JS parser sees it, so `&#39;` becomes `'` and closes the string.
 // Dynamic values therefore ride in data-* attributes (where esc() IS correct) and
 // dispatch through this one listener instead of being concatenated into JS source.
-const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system','alerts','hq','settings'];
+// Production portal boundary: HQ and Admin remain private/internal surfaces. They
+// are intentionally not reachable from the employee/client portal shell; the
+// private HQ application is the place for migration and QA work.
+const PORTAL_INTERNAL_SURFACES = false;
+const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system','alerts'];
+if (PORTAL_INTERNAL_SURFACES) SAFE_TABS.push('hq','settings');
 const safeTab = (t) => (SAFE_TABS.indexOf(String(t || '')) >= 0 ? String(t) : 'today');
 // Human labels for the same ids (reused for document.title — finding 87). Keyed by
 // the SAFE_TABS ids so the two lists can never silently drift apart.
@@ -969,6 +1016,7 @@ const ACTIONS = Object.assign(Object.create(null), {
   },
   opsOpenRecord: (arg) => opsOpenRecord(arg),
   opsRunAction: (arg) => opsRunAction(arg),
+  opsRetryAction: (arg) => opsRetryAction(arg),
   selectProspect: (arg) => selectProspect(arg),
   renderClient: (arg) => renderClient(arg || undefined),
   renderClientFromRecord: (arg) => { opsCloseRecord(true); window._opsDrawerReturn = null; Promise.resolve(renderClient(arg || undefined)).then(clientFocusLanding); },
@@ -1082,6 +1130,16 @@ function ptDayShort(d) {
   if (m) {
     const y = Number(m[1]);
     return MONTH_NAMES[Number(m[2]) - 1].slice(0, 3) + " " + Number(m[3]) + (y !== nowY ? ", " + y : "");
+  }
+  // Preserve already-human labels such as "Jun 3". Parsing those through
+  // Date turns them into dates in 2001, which is technically valid JS but
+  // misleading in a client-facing trend.
+  const human = String(d).match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:,\s*(\d{4}))?$/);
+  if (human) {
+    const month = human[1].slice(0, 3);
+    const day = Number(human[2]);
+    const year = human[3] ? Number(human[3]) : null;
+    return month + " " + day + (year && year !== nowY ? ", " + year : "");
   }
   const t = new Date(d);
   if (!isFinite(t.getTime())) return String(d);
@@ -1380,16 +1438,47 @@ async function rest(path) {
   try { return await r.json(); } catch { return { __error: "parse" }; }
 }
 
+function actionWait(ms) { return new Promise(function(resolve) { setTimeout(resolve, ms); }); }
+
+// Queue writes used to end at a green "Queued" toast. That made a failed worker run
+// indistinguishable from a successful refresh/publish. Ask PostgREST to return the row,
+// then watch the existing queue status column for a short, bounded window. The worker is
+// still the authority; this is only the operator's visibility loop.
+async function watchQueuedAction(id, action) {
+  for (let i = 0; i < 8; i++) {
+    await actionWait(1500);
+    let row;
+    try { row = await rest("operator_action_queue?id=eq." + encodeURIComponent(String(id)) + "&select=id,action,status,result,processed_at"); }
+    catch { return; }
+    if (bad(row) || !Array.isArray(row) || !row[0]) continue;
+    const state = String(row[0].status || "").toLowerCase();
+    if (state === "processing") toast("Running — " + action, "wait", 2600);
+    if (state === "done") { toast("Completed — " + action, "ok", 4200); renderOps(); return; }
+    if (state === "failed") { toast("Failed — " + (row[0].result || action) + ". Retry is available below.", "err", 6500); renderOps(); return; }
+  }
+  toast("Still queued — check Recent actions for the final result.", "wait", 5000);
+  renderOps();
+}
+
 async function enqueueAction(action, params) {
   let r;
   try {
     r = await authedFetch(SB + "/rest/v1/operator_action_queue", {
-      method: "POST", body: JSON.stringify({ action, params: params || {} }),
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ action, params: params || {} }),
     });
   } catch { toast("Could not queue — network error", "err"); return; }
   if (r === null) return;
-  if (r.ok) { toast("Queued — applies in ~2 min"); renderOps(); }
-  else toast("Could not queue (HTTP " + r.status + ")", "err");
+  if (!r.ok) { toast("Could not queue (HTTP " + r.status + ")", "err"); return; }
+  let rows = [];
+  try { rows = await r.json(); } catch (e) {}
+  const queued = Array.isArray(rows) ? rows[0] : rows;
+  const id = queued && queued.id != null ? queued.id : null;
+  toast(id != null ? "Queued — tracking status" : "Queued — check Recent actions", "wait", 3500);
+  renderOps();
+  if (id != null) watchQueuedAction(id, action);
+  return queued || null;
 }
 
 // Money-in landing node: validate + confirm the operator-typed close, then enqueue
@@ -1477,6 +1566,14 @@ function opsRunAction(id) {
   if (!cfg) return toast("Action is not wired yet");
   enqueueAction(cfg.action, cfg.params || {});
 }
+function opsRetryAction(id) {
+  const row = (window._opsRecentActions || []).find(function(item) { return String(item.id) === String(id); });
+  if (!row || !row.action) return toast("Failed action detail is no longer loaded", "err");
+  const params = row.params || row.action_params || {};
+  const sensitive = /^(publishing\.dispatch|record_revenue|client_request\.resolve|client_approval\.respond)$/.test(String(row.action));
+  if (sensitive && !confirm("Retry this action?\n\n" + row.action + "\n\nThe retry may write client, money, or public-site state.")) return;
+  enqueueAction(row.action, params);
+}
 // Client-facing "soon" control: an intentionally-disabled action with a client-safe
 // label (no internal jargon). Until the self-serve approve/upload broker is wired, the
 // client's Rankwise contact handles these directly — so render it as clearly forthcoming,
@@ -1490,13 +1587,17 @@ function prettyKey(s) {
   return k.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 function clientSoonBtn(label) {
-  return '<button class="client-action" disabled title="Coming soon — your Rankwise contact will set this up with you for now.">' +
-    esc(label) + ' <span class="ca-soon">soon</span></button>';
+  return clientContactBtn("Message Rankwise", label);
 }
-// Pass Y: the one-sentence explanation for the "soon" controls, as VISIBLE text —
-// rendered once per button group (a disabled button isn't focusable, so its title=
-// was unreachable by keyboard/touch/AT). SOON_NOTE holds no runtime value, safe inline.
-const SOON_NOTE = '<div class="ca-soonnote">Coming soon — your Rankwise contact will set this up with you for now.</div>';
+// Snapshot asks do not carry a durable client_request id, so they cannot safely claim
+// to approve or upload anything. Give the client a real next step instead of a dead
+// disabled control; durable approval/upload actions are rendered from client_request rows.
+function clientContactBtn(label, context) {
+  const subject = "Rankwise portal — " + String(context || "question");
+  const href = "mailto:zshef@rankwise.ca?subject=" + encodeURIComponent(subject);
+  return '<a class="client-action" href="' + esc(href) + '">' + esc(label || "Message Rankwise") + '</a>';
+}
+const SOON_NOTE = '<div class="ca-soonnote">This snapshot item is informational. Your Rankwise team will turn it into a live request before you approve, request changes, or upload.</div>';
 
 // A client's own JWT can WRITE client_approval but cannot flip client_request off "open"
 // (migration 038: client_request updates are operator-only, and clientApprovalWrite POSTs
@@ -1540,7 +1641,7 @@ async function clientApprovalWrite(requestId, kind, responseText, uploadRef) {
       .filter((box) => { const ta = box.querySelector('.crq-txt'); const card = box.closest('[data-crq]');
         return ta && ta.value.trim() && card && String(card.dataset.crq) !== String(requestId); });
     if (dirty.length && !confirm("You're typing a response in another request — discard it and refresh?")) return;
-    await Promise.resolve(renderClient(window._clientKey)).then(clientFocusLanding);  // Pass Y: don't strand focus on <body>
+    await Promise.resolve(renderClient()).then(clientFocusLanding);  // Pass Y: don't strand focus on <body>
   }
   else toast("Could not send — your Rankwise contact will follow up", "err");
 }
@@ -1675,12 +1776,26 @@ async function logCall(slug) {
       !confirm("Mark this lead DO NOT CONTACT? This is permanent — they will not be called again.")) {
     return;
   }
+  const nextActionEl = card.querySelector(".next-action");
+  const nextAction = nextActionEl ? nextActionEl.value : "none";
+  if (nextAction === "booking_verify" && sel.dataset.d !== "booked") {
+    toast("Verify booking is only valid with the booked disposition", "err");
+    if (nextActionEl && nextActionEl.focus) nextActionEl.focus();
+    return;
+  }
   const body = {
     prospect_slug: slug, prospect_name: window._nm[slug] || slug, disposition: sel.dataset.d,
     note: card.querySelector(".note").value.trim(),
     conversation: card.querySelector(".conv").checked,
   };
+  const rawNote = body.note;
+  if (nextAction !== "none") body.note = "NEXT ACTION: " + NEXT_ACTIONS[nextAction] + (rawNote ? " — " + rawNote : "");
   const cbAt = card.querySelector(".cbat") ? card.querySelector(".cbat").value : "";
+  if (nextAction === "callback" && !cbAt) {
+    toast("Add a callback time for the callback next action", "err");
+    const cbEl = card.querySelector(".cbat"); if (cbEl && cbEl.focus) cbEl.focus();
+    return;
+  }
   if (cbAt) {
     // A past callback time lands the card straight in the DUE bucket and drives
     // the "clear due callbacks first" mission — almost always a typo.
@@ -1696,10 +1811,19 @@ async function logCall(slug) {
     if (cbEl) cbEl.removeAttribute("aria-invalid");
     body.callback_at = when.toISOString();
   }
+  const attemptId = card.dataset.attemptId || "";
+  if (/^\d+$/.test(attemptId)) body.attempt_id = Number(attemptId);
   const post = (b) => authedFetch(SB + "/rest/v1/seller_call_log", { method: "POST", body: JSON.stringify(b) });
   let r;
   try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
   if (r === null) return;
+  if (!r.ok && body.attempt_id) {
+    // Older databases may not have the optional call-attempt link yet. Preserve the
+    // disposition and retry without that one column while the migration rolls out.
+    delete body.attempt_id;
+    try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
+    if (r === null) return;
+  }
   if (!r.ok && body.callback_at) {
     // pre-migration-014 backend: retry without the callback column, keep it in the note
     delete body.callback_at;
@@ -1746,9 +1870,11 @@ function sellerNextSel(justLoggedSlug) {
   const today = ptDay(new Date());
   const done = {};
   const latestDisp = {};
+  const latestRow = {};
   asArr(d.log).forEach(function(r) {
     if (!r.prospect_slug) return;
     if (!(r.prospect_slug in latestDisp)) latestDisp[r.prospect_slug] = r.disposition;   // log is newest-first
+    if (!(r.prospect_slug in latestRow)) latestRow[r.prospect_slug] = r;
     if (ptDay(r.called_at) === today && !done[r.prospect_slug]) done[r.prospect_slug] = 1;
   });
   // A terminal disposition (DNC/declined/wrong number) sinks the card on ANY day, not just
@@ -1757,7 +1883,11 @@ function sellerNextSel(justLoggedSlug) {
   done[justLoggedSlug] = 1;
   const cards = asArr(d.queue).slice().sort(function(a, b) { return ((a.slug in done) ? 1 : 0) - ((b.slug in done) ? 1 : 0) || a.rank - b.rank; });
   const remaining = cards.filter(function(p) { return !(p.slug in done); });
-  return (remaining[0] && remaining[0].slug) || (cards[0] && cards[0].slug) || null;
+  const due = remaining.filter(function(p) {
+    const row = latestRow[p.slug];
+    return row && row.callback_at && new Date(row.callback_at).getTime() <= Date.now();
+  }).sort(function(a, b) { return new Date(latestRow[a.slug].callback_at) - new Date(latestRow[b.slug].callback_at); });
+  return (due[0] && due[0].slug) || (remaining[0] && remaining[0].slug) || (cards[0] && cards[0].slug) || null;
 }
 
 // 'YYYY-MM-DDTHH:MM' in LOCAL time — the format a datetime-local min= expects.
@@ -1792,6 +1922,7 @@ function localDatetimeNow() {
 }
 
 const DISPS = ["connect", "voicemail", "no_answer", "declined", "wrong_number", "booked", "do_not_contact"];
+const NEXT_ACTIONS = { none:"No follow-up", callback:"Callback", send_audit:"Send audit", booking_verify:"Verify booking" };
 // Terminal dispositions: a lead marked these is DONE for good — it must not resurface
 // as a fresh top card on a later day (finding W-3). no_answer/voicemail/connect recycle.
 const TERMINAL_DISP = { do_not_contact: 1, declined: 1, wrong_number: 1 };
@@ -1814,6 +1945,9 @@ function logForm(slug, open) {
     dispBtns +
     '</div><label class="cb"><input type="checkbox" class="conv"> Real conversation (got past the opener)</label>' +
     '<input class="note" aria-label="Call note — objection, email given, next step" placeholder="Note — objection, email given, next step…">' +
+    '<label class="cb" style="display:block"><span class="mut">Next action:</span> <select class="next-action" aria-label="Next action">' +
+    Object.keys(NEXT_ACTIONS).map((k) => '<option value="' + esc(k) + '">' + esc(NEXT_ACTIONS[k]) + '</option>').join('') +
+    '</select></label>' +
     '<label class="cb" style="display:block"><span class="mut">Call back at (optional, Pacific):</span> ' +
     '<input type="datetime-local" class="cbat" min="' + localDatetimeNow() + '" aria-label="Callback date and time (Pacific)"></label>' +
     '<button class="primary" style="width:100%;margin-top:8px" data-slug="' + esc(slug) + '"' +
@@ -2103,7 +2237,9 @@ function callBtn(p) {
   const tel  = String(p.phone == null ? "" : p.phone).replace(/[^0-9+]/g, "");
   const locked = !insideCallingHours();
   // Click-to-call bridge: rings the seller's own cell, then bridges to the prospect (recorded).
-  // Degrades to the native tel: dialer on 503/error so the call always has a path.
+  // There is deliberately no native tel: fallback: it would bypass recording, DNC checks,
+  // calling-hour enforcement, and the call-attempt audit trail while the UI still promised
+  // a recorded call.
   // Rendered disabled outside CRTC hours; sellerHoursTick keeps it in sync as time passes.
   const btn = '<button class="dccall' + (locked ? ' hours-lock' : '') + '"' +
          (locked ? ' disabled title="Outside calling hours — dialing paused"' : '') +
@@ -2123,12 +2259,12 @@ function toE164(s) {
 }
 
 // Initiates the bridge via the twilio-dial edge fn (rings the seller's cell). The seller's JWT
-// rides in hdr(); the edge fn re-checks role + queue membership. Falls back to tel: on any failure.
+// rides in hdr(); the edge fn re-checks role, queue membership, DNC, and calling hours.
 async function dialBridge(btn) {
   const num = btn.getAttribute("data-dial");
   const slug = btn.getAttribute("data-slug");
   const tel = btn.getAttribute("data-tel");
-  if (!num) { if (tel) location.href = "tel:" + tel; return; }
+  if (!num) { toast("This lead has no callable number", "err"); return; }
   // Guard against a misclick placing a real call: confirm ONCE per session, showing the number
   // and restating the recording disclosure the seller owes the prospect. After the first
   // acknowledged dial the blocking prompt is suppressed so a shift isn't a wall of confirms (W-10).
@@ -2142,12 +2278,19 @@ async function dialBridge(btn) {
       method: "POST", headers: hdr(),
       body: JSON.stringify({ prospect_number: num, slug: slug }),
     });
-    if (r.ok) toast("Your phone is ringing — answer it and we'll connect you.");
-    else if (r.status === 503) { toast("Click-to-call isn't switched on yet — dialing manually."); location.href = "tel:" + tel; }
-    else if (r.status === 403) toast("This number isn't callable from the queue.");
-    else { toast("Call failed (" + r.status + ") — dialing manually."); location.href = "tel:" + tel; }
+    if (r.ok) {
+      let payload = {};
+      try { payload = await r.json(); } catch (e) {}
+      if (payload.attempt_id != null) {
+        const card = btn.closest('[data-card]');
+        if (card) card.dataset.attemptId = String(payload.attempt_id);
+      }
+      toast("Your phone is ringing — answer it and we'll connect you.");
+    } else if (r.status === 403) toast("This number is blocked, outside calling hours, or no longer callable.", "err");
+    else if (r.status === 503) toast("Recorded click-to-call is unavailable right now. No call was placed.", "err");
+    else toast("Call failed (" + r.status + "). No call was placed — retry when ready.", "err");
   } catch (e) {
-    toast("Network error — dialing manually."); if (tel) location.href = "tel:" + tel;
+    toast("Network error — no call was placed. Check your connection and retry.", "err");
   } finally {
     btn.classList.remove('dialing'); btn.innerHTML = orig;
     // Re-lock immediately if the CRTC window closed while the call was connecting,
@@ -2625,7 +2768,13 @@ async function renderSeller(data) {
   }
   cbs.sort((a, b) => String(a.at).localeCompare(String(b.at)));
   const dueCallbacks = cbs.filter((c) => new Date(c.at) <= new Date());
-  const nextDial = remainingCards[0] || null;
+  // A promised callback is a trust obligation, not just another signal. Keep the
+  // full rail rank order for browsing, but make the next-action selection callback-first.
+  const dueBySlug = {}; dueCallbacks.forEach((c) => { dueBySlug[c.slug] = 1; });
+  const callbackCards = remainingCards.filter((p) => dueBySlug[p.slug]);
+  const freshCards = remainingCards.filter((p) => !dueBySlug[p.slug]);
+  const prioritizedCards = callbackCards.concat(freshCards);
+  const nextDial = prioritizedCards[0] || null;
   const intelReady = cards.filter((c) => c.intel && Object.keys(c.intel || {}).length).length;
   const liveAudits = cards.filter((c) => c.audit_url).length;
   const dncHeld = cards.filter((c) => c.intel && c.intel.dnc).length;
@@ -2674,7 +2823,7 @@ async function renderSeller(data) {
   window._nm = {}; cards.forEach((p) => { window._nm[p.slug] = p.business_name; });
   window._cbDueSlugs = {}; dueCallbacks.forEach((c) => { window._cbDueSlugs[c.slug] = 1; });
   window._railFilter = 'all';   // a rebuilt rail re-hardcodes the "All" chip active — keep filter state in sync
-  const sel = (window._sel && cards.some((c) => c.slug === window._sel)) ? window._sel : (cards[0] && cards[0].slug);
+  const sel = (window._sel && cards.some((c) => c.slug === window._sel)) ? window._sel : (nextDial ? nextDial.slug : (cards[0] && cards[0].slug));
   // First-milestone celebration — one-time per browser, guarded by localStorage. [PROVISIONAL]
   try {
     const _fired = JSON.parse(localStorage.getItem('rw_seller_milestones') || '{}');
@@ -2712,6 +2861,12 @@ async function renderSeller(data) {
     '<div class="role-kicker">' + (role === "operator" ? 'Operator preview' : 'Seller workspace') + '</div>' +
     '<h1>Dial Console</h1><p class="mut">Call list, proof, objection guardrails, and live progress.</p></div></div>' +
     hoursStatus() +
+    '<section class="workflow-strip" aria-label="Shift workflow"><div class="workflow-strip-k">Shift workflow</div><div class="workflow-strip-steps">' +
+    '<div class="workflow-strip-step active"><b>1</b><span>Choose next lead</span></div>' +
+    '<div class="workflow-strip-step"><b>2</b><span>Controlled call</span></div>' +
+    '<div class="workflow-strip-step"><b>3</b><span>Log outcome</span></div>' +
+    '<div class="workflow-strip-step"><b>4</b><span>Advance commitment</span></div>' +
+    '</div></section>' +
     '<section class="role-hero seller-hero"><div class="role-kicker">Current focus</div><h2>' + esc(shiftTitle) + '</h2><p>' + esc(shiftSub) + '</p>' +
     '<div class="metric-grid">' +
     metric('To dial today', remainingCards.length, remainingCards.length ? 'fresh queue — not a backlog' : 'queue clear', remainingCards.length ? 'info' : 'ok') +
@@ -2783,7 +2938,7 @@ async function renderSeller(data) {
     for (const c of cbs.slice(0, 8)) {
       const overdue = new Date(c.at) <= new Date();
       h += '<div class="hist"><span class="pill ' + (overdue ? "warn" : "") + '">' + (overdue ? "DUE" : ptTime(c.at)) + '</span> <b>' + esc(c.name) + '</b>' +
-        (phoneBySlug[c.slug] ? ' · <a href="tel:' + String(phoneBySlug[c.slug]).replace(/[^0-9+]/g, "") + '" style="color:var(--ok)">call</a>' : '') +
+        (phoneBySlug[c.slug] ? ' · <button class="link-btn" data-act="selectProspect" data-arg="' + esc(c.slug) + '">Open call</button>' : '') +
         (c.note ? '<br><span class="mut">' + esc(c.note) + '</span>' : '') + '</div>';
     }
     h += '<p class="mut">Logging any new call for that business clears its callback.</p></div>';
@@ -3864,6 +4019,7 @@ async function renderOps() {
   const mktBad = bad(marketRows);
   const snap = rows[0] || null;
   const recentActions = Array.isArray(actionRows) ? actionRows : [];
+  window._opsRecentActions = recentActions;
   const p = (snap && snap.payload) ? snap.payload : {};
   // Market intel rides a separate table (market_snapshot, operator-only RLS).
   const mktSnap = (Array.isArray(marketRows) && marketRows[0]) ? marketRows[0] : null;
@@ -4715,6 +4871,35 @@ async function renderOps() {
   // ── TODAY section ─────────────────────────────────────────────────────────
   const nm = p.next_move ? deDragItem(p.next_move) : null;
   let todayH = '';
+  // Make the operator's next decision the first thing on the screen. The
+  // detailed panels remain available below, but the landing surface now
+  // answers: what needs me, why, and where do I act?
+  const deckSource = nextCommand || nm || null;
+  const deckTab = safeTab((deckSource && (deckSource.tab || deckSource.action_tab)) || 'today');
+  const deckTitle = deckSource ? (deckSource.title || 'Review the next open item') : 'No decision is waiting on you';
+  const deckSub = deckSource ? ([deckSource.owner || 'operator', deckSource.type, deckSource.sub || deckSource.next_action].filter(Boolean).join(' · ') || 'Open the linked workspace and move the item to its next state.') : 'The portal will promote the next client, content, outreach, or system commitment here.';
+  const deckOpenAnchor = deckTab === 'today' ? 'ops-command-queue' : (deckSource && deckSource.anchor);
+  const deckOpen = '<button class="ops-btn primary" data-act="opsTab" data-arg="' + esc(deckTab) + '"' + anchorAttr(deckOpenAnchor) + '>' + (deckTab === 'today' ? 'Review command queue' : 'Open workspace') + ' <span aria-hidden="true">→</span></button>';
+  const deckAttention = actNow.length + todayNeeds.length;
+  const deckHealth = findingsTotal ? findingsTotal + ' open finding' + (findingsTotal === 1 ? '' : 's') : 'No open findings';
+  const deckLane = function(label, value, note, tab, anchor) {
+    return '<div class="ops-deck-lane"><div class="ops-deck-lane-k">' + esc(label) + '</div><div class="ops-deck-lane-v">' + esc(value) + '</div><div class="ops-deck-lane-n">' + esc(note) + '</div><button class="ops-btn ghost" data-act="opsTab" data-arg="' + esc(safeTab(tab)) + '"' + anchorAttr(anchor) + '>Open</button></div>';
+  };
+  todayH += '<section class="ops-command-deck" aria-labelledby="ops-deck-title">' +
+    '<div class="ops-deck-head"><div><div class="ops-deck-k">Command deck · one next move</div><h2 class="ops-deck-title" id="ops-deck-title">' + esc(deckTitle) + '</h2><p class="ops-deck-sub">' + esc(deckSub) + '</p></div>' +
+    '<span class="ops-deck-state">' + (deckAttention ? esc(deckAttention + ' needs you') : 'steady state') + '</span></div>' +
+    '<div class="ops-deck-main"><div class="ops-deck-next"><div class="ops-deck-label">Recommended next action</div><div class="ops-deck-next-title">' + esc(deckTitle) + '</div><div class="ops-deck-next-sub">' + esc(deckSub) + '</div>' + deckOpen + '</div>' +
+    '<div class="ops-deck-context"><div class="ops-deck-label">Operating context</div>' +
+    '<div class="ops-deck-context-row"><span>Needs your decision</span><b>' + esc(deckAttention) + '</b></div>' +
+    '<div class="ops-deck-context-row"><span>Due outreach</span><b>' + esc(dueCalls.length) + '</b></div>' +
+    '<div class="ops-deck-context-row"><span>Content waiting</span><b>' + esc(contentBadge) + '</b></div>' +
+    '<div class="ops-deck-context-row"><span>System watch</span><b>' + esc(deckHealth) + '</b></div></div></div>' +
+    '<div class="ops-deck-lanes">' +
+    deckLane('Decisions', deckAttention, deckAttention ? 'your call first' : 'nothing waiting', 'today', 'ops-command-queue') +
+    deckLane('Outreach', dueCalls.length, dueCalls.length ? 'callbacks and calls due' : 'no due calls', 'outreach', 'ops-outreach-due') +
+    deckLane('Content', contentBadge, contentBadge ? 'approval or media gate' : 'lane is clear', 'content', 'ops-content-workflow') +
+    deckLane('Clients', clientsNeedingAttention.length, clientsNeedingAttention.length ? 'client work needs attention' : 'no client escalation', 'clients', 'ops-clients-attention') +
+    '</div></section>';
   // next-move hero
   if (nm) {
     // The hero lives on the Today view, so an Open button pointing at 'today' with no
@@ -4794,7 +4979,7 @@ async function renderOps() {
   const vGriffin = visibleCommands.filter(function(c){ return griffinCommands.indexOf(c) >= 0; }).length;
   const vClient = visibleCommands.filter(function(c){ return clientCommands.indexOf(c) >= 0; }).length;
   const vContent = visibleCommands.filter(function(c){ return contentCommands.indexOf(c) >= 0; }).length;
-  todayH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Command queue</h3><span class="ops-count">' +
+  todayH += '<div class="ops-panel" id="ops-command-queue" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Command queue</h3><span class="ops-count">' +
     esc(universalCommands.length || 'clear') + '</span></div>';
   todayH += '<div class="ops-workbench">' +
     '<div class="ops-workbench-main"><div><div class="ops-workbench-k">Top of queue</div>' +
@@ -5465,7 +5650,10 @@ async function renderOps() {
     for (const item of sortedWorkflow.slice(0, 18)) {
       const lane = contentLane(item);
       const key = item.client_key || item.client || '';
-      const contentId = item.id || item.content_id || item.slug || item.path || contentTitle(item);
+      // A title is a label, never a write target. Publishing/approval actions stay
+      // visibly gated until the snapshot carries a canonical content id, slug, or path.
+      const contentId = item.id || item.content_id || item.slug || item.path || '';
+      const hasContentTarget = String(contentId).trim().length > 0;
       const fvals = [lane];
       if (contentDueThisWeek(item)) fvals.push('due-week');
       if (key) fvals.push('client-' + String(key).replace(/[^a-zA-Z0-9_-]/g, '-'));
@@ -5477,11 +5665,11 @@ async function renderOps() {
         (item.readiness ? '<span class="ops-pill ' + (String(item.readiness).toLowerCase().indexOf('ship') >= 0 ? 'ok' : 'warn') + '">' + esc(item.readiness) + '</span>' : '') +
         (contentNeedsAsset(item) ? '<span class="ops-pill warn">media</span>' : '') +
         (key ? '<button class="ops-btn ghost" data-act="renderClient" data-arg="' + esc(key) + '">Client</button>' : '') +
-        (lane === 'approval' || lane === 'ready' ? actionButton('content.approve', 'Approve', { content_id: contentId, client_key: key }, { primary: lane === 'approval', sub:'audit required' }) : '') +
-        (lane === 'approval' ? actionButton('content.reject', 'Changes', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') +
-        (lane === 'draft' || lane === 'approval' ? actionButton('content.rewrite_preview', 'Preview rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') +
-        (lane === 'ready' || lane === 'scheduled' ? '<button class="ops-btn ghost ops-actionbtn" data-act="submitPublishPreview" data-arg="' + esc(contentId) + '" title="dry-run preview — nothing published"><b>Preview publish</b><span>dry-run</span></button>' : '') +
-        (lane === 'ready' || lane === 'scheduled' ? '<button class="ops-btn primary ops-actionbtn" data-act="submitPublishLive" data-arg="' + esc(contentId) + '" title="publishes to the live rankwise.ca site"><b>Publish (go live)</b><span>ships now</span></button>' : '') +
+        (lane === 'approval' || lane === 'ready' ? (hasContentTarget ? actionButton('content.approve', 'Approve', { content_id: contentId, client_key: key }, { primary: lane === 'approval', sub:'audit required' }) : '<button class="ops-btn ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Approve</b><span>needs canonical target</span></button>') : '') +
+        (lane === 'approval' ? (hasContentTarget ? actionButton('content.reject', 'Changes', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') : '') +
+        (lane === 'draft' || lane === 'approval' ? (hasContentTarget ? actionButton('content.rewrite_preview', 'Preview rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') : '') +
+        (lane === 'ready' || lane === 'scheduled' ? (hasContentTarget ? '<button class="ops-btn ghost ops-actionbtn" data-act="submitPublishPreview" data-arg="' + esc(contentId) + '" title="dry-run preview — nothing published"><b>Preview publish</b><span>dry-run</span></button>' : '<button class="ops-btn ghost ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Preview publish</b><span>needs canonical target</span></button>') : '') +
+        (lane === 'ready' || lane === 'scheduled' ? (hasContentTarget ? '<button class="ops-btn primary ops-actionbtn" data-act="submitPublishLive" data-arg="' + esc(contentId) + '" title="publishes to the live rankwise.ca site"><b>Publish (go live)</b><span>ships now</span></button>' : '<button class="ops-btn primary ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Publish (go live)</b><span>needs canonical target</span></button>') : '') +
         '</li>';
     }
     contH += '</ul>';
@@ -6193,7 +6381,22 @@ async function renderOps() {
       'Tap a box for the plain-English story, components and provenance. Badges recompute hourly from the existing monitors, gate files, crontab and dead-man checks — an unreadable source shows UNKNOWN, never a guess. This panel renders; alerting stays with the briefing/Healthchecks rails.' +
       '</span></div></div>';
   }
-  let sysH = sysmapH + '<div class="ops-colset two">';
+  // ── ctOS system atlas (operator-only; the interactive map, upgraded) ──────
+  // The atlas loads through a SAME-ORIGIN loader (system/system-map.html): it
+  // reads the operator's Supabase session from localStorage, fetches the
+  // operator-only public.system_map rows, and hosts the untrusted, data-injected
+  // atlas in its OWN sandboxed grandchild frame. This parent frame must stay
+  // same-origin (that is how the loader reaches the token) — the RLS policy on
+  // public.system_map is the real boundary: a non-operator session fetches 0
+  // rows and the loader renders its own "no operator access" state. This whole
+  // tab is already inside the role==='operator' render path (render()).
+  let atlasH = '<div class="ops-panel" id="ops-atlas-panel" style="margin-bottom:16px;padding:0;overflow:hidden">' +
+    '<div class="ops-panel-h" style="padding:12px 14px"><h3 class="ops-panel-t">System atlas — ctOS</h3>' +
+    '<a class="ops-count" href="system/system-map.html" target="_blank" rel="noopener" style="text-decoration:none">⤢ open full screen</a></div>' +
+    '<iframe src="system/system-map.html" title="Rankwise ctOS system atlas" loading="lazy" ' +
+    'style="display:block;width:100%;height:78vh;min-height:520px;border:0;background:var(--surface-0)"></iframe>' +
+    '</div>';
+  let sysH = atlasH + sysmapH + '<div class="ops-colset two">';
   // Snapshot contract
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Snapshot contract</h3>' +
     '<span class="ops-count">' + esc(schemaVersion || 'missing schema') + '</span></div>' +
@@ -6374,7 +6577,9 @@ async function renderOps() {
     sysH += '<div class="ops-minihead"><span>Retry-ready failures</span><span>' + esc(failedActions.length) + '</span></div><ul class="ops-list">';
     for (const row of failedActions.slice(0, 5)) {
       sysH += '<li class="ops-li"><span class="ops-pill bad">failed</span><div class="ops-grow"><div class="ops-li-ttl">' + esc(actionName(row.action)) + '</div>' +
-        '<div class="ops-li-meta">' + esc(row.result || ptTime(row.created_at)) + '</div></div><button class="ops-btn ghost" onclick="opsTab(\'today\')">Decision</button></li>';
+        '<div class="ops-li-meta">' + esc(row.result || ptTime(row.created_at)) + '</div></div>' +
+        '<button class="ops-btn ghost" data-act="opsRetryAction" data-arg="' + esc(String(row.id)) + '">Retry</button>' +
+        '<button class="ops-btn ghost" onclick="opsTab(\'today\')">Decision</button></li>';
     }
     sysH += '</ul>';
   }
@@ -7077,10 +7282,11 @@ async function renderOps() {
     (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' : (findingsTotal ? ' <span class="ops-badge">' + esc(findingsTotal) + '</span>' : '')) + '</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='alerts'?'true':'false') + '" data-v="alerts" onclick="opsTab(\'alerts\')">Alerts' +
     (notificationsBadge ? ' <span class="ops-badge hot">' + esc(notificationsBadge) + '</span>' : '') + '</button>' +
-    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='hq'?'true':'false') + '" data-v="hq" onclick="opsTab(\'hq\')">Legacy HQ' +
-    (hqRiskCount ? ' <span class="ops-badge">' + esc(hqRiskCount) + '</span>' : '') + '</button>' +
-    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' +
+    (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='hq'?'true':'false') + '" data-v="hq" onclick="opsTab(\'hq\')">Legacy HQ' +
+    (hqRiskCount ? ' <span class="ops-badge">' + esc(hqRiskCount) + '</span>' : '') + '</button>' : '') +
+    (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
     '</nav>' +
+    '<main class="ops-main">' +
     '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + todayH + '</section>' +
     '<section class="ops-view" id="ops-pipeline" role="tabpanel"' + (window._opsTab!=='pipeline'?' hidden':'') + '>' + pipeH + '</section>' +
     '<section class="ops-view" id="ops-market" role="tabpanel"' + (window._opsTab!=='market'?' hidden':'') + '>' + marketH + '</section>' +
@@ -7090,8 +7296,9 @@ async function renderOps() {
     '<section class="ops-view" id="ops-money" role="tabpanel"' + (window._opsTab!=='money'?' hidden':'') + '>' + monH + '</section>' +
     '<section class="ops-view" id="ops-system" role="tabpanel"' + (window._opsTab!=='system'?' hidden':'') + '>' + sysH + '</section>' +
     '<section class="ops-view" id="ops-alerts" role="tabpanel"' + (window._opsTab!=='alerts'?' hidden':'') + '>' + alertH + '</section>' +
-    '<section class="ops-view" id="ops-hq" role="tabpanel"' + (window._opsTab!=='hq'?' hidden':'') + '>' + hqH + '</section>' +
-    '<section class="ops-view" id="ops-settings" role="tabpanel"' + (window._opsTab!=='settings'?' hidden':'') + '>' + settingsH + '</section>' +
+    (PORTAL_INTERNAL_SURFACES ? '<section class="ops-view" id="ops-hq" role="tabpanel"' + (window._opsTab!=='hq'?' hidden':'') + '>' + hqH + '</section>' : '') +
+    (PORTAL_INTERNAL_SURFACES ? '<section class="ops-view" id="ops-settings" role="tabpanel"' + (window._opsTab!=='settings'?' hidden':'') + '>' + settingsH + '</section>' : '') +
+    '</main>' +
     '<div class="ops-drawer-backdrop" id="ops-record-backdrop" hidden onclick="opsCloseRecord()"></div>' +
     '<aside class="ops-drawer" id="ops-record-drawer" role="dialog" aria-modal="true" aria-label="Record detail" hidden></aside>' +
     '<div class="ops-mobile-dock">' +
@@ -7348,18 +7555,42 @@ async function renderClient(key) {
     h += '<div class="client-onboarding-banner"><b>Setup in progress — just getting started.</b> Early numbers are expected to be low while we connect your sources and publish the first work; this is the baseline we grow from.' +
       ' <span class="cob-need">' + esc(_openSetup.length) + ' setup step' + (_openSetup.length === 1 ? '' : 's') + ' still need you below.</span></div>';
   }
+  // Put the client's one next move ahead of the scorecard. Metrics explain progress;
+  // this surface explains what the client can actually do today.
+  const clientNextItem = needsYouPrimary || nextClientWork || null;
+  const clientNextParts = clientNextItem ? planParts(clientNextItem) : null;
+  const clientNextTitle = clientNextParts ? clientNextParts.title : 'Nothing needs your attention today';
+  const clientNextMeta = clientNextItem
+    ? ([clientNextItem.status || clientNextItem.type || clientNextItem.stage || 'next step', clientNextItem.due || clientNextItem.due_at || clientNextParts.date, clientNextParts.sub || clientNextItem.detail || clientNextItem.note].filter(Boolean).join(' · '))
+    : 'Your Rankwise team is monitoring the work and will bring the next decision here.';
+  const clientNextCta = needsYouPrimary
+    ? (needsYouPrimary._setup
+      ? '<a class="client-action client-action-armed" href="#client-setup">Review setup step <span aria-hidden="true">→</span></a>'
+      : clientContactBtn('Message Rankwise', clientNextTitle))
+    : (nextClientWork ? '<a class="client-action" href="#client-action-center">See action center <span aria-hidden="true">→</span></a>' : '');
+  h += '<section class="client-next-action" aria-labelledby="client-next-title"><div class="role-kicker">Your next action</div><h2 id="client-next-title">' + esc(clientNextTitle) + '</h2><p>' + esc(clientNextMeta) + '</p>' + clientNextCta + '</section>';
+  // Ranking cards must never invent a denominator from the display-capped rows.
+  // If the backend has not supplied rankings_total (or an equivalent tracked count),
+  // show the ranked count without an "of N" claim instead of rendering states such
+  // as "31 of 2".
+  const _finiteCount = (v) => (v != null && v !== '' && isFinite(Number(v))) ? Number(v) : null;
+  const _rankedKpi = _finiteCount(terms.value);
+  const _trackedKpi = _finiteCount(p.rankings_total != null ? p.rankings_total : (terms.total != null ? terms.total : terms.tracked));
+  const _rankDataMismatch = _rankedKpi != null && _trackedKpi != null && _rankedKpi > _trackedKpi;
+  const _rankMetricValue = _rankedKpi == null ? '—' : (!_rankDataMismatch && _trackedKpi != null ? _rankedKpi + ' of ' + _trackedKpi : _rankedKpi + ' ranked');
+  const _rankMetricDetail = _rankDataMismatch ? 'data check needed' : (_trackedKpi != null ? 'of your tracked search terms' : 'tracked terms counted in this snapshot');
   h += '<section class="role-hero client-hero"><div class="role-kicker">Scorecard</div><h2>' + esc(heroTitle) + '</h2><p>' + esc(periodLine) + '</p>' +
     '<div class="metric-grid">' +
     metric(clicks.label || 'Clicks', clicks.value, clicks.delta ? clicks.delta + ' vs prior' : 'Google Search', toNum(clicks.value) < 10 ? 'info' : deltaTone(clicks.delta), 'People who clicked through to your site from Google Search.') +
     metric(imps.label || 'Impressions', imps.value, imps.delta ? imps.delta + ' vs prior' : 'search visibility', toNum(imps.value) < 10 ? 'info' : deltaTone(imps.delta), 'How many times your site appeared in Google Search results.') +
-    metric('Ranked in top results', (terms.value != null ? terms.value : 0) + ' of ' + ((p.rankings_total != null ? Number(p.rankings_total) : (p.rankings || []).length) || terms.total || terms.tracked || '—'), 'of your tracked search terms', toNum(terms.value) ? 'ok' : 'info', 'How many of your tracked search terms currently show up in the top results.') +
+    metric('Ranked in top results', _rankMetricValue, _rankMetricDetail, toNum(terms.value) ? 'ok' : 'info', 'How many of your tracked search terms currently show up in the top results.') +
     metric(map3.label || 'Map-pack top 3', map3.value, 'local pack wins', toNum(map3.value) ? 'ok' : 'warn', 'Search terms where you appear in the Google Maps top 3 (the local pack).') +
     (ga4.latest_sessions != null ? metric('Site sessions', ga4.latest_sessions, (ga4.sessions_delta != null ? (ga4.sessions_delta >= 0 ? '+' : '') + ga4.sessions_delta + ' vs prior' : 'GA4'), ga4.sessions_delta < 0 ? 'warn' : 'info', 'Visits to your website in this period (from Google Analytics).') : '') +
     (aeo.citation_rate_pct != null ? metric('AI citations', (aeo.cited || 0) + ' of ' + (aeo.total || 0), aeo.citation_rate_pct + '% of checked queries cited you', Number(aeo.citation_rate_pct) > 0 ? 'ok' : 'warn', 'How often AI answers (like Google AI Overviews) cite your business, out of the queries we check.') : '') +
     '</div></section>';
   h += '<div class="role-kicker" style="margin:12px 0 -2px">At a glance</div><div class="status-row">' +
     freshnessPill('Updated', clientGeneratedAt, 192, 264) +
-    statusPill('Search tracking', (p.rankings || []).length ? ((p.rankings_total != null ? Number(p.rankings_total) : p.rankings.length) + ' terms') : 'pending', (p.rankings || []).length ? (toNum(terms.value) ? 'ok' : 'warn') : 'warn') +
+    statusPill('Search tracking', _rankDataMismatch ? 'data check' : (_trackedKpi != null ? _trackedKpi + ' terms' : ((p.rankings || []).length ? p.rankings.length + ' rows shown' : 'pending')), (p.rankings || []).length ? (toNum(terms.value) ? 'ok' : 'warn') : 'warn') +
     statusPill(planItems.length ? 'Content plan' : 'Work plan', planned.length ? plural(planned.length, 'item') : 'planning', planned.length ? 'info' : 'warn') +
     statusPill('AI visibility', aeo.citation_rate_pct != null ? (aeo.citation_rate_pct + '%') : 'pending', aeo.citation_rate_pct != null ? (Number(aeo.citation_rate_pct) > 0 ? 'ok' : 'warn') : '') +
     (clientSourceStatus.length ? statusPill('Sources', clientSourceBad ? clientSourceBad + ' need check' : clientSourceStatus.length + ' connected', clientSourceBad ? 'warn' : 'ok') : '') +
@@ -7386,11 +7617,11 @@ async function renderClient(key) {
   }
   h += '</div></section>';
 
-  h += '<section class="role-card client-action-center"><h3>Action center</h3>' +
+  h += '<section class="role-card client-action-center" id="client-action-center"><h3>Action center</h3>' +
     '<div class="client-action-grid">' +
     '<div class="client-action-card"><div class="ca-k">Needs you now</div><div class="ca-v">' + esc(needsYouPrimary ? planParts(needsYouPrimary).title : 'Nothing pending') + '</div>' +
     '<div class="ca-n">' + esc(needsYouPrimary ? ([needsYouPrimary.status || needsYouPrimary.type || 'open', needsYouPrimary.due || needsYouPrimary.due_at || planParts(needsYouPrimary).date, planParts(needsYouPrimary).sub || needsYouPrimary.detail || needsYouPrimary.note].filter(Boolean).join(' · ')) : 'Approvals, uploads, or access requests will appear here.') + '</div>' +
-    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : '<div class="client-btnrow">' + clientSoonBtn('Respond') + '</div>' + SOON_NOTE) : '') + '</div>' +
+    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', planParts(needsYouPrimary).title) + '</div>') : '') + '</div>' +
     '<div class="client-action-card"><div class="ca-k">Next publish</div><div class="ca-v">' + esc(nextClientWork ? planParts(nextClientWork).title : 'Plan being assembled') + '</div>' +
     '<div class="ca-n">' + esc(nextClientWork ? ([nextClientWork.status || nextClientWork.stage || nextClientWork.type, nextClientWork.due || nextClientWork.scheduled_for || planParts(nextClientWork).date, planParts(nextClientWork).sub].filter(Boolean).join(' · ')) : 'Content and delivery plan appears after kickoff.') + '</div></div>' +
     '<div class="client-action-card"><div class="ca-k">Latest proof</div><div class="ca-v">' + esc(latestClientProof ? planParts(latestClientProof).title : 'Proof pending') + '</div>' +
@@ -7450,7 +7681,7 @@ async function renderClient(key) {
       '</section>';
   }
 
-  h += '<section class="role-card"><h3>Setup and first 30 days</h3>' +
+  h += '<section class="role-card" id="client-setup"><h3>Setup and first 30 days</h3>' +
     '<div class="client-workspace">' + clientSetupSteps.slice(0, 8).map((step) => {
       const tone = clientStageTone(step.status || step.state || step.ok);
       // Each still-open setup row gets a real resolve action (mailto — no backend needed,
@@ -7495,20 +7726,23 @@ async function renderClient(key) {
     clientApprovals.concat(clientAsks).slice(0, 6).forEach((ask) => {
       const it = planParts(ask);
       const status = ask.status || ask.stage || ask.type || 'open';
+      const rid = Number(ask.request_id || ask.client_request_id || 0);
+      const liveId = roleOf() !== 'operator' && Number.isFinite(rid) && rid > 0;
       h += '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(it.title || 'Approval request') + '</div>' +
         '<div class="client-ask__sub">' + esc([status, ask.due || ask.due_at || it.date, it.sub || ask.detail || ask.note].filter(Boolean).join(' · ')) + '</div></div>' +
         '<span class="pill warn">' + esc(status) + '</span></div>' +
-        '<div class="client-btnrow">' +
-        clientSoonBtn('Approve') +
-        clientSoonBtn('Request changes') +
-        '</div>' + SOON_NOTE + '</div>';
+        '<div class="client-btnrow">' + (liveId ?
+          '<button class="client-action" onclick="clientApprove(this,' + rid + ')">Approve</button>' +
+          '<button class="client-action" onclick="clientCompose(' + rid + ',\'request_changes\')">Request changes</button>' :
+          clientContactBtn('Message Rankwise', it.title)) +
+        '</div>' + (liveId ? '' : SOON_NOTE) + '</div>';
     });
     clientUploads.slice(0, 4).forEach((ask) => {
       const it = planParts(ask);
       h += '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(it.title || 'Upload requested asset') + '</div>' +
         '<div class="client-ask__sub">' + esc([ask.asset_type || ask.type || 'asset', ask.due || ask.due_at || it.date, it.sub || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
         '<span class="pill">upload</span></div>' +
-        '<div class="client-btnrow">' + clientSoonBtn('Upload file') + '</div>' + SOON_NOTE + '</div>';
+        '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', it.title) + '</div>' + SOON_NOTE + '</div>';
     });
     h += '</div>';
   } else if (pendingSetupAsks.length) {
@@ -7530,23 +7764,21 @@ async function renderClient(key) {
     // Collapse it to a compact baseline + ETA (review finding :61); show the table
     // only once at least one term is actually ranking.
     const _rankedRows = p.rankings.filter((r) => r.local != null || r.organic != null).length;
-    // rankTotal = true distinct tracked-term count. The rankings list is display-capped
-    // upstream (MAX_RANK_ROWS), so p.rankings.length is NOT a safe denominator — a capped
-    // list of all-ranked rows would read as a false 100%. Fall back to the shown count only
-    // when the backend has not yet shipped rankings_total.
+    // rankTotal is only a real denominator when the payload supplies one. The rankings
+    // list is display-capped upstream, so its length is never presented as the total.
     const rankShown = p.rankings.length;
-    const rankTotal = (p.rankings_total != null) ? Number(p.rankings_total) : rankShown;
-    const rankCapNote = rankTotal > rankShown ? ' Showing the top ' + rankShown + ' of ' + rankTotal + '.' : '';
+    const rankTotal = _rankDataMismatch ? null : _trackedKpi;
+    const rankCapNote = rankTotal != null && rankTotal > rankShown ? ' Showing the top ' + rankShown + ' of ' + rankTotal + '.' : '';
     if (_rankedRows === 0) {
       h += '<section class="role-card"><h3>Where you rank on Google</h3>' +
-        '<p class="role-empty">Baseline captured for <b>' + esc(rankTotal) + '</b> target terms — none are in the tracked top results yet. This is the starting line we grow from; first movement usually shows over the first few content + local cycles.</p></section>';
+        '<p class="role-empty">Baseline captured for ' + (rankTotal != null ? '<b>' + esc(rankTotal) + '</b> target terms' : 'the current tracked terms') + ' — none are in the tracked top results yet. This is the starting line we grow from; first movement usually shows over the first few content + local cycles.</p></section>';
     } else {
       // Per-row measurement provenance (46d1f73): device / location / checked_at now ride
       // each ranking row. Show a compact "desktop · <location> · checked <date>" subline so a
       // client can tell where/when/how a rank was measured. Honest-omit any field the row lacks.
       const _rankProv = (r) => [r.device, r.location, r.checked_at ? 'checked ' + ptDayShort(r.checked_at) : ''].filter(Boolean).join(' · ');
       h += '<section class="role-card"><h3>Where you rank on Google</h3>' +
-        '<p class="mut" style="margin:0 0 8px">Ranking in <b>' + esc(_rankedRows) + '</b> of ' + esc(rankTotal) + ' tracked terms.</p>' +
+        '<p class="mut" style="margin:0 0 8px">Ranking in <b>' + esc(_rankedKpi != null ? _rankedKpi : _rankedRows) + '</b>' + (rankTotal != null ? ' of ' + esc(rankTotal) : ' tracked terms shown in this snapshot') + '.</p>' +
         '<table class="role-table"><tr><th>Search</th><th class="num">Maps</th><th class="num">Organic</th></tr>' +
         p.rankings.map((r) => { const _prov = _rankProv(r);
           return '<tr><td>' + esc(r.keyword) + (_prov ? '<span class="mut" style="display:block;font-size:var(--fs-1);font-weight:400">' + esc(_prov) + '</span>' : '') + '</td><td class="num">' + (r.local == null ? "—" : "#" + esc(r.local)) + '</td><td class="num">' + (r.organic == null ? "—" : "#" + esc(r.organic)) + '</td></tr>'; }).join("") +
@@ -7679,4 +7911,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: b7f4612e6e67 -->
+<!-- rankwise-portal-version: 8f25f2d83af3 -->
