@@ -906,6 +906,55 @@
   .sysmap-bar input[type=search] { font-size:var(--fs-5); }   /* finding 25: no iOS focus-zoom */
 }
 @media (prefers-reduced-motion:reduce) { .sysmap-insp { transition:none; } }
+/* ── operator HOME cockpit tab (data from cockpit_snapshot, mig 050); scoped .ckpt, self-contained ── */
+.ckpt{--ck-line:#22303c;--ck-line2:#2f4553;--ck-surf:#131a21;--ck-ink:#e4edf4;--ck-ink2:#93a6b6;--ck-ink3:#5f7386;--ck-ok:#3ecf8e;--ck-warn:#f2b640;--ck-bad:#f0685e;--ck-accent:#35c7e8;color:var(--ck-ink);font-size:14px}
+.ckpt-wrap{display:grid;grid-template-columns:63% 1fr;gap:14px;align-items:start}
+.ckpt-q{background:var(--ck-surf);border:1px solid var(--ck-line2);border-radius:12px;overflow:hidden}
+.ckpt-qh{display:flex;align-items:baseline;gap:10px;padding:11px 15px;border-bottom:1px solid var(--ck-line);font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ck-ink3)}
+.ckpt-qlbl{font-weight:700}
+.ckpt-pill{margin-left:auto;font-size:10px;font-weight:800;color:var(--ck-ink2);background:rgba(154,167,177,.12);border:1px solid var(--ck-line2);border-radius:999px;padding:2px 9px}
+.ckpt-row{position:relative;display:flex;align-items:flex-start;gap:12px;padding:13px 15px 13px 20px;border-bottom:1px solid var(--ck-line)}
+.ckpt-row:last-child{border-bottom:0}
+.ckpt-row.hero{background:rgba(53,199,232,.06);padding-top:17px;padding-bottom:17px}
+.ckpt-spine{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ck-ink3)}
+.ckpt-row.tone-hot .ckpt-spine{background:var(--ck-accent)}.ckpt-row.tone-warn .ckpt-spine{background:var(--ck-warn)}.ckpt-row.tone-bad .ckpt-spine{background:var(--ck-bad)}.ckpt-row.tone-calm .ckpt-spine{background:var(--ck-line2)}
+.ckpt-row.tone-bad{background:linear-gradient(90deg,rgba(240,104,94,.10),transparent)}
+.ckpt-rk{font-family:ui-monospace,monospace;font-weight:700;color:var(--ck-ink2)}
+.ckpt-row.hero .ckpt-rk{font-size:18px;color:var(--ck-accent)}
+.ckpt-main{min-width:0;flex:1}
+.ckpt-t{font-weight:700;font-size:14px}
+.ckpt-row.hero .ckpt-t{font-size:20px;font-weight:800}
+.ckpt-w{font-size:12px;color:var(--ck-ink2);margin-top:2px}
+.ckpt-meta{display:flex;align-items:center;gap:10px;margin-top:7px}
+.ckpt-num{font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;color:var(--ck-ink2)}
+.ckpt-row.tone-bad .ckpt-num{color:#ffb3ab}.ckpt-row.tone-warn .ckpt-num{color:var(--ck-warn)}
+.ckpt-tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:6px}
+.ckpt-tag.hot{color:var(--ck-accent);background:rgba(53,199,232,.13)}.ckpt-tag.warn{color:var(--ck-warn);background:rgba(242,182,64,.13)}.ckpt-tag.bad{color:var(--ck-bad);background:rgba(240,104,94,.14)}.ckpt-tag.calm{color:var(--ck-ink2);background:rgba(154,167,177,.12)}
+.ckpt-watch{background:var(--ck-surf);border:1px solid var(--ck-line);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:9px;font-family:ui-monospace,monospace;font-size:12px}
+.ckpt-watch.degraded{border-color:rgba(240,104,94,.35)}
+.ckpt-h{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ck-ink3)}
+.ckpt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.ckpt-dot.ok,.ckpt-dot.fresh{background:var(--ck-ok)}.ckpt-dot.warn{background:var(--ck-warn)}.ckpt-dot.bad{background:var(--ck-bad)}.ckpt-dot.mut{background:var(--ck-ink3)}
+.ckpt-fault{display:flex;align-items:center;gap:8px;border-left:3px solid var(--ck-bad);padding:5px 0 5px 10px}
+.ckpt-fault b{color:#ff9b91;font-weight:800}
+.ckpt-sub,.ckpt-mut{color:var(--ck-ink3)}
+.ckpt-ok{display:flex;align-items:center;color:var(--ck-ok);border:1px solid var(--ck-line);border-radius:9px;padding:9px 11px}
+.ckpt-line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:1px solid var(--ck-line);padding-top:8px}
+.ckpt-k{color:var(--ck-ink3)}.ckpt-v{color:var(--ck-ink2);text-align:right}
+.ckpt-v.warn{color:var(--ck-warn)}.ckpt-v.bad{color:var(--ck-bad)}
+.ckpt-digest{display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--ck-line);padding-top:9px}
+.ckpt-dh{font-size:11px;color:var(--ck-ink3)}
+.ckpt-flag{display:flex;align-items:center;gap:8px;font-size:11.5px}
+.ckpt-fdom{color:var(--ck-ink2);font-weight:700}.ckpt-ftx{color:var(--ck-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ckpt-kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ck-line);border:1px solid var(--ck-line);border-radius:8px;overflow:hidden}
+.ckpt-kpi{background:var(--ck-surf);padding:8px 11px;display:flex;flex-direction:column;gap:1px}
+.ckpt-kpi.warn{box-shadow:inset 3px 0 0 var(--ck-warn)}
+.ckpt-kk{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ck-ink3)}
+.ckpt-kv{font-size:16px;font-weight:800}.ckpt-kpi.warn .ckpt-kv{color:var(--ck-warn)}
+.ckpt-ks{font-size:10.5px;color:var(--ck-ink3)}
+.ckpt-stamp{margin-top:12px;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ck-ink3)}
+.ckpt-empty{color:var(--ck-ink2);padding:16px}
+@media(max-width:720px){.ckpt-wrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -974,15 +1023,16 @@ function roleOf() {
 // are intentionally not reachable from the employee/client portal shell; the
 // private HQ application is the place for migration and QA work.
 const PORTAL_INTERNAL_SURFACES = false;
-const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system','alerts'];
+const SAFE_TABS = ['home','today','pipeline','market','outreach','content','clients','money','system','alerts'];
 if (PORTAL_INTERNAL_SURFACES) SAFE_TABS.push('hq','settings');
 const safeTab = (t) => (SAFE_TABS.indexOf(String(t || '')) >= 0 ? String(t) : 'today');
 // Human labels for the same ids (reused for document.title — finding 87). Keyed by
 // the SAFE_TABS ids so the two lists can never silently drift apart.
-const TAB_LABELS = { today:'Today', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', alerts:'Alerts', hq:'Legacy HQ', settings:'Admin' };
+const TAB_LABELS = { home:'Home', today:'Today', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', alerts:'Alerts', hq:'Legacy HQ', settings:'Admin' };
 // One-line pre-click descriptions surfaced as the tab's native title tooltip (finding:
 // tab strip has no affordance for what each tab does). Keyed by SAFE_TABS ids.
 const TAB_DESC = {
+  home:'Operator home — your ranked decision queue, system watch and KPIs at a glance',
   today:'Your daily orientation — next move, due calls and the whole-system status row',
   pipeline:'Acquisition pipeline — replies, bookings and lead quality',
   market:'Market study — competitor and AI-visibility research',
@@ -2513,7 +2563,7 @@ function buildDossier(p, done, attemptPill) {
   if (p.pushed_at) h += '<div style="margin-top:5px">' + freshnessPill('pushed', p.pushed_at, 48, 168) + '</div>';
   if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
   if (!has) return h + callBtn(p) + logForm(p.slug, true) + '</div>';   // degrade; Log control pinned open
-  h += hookBlock(it) + chipsRow(it) + callBtn(p);
+  h += hookBlock(it) + chipsRow(it) + momentumRow(it) + callBtn(p);
   h += '<div class="dgrid">' +
     '<div class="dcol">' + openWith(it) + proofList(it) + avoidTags(it) + '</div>' +
     '<div class="dcol">' + gapViz(it) + evidenceBlock(it) + '</div></div>';
@@ -2521,6 +2571,49 @@ function buildDossier(p, done, attemptPill) {
   if (p.opener) h += '<details><summary>Opener script</summary><div class="opener">' + esc(fillSellerName(p.opener)) + '</div></details>';
   if (p.audit_url && /^https?:\/\//.test(p.audit_url)) h += '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>';
   return h + logForm(p.slug, true) + '</div>';   // Log control pinned open (no extra tap to reach dispositions)
+}
+
+// Momentum strip — reconstructed review/rival/rank velocity from prospect_signals_history.
+// Every dynamic value rides through esc() into TEXT context; the only style-attribute value
+// (bc) is one of three whitelisted constants. mspark's points come from esc'd-int arithmetic.
+function mspark(vals) {
+  if (!vals || !vals.length) return '';
+  const w = 64, h = 18, pad = 2, n = vals.length;
+  const mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rng = (mx - mn) || 1;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const x = pad + i * (w - 2 * pad) / ((n - 1) || 1);
+    const y = (mx === mn) ? h / 2 : (h - pad - ((vals[i] - mn) / rng) * (h - 2 * pad));
+    pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+  }
+  return '<svg width="' + w + '" height="' + h + '" style="flex:none"><polyline points="' + pts.join(' ') +
+    '" fill="none" stroke="var(--warn)" stroke-width="1.5"/></svg>';
+}
+function momentumRow(it) {
+  const m = it.momentum;
+  if (!m || !m.status) return '';
+  if (m.status === 'banking') {
+    return '<div style="margin:9px 0;padding:8px 11px;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--mut)">' +
+      '<b style="color:var(--text)">Momentum</b> — tracking; banking readings, first trend after the next check.</div>';
+  }
+  const vals = Array.isArray(m.vals) ? m.vals : [];
+  const last = vals.length ? vals[vals.length - 1] : '';
+  // Full-span "from" = last − net (net is over the WHOLE series), so the head numbers can't
+  // disagree with the status/first/last even if vals is a truncated newest-8 window.
+  const fromV = (typeof last === 'number' && typeof m.net === 'number') ? (last - m.net) : (vals.length ? vals[0] : last);
+  let head;
+  if (m.status === 'flat') head = '<b style="color:var(--warn)">Reviews frozen</b> — stuck at ' + esc(last) + ' for ' + esc(m.wks) + ' weeks';
+  else if (m.status === 'down') head = '<b style="color:var(--bad)">Reviews slipping</b> — ' + esc(fromV) + ' → ' + esc(last);
+  else head = 'Reviews climbing ' + esc(fromV) + ' → ' + esc(last) + ' — already improving';
+  let sub = esc(m.n) + ' checks · ' + esc(m.first) + '→' + esc(m.last);
+  if (m.rival && m.rival.name) sub += ' · rival ' + esc(m.rival.name) + ' ' + esc(m.rival.from) + '→' + esc(m.rival.to);
+  if (m.rank && m.rank.from != null) sub += ' · map ' + esc(m.rank.from) + '→' + esc(m.rank.to);
+  const bc = m.status === 'down' ? 'var(--bad)' : (m.status === 'up' ? 'var(--line)' : 'var(--warn)');
+  return '<div style="margin:9px 0;padding:8px 11px;border:1px solid var(--line);border-left:3px solid ' + bc +
+    ';border-radius:8px;display:flex;align-items:center;gap:10px">' + mspark(vals) +
+    '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text)">' + head + '</div>' +
+    '<div style="font-size:11px;color:var(--mut);margin-top:2px">' + sub + '</div></div>' +
+    '<div style="font-family:ui-monospace,monospace;font-size:9px;color:var(--mut);border:1px solid var(--line);border-radius:4px;padding:2px 6px;white-space:nowrap">rank·rival banking</div></div>';
 }
 
 // The evidence half of the dossier — visible proof for due diligence.
@@ -3971,6 +4064,53 @@ document.addEventListener('click', function(e) {
 });
 
 // ── Ops overview (role=operator only; data via operator_portal_snapshot RLS) ──
+// ── Operator HOME cockpit (cockpit_snapshot, mig 050) ─────────────────────────
+// PURE function of the snapshot payload; DISPLAY-ONLY (no onclick / no dynamic JS);
+// every dynamic value rides through esc() (HTML-entity — correct here, no attribute/JS
+// interpolation). Reads nothing but the passed payload; secondary source, degrades to a
+// warming-up card if the snapshot is missing/malformed (never throws mid-build).
+function cockpitHomeHTML(cp, updatedAt) {
+  if (!cp || typeof cp !== 'object') {
+    return '<div class="ckpt"><p class="ckpt-empty">Operator home is warming up — no snapshot yet. It refreshes automatically a few times a day.</p></div>';
+  }
+  const fr = cp.freshness || {}, fa = cp.faults || {};
+  const queue = Array.isArray(cp.queue) ? cp.queue : [];
+  const flags = Array.isArray(cp.watch_flags) ? cp.watch_flags : [];
+  const sb = Array.isArray(cp.scoreboard) ? cp.scoreboard : [];
+  const toneCls = (t) => (t === 'hot' || t === 'warn' || t === 'bad') ? t : 'calm';
+  const faultN = Number(fa.count || 0);
+  const stale = !!fr.scan_stale;
+  const scanHrs = Number(fr.scan_hours);
+  const fcl = !isFinite(scanHrs) ? 'warn' : scanHrs < 6 ? 'fresh' : scanHrs < 24 ? 'warn' : 'bad';
+  const faultRow = (faultN > 0 || stale)
+    ? '<div class="ckpt-fault"><span class="ckpt-dot bad"></span><b>' + esc(faultN) + ' dead node' + (faultN===1?'':'s') + '</b><span class="ckpt-sub">system faults</span></div>'
+    : '<div class="ckpt-ok"><span class="ckpt-dot ok"></span>verified &middot; all checks pass</div>';
+  const freshRow = '<div class="ckpt-line"><span class="ckpt-k"><span class="ckpt-dot ' + fcl + '"></span>scanned</span>'
+    + '<span class="ckpt-v ' + fcl + '">' + esc(fr.scan_age_label || '—') + ' ago' + (scanHrs>=24?' <b>STALE</b>':'')
+    + ' <span class="ckpt-mut">&middot; ' + esc(fr.scan_abs || '') + '</span></span></div>';
+  const flagRows = flags.slice(0,5).map((f) =>
+    '<div class="ckpt-flag"><span class="ckpt-dot ' + (f.cls==='bad'?'bad':f.cls==='warn'?'warn':'mut') + '"></span>'
+      + '<span class="ckpt-fdom">' + esc(f.dom || '') + '</span><span class="ckpt-ftx">' + esc(f.s || '') + '</span></div>').join('');
+  const watchLbl = cp.watch_mode === 'changes' ? ('changed &middot; ' + esc(cp.watch_label || '')) : 'to watch';
+  const kpiCells = sb.slice(0,4).map((t) =>
+    '<div class="ckpt-kpi' + (t.dc==='warn'?' warn':'') + '"><span class="ckpt-kk">' + esc(t.k || '') + '</span>'
+      + '<span class="ckpt-kv">' + esc(t.v || '') + '</span><span class="ckpt-ks">' + esc(t.sub || '') + '</span></div>').join('');
+  const watch = '<aside class="ckpt-watch' + (faultN>0||stale?' degraded':'') + '"><div class="ckpt-h">watch</div>'
+    + faultRow + freshRow
+    + (flags.length ? '<div class="ckpt-digest"><div class="ckpt-dh">' + esc(flags.length) + ' ' + watchLbl + '</div>' + flagRows + '</div>' : '')
+    + '<div class="ckpt-kpis">' + kpiCells + '</div></aside>';
+  const rows = queue.map((r, i) =>
+    '<div class="ckpt-row tone-' + toneCls(r.tone) + (i===0?' hero':'') + '"><span class="ckpt-spine"></span>'
+      + '<span class="ckpt-rk">' + esc(r.rank != null ? r.rank : (i+1)) + '</span>'
+      + '<div class="ckpt-main"><div class="ckpt-t">' + esc(r.text || '') + '</div><div class="ckpt-w">' + esc(r.why || '') + '</div>'
+      + '<div class="ckpt-meta"><span class="ckpt-num">' + esc(r.num || '') + '</span>'
+      + (r.tag ? '<span class="ckpt-tag ' + toneCls(r.tone) + '">' + esc(r.tag) + '</span>' : '') + '</div></div></div>').join('');
+  const queueBox = '<div class="ckpt-q"><div class="ckpt-qh"><span class="ckpt-qlbl">&#9656; your queue</span>'
+    + '<span class="ckpt-pill">' + esc(queue.length) + ' need you</span></div>' + rows + '</div>';
+  const stamp = updatedAt ? '<div class="ckpt-stamp">live &middot; snapshot ' + esc(String(updatedAt).replace('T',' ').slice(0,16)) + ' UTC</div>' : '';
+  return '<div class="ckpt"><div class="ckpt-wrap">' + queueBox + watch + '</div>' + stamp + '</div>';
+}
+
 async function renderOps() {
   if (roleOf() !== 'operator') return render();  // hygiene; RLS is the real gate
   document.body.classList.remove('dial', 'client');
@@ -3997,10 +4137,11 @@ async function renderOps() {
   // (opsWireTabs/restoreOpsUI/boots) stays OUTSIDE the try so a boot glitch can't
   // clobber a cockpit that already painted.
   try {
-  const [rows, actionRows, marketRows] = await Promise.all([
+  const [rows, actionRows, marketRows, cockpitRows] = await Promise.all([
     rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1"),
     rest("operator_action_queue?select=*&order=id.desc&limit=10"),
     rest("market_snapshot?select=payload,updated_at&id=eq.1"),
+    rest("cockpit_snapshot?select=payload,updated_at&id=eq.1"),   // operator HOME cockpit (mig 050, operator-only RLS)
     // NB: the 513KB market_map_snapshot is NO LONGER fetched here — it blocked
     // first paint of the Today tab though only the Market tab consumes it. It is
     // now deferred to opsMmapEnsure() on the first Market-tab open (finding 51).
@@ -4028,6 +4169,10 @@ async function renderOps() {
   // opsMmapEnsure(); use whatever it has already cached in-session, else null →
   // the panel renders a "Loading map…" shell that the Market tab fills.
   const mmap = window._mmapPayload || null;
+  // Operator-HOME cockpit (cockpit_snapshot, mig 050, operator-only RLS) — secondary source;
+  // degrades to a "warming up" card if missing/malformed, never blocks the rest of the cockpit.
+  const ckSnap = (Array.isArray(cockpitRows) && cockpitRows[0]) ? cockpitRows[0] : null;
+  const homeH = cockpitHomeHTML((ckSnap && ckSnap.payload) ? ckSnap.payload : null, ckSnap ? ckSnap.updated_at : null);
 
   // ── Derived counts for tab badges ────────────────────────────────────────
   const needsYou = asArr(p.needs_you).map(deDragItem);   // asArr, not ||[]: a non-array field would throw on .map and freeze the cockpit (finding 1)
@@ -7264,6 +7409,7 @@ async function renderOps() {
     // divider before each zone's first tab. This is an ORDER change only — no tab
     // renamed, all 11 kept (the Pipeline merge in the blueprint stays deferred).
     '<nav class="ops-tabs" role="tablist">' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='home'?'true':'false') + '" data-v="home" onclick="opsTab(\'home\')">Home</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Today' +
     (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
@@ -7287,6 +7433,7 @@ async function renderOps() {
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
     '</nav>' +
     '<main class="ops-main">' +
+    '<section class="ops-view" id="ops-home" role="tabpanel"' + (window._opsTab!=='home'?' hidden':'') + '>' + homeH + '</section>' +
     '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + todayH + '</section>' +
     '<section class="ops-view" id="ops-pipeline" role="tabpanel"' + (window._opsTab!=='pipeline'?' hidden':'') + '>' + pipeH + '</section>' +
     '<section class="ops-view" id="ops-market" role="tabpanel"' + (window._opsTab!=='market'?' hidden':'') + '>' + marketH + '</section>' +
@@ -7911,4 +8058,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 8f25f2d83af3 -->
+<!-- rankwise-portal-version: f96cb6712672 -->
