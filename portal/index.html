@@ -300,6 +300,16 @@
     .workflow-strip-step { min-height:34px; }
   }
   .metric-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:10px 0; }
+  /* cockpit dial-console redesign 2026-07-22 — thin HUD + elevated stage */
+  .seller-hud { padding:9px 12px; }
+  .ckpt-hud-row { display:flex; gap:9px; flex-wrap:wrap; }
+  .ckpt-hud-m { display:flex; flex-direction:column; align-items:flex-start; min-width:74px; padding:6px 12px; background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-md); }
+  .ckpt-hud-m b { font-size:22px; line-height:1; font-variant-numeric:tabular-nums; color:var(--text); }
+  .ckpt-hud-m span { font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--mut); margin-top:4px; }
+  .ckpt-hud-m.warn b { color:var(--warn); }
+  .ckpt-hud-m.bad b { color:var(--bad); }
+  .stage-lbl { font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--mut); margin:14px 0 7px; }
+  .opener--stage { font-size:16.5px; line-height:1.5; font-style:normal; padding:14px 16px; margin:2px 0 12px; }
   @media(min-width:768px) { .metric-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
   /* Stat primitive (finding 71): the canonical KPI tile — uppercase kicker in the
      scoped role accent, big tabular value, muted note. Pass L already unified the
@@ -2563,12 +2573,16 @@ function buildDossier(p, done, attemptPill) {
   if (p.pushed_at) h += '<div style="margin-top:5px">' + freshnessPill('pushed', p.pushed_at, 48, 168) + '</div>';
   if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
   if (!has) return h + callBtn(p) + logForm(p.slug, true) + '</div>';   // degrade; Log control pinned open
-  h += hookBlock(it) + chipsRow(it) + momentumRow(it) + callBtn(p);
+  h += hookBlock(it) + chipsRow(it) + momentumRow(it);
+  // Opener — elevated out of a <details>: the line you read the second they pick up.
+  if (p.opener) h += '<div class="stage-lbl">Opener — read when they pick up</div>' +
+    '<div class="opener opener--stage">' + esc(fillSellerName(p.opener)) + '</div>';
+  h += callBtn(p);
+  // Trust split (safe-to-say / never-say) — the centerpiece, always visible (was collapsed).
+  h += wordingBlock(it);
   h += '<div class="dgrid">' +
     '<div class="dcol">' + openWith(it) + proofList(it) + avoidTags(it) + '</div>' +
     '<div class="dcol">' + gapViz(it) + evidenceBlock(it) + '</div></div>';
-  h += '<details><summary>Exact verified wording (the receipts)</summary>' + wordingBlock(it) + '</details>';
-  if (p.opener) h += '<details><summary>Opener script</summary><div class="opener">' + esc(fillSellerName(p.opener)) + '</div></details>';
   if (p.audit_url && /^https?:\/\//.test(p.audit_url)) h += '<p class="mut" style="margin-top:10px">Live audit: <a href="' + esc(p.audit_url) + '" style="color:var(--accent)">' + esc(p.audit_url) + '</a></p>';
   return h + logForm(p.slug, true) + '</div>';   // Log control pinned open (no extra tap to reach dispositions)
 }
@@ -2954,48 +2968,20 @@ async function renderSeller(data) {
     '<div class="role-kicker">' + (role === "operator" ? 'Operator preview' : 'Seller workspace') + '</div>' +
     '<h1>Dial Console</h1><p class="mut">Call list, proof, objection guardrails, and live progress.</p></div></div>' +
     hoursStatus() +
-    '<section class="workflow-strip" aria-label="Shift workflow"><div class="workflow-strip-k">Shift workflow</div><div class="workflow-strip-steps">' +
-    '<div class="workflow-strip-step active"><b>1</b><span>Choose next lead</span></div>' +
-    '<div class="workflow-strip-step"><b>2</b><span>Controlled call</span></div>' +
-    '<div class="workflow-strip-step"><b>3</b><span>Log outcome</span></div>' +
-    '<div class="workflow-strip-step"><b>4</b><span>Advance commitment</span></div>' +
+    // Thin cockpit HUD — the numbers that matter, compact. KEEPS the .seller-hero class:
+    // render() (2777) and renderSeller (2827) key their loading-swap + in-place logic off it.
+    // The workflow strip, metric hero, focus-lane, and prep-runway that used to stack above
+    // are cut/folded — the opener + trust split now live IN the stage (buildDossier), and the
+    // console is the page. (Secondary modules — coach, tallies, cheat sheet — stay below.)
+    '<section class="role-hero seller-hero seller-hud"><div class="ckpt-hud-row">' +
+    '<div class="ckpt-hud-m"><b>' + remainingCards.length + '</b><span>to dial</span></div>' +
+    '<div class="ckpt-hud-m"><b>' + todayRows.length + '</b><span>dials today</span></div>' +
+    '<div class="ckpt-hud-m"><b>' + cnt(todayRows, isConvo) + '</b><span>real convos</span></div>' +
+    '<div class="ckpt-hud-m' + (dueCallbacks.length ? ' warn' : '') + '"><b>' + cbs.length + '</b><span>' + (dueCallbacks.length ? dueCallbacks.length + ' due now' : 'callbacks') + '</span></div>' +
+    (dncHeld ? '<div class="ckpt-hud-m bad"><b>' + dncHeld + '</b><span>DNC held</span></div>' : '') +
+    (intelReady < cards.length ? '<div class="ckpt-hud-m warn"><b>' + intelReady + '/' + cards.length + '</b><span>intel ready</span></div>' : '') +
     '</div></section>' +
-    '<section class="role-hero seller-hero"><div class="role-kicker">Current focus</div><h2>' + esc(shiftTitle) + '</h2><p>' + esc(shiftSub) + '</p>' +
-    '<div class="metric-grid">' +
-    metric('To dial today', remainingCards.length, remainingCards.length ? 'fresh queue — not a backlog' : 'queue clear', remainingCards.length ? 'info' : 'ok') +
-    metric('Dials today', todayRows.length, cnt(todayRows, isPickup) + ' pickups', todayRows.length ? 'info' : '') +
-    metric('Real convos', cnt(todayRows, isConvo), 'got past opener', cnt(todayRows, isConvo) ? 'ok' : '') +
-    metric('Callbacks', cbs.length, dueCallbacks.length ? dueCallbacks.length + ' due now' : 'promised', dueCallbacks.length ? 'warn' : '') +
-    '</div></section>' +
-    '<div class="status-row">' +
-    statusPill('Intel-ready cards', intelReady + '/' + cards.length, intelReady ? 'ok' : 'warn') +
-    statusPill('Lead audit links', liveAudits, liveAudits ? 'info' : '') +
-    statusPill('DNC held back', dncHeld, dncHeld ? 'bad' : 'ok') +
-    (trial.configured ? statusPill('Trial gap', trialDialGap + ' dials · ' + trialConvoGap + ' convos', (trialConvoGap || trialDialGap) ? 'warn' : 'ok') : '') +
-    '</div>' +
-    '<section class="role-card seller-focus"><h3>Today&rsquo;s call lane</h3>' +
-    '<div class="seller-focus-grid">' +
-    '<div class="seller-focus-card"><div class="sf-k">Priority lead</div><div class="sf-v">' + esc(focusCard ? focusCard.business_name : 'Queue clear') + '</div>' +
-    '<div class="sf-n">' + esc(focusCard ? [focusCard.city, focusAttempts.length ? 'attempt ' + (focusAttempts.length + 1) : 'first attempt'].filter(Boolean).join(' · ') : 'Refresh when Zack pushes more cards.') + '</div></div>' +
-    '<div class="seller-focus-card"><div class="sf-k">Lead quality reason</div><div class="sf-v">' + esc(focusReason) + '</div>' +
-    '<div class="sf-n">' + esc(focusProof) + '</div></div>' +
-    '<div class="seller-focus-card"><div class="sf-k">Call guardrail</div><div class="sf-v">' + esc(focusOutcome) + '</div>' +
-    '<div class="sf-n">' + esc(focusAvoid) + '</div></div>' +
-    '</div>' +
-    '<div class="status-row">' +
-    statusPill('Disposition history', focusAttempts.length ? focusAttempts.length + ' logged' : 'none yet', focusAttempts.length ? 'info' : '') +
-    statusPill('Audit link', focusCard && focusCard.audit_url ? 'lead-specific' : 'rankwise.ca/audit', focusCard && focusCard.audit_url ? 'ok' : 'info') +
-    statusPill('Verified intel', focusIntel && Object.keys(focusIntel).length ? 'ready' : 'needs enrichment', focusIntel && Object.keys(focusIntel).length ? 'ok' : 'warn') +
-    '</div></section>' +
-    '<section class="role-card seller-playbook"><h3>Call prep runway</h3>' +
-    '<div class="seller-playbook-grid">' +
-    '<div class="seller-playbook-card"><div class="sp-k">Opener</div><div class="sp-v">' + esc(focusOpener) + '</div><div class="sp-n">keep it short and specific</div></div>' +
-    '<div class="seller-playbook-card"><div class="sp-k">Proof to use</div><div class="sp-v">' + esc(focusProof) + '</div><div class="sp-n">verified fact only</div></div>' +
-    '<div class="seller-playbook-card"><div class="sp-k">Objection move</div><div class="sp-v">' + esc(objectionSummary(focusObjection, 160)) + '</div><div class="sp-n">' + esc(focusAvoid) + '</div></div>' +
-    '<div class="seller-playbook-card"><div class="sp-k">Clean close</div><div class="sp-v">' + esc(focusClose) + '</div><div class="sp-n">' + esc(focusLogRule) + '</div></div>' +
-    '</div></section>' +
-    // Front-load the dial console (rail + dossier) directly under the prep runway,
-    // above the coaching/scorecard modules — the phone + Log control are the job.
+    // The console IS the page now: one prospect on stage (dossier) + the queue rail beside it.
     '<div class="console">' + buildRail(cards, sunk, sel) + '<div class="dossier" id="dossier"></div></div>' +
     '<div class="role-grid two seller-shift">' +
     '<section class="role-card"><h3>Shift path</h3><div class="mission">' +
@@ -8058,4 +8044,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: f96cb6712672 -->
+<!-- rankwise-portal-version: 0909a1fd2a6e -->
