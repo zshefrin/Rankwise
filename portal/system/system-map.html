@@ -38,10 +38,14 @@ const show = (html) => { $state.innerHTML = '<div class="card">' + html + '</div
 const MARK = '<div class="mark">RANKWISE<b>//</b>ctOS</div>';
 
 function readToken() {
-  /* Supabase-js stores the session under sb-<ref>-auth-token; shape has drifted across
-     versions (top-level access_token, or nested .currentSession). Handle both + a manual override. */
+  /* The Rankwise portal (seller-portal/page.html) stores the operator session as a bare
+     JWT under rw_tok — this iframe is same-origin, so read that first. Fall back to the
+     supabase-js session under sb-<ref>-auth-token (shape drifts: top-level access_token or
+     nested .currentSession) and a manual RW_MAP_CONFIG override. */
   try {
     if (window.RW_MAP_CONFIG && window.RW_MAP_CONFIG.access_token) return window.RW_MAP_CONFIG.access_token;
+    const portalTok = localStorage.getItem('rw_tok');
+    if (portalTok) return portalTok;
     const raw = localStorage.getItem('sb-' + PROJECT_REF + '-auth-token');
     if (!raw) return null;
     const o = JSON.parse(raw);
