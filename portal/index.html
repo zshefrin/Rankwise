@@ -998,6 +998,12 @@
   body.ops .tk-revise[hidden] { display:none; }
   body.ops .tk-note { width:100%; box-sizing:border-box; resize:vertical; background:var(--surface-0); color:var(--text-1); border:1px solid var(--border-2); border-radius:var(--r-md); padding:8px 10px; font:inherit; font-size:var(--fs-2); }
   body.ops .tk-note:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
+  /* Content review hub (Content tab → Read-draft drawer + Revise-with-note) */
+  body.ops .cr-body { white-space:pre-wrap; word-break:break-word; font-size:var(--fs-3); line-height:1.65; color:var(--text-1); max-height:60vh; overflow:auto; background:var(--surface-0); border:1px solid var(--border-2); border-radius:var(--r-md); padding:14px 16px; }
+  body.ops .cr-revise { flex-basis:100%; display:flex; flex-direction:column; gap:7px; margin-top:9px; }
+  body.ops .cr-revise[hidden] { display:none; }
+  body.ops .cr-note { width:100%; box-sizing:border-box; resize:vertical; background:var(--surface-0); color:var(--text-1); border:1px solid var(--border-2); border-radius:var(--r-md); padding:8px 10px; font:inherit; font-size:var(--fs-2); }
+  body.ops .cr-note:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -1116,6 +1122,14 @@ const ACTIONS = Object.assign(Object.create(null), {
     if (!box.hidden) { const ta = box.querySelector(".tk-note"); if (ta) ta.focus(); }
   },
   opsTicketRevise: (_arg, el) => opsTicketRevise(el),
+  // content review hub: toggle the per-row revise note box, and submit the note.
+  opsContentReviseToggle: (_arg, el) => {
+    const box = el.closest(".ops-li") && el.closest(".ops-li").querySelector(".cr-revise");
+    if (!box) return;
+    box.hidden = !box.hidden;
+    if (!box.hidden) { const ta = box.querySelector(".cr-note"); if (ta) ta.focus(); }
+  },
+  opsContentRevise: (_arg, el) => opsContentRevise(el),
   selectProspect: (arg) => selectProspect(arg),
   renderClient: (arg) => renderClient(arg || undefined),
   renderClientFromRecord: (arg) => { opsCloseRecord(true); window._opsDrawerReturn = null; Promise.resolve(renderClient(arg || undefined)).then(clientFocusLanding); },
@@ -1635,6 +1649,24 @@ async function opsTicketRevise(btn) {
   if (!id) { toast("No ticket id on this row", "err"); return; }
   if (!note) { toast("Add a note first", "err"); return; }
   await enqueueAction("ticket.revise", { id: id, note: note });
+}
+
+// content.revise (content review hub): send a change note back to the content editor. FORM action —
+// reads the note + the draft's content_id (path) + client_key from the row wrapper (closest .ops-li)
+// so per-row note boxes never collide. The worker re-validates the _inbox path + the note server-side;
+// the id here is defense-in-depth. Non-terminal: the editor regenerates the draft with the note.
+async function opsContentRevise(btn) {
+  const row = btn.closest(".ops-li");
+  if (!row) { toast("Content row not found", "err"); return; }
+  const id = (row.dataset.contentId || "").trim();
+  const key = (row.dataset.clientKey || "").trim();
+  const ta = row.querySelector(".cr-note");
+  const note = ta ? (ta.value || "").trim() : "";
+  if (!id) { toast("No content target on this row", "err"); return; }
+  if (!note) { toast("Add a revision note first", "err"); return; }
+  const params = { content_id: id, note: note };
+  if (key) params.client_key = key;
+  await enqueueAction("content.revise", params);
 }
 
 // client_request.create (operator cockpit): raise a client-safe ask → operator_action_queue →
@@ -4430,7 +4462,7 @@ async function renderOps() {
   let opsActionSeq = 0;
   const safeDefaultActions = ['refresh_ops','refresh_seller','refresh_clients','confirm_expense','reject_expense'];
   const neededBackendActions = [
-    'content.approve','content.reject','content.rewrite_preview','content.apply_rewrite','publishing.dispatch',
+    'content.approve','content.reject','content.revise','content.rewrite_preview','content.apply_rewrite','publishing.dispatch',
     'outreach.log_call','outreach.reset_sequence','outreach.add_dnc','client_request.create','client_request.resolve',
     'client_approval.respond','system.retry_source','system.resolve_finding','system.dismiss_finding','autofix.preview','autofix.queue',
     'golive.gate_check','golive.dry_run','golive.preflight','golive.mark_verified',
@@ -5946,18 +5978,27 @@ async function renderOps() {
       if (contentDueThisWeek(item)) fvals.push('due-week');
       if (key) fvals.push('client-' + String(key).replace(/[^a-zA-Z0-9_-]/g, '-'));
       if (contentNeedsAsset(item)) fvals.push('assets');
-      contH += '<li class="ops-li ops-filtered" data-filter-target="content" data-filter-values="' + esc(fvals.join(' ')) + '">' +
+      const canRevise = hasContentTarget && actionAllowed('content.revise');
+      contH += '<li class="ops-li ops-filtered" data-filter-target="content" data-filter-values="' + esc(fvals.join(' ')) + '"' +
+        (hasContentTarget ? ' data-content-id="' + esc(contentId) + '" data-client-key="' + esc(key) + '"' : '') + '>' +
         '<span class="ops-pill ' + esc(contentTone(item)) + '">' + esc(lane) + '</span>' +
         '<div class="ops-grow"><div class="ops-li-ttl">' + esc(contentTitle(item)) + '</div>' +
         '<div class="ops-li-meta">' + esc(contentMeta(item) || 'content workflow item') + '</div></div>' +
         (item.readiness ? '<span class="ops-pill ' + (String(item.readiness).toLowerCase().indexOf('ship') >= 0 ? 'ok' : 'warn') + '">' + esc(item.readiness) + '</span>' : '') +
         (contentNeedsAsset(item) ? '<span class="ops-pill warn">media</span>' : '') +
         (key ? '<button class="ops-btn ghost" data-act="renderClient" data-arg="' + esc(key) + '">Client</button>' : '') +
+        // Read the actual draft body in a drawer, so blogs/labs can be judged without leaving the portal.
+        (item.body_preview ? recordButton({ kind:'Content draft', title: contentTitle(item), sub: contentMeta(item),
+          bodyHtml: drawerSection('Draft' + (item.body_truncated ? ' (excerpt)' : ''), '<div class="cr-body">' + esc(item.body_preview) + '</div>') }, 'Read draft') : '') +
         (lane === 'approval' || lane === 'ready' ? (hasContentTarget ? actionButton('content.approve', 'Approve', { content_id: contentId, client_key: key }, { primary: lane === 'approval', sub:'audit required' }) : '<button class="ops-btn ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Approve</b><span>needs canonical target</span></button>') : '') +
-        (lane === 'approval' ? (hasContentTarget ? actionButton('content.reject', 'Changes', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') : '') +
-        (lane === 'draft' || lane === 'approval' ? (hasContentTarget ? actionButton('content.rewrite_preview', 'Preview rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') : '') +
+        // Revise-with-note (content.revise): your note → the draft, editor regenerates next run. Hidden
+        // until the backend action is live (actionAllowed) so it never renders as a dead button.
+        (lane === 'approval' && canRevise ? '<button class="ops-btn ghost ops-actionbtn" data-act="opsContentReviseToggle" data-arg=""><b>Revise</b><span>send a note</span></button>' : '') +
+        (lane === 'approval' ? (hasContentTarget ? actionButton('content.reject', 'Reject', { content_id: contentId, client_key: key }, { ghost:true, sub:'reason required' }) : '') : '') +
+        (lane === 'draft' || lane === 'approval' ? (hasContentTarget ? actionButton('content.rewrite_preview', 'AI rewrite', { content_id: contentId, client_key: key }, { ghost:true, sub:'preview only' }) : '') : '') +
         (lane === 'ready' || lane === 'scheduled' ? (hasContentTarget ? '<button class="ops-btn ghost ops-actionbtn" data-act="submitPublishPreview" data-arg="' + esc(contentId) + '" title="dry-run preview — nothing published"><b>Preview publish</b><span>dry-run</span></button>' : '<button class="ops-btn ghost ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Preview publish</b><span>needs canonical target</span></button>') : '') +
         (lane === 'ready' || lane === 'scheduled' ? (hasContentTarget ? '<button class="ops-btn primary ops-actionbtn" data-act="submitPublishLive" data-arg="' + esc(contentId) + '" title="publishes to the live rankwise.ca site"><b>Publish (go live)</b><span>ships now</span></button>' : '<button class="ops-btn primary ops-actionbtn" disabled title="Canonical content id or path is missing"><b>Publish (go live)</b><span>needs canonical target</span></button>') : '') +
+        (lane === 'approval' && canRevise ? '<div class="cr-revise" hidden><textarea class="cr-note" rows="2" maxlength="280" placeholder="What should change? The editor regenerates the draft with your note next run."></textarea><button class="ops-btn ops-actionbtn" data-act="opsContentRevise" data-arg=""><b>Send revision</b><span>editor regenerates next run</span></button></div>' : '') +
         '</li>';
     }
     contH += '</ul>';
@@ -8197,4 +8238,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 7ba7bc7243cc -->
+<!-- rankwise-portal-version: 1850e154f23c -->
