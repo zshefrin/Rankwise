@@ -974,6 +974,30 @@
 .ckpt-stamp{margin-top:12px;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ck-ink3)}
 .ckpt-empty{color:var(--ck-ink2);padding:16px}
 @media(max-width:720px){.ckpt-wrap{grid-template-columns:1fr}}
+  /* Night-shift ticket DECIDE lane (Today → Overnight tickets) */
+  body.ops .tk-intro { padding:11px 15px; color:var(--text-2); font-size:var(--fs-2); line-height:1.5; border-bottom:1px solid var(--border-1); }
+  body.ops .tk-intro b { color:var(--text-1); font-weight:600; }
+  body.ops .tk-list { display:flex; flex-direction:column; }
+  body.ops .tk-row { padding:13px 15px; border-bottom:1px solid var(--border-1); }
+  body.ops .tk-row:last-child { border-bottom:0; }
+  body.ops .tk-top { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:5px; }
+  body.ops .tk-rank { font-size:var(--fs-1); font-weight:700; color:var(--text-3); font-variant-numeric:tabular-nums; }
+  body.ops .tk-tone { font-size:var(--fs-1); text-transform:uppercase; letter-spacing:.04em; font-weight:600; padding:1px 7px; border-radius:var(--r-pill); border:1px solid var(--border-2); color:var(--text-2); }
+  body.ops .tk-tone.bad { color:var(--bad); }
+  body.ops .tk-tone.warn { color:var(--warn); }
+  body.ops .tk-tone.calm { color:var(--text-3); }
+  body.ops .tk-pill { margin-left:auto; font-size:var(--fs-1); font-weight:600; padding:1px 8px; border-radius:var(--r-pill); background:var(--surface-3); color:var(--text-2); border:1px solid var(--border-2); }
+  body.ops .tk-pill.tk-ok { color:var(--ok); }
+  body.ops .tk-title { font-size:var(--fs-3); font-weight:600; color:var(--text-1); margin-bottom:3px; }
+  body.ops .tk-src { font-size:var(--fs-1); color:var(--text-3); font-family:ui-monospace,monospace; margin-bottom:6px; word-break:break-all; }
+  body.ops .tk-x { font-size:var(--fs-2); color:var(--text-2); line-height:1.5; margin-top:3px; }
+  body.ops .tk-x b { color:var(--text-3); font-weight:600; text-transform:uppercase; font-size:var(--fs-1); letter-spacing:.03em; margin-right:5px; }
+  body.ops .tk-yournote, body.ops .tk-yournote b { color:var(--accent); }
+  body.ops .tk-acts { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+  body.ops .tk-revise { margin-top:9px; display:flex; flex-direction:column; gap:7px; }
+  body.ops .tk-revise[hidden] { display:none; }
+  body.ops .tk-note { width:100%; box-sizing:border-box; resize:vertical; background:var(--surface-0); color:var(--text-1); border:1px solid var(--border-2); border-radius:var(--r-md); padding:8px 10px; font:inherit; font-size:var(--fs-2); }
+  body.ops .tk-note:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -1086,6 +1110,14 @@ const ACTIONS = Object.assign(Object.create(null), {
   opsOpenRecord: (arg) => opsOpenRecord(arg),
   opsRunAction: (arg) => opsRunAction(arg),
   opsRetryAction: (arg) => opsRetryAction(arg),
+  // night-shift ticket DECIDE lane: toggle the per-row revise note box, and submit the note.
+  opsTicketReviseToggle: (_arg, el) => {
+    const box = el.closest(".tk-row") && el.closest(".tk-row").querySelector(".tk-revise");
+    if (!box) return;
+    box.hidden = !box.hidden;
+    if (!box.hidden) { const ta = box.querySelector(".tk-note"); if (ta) ta.focus(); }
+  },
+  opsTicketRevise: (_arg, el) => opsTicketRevise(el),
   selectProspect: (arg) => selectProspect(arg),
   renderClient: (arg) => renderClient(arg || undefined),
   renderClientFromRecord: (arg) => { opsCloseRecord(true); window._opsDrawerReturn = null; Promise.resolve(renderClient(arg || undefined)).then(clientFocusLanding); },
@@ -1589,6 +1621,22 @@ async function submitLogCall(btn) {
   const params = { prospect: name, disposition: disp };
   if (note) params.notes = note;
   await enqueueAction("outreach.log_call", params);
+}
+
+// ticket.revise (operator DECIDE lane): record a change note on a night-shift ticket and KEEP it
+// open (NOT approved). FORM action — reads the note + ticket id from the row wrapper (closest) so
+// per-ticket note boxes never collide on element ids. The worker re-validates the id (slug +
+// frontmatter scan) and the note (non-empty, control-char-free, capped) server-side; the id here
+// is defense-in-depth only.
+async function opsTicketRevise(btn) {
+  const row = btn.closest(".tk-row");
+  if (!row) { toast("Ticket not found", "err"); return; }
+  const id = (row.dataset.ticketId || "").trim();
+  const ta = row.querySelector(".tk-note");
+  const note = ta ? (ta.value || "").trim() : "";
+  if (!id) { toast("No ticket id on this row", "err"); return; }
+  if (!note) { toast("Add a note first", "err"); return; }
+  await enqueueAction("ticket.revise", { id: id, note: note });
 }
 
 // client_request.create (operator cockpit): raise a client-safe ask → operator_action_queue →
@@ -4390,7 +4438,8 @@ async function renderOps() {
     'golive.gate_check','golive.dry_run','golive.preflight','golive.mark_verified',
     'campaign.launch','campaign.pause','campaign.adjust_targeting','lead.approve','lead.reject','lead.assign_seller',
     'lead.add_to_sequence','reply.mark_interested','reply.mark_not_fit','reply.mark_dnc','booking.confirm','booking.no_show',
-    'infra.retry_check','market_pack.launch'
+    'infra.retry_check','market_pack.launch',
+    'ticket.approve','ticket.reject','ticket.revise'
   ];
   const actionAllow = allowlist.length ? allowlist.map(String) : safeDefaultActions;
   function actionAliases(action) {
@@ -4434,6 +4483,51 @@ async function renderOps() {
     const id = 'a' + (++opsActionSeq);
     window._opsActionParams[id] = { action: action, params: params || {} };
     return '<button class="ops-btn ops-actionbtn' + cls + '" data-act="opsRunAction" data-arg="' + esc(id) + '" title="' + esc(sub) + '"><b>' + esc(label) + '</b><span>' + esc(sub) + '</span></button>';
+  }
+  // Night-shift ticket DECIDE lane: the value-ranked overnight backlog (p.tickets) with a per-row
+  // Approve / Reject / Revise-with-note. approved:true is the sole execution gate — nothing runs
+  // until the operator taps Approve. Buttons auto-disable ("Needs backend") until the snapshot
+  // emits ticket.* in action_allowlist (after migration 052 + a push). All dynamic values are esc()'d
+  // into HTML text/attribute contexts only; the ticket id is re-validated server-side (slug + FM scan).
+  function ticketsSection() {
+    const tickets = asArr(p.tickets);
+    if (!tickets.length) return '';
+    const rows = tickets.map(function (t, i) {
+      const tid = String(t.id || '');
+      const sev = String(t.severity || '').toLowerCase();
+      const sevCls = sev === 'high' ? 'bad' : (sev === 'medium' ? 'warn' : 'calm');
+      const approved = t.approved === true;
+      const statePill = approved
+        ? '<span class="tk-pill tk-ok">approved · awaiting run</span>'
+        : '<span class="tk-pill">needs your call</span>';
+      const src = t.source ? (esc(String(t.source)) + (t.sourceLine != null ? ':' + esc(String(t.sourceLine)) : '')) : '';
+      const approveBtn = actionButton('ticket.approve', approved ? 'Approved' : 'Approve', { id: tid },
+        { primary: !approved, sub: approved ? 'the hands may run it' : 'let the hands run it' });
+      const rejectBtn = actionButton('ticket.reject', 'Reject', { id: tid }, { ghost: true, sub: 'drop + close' });
+      return '<div class="tk-row" data-ticket-id="' + esc(tid) + '">' +
+        '<div class="tk-top"><span class="tk-rank">#' + esc(String(t.rank != null ? t.rank : (i + 1))) + '</span>' +
+        '<span class="tk-tone ' + sevCls + '">' + esc(sev || 'sev') + '</span>' +
+        (t.blastRadius ? '<span class="tk-tone calm">' + esc(String(t.blastRadius)) + '</span>' : '') +
+        statePill + '</div>' +
+        '<div class="tk-title">' + esc(String(t.title || tid)) + '</div>' +
+        (src ? '<div class="tk-src">' + src + '</div>' : '') +
+        (t.problem ? '<div class="tk-x"><b>Problem</b> ' + esc(String(t.problem)) + '</div>' : '') +
+        (t.acceptance ? '<div class="tk-x"><b>Done when</b> ' + esc(String(t.acceptance)) + '</div>' : '') +
+        (t.operatorNote ? '<div class="tk-x tk-yournote"><b>Your note</b> ' + esc(String(t.operatorNote)) + '</div>' : '') +
+        '<div class="tk-acts">' + approveBtn + rejectBtn +
+          '<button class="ops-btn ops-actionbtn ghost" data-act="opsTicketReviseToggle" data-arg=""><b>Revise</b><span>add a note</span></button>' +
+        '</div>' +
+        '<div class="tk-revise" hidden>' +
+          '<textarea class="tk-note" rows="2" maxlength="500" placeholder="What should change before this runs? (kept open, not approved)"></textarea>' +
+          '<button class="ops-btn ops-actionbtn" data-act="opsTicketRevise" data-arg=""><b>Save note</b><span>keeps it open</span></button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="ops-panel" id="ops-tickets" style="margin-top:16px">' +
+      '<div class="ops-panel-h"><h3 class="ops-panel-t">Overnight tickets</h3>' +
+      '<span class="ops-count">' + esc(String(tickets.length)) + ' ranked · approve to run</span></div>' +
+      '<div class="tk-intro">The night shift ranks its work here, most valuable first. <b>Approve</b> lets the hands run it, <b>Reject</b> drops it, <b>Revise</b> keeps it open with a note. Nothing runs until you approve.</div>' +
+      '<div class="tk-list">' + rows + '</div></div>';
   }
   window._opsRecords = {};
   let opsRecordSeq = 0;
@@ -5174,6 +5268,7 @@ async function renderOps() {
   const vGriffin = visibleCommands.filter(function(c){ return griffinCommands.indexOf(c) >= 0; }).length;
   const vClient = visibleCommands.filter(function(c){ return clientCommands.indexOf(c) >= 0; }).length;
   const vContent = visibleCommands.filter(function(c){ return contentCommands.indexOf(c) >= 0; }).length;
+  todayH += ticketsSection();  // night-shift DECIDE lane — approve/reject/revise overnight work
   todayH += '<div class="ops-panel" id="ops-command-queue" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Command queue</h3><span class="ops-count">' +
     esc(universalCommands.length || 'clear') + '</span></div>';
   todayH += '<div class="ops-workbench">' +
@@ -8108,4 +8203,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 0463e0ccce0e -->
+<!-- rankwise-portal-version: 2e128fa29fcd -->
