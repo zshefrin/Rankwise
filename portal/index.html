@@ -310,6 +310,15 @@
   .ckpt-hud-m.bad b { color:var(--bad); }
   .stage-lbl { font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--mut); margin:14px 0 7px; }
   .opener--stage { font-size:16.5px; line-height:1.5; font-style:normal; padding:14px 16px; margin:2px 0 12px; }
+  .obj-tray { margin:12px 0; padding:11px 13px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-1); }
+  .obj-chips { display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 9px; }
+  .obj-chip { font-size:12px; padding:6px 11px; border-radius:20px; border:1px solid var(--line); background:var(--surface-2); color:var(--text); cursor:pointer; }
+  .obj-chip:hover { border-color:var(--accent); }
+  .obj-chip.active { background:var(--accent-wash); border-color:var(--accent); color:var(--accent); }
+  .obj-resp { font-size:14px; line-height:1.5; color:var(--text); min-height:20px; padding:2px 0; }
+  .obj-resp b { color:var(--accent); }
+  .disp-guide { font-size:12.5px; line-height:1.5; color:var(--text); background:var(--accent-wash); border:1px solid var(--accent-line); border-radius:var(--r-md); padding:9px 12px; margin:6px 0; }
+  .disp-guide b { color:var(--accent); }
   @media(min-width:768px) { .metric-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
   /* Stat primitive (finding 71): the canonical KPI tile — uppercase kicker in the
      scoped role accent, big tabular value, muted note. Pass L already unified the
@@ -965,6 +974,30 @@
 .ckpt-stamp{margin-top:12px;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ck-ink3)}
 .ckpt-empty{color:var(--ck-ink2);padding:16px}
 @media(max-width:720px){.ckpt-wrap{grid-template-columns:1fr}}
+  /* Night-shift ticket DECIDE lane (Today → Overnight tickets) */
+  body.ops .tk-intro { padding:11px 15px; color:var(--text-2); font-size:var(--fs-2); line-height:1.5; border-bottom:1px solid var(--border-1); }
+  body.ops .tk-intro b { color:var(--text-1); font-weight:600; }
+  body.ops .tk-list { display:flex; flex-direction:column; }
+  body.ops .tk-row { padding:13px 15px; border-bottom:1px solid var(--border-1); }
+  body.ops .tk-row:last-child { border-bottom:0; }
+  body.ops .tk-top { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:5px; }
+  body.ops .tk-rank { font-size:var(--fs-1); font-weight:700; color:var(--text-3); font-variant-numeric:tabular-nums; }
+  body.ops .tk-tone { font-size:var(--fs-1); text-transform:uppercase; letter-spacing:.04em; font-weight:600; padding:1px 7px; border-radius:var(--r-pill); border:1px solid var(--border-2); color:var(--text-2); }
+  body.ops .tk-tone.bad { color:var(--bad); }
+  body.ops .tk-tone.warn { color:var(--warn); }
+  body.ops .tk-tone.calm { color:var(--text-3); }
+  body.ops .tk-pill { margin-left:auto; font-size:var(--fs-1); font-weight:600; padding:1px 8px; border-radius:var(--r-pill); background:var(--surface-3); color:var(--text-2); border:1px solid var(--border-2); }
+  body.ops .tk-pill.tk-ok { color:var(--ok); }
+  body.ops .tk-title { font-size:var(--fs-3); font-weight:600; color:var(--text-1); margin-bottom:3px; }
+  body.ops .tk-src { font-size:var(--fs-1); color:var(--text-3); font-family:ui-monospace,monospace; margin-bottom:6px; word-break:break-all; }
+  body.ops .tk-x { font-size:var(--fs-2); color:var(--text-2); line-height:1.5; margin-top:3px; }
+  body.ops .tk-x b { color:var(--text-3); font-weight:600; text-transform:uppercase; font-size:var(--fs-1); letter-spacing:.03em; margin-right:5px; }
+  body.ops .tk-yournote, body.ops .tk-yournote b { color:var(--accent); }
+  body.ops .tk-acts { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+  body.ops .tk-revise { margin-top:9px; display:flex; flex-direction:column; gap:7px; }
+  body.ops .tk-revise[hidden] { display:none; }
+  body.ops .tk-note { width:100%; box-sizing:border-box; resize:vertical; background:var(--surface-0); color:var(--text-1); border:1px solid var(--border-2); border-radius:var(--r-md); padding:8px 10px; font:inherit; font-size:var(--fs-2); }
+  body.ops .tk-note:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -1077,6 +1110,14 @@ const ACTIONS = Object.assign(Object.create(null), {
   opsOpenRecord: (arg) => opsOpenRecord(arg),
   opsRunAction: (arg) => opsRunAction(arg),
   opsRetryAction: (arg) => opsRetryAction(arg),
+  // night-shift ticket DECIDE lane: toggle the per-row revise note box, and submit the note.
+  opsTicketReviseToggle: (_arg, el) => {
+    const box = el.closest(".tk-row") && el.closest(".tk-row").querySelector(".tk-revise");
+    if (!box) return;
+    box.hidden = !box.hidden;
+    if (!box.hidden) { const ta = box.querySelector(".tk-note"); if (ta) ta.focus(); }
+  },
+  opsTicketRevise: (_arg, el) => opsTicketRevise(el),
   selectProspect: (arg) => selectProspect(arg),
   renderClient: (arg) => renderClient(arg || undefined),
   renderClientFromRecord: (arg) => { opsCloseRecord(true); window._opsDrawerReturn = null; Promise.resolve(renderClient(arg || undefined)).then(clientFocusLanding); },
@@ -1582,6 +1623,22 @@ async function submitLogCall(btn) {
   await enqueueAction("outreach.log_call", params);
 }
 
+// ticket.revise (operator DECIDE lane): record a change note on a night-shift ticket and KEEP it
+// open (NOT approved). FORM action — reads the note + ticket id from the row wrapper (closest) so
+// per-ticket note boxes never collide on element ids. The worker re-validates the id (slug +
+// frontmatter scan) and the note (non-empty, control-char-free, capped) server-side; the id here
+// is defense-in-depth only.
+async function opsTicketRevise(btn) {
+  const row = btn.closest(".tk-row");
+  if (!row) { toast("Ticket not found", "err"); return; }
+  const id = (row.dataset.ticketId || "").trim();
+  const ta = row.querySelector(".tk-note");
+  const note = ta ? (ta.value || "").trim() : "";
+  if (!id) { toast("No ticket id on this row", "err"); return; }
+  if (!note) { toast("Add a note first", "err"); return; }
+  await enqueueAction("ticket.revise", { id: id, note: note });
+}
+
 // client_request.create (operator cockpit): raise a client-safe ask → operator_action_queue →
 // worker → client_request table (M4). FORM action: client_key (pre-filled per client) + title +
 // optional detail + kind. Reads from the form wrapper (closest) so per-client forms don't collide
@@ -1989,6 +2046,14 @@ const TERMINAL_DISP = { do_not_contact: 1, declined: 1, wrong_number: 1 };
 // Dispositions that CANNOT be a "real conversation" — the .conv checkbox is force-cleared
 // and disabled when one is picked (finding W-7).
 const NON_CONVO_DISP = { no_answer: 1, voicemail: 1, wrong_number: 1 };
+// Disposition-keyed guidance shown on pick (VM script / booking guardrail / DNC line). The
+// HTML is a trusted literal; the only dynamic tokens are {seller}/{business}, both esc()'d
+// before substitution in dispPick. No new disposition vocabulary (that's a cross-system change).
+const DISP_GUIDE = {
+  voicemail: '📩 <b>Voicemail — keep it ≤20s, skip the review-gap hook:</b> “Hi, this is {seller} with Rankwise — calling about a free 15-minute Google Maps visibility audit for {business}. I’ll try you again, or you can reach me back. Thanks.” Then set a callback below for the retry.',
+  booked: '✅ <b>Booking:</b> capture their email in the note, confirm a real time, and book it at rankwise.ca/audit while you’re on the line. “Just send me the link” is NOT booked — log a callback with their email instead.',
+  do_not_contact: '🛑 <b>Removed — no argument, no undo:</b> “Absolutely, I’ve taken this number off our list.” Saving suppresses this lead permanently.',
+};
 
 function logForm(slug, open) {
   const dispBtns = DISPS.map((d) => {
@@ -2003,7 +2068,8 @@ function logForm(slug, open) {
     '<div class="mut" style="margin:2px 0 6px">Disposition <span style="color:var(--bad)">*</span> — required to log</div>' +
     '<div class="row" role="group" aria-label="Call disposition (required)">' +
     dispBtns +
-    '</div><label class="cb"><input type="checkbox" class="conv"> Real conversation (got past the opener)</label>' +
+    '</div><div class="disp-guide" style="display:none"></div>' +
+    '<label class="cb"><input type="checkbox" class="conv"> Real conversation (got past the opener)</label>' +
     '<input class="note" aria-label="Call note — objection, email given, next step" placeholder="Note — objection, email given, next step…">' +
     '<label class="cb" style="display:block"><span class="mut">Next action:</span> <select class="next-action" aria-label="Next action">' +
     Object.keys(NEXT_ACTIONS).map((k) => '<option value="' + esc(k) + '">' + esc(NEXT_ACTIONS[k]) + '</option>').join('') +
@@ -2026,6 +2092,21 @@ function dispPick(btn) {
   if (conv) {
     if (NON_CONVO_DISP[btn.dataset.d]) { conv.checked = false; conv.disabled = true; }
     else conv.disabled = false;
+  }
+  // Disposition-keyed guidance (VM script / booking guardrail / DNC line). The template is a
+  // trusted literal; only {seller}/{business} are dynamic and both are esc()'d before insertion.
+  const guide = form && form.querySelector('.disp-guide');
+  if (guide) {
+    const g = DISP_GUIDE[btn.dataset.d];
+    if (g) {
+      const card = btn.closest('[data-card]');
+      const biz = esc((card && window._nm && window._nm[card.dataset.card]) || 'this business');
+      const seller = esc(fillSellerName('[SELLER NAME]'));
+      // Function replacements: esc() can mint a literal "$&" in a name, which a string
+      // replacement would treat as a back-reference token (LOW-2). () => value is inert.
+      guide.innerHTML = g.replace(/\{seller\}/g, function () { return seller; }).replace(/\{business\}/g, function () { return biz; });
+      guide.style.display = 'block';
+    } else { guide.innerHTML = ''; guide.style.display = 'none'; }
   }
 }
 
@@ -2454,7 +2535,6 @@ function buildRail(cards, done, sel) {
     '<button class="rf-chip active" data-f="all" onclick="sellerRailSetFilter(this)">All</button>' +
     '<button class="rf-chip" data-f="intel" onclick="sellerRailSetFilter(this)">Intel-ready</button>' +
     '<button class="rf-chip" data-f="callback" onclick="sellerRailSetFilter(this)">Callback due</button>' +
-    '<button class="rf-chip" data-f="dnc" onclick="sellerRailSetFilter(this)">DNC</button>' +
     '</div></div>';
   const cbDue = window._cbDueSlugs || {};
   const rows = cards.map((p) => {
@@ -2562,6 +2642,36 @@ function sellerRailFilter() {
   srSay(term ? (shown ? shown + ' lead' + (shown === 1 ? '' : 's') + ' match “' + term + '”' : 'No leads match “' + term + '”') : shown + ' lead' + (shown === 1 ? '' : 's') + ' shown');
 }
 
+// Objection palette — pre-written rebuttals (answer + follow-up), one tap to the exact line
+// the second a prospect pushes back. Static content; the future keyword-STT layer just auto-taps
+// the matching chip. {business} filled from the selected lead; [SELLER NAME] via fillSellerName.
+const OBJECTIONS = [
+  { k: 'Already do SEO', r: "Makes sense — I'm not calling to replace it. I'm checking whether your Google Maps presence is winning the searches you actually want. 15 minutes — worth a look?" },
+  { k: 'Too busy', r: "That's exactly why it's 15 minutes with nothing to prepare. I've got [a time] or [another time] — which is less disruptive?" },
+  { k: 'How much?', r: "The audit's free. If there's paid work after, we'd only talk about it once you've seen the gaps — no obligation. Want to put 15 minutes on the calendar?" },
+  { k: 'Just email me', r: "Happy to — what's the best email? I'll send it and hold a short slot so it doesn't get buried. [a time] or [another time]?" },
+  { k: "We're fine", r: "Understood, I won't push. Want me to close this out, or would a better time for a 15-minute audit help? (If they say don't call again — mark Do-not-contact.)" },
+  { k: 'Who are you / sales call?', r: "Yes — it's a sales call. I'm [SELLER NAME] with Rankwise, local-search marketing. Free 15-minute audit of your Google Maps visibility. Not interested? I'll close it out." },
+];
+function objectionTray() {
+  const chips = OBJECTIONS.map(function (o, i) {
+    return '<button class="obj-chip" onclick="showObjection(' + i + ')">' + esc(o.k) + '</button>';
+  }).join('');
+  return '<div class="obj-tray"><div class="stage-lbl" style="margin-top:0">⚡ Quick assist — tap the objection you hear</div>' +
+    '<div class="obj-chips">' + chips + '</div>' +
+    '<div class="obj-resp" id="obj-resp"><span class="mut">Tap an objection above for the exact response + follow-up.</span></div></div>';
+}
+// i is a static loop index (never payload) — safe in the onclick above. The response text is
+// pre-written; {business} is substituted from the selected lead, then the WHOLE string is esc()'d.
+function showObjection(i) {
+  const o = OBJECTIONS[i];
+  if (!o) return;
+  const biz = (window._nm && window._sel && window._nm[window._sel]) || 'your business';
+  const txt = fillSellerName(o.r).replace(/\{business\}/g, function () { return biz; });
+  const resp = document.getElementById('obj-resp');
+  if (resp) resp.innerHTML = '<b>' + esc(o.k) + '</b> &mdash; ' + esc(txt);
+  document.querySelectorAll('.obj-chip').forEach(function (c) { c.classList.toggle('active', c.getAttribute('onclick') === 'showObjection(' + i + ')'); });
+}
 function buildDossier(p, done, attemptPill) {
   const it = p.intel || {};
   const has = Object.keys(it).length > 0;
@@ -2580,6 +2690,8 @@ function buildDossier(p, done, attemptPill) {
   h += callBtn(p);
   // Trust split (safe-to-say / never-say) — the centerpiece, always visible (was collapsed).
   h += wordingBlock(it);
+  // Objection palette — one tap to the rebuttal the moment they push back (teleprompter body).
+  h += objectionTray();
   h += '<div class="dgrid">' +
     '<div class="dcol">' + openWith(it) + proofList(it) + avoidTags(it) + '</div>' +
     '<div class="dcol">' + gapViz(it) + evidenceBlock(it) + '</div></div>';
@@ -4326,7 +4438,8 @@ async function renderOps() {
     'golive.gate_check','golive.dry_run','golive.preflight','golive.mark_verified',
     'campaign.launch','campaign.pause','campaign.adjust_targeting','lead.approve','lead.reject','lead.assign_seller',
     'lead.add_to_sequence','reply.mark_interested','reply.mark_not_fit','reply.mark_dnc','booking.confirm','booking.no_show',
-    'infra.retry_check','market_pack.launch'
+    'infra.retry_check','market_pack.launch',
+    'ticket.approve','ticket.reject','ticket.revise'
   ];
   const actionAllow = allowlist.length ? allowlist.map(String) : safeDefaultActions;
   function actionAliases(action) {
@@ -4370,6 +4483,51 @@ async function renderOps() {
     const id = 'a' + (++opsActionSeq);
     window._opsActionParams[id] = { action: action, params: params || {} };
     return '<button class="ops-btn ops-actionbtn' + cls + '" data-act="opsRunAction" data-arg="' + esc(id) + '" title="' + esc(sub) + '"><b>' + esc(label) + '</b><span>' + esc(sub) + '</span></button>';
+  }
+  // Night-shift ticket DECIDE lane: the value-ranked overnight backlog (p.tickets) with a per-row
+  // Approve / Reject / Revise-with-note. approved:true is the sole execution gate — nothing runs
+  // until the operator taps Approve. Buttons auto-disable ("Needs backend") until the snapshot
+  // emits ticket.* in action_allowlist (after migration 052 + a push). All dynamic values are esc()'d
+  // into HTML text/attribute contexts only; the ticket id is re-validated server-side (slug + FM scan).
+  function ticketsSection() {
+    const tickets = asArr(p.tickets);
+    if (!tickets.length) return '';
+    const rows = tickets.map(function (t, i) {
+      const tid = String(t.id || '');
+      const sev = String(t.severity || '').toLowerCase();
+      const sevCls = sev === 'high' ? 'bad' : (sev === 'medium' ? 'warn' : 'calm');
+      const approved = t.approved === true;
+      const statePill = approved
+        ? '<span class="tk-pill tk-ok">approved · awaiting run</span>'
+        : '<span class="tk-pill">needs your call</span>';
+      const src = t.source ? (esc(String(t.source)) + (t.sourceLine != null ? ':' + esc(String(t.sourceLine)) : '')) : '';
+      const approveBtn = actionButton('ticket.approve', approved ? 'Approved' : 'Approve', { id: tid },
+        { primary: !approved, sub: approved ? 'the hands may run it' : 'let the hands run it' });
+      const rejectBtn = actionButton('ticket.reject', 'Reject', { id: tid }, { ghost: true, sub: 'drop + close' });
+      return '<div class="tk-row" data-ticket-id="' + esc(tid) + '">' +
+        '<div class="tk-top"><span class="tk-rank">#' + esc(String(t.rank != null ? t.rank : (i + 1))) + '</span>' +
+        '<span class="tk-tone ' + sevCls + '">' + esc(sev || 'sev') + '</span>' +
+        (t.blastRadius ? '<span class="tk-tone calm">' + esc(String(t.blastRadius)) + '</span>' : '') +
+        statePill + '</div>' +
+        '<div class="tk-title">' + esc(String(t.title || tid)) + '</div>' +
+        (src ? '<div class="tk-src">' + src + '</div>' : '') +
+        (t.problem ? '<div class="tk-x"><b>Problem</b> ' + esc(String(t.problem)) + '</div>' : '') +
+        (t.acceptance ? '<div class="tk-x"><b>Done when</b> ' + esc(String(t.acceptance)) + '</div>' : '') +
+        (t.operatorNote ? '<div class="tk-x tk-yournote"><b>Your note</b> ' + esc(String(t.operatorNote)) + '</div>' : '') +
+        '<div class="tk-acts">' + approveBtn + rejectBtn +
+          '<button class="ops-btn ops-actionbtn ghost" data-act="opsTicketReviseToggle" data-arg=""><b>Revise</b><span>add a note</span></button>' +
+        '</div>' +
+        '<div class="tk-revise" hidden>' +
+          '<textarea class="tk-note" rows="2" maxlength="500" placeholder="What should change before this runs? (kept open, not approved)"></textarea>' +
+          '<button class="ops-btn ops-actionbtn" data-act="opsTicketRevise" data-arg=""><b>Save note</b><span>keeps it open</span></button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="ops-panel" id="ops-tickets" style="margin-top:16px">' +
+      '<div class="ops-panel-h"><h3 class="ops-panel-t">Overnight tickets</h3>' +
+      '<span class="ops-count">' + esc(String(tickets.length)) + ' ranked · approve to run</span></div>' +
+      '<div class="tk-intro">The night shift ranks its work here, most valuable first. <b>Approve</b> lets the hands run it, <b>Reject</b> drops it, <b>Revise</b> keeps it open with a note. Nothing runs until you approve.</div>' +
+      '<div class="tk-list">' + rows + '</div></div>';
   }
   window._opsRecords = {};
   let opsRecordSeq = 0;
@@ -5110,6 +5268,7 @@ async function renderOps() {
   const vGriffin = visibleCommands.filter(function(c){ return griffinCommands.indexOf(c) >= 0; }).length;
   const vClient = visibleCommands.filter(function(c){ return clientCommands.indexOf(c) >= 0; }).length;
   const vContent = visibleCommands.filter(function(c){ return contentCommands.indexOf(c) >= 0; }).length;
+  todayH += ticketsSection();  // night-shift DECIDE lane — approve/reject/revise overnight work
   todayH += '<div class="ops-panel" id="ops-command-queue" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Command queue</h3><span class="ops-count">' +
     esc(universalCommands.length || 'clear') + '</span></div>';
   todayH += '<div class="ops-workbench">' +
@@ -8044,4 +8203,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 0909a1fd2a6e -->
+<!-- rankwise-portal-version: 2e128fa29fcd -->
