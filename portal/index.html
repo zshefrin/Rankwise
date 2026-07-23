@@ -1066,17 +1066,16 @@ function roleOf() {
 // are intentionally not reachable from the employee/client portal shell; the
 // private HQ application is the place for migration and QA work.
 const PORTAL_INTERNAL_SURFACES = false;
-const SAFE_TABS = ['home','today','pipeline','market','outreach','content','clients','money','system','alerts'];
+const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system'];
 if (PORTAL_INTERNAL_SURFACES) SAFE_TABS.push('hq','settings');
 const safeTab = (t) => (SAFE_TABS.indexOf(String(t || '')) >= 0 ? String(t) : 'today');
 // Human labels for the same ids (reused for document.title — finding 87). Keyed by
 // the SAFE_TABS ids so the two lists can never silently drift apart.
-const TAB_LABELS = { home:'Home', today:'Today', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', alerts:'Alerts', hq:'Legacy HQ', settings:'Admin' };
+const TAB_LABELS = { today:'Home', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', hq:'Legacy HQ', settings:'Admin' };
 // One-line pre-click descriptions surfaced as the tab's native title tooltip (finding:
 // tab strip has no affordance for what each tab does). Keyed by SAFE_TABS ids.
 const TAB_DESC = {
-  home:'Operator home — your ranked decision queue, system watch and KPIs at a glance',
-  today:'Your daily orientation — next move, due calls and the whole-system status row',
+  today:'Operator home — cockpit queue, next best move, overnight tickets, and everything that needs review, in one place',
   pipeline:'Acquisition pipeline — replies, bookings and lead quality',
   market:'Market study — competitor and AI-visibility research',
   outreach:'Seller call queue — dispositions, callbacks and DNC',
@@ -1084,7 +1083,6 @@ const TAB_DESC = {
   clients:'Client dashboards — health, proof and requests',
   money:'Revenue — deals, bookings and per-model API cost',
   system:'System health — data truth, sources and open findings',
-  alerts:'Alert center — everything that needs review, routed to where you resolve it',
   hq:'Legacy HQ — pre-portal panels still being ported; live tabs are authoritative',
   settings:'Admin — role/client mappings and read-only QA checks',
 };
@@ -7548,14 +7546,14 @@ async function renderOps() {
     '<button class="ops-iconbtn ops-hdr-dial" aria-label="Dial console" onclick="opsOpenConsole()"><svg class="i"><use href="#i-phone"/></svg><span class="ops-hdr-label">Dial console →</span></button>' +
     '<button class="ops-iconbtn ops-hdr-logout" onclick="logout()">Log out</button>' +
     '</header>' +
-    // Funnel-ordered, zone-grouped strip (findings 17/59): Today | acquisition
+    // Funnel-ordered, zone-grouped strip (findings 17/59): Home | acquisition
     // (Outreach · Pipeline · Content) | delivery & money (Clients · Money · Market)
-    // | system (System · Alerts · HQ OS · Settings). The .zone class draws a 1px
-    // divider before each zone's first tab. This is an ORDER change only — no tab
-    // renamed, all 11 kept (the Pipeline merge in the blueprint stays deferred).
+    // | system (System). The .zone class draws a 1px divider before each zone's
+    // first tab. 2026-07-22 consolidation: the old Home cockpit + the Alerts center
+    // are folded into the Today tab (relabeled "Home"); HQ OS · Admin stay gated
+    // off behind PORTAL_INTERNAL_SURFACES. 8 visible tabs.
     '<nav class="ops-tabs" role="tablist">' +
-    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='home'?'true':'false') + '" data-v="home" onclick="opsTab(\'home\')">Home</button>' +
-    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Today' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Home' +
     (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
     (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + ' due</span>' : '') + '</button>' +
@@ -7571,15 +7569,12 @@ async function renderOps() {
     (marketBadge ? ' <span class="ops-badge">' + esc(marketBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='system'?'true':'false') + '" data-v="system" onclick="opsTab(\'system\')">System' +
     (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' : (findingsTotal ? ' <span class="ops-badge">' + esc(findingsTotal) + '</span>' : '')) + '</button>' +
-    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='alerts'?'true':'false') + '" data-v="alerts" onclick="opsTab(\'alerts\')">Alerts' +
-    (notificationsBadge ? ' <span class="ops-badge hot">' + esc(notificationsBadge) + '</span>' : '') + '</button>' +
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='hq'?'true':'false') + '" data-v="hq" onclick="opsTab(\'hq\')">Legacy HQ' +
     (hqRiskCount ? ' <span class="ops-badge">' + esc(hqRiskCount) + '</span>' : '') + '</button>' : '') +
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
     '</nav>' +
     '<main class="ops-main">' +
-    '<section class="ops-view" id="ops-home" role="tabpanel"' + (window._opsTab!=='home'?' hidden':'') + '>' + homeH + '</section>' +
-    '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + todayH + '</section>' +
+    '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + homeH + todayH + alertH + '</section>' +
     '<section class="ops-view" id="ops-pipeline" role="tabpanel"' + (window._opsTab!=='pipeline'?' hidden':'') + '>' + pipeH + '</section>' +
     '<section class="ops-view" id="ops-market" role="tabpanel"' + (window._opsTab!=='market'?' hidden':'') + '>' + marketH + '</section>' +
     '<section class="ops-view" id="ops-outreach" role="tabpanel"' + (window._opsTab!=='outreach'?' hidden':'') + '>' + outH + '</section>' +
@@ -7587,7 +7582,6 @@ async function renderOps() {
     '<section class="ops-view" id="ops-clients" role="tabpanel"' + (window._opsTab!=='clients'?' hidden':'') + '>' + clientH + '</section>' +
     '<section class="ops-view" id="ops-money" role="tabpanel"' + (window._opsTab!=='money'?' hidden':'') + '>' + monH + '</section>' +
     '<section class="ops-view" id="ops-system" role="tabpanel"' + (window._opsTab!=='system'?' hidden':'') + '>' + sysH + '</section>' +
-    '<section class="ops-view" id="ops-alerts" role="tabpanel"' + (window._opsTab!=='alerts'?' hidden':'') + '>' + alertH + '</section>' +
     (PORTAL_INTERNAL_SURFACES ? '<section class="ops-view" id="ops-hq" role="tabpanel"' + (window._opsTab!=='hq'?' hidden':'') + '>' + hqH + '</section>' : '') +
     (PORTAL_INTERNAL_SURFACES ? '<section class="ops-view" id="ops-settings" role="tabpanel"' + (window._opsTab!=='settings'?' hidden':'') + '>' + settingsH + '</section>' : '') +
     '</main>' +
@@ -7597,10 +7591,10 @@ async function renderOps() {
     // primary marks the OPEN tab, not a hardcoded Today (Pass X). data-v lets opsTab
     // re-toggle it on every switch; when the active tab isn't in the dock (e.g. Content)
     // no dock button is primary, which is correct.
-    '<button class="ops-btn' + (window._opsTab === 'today' ? ' primary' : '') + '" data-v="today" onclick="opsTab(\'today\')">Today</button>' +
+    '<button class="ops-btn' + (window._opsTab === 'today' ? ' primary' : '') + '" data-v="today" onclick="opsTab(\'today\')">Home</button>' +
     '<button class="ops-btn' + (window._opsTab === 'outreach' ? ' primary' : '') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' + (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-btn' + (window._opsTab === 'content' ? ' primary' : '') + '" data-v="content" onclick="opsTab(\'content\')">Content' + (contentBadge ? ' <span class="ops-badge">' + esc(contentBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-btn' + (window._opsTab === 'system' ? ' primary' : '') + '" data-v="system" onclick="opsTab(\'system\')">System' + (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' : '') + '</button>' +
-    '<button class="ops-btn' + (window._opsTab === 'alerts' ? ' primary' : '') + '" data-v="alerts" onclick="opsTab(\'alerts\')">Alerts' + (notificationsBadge ? ' <span class="ops-badge hot">' + esc(notificationsBadge) + '</span>' : '') + '</button>' +
     '</div>' +
     '<footer class="ops-note">Rankwise operator cockpit</footer>' +
     '</div>';
@@ -8203,4 +8197,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 2e128fa29fcd -->
+<!-- rankwise-portal-version: 7ba7bc7243cc -->
