@@ -4528,11 +4528,11 @@ async function renderOps() {
       const sevCls = sev === 'high' ? 'bad' : (sev === 'medium' ? 'warn' : 'calm');
       const approved = t.approved === true;
       const statePill = approved
-        ? '<span class="tk-pill tk-ok">approved · awaiting run</span>'
+        ? '<span class="tk-pill tk-ok">approved · ready to build</span>'
         : '<span class="tk-pill">needs your call</span>';
       const src = t.source ? (esc(String(t.source)) + (t.sourceLine != null ? ':' + esc(String(t.sourceLine)) : '')) : '';
       const approveBtn = actionButton('ticket.approve', approved ? 'Approved' : 'Approve', { id: tid },
-        { primary: !approved, sub: approved ? 'the hands may run it' : 'let the hands run it' });
+        { primary: !approved, sub: approved ? 'marked ready to build' : 'mark ready to build' });
       const rejectBtn = actionButton('ticket.reject', 'Reject', { id: tid }, { ghost: true, sub: 'drop + close' });
       return '<div class="tk-row" data-ticket-id="' + esc(tid) + '">' +
         '<div class="tk-top"><span class="tk-rank">#' + esc(String(t.rank != null ? t.rank : (i + 1))) + '</span>' +
@@ -4548,15 +4548,15 @@ async function renderOps() {
           '<button class="ops-btn ops-actionbtn ghost" data-act="opsTicketReviseToggle" data-arg=""><b>Revise</b><span>add a note</span></button>' +
         '</div>' +
         '<div class="tk-revise" hidden>' +
-          '<textarea class="tk-note" rows="2" maxlength="500" placeholder="What should change before this runs? (kept open, not approved)"></textarea>' +
+          '<textarea class="tk-note" rows="2" maxlength="500" placeholder="What should change before this is built? (kept open, not approved)"></textarea>' +
           '<button class="ops-btn ops-actionbtn" data-act="opsTicketRevise" data-arg=""><b>Save note</b><span>keeps it open</span></button>' +
         '</div>' +
       '</div>';
     }).join('');
     return '<div class="ops-panel" id="ops-tickets" style="margin-top:16px">' +
       '<div class="ops-panel-h"><h3 class="ops-panel-t">Overnight tickets</h3>' +
-      '<span class="ops-count">' + esc(String(tickets.length)) + ' ranked · approve to run</span></div>' +
-      '<div class="tk-intro">The night shift ranks its work here, most valuable first. <b>Approve</b> lets the hands run it, <b>Reject</b> drops it, <b>Revise</b> keeps it open with a note. Nothing runs until you approve.</div>' +
+      '<span class="ops-count">' + esc(String(tickets.length)) + ' ranked · approve to greenlight</span></div>' +
+      '<div class="tk-intro">The night shift ranks its work here, most valuable first. <b>Approve</b> greenlights a ticket for building, <b>Reject</b> drops it, <b>Revise</b> keeps it open with a note. Approving marks it ready to build — it does not run the work on its own.</div>' +
       '<div class="tk-list">' + rows + '</div></div>';
   }
   window._opsRecords = {};
@@ -8238,4 +8238,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 1850e154f23c -->
+<!-- rankwise-portal-version: e0db4d4d23a6 -->
