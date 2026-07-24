@@ -1497,6 +1497,10 @@ function renderTruthStrip(scan) {
     bits.push(bad.length
       ? `<span style="color:var(--dead, #E85C5C)" title="${esc(detail)}">CLOUD ✗${bad.length}</span>`
       : `<span style="color:var(--live, #46D68C)" title="${esc(detail)}">CLOUD ✓</span>`);
+  } else if (cloud && cloud.reason && cloud.reason !== 'not probed') {
+    /* make a DEGRADED probe visible instead of silently absent (review #2) — a gh
+       auth/offline failure would otherwise look identical to "feature not built". */
+    bits.push(`<span style="color:var(--ink-dim)" title="cloud probe unavailable: ${esc(cloud.reason)}">CLOUD ?</span>`);
   }
   const ch = (scan && scan.changes) || [];
   if (ch.length) {
