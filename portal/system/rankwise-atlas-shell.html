@@ -1281,7 +1281,14 @@ async function applyLiveScan() {
     if (j.last_log) n.last_activity = j.last_log;
     const cur = n.status;
     if (j.computed_status === 'FROZEN' && cur !== 'FROZEN' && cur !== 'DEAD') { n.status = 'FROZEN'; changed++; }
-    else if (j.computed_status === 'DEAD' && cur !== 'DEAD') { n.status = 'DEAD'; changed++; }
+    else if (j.computed_status === 'DEAD' && (cur === 'LIVE' || cur === 'FROZEN' || cur === 'UNKNOWN')) { n.status = 'DEAD'; changed++; }
+    else if (j.computed_status === 'DEAD' && cur !== 'DEAD') {
+      /* ARMED/DORMANT/CUT are curation-adjudicated (e.g. unfrozen-awaiting-first-run) —
+         per the stated merge policy the scan must not flip them; surface, don't demote.
+         (FROZEN/UNKNOWN above DO demote — reviewer note 2026-07-23: they are not
+         curation-adjudicated states and a stale-dead read should win there.) */
+      n.scan_disagrees = `scan: ${j.evidence} — status stays ${cur} (curation-adjudicated, not demoted)`;
+    }
     else if (j.computed_status === 'LIVE' && cur === 'DEAD') {
       n.scan_disagrees = `scan says LIVE (${j.evidence}) but curation says DEAD — investigate`;
     }
