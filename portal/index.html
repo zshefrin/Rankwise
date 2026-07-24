@@ -1987,7 +1987,15 @@ function sellerNextSel(justLoggedSlug) {
     return isNaN(t) ? Infinity : t;   // garbage note timestamps sort last, never crash
   };
   const due = remaining.filter(_actionable).sort(function(a, b) { return _atMs(a) - _atMs(b); });
-  return (due[0] && due[0].slug) || (remaining[0] && remaining[0].slug) || (cards[0] && cards[0].slug) || null;
+  // Fallbacks skip DO-NOT-DIAL leads (codex DEFECT-4): never auto-advance onto a
+  // lead the seller must not call — dnc_blocked state or an intel-level DNC hold.
+  const _noDial = function(p) {
+    const s = cbSt && cbSt[p.slug];
+    return (s && s.state === "dnc_blocked") || (p.intel && p.intel.dnc);
+  };
+  const freshOk = remaining.filter(function(p) { return !_noDial(p); });
+  const anyOk = cards.filter(function(p) { return !_noDial(p); });
+  return (due[0] && due[0].slug) || (freshOk[0] && freshOk[0].slug) || (anyOk[0] && anyOk[0].slug) || null;
 }
 
 // 'YYYY-MM-DDTHH:MM' in LOCAL time — the format a datetime-local min= expects.
@@ -3018,9 +3026,15 @@ async function renderSeller(data) {
   // queue is callback-first (the old code computed a callback-first list but only used
   // it to pick the auto-focused card — the visible rail still sold rank order):
   // overdue (earliest promise first) → due-soon → fresh leads by rank; sunk cards last.
+  // Priorities: 0 overdue · 1 due-soon · 2 fresh · 3 DO-NOT-DIAL (codex review
+  // DEFECT-4 fix: dnc_blocked/intel.dnc previously fell through as "fresh" (2), so
+  // a DNC lead could sort high and even become the auto-focused next dial. They now
+  // sort LAST and are excluded from nextDial/auto-advance entirely — still rendered
+  // in the rail (browsable, chip explains why) but never dial-prompted.)
   const _cbPri = { overdue: 0, due_soon: 1 };
   const _pri = (p) => {
     const s = cbState[p.slug];
+    if ((s && s.state === "dnc_blocked") || (p.intel && p.intel.dnc)) return 3;
     return s && _cbPri[s.state] !== undefined ? _cbPri[s.state] : 2;
   };
   const railCards = cards.slice().sort((a, b) => {
@@ -3038,6 +3052,8 @@ async function renderSeller(data) {
   });
   const callbackCards = railCards.filter((p) => !(p.slug in sunk) && _pri(p) < 2);
   const freshCards = railCards.filter((p) => !(p.slug in sunk) && _pri(p) === 2);
+  // prioritizedCards deliberately EXCLUDES priority-3 (DNC) — nextDial can never
+  // land on a lead the seller must not call.
   const prioritizedCards = callbackCards.concat(freshCards);
   const nextDial = prioritizedCards[0] || null;
   const intelReady = cards.filter((c) => c.intel && Object.keys(c.intel || {}).length).length;
@@ -7936,4 +7952,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 67f85c09c6a9 -->
+<!-- rankwise-portal-version: 7e4baee17e26 -->
