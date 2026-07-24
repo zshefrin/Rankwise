@@ -2364,6 +2364,19 @@ function planParts(item) {
 // name + flat signal line + call button when intel={}.
 function callBtn(p) {
   if (p.intel && p.intel.dnc) return '<div class="dccall dnc">📵 DO NOT CALL — number withheld</div>';
+  // Dial-time-enforcement ticket criterion 2: the call control must vanish the
+  // moment a DNC disposition is recorded — not wait for the next queue refresh.
+  // Covers BOTH holds the intel flag misses: a dnc_blocked callback state and a
+  // just-logged do_not_contact disposition (window._attempts is newest-first and
+  // is refreshed by the same render pass that follows logCall). The edge fn
+  // re-checks the central DNC table server-side regardless — this is the UI half.
+  const _st = (window._cbState || {})[p.slug];
+  // ANY-row match, not newest-row (edge review LOW): a later logged disposition on
+  // a DNC'd lead must not resurrect the dial button — DNC is permanent, no undo.
+  const _everDnc = ((window._attempts || {})[p.slug] || []).some(function(r) { return r.disposition === 'do_not_contact'; });
+  if ((_st && _st.state === 'dnc_blocked') || _everDnc) {
+    return '<div class="dccall dnc">📵 DO NOT CALL — marked do-not-contact</div>';
+  }
   if (!p.phone) return '';
   const e164 = toE164(p.phone);
   const tel  = String(p.phone == null ? "" : p.phone).replace(/[^0-9+]/g, "");
@@ -7952,4 +7965,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 7e4baee17e26 -->
+<!-- rankwise-portal-version: 406eaf47a0bd -->
