@@ -862,69 +862,6 @@
 #mmap-tip h4 { margin:0 0 3px; font-size:var(--fs-2); }
 #mmap-tip .k { color:var(--mut); }
 #mmap-tip .row { display:flex; gap:10px; justify-content:space-between; }
-/* Live system map (ops System tab; SVG flowchart from payload.system_status) */
-.sysmap-strip { display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; padding:10px 14px 0; font-size:var(--fs-2); color:var(--text-2); }
-.sysmap-strip b { color:var(--text); font-weight:700; }
-.sysmap-strip .sysmap-asof { margin-left:auto; }
-.sysmap-nodeline { padding:4px 14px 0; font-size:var(--fs-2); color:var(--text-2); }
-.sysmap-nodeline b { color:var(--text); font-weight:700; }
-.sysmap-bar { display:flex; flex-wrap:wrap; gap:7px; align-items:center; padding:10px 14px 4px; }
-.sysmap-chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--surface-1); border-radius:var(--r-pill); padding:4px 11px; font-size:var(--fs-2); cursor:pointer; color:var(--text); user-select:none; }
-.sysmap-chip[data-on="1"] { border-color:var(--border-hover); box-shadow:inset 0 0 0 1px var(--border-hover); }
-.sysmap-chip i { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.sysmap-bar input[type=search] { flex:1 1 140px; min-width:120px; max-width:240px; background:var(--surface-0); border:1px solid var(--line); border-radius:var(--r-md); color:var(--text); padding:6px 10px; font-size:var(--fs-3); }
-.sysmap-bar .sysmap-zbtn { border:1px solid var(--line); background:var(--surface-1); color:var(--text); border-radius:var(--r-md); padding:5px 10px; font-size:var(--fs-2); font-weight:600; }
-.sysmap-wrap { position:relative; overflow:hidden; margin:8px 12px 12px; border-radius:var(--r-md); background:var(--surface-0); }
-#sysmap-cv { display:block; width:100%; height:520px; touch-action:pan-y; cursor:grab; }  /* finding 67: vertical swipe scrolls page; custom pinch/pan still fire */
-#sysmap-cv.panning { cursor:grabbing; }
-#sysmap-cv .lanebg { fill:rgba(232,237,242,.035); }
-#sysmap-cv .lanelabel { fill:var(--mut); font-size:var(--fs-1); font-weight:700; letter-spacing:.09em; }
-#sysmap-cv .edge { fill:none; stroke:var(--border-hover); stroke-width:1.6; }
-#sysmap-cv .edge.pipe { stroke:#c8d3dc; stroke-width:2.4; opacity:.8; }
-#sysmap-cv .edge.blocked { stroke:var(--bad); stroke-dasharray:7 5; }
-#sysmap-cv .edge.feed { opacity:.55; }
-#sysmap-cv .edge.hot { opacity:1; stroke:var(--warn); stroke-width:2.6; }
-#sysmap-cv .node { cursor:pointer; }
-#sysmap-cv .node rect.box { fill:var(--card); stroke:var(--line); stroke-width:1; }
-#sysmap-cv .node:hover rect.box { stroke:var(--border-hover); }
-#sysmap-cv .node[data-sel="1"] rect.box { stroke:var(--accent); stroke-width:2; }
-#sysmap-cv .node.dim { opacity:.22; }
-#sysmap-cv .node text { pointer-events:none; }
-#sysmap-cv .node .nm { font-weight:600; font-size:var(--fs-3); fill:var(--text); }
-#sysmap-cv .node .st { font-size:var(--fs-1); font-weight:700; letter-spacing:.05em; }
-#sysmap-cv .node .ds { font-size:var(--fs-1); fill:var(--mut); }
-#sysmap-cv .gatepill rect { fill:rgba(248,113,113,.13); stroke:var(--bad); stroke-width:1; }
-#sysmap-cv .gatepill text { fill:var(--bad); font-size:var(--fs-1); font-weight:700; }
-#sysmap-cv .lockpill rect { fill:rgba(251,191,36,.13); stroke:var(--warn); }
-#sysmap-cv .lockpill text { fill:var(--warn); font-size:var(--fs-1); font-weight:700; }
-.sysmap-insp { position:absolute; top:0; right:0; bottom:0; width:min(380px,92%); background:var(--surface-1); border-left:1px solid var(--line); padding:14px 16px; overflow-y:auto; transform:translateX(103%); transition:transform .2s cubic-bezier(.22,1,.36,1); z-index:4; }
-.sysmap-insp[data-open="1"] { transform:none; }
-.sysmap-insp h4 { font-size:var(--fs-5); margin:0 30px 4px 0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.sysmap-insp .plain { color:var(--text-2); font-size:var(--fs-3); margin:6px 0 6px; }
-.sysmap-insp .prov { color:var(--mut); font-size:var(--fs-2); margin:0 0 10px; }
-.sysmap-insp .close { position:absolute; top:10px; right:10px; border:1px solid var(--line); background:none; color:var(--text); border-radius:var(--r-md); width:26px; height:26px; padding:0; font-size:var(--fs-3); line-height:1; }
-.sysmap-badge { display:inline-block; font-size:var(--fs-1); font-weight:700; letter-spacing:.05em; border-radius:var(--r-sm); padding:2px 7px; flex:none; }
-.sysmap-b-LIVE { color:var(--ok); background:rgba(52,211,153,.13); }
-.sysmap-b-ARMED { color:var(--warn); background:rgba(251,191,36,.13); }
-.sysmap-b-GATED { color:var(--accent); background:rgba(96,165,250,.13); }
-.sysmap-b-DEAD { color:var(--bad); background:rgba(248,113,113,.13); }
-.sysmap-b-UNKNOWN { color:var(--text-2); background:rgba(154,167,177,.14); }
-.sysmap-comp { list-style:none; margin:0; padding:0; }
-.sysmap-comp li { padding:8px 0; border-top:1px solid var(--border-1); font-size:var(--fs-2); }
-.sysmap-comp .cn { font-weight:600; }
-.sysmap-comp .cv { color:var(--text-2); display:block; margin-top:1px; }
-.sysmap-comp .cp { color:var(--mut); display:block; margin-top:1px; font-size:var(--fs-1); }
-.sysmap-comp .cw { color:var(--warn); display:block; margin-top:1px; }
-@media (max-width:767.98px) {
-  #sysmap-cv { height:400px; }
-  /* padding-bottom clears the home-indicator when the inspector docks to the bottom (finding 68). */
-  .sysmap-insp { top:auto; left:0; right:0; width:auto; max-height:62%; border-left:none; border-top:1px solid var(--line); border-radius:var(--r-lg) var(--r-lg) 0 0; transform:translateY(103%); padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px)); }
-  .sysmap-insp[data-open="1"] { transform:none; }
-  .sysmap-chip { padding:9px 12px; }                 /* finding 66: 26px -> ~40px chips */
-  .sysmap-insp .close { width:36px; height:36px; }   /* finding 66: 26px -> 36px */
-  .sysmap-bar input[type=search] { font-size:var(--fs-5); }   /* finding 25: no iOS focus-zoom */
-}
-@media (prefers-reduced-motion:reduce) { .sysmap-insp { transition:none; } }
 /* ── operator HOME cockpit tab (data from cockpit_snapshot, mig 050); scoped .ckpt, self-contained ── */
 .ckpt{--ck-line:#22303c;--ck-line2:#2f4553;--ck-surf:#131a21;--ck-ink:#e4edf4;--ck-ink2:#93a6b6;--ck-ink3:#5f7386;--ck-ok:#3ecf8e;--ck-warn:#f2b640;--ck-bad:#f0685e;--ck-accent:#35c7e8;color:var(--ck-ink);font-size:14px}
 .ckpt-wrap{display:grid;grid-template-columns:63% 1fr;gap:14px;align-items:start}
@@ -3803,276 +3740,6 @@ function opsMmapRun(cv, data) {
   frame();
 }
 
-// ── Live system map (ops System tab; SVG from payload.system_status) ─────────
-// Truthful flowchart: topology + badges are computed HOURLY by
-// build_system_status() (push_operator_snapshot cron) from deterministic
-// sources only — this renderer draws, it never computes or alerts. Ports the
-// approved _dev/system-map-2026-07-05.html form (3 swimlanes, elbow edges,
-// gate/lock pills, inspector) onto the portal's own tokens. ALL payload
-// strings land via textContent/createElementNS — never string-built markup —
-// so the payload is always treated as data, never as markup.
-const SYSMAP_DOT = { LIVE:'var(--ok)', ARMED:'var(--warn)', GATED:'var(--accent)', DEAD:'var(--bad)', UNKNOWN:'#9aa7b1' };
-const SYSMAP_LBL = { LIVE:'LIVE', ARMED:'ARMED', GATED:'BLOCKED', DEAD:'BROKEN', UNKNOWN:'UNKNOWN' };
-function opsSysmapBoot() {
-  const host = document.getElementById('sysmap-wrap');
-  const data = window._sysmapData;
-  if (!host || host.dataset.booted) return;
-  host.dataset.booted = '1';
-  if (!data || data.error || !Array.isArray(data.nodes) || !data.nodes.length) return; // skeleton already shows the explicit error/empty state
-  const NS = 'http://www.w3.org/2000/svg';
-  const el = function(t, a) { const e = document.createElementNS(NS, t); for (const k in (a || {})) e.setAttribute(k, a[k]); return e; };
-  const view = data.view || { w: 1390, h: 660 };
-  const svg = el('svg', { id: 'sysmap-cv', role: 'group', 'aria-label': 'Rankwise live system flowchart' });
-  host.appendChild(svg);
-  // null-proto: a payload id of "__proto__" must not poison lookups (sec nit N2)
-  const byId = Object.create(null); data.nodes.forEach(function(n) { byId[n.id] = n; });
-
-  asArr(data.lanes).forEach(function(l) {
-    svg.appendChild(el('rect', { x: 10, y: l.y, width: view.w - 20, height: l.h, class: 'lanebg', rx: 14 }));
-    const t = el('text', { x: 24, y: l.y + 20, class: 'lanelabel' }); t.textContent = l.label || ''; svg.appendChild(t);
-  });
-
-  const defs = el('defs');
-  [['smArr', '#c8d3dc'], ['smArrR', 'var(--bad)'], ['smArrF', '#3b4750']].forEach(function(pair) {
-    const m = el('marker', { id: pair[0], viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' });
-    const p = el('path', { d: 'M0 0L10 5L0 10z' }); p.setAttribute('fill', pair[1]); m.appendChild(p); defs.appendChild(m);
-  });
-  svg.appendChild(defs);
-
-  const edgesG = el('g'); svg.appendChild(edgesG);
-  let trk = 0;
-  asArr(data.edges).forEach(function(e) {
-    const a = byId[e.f], b = byId[e.t];
-    if (a && b && a.lane === 1 && b.lane === 0 && Math.abs((a.x + a.w / 2) - (b.x + b.w / 2)) >= 6) e._track = (trk++) % 5;
-  });
-  function edgePath(e) {
-    const a = byId[e.f], b = byId[e.t];
-    if (!a || !b) return '';
-    const blocked = e.gate && e.gate.active;
-    if (a.lane === b.lane && a.lane === 0) return 'M' + (a.x + a.w) + ' ' + (a.y + a.h / 2) + ' L' + b.x + ' ' + (b.y + b.h / 2);
-    if ((e.cls || '').indexOf('under') >= 0) {
-      const yv = (e.cls || '').indexOf('under2') >= 0 ? 412 : 398;
-      const x1 = a.x + a.w / 2, x2 = b.x + b.w / 2;
-      return 'M' + x1 + ' ' + (a.y + a.h) + ' L' + x1 + ' ' + yv + ' L' + x2 + ' ' + yv + ' L' + x2 + ' ' + (b.y + b.h);
-    }
-    const x1 = a.x + a.w / 2, y1 = a.y, x2 = b.x + b.w / 2, y2 = b.y + b.h;
-    const ym = 224 + (e._track || 0) * 11;
-    if (Math.abs(x1 - x2) < 6) return 'M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + (y2 + 4);
-    return 'M' + x1 + ' ' + y1 + ' L' + x1 + ' ' + ym + ' L' + x2 + ' ' + ym + ' L' + x2 + ' ' + (y2 + 4);
-  }
-  asArr(data.edges).forEach(function(e) {
-    const blocked = !!(e.gate && e.gate.active);
-    const isPipe = (e.cls || '').indexOf('pipe') >= 0;
-    const cls = 'edge ' + (e.cls || '') + (blocked ? ' blocked' : '');
-    const p = el('path', { d: edgePath(e), class: cls, 'data-f': e.f, 'data-t': e.t });
-    p.setAttribute('marker-end', blocked ? 'url(#smArrR)' : (isPipe ? 'url(#smArr)' : 'url(#smArrF)'));
-    edgesG.appendChild(p);
-    if (blocked && e.gate.label) {
-      const a = byId[e.f], b = byId[e.t];
-      if (a && b) {
-        const mx = (a.x + a.w + b.x) / 2, gy = a.y + a.h + 8;
-        const g = el('g', { class: 'gatepill' });
-        const wpx = e.gate.label.length * 6.2 + 24;
-        g.appendChild(el('rect', { x: mx - wpx / 2, y: gy, width: wpx, height: 19, rx: 9 }));
-        const t = el('text', { x: mx, y: gy + 13.5, 'text-anchor': 'middle' });
-        t.textContent = '⛔ ' + e.gate.label; g.appendChild(t);
-        edgesG.appendChild(g);
-      }
-    }
-    if (e.label) {
-      const a = byId[e.f], b = byId[e.t];
-      if (a && b) {
-        const yv = (e.cls || '').indexOf('under2') >= 0 ? 412 : 398;
-        const t = el('text', { x: (a.x + a.w / 2 + b.x + b.w / 2) / 2, y: yv - 4, 'text-anchor': 'middle', class: 'lanelabel' });
-        t.setAttribute('style', 'font-weight:600;letter-spacing:0;font-size:10px');
-        t.textContent = e.label; edgesG.appendChild(t);
-      }
-    }
-  });
-  asArr(data.locks).forEach(function(lk) {
-    if (!lk.active) return;
-    const n = byId[lk.node]; if (!n) return;
-    const g = el('g', { class: 'lockpill' });
-    const wpx = (lk.label || '🔒').length * 6.4 + 22;
-    g.appendChild(el('rect', { x: n.x + n.w - wpx, y: n.y + n.h + 4, width: wpx, height: 19, rx: 9 }));
-    const t = el('text', { x: n.x + n.w - wpx / 2, y: n.y + n.h + 17.5, 'text-anchor': 'middle' });
-    t.textContent = lk.label || '🔒'; g.appendChild(t);
-    edgesG.appendChild(g);
-  });
-
-  const nodesG = el('g'); svg.appendChild(nodesG);
-  data.nodes.forEach(function(n) {
-    const st = (n.badge && n.badge.status) || 'UNKNOWN';
-    const g = el('g', { class: 'node', 'data-id': n.id, 'data-b': st, tabindex: 0, role: 'button', 'aria-label': (n.name || n.id) + ': ' + (SYSMAP_LBL[st] || st) });
-    g.appendChild(el('rect', { class: 'box', x: n.x, y: n.y, width: n.w, height: n.h, rx: 12 }));
-    const comps = n.components || [];
-    if (st !== 'DEAD' && comps.some(function(c) { return c.badge && c.badge.status === 'DEAD'; })) {
-      const warn = el('circle', { cx: n.x + n.w - 13, cy: n.y + 13, r: 4 }); warn.setAttribute('fill', 'var(--bad)'); g.appendChild(warn);
-    }
-    if (comps.some(function(c) { return c.badge && c.badge.warn; }) || (n.badge && n.badge.warn)) {
-      const tick = el('circle', { cx: n.x + n.w - 25, cy: n.y + 13, r: 3 }); tick.setAttribute('fill', 'var(--warn)'); g.appendChild(tick);
-    }
-    const dot = el('circle', { cx: n.x + 16, cy: n.y + 19, r: 5 }); dot.setAttribute('fill', SYSMAP_DOT[st] || SYSMAP_DOT.UNKNOWN); g.appendChild(dot);
-    const stT = el('text', { x: n.x + 27, y: n.y + 23, class: 'st' }); stT.setAttribute('fill', SYSMAP_DOT[st] || SYSMAP_DOT.UNKNOWN); stT.textContent = SYSMAP_LBL[st] || st; g.appendChild(stT);
-    const nm = el('text', { x: n.x + 14, y: n.y + 45, class: 'nm' }); nm.textContent = n.name || n.id; g.appendChild(nm);
-    const ds = el('text', { x: n.x + 14, y: n.y + 64, class: 'ds' }); ds.textContent = n.ds || ''; g.appendChild(ds);
-    g.addEventListener('click', function() { sysmapSelect(n.id); });
-    g.addEventListener('keydown', function(ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); sysmapSelect(n.id); } });
-    nodesG.appendChild(g);
-  });
-
-  // inspector (DOM-built; textContent only)
-  const insp = document.createElement('aside');
-  insp.className = 'sysmap-insp'; insp.dataset.open = '0'; insp.setAttribute('aria-live', 'polite');
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close'; closeBtn.setAttribute('aria-label', 'close'); closeBtn.textContent = '✕';
-  closeBtn.onclick = function() { sysmapSelect(window._sysmapSel); };
-  const ibody = document.createElement('div');
-  insp.appendChild(closeBtn); insp.appendChild(ibody); host.appendChild(insp);
-
-  function badgeEl(b) {
-    const s = document.createElement('span');
-    const st = (b && b.status) || 'UNKNOWN';
-    s.className = 'sysmap-badge sysmap-b-' + st;
-    s.textContent = SYSMAP_LBL[st] || st;
-    return s;
-  }
-  function provText(b) {
-    if (!b) return '';
-    const ago = b.at ? freshnessInfo(b.at).label : '';
-    return 'computed from ' + (b.computedFrom || 'unknown source') + (ago ? ' · ' + ago : '');
-  }
-  window._sysmapSel = null;
-  window.sysmapSelect = function(id) {
-    window._sysmapSel = (window._sysmapSel === id) ? null : id;
-    const sel = window._sysmapSel;
-    svg.querySelectorAll('.node').forEach(function(x) { x.dataset.sel = x.dataset.id === sel ? '1' : '0'; });
-    svg.querySelectorAll('.edge').forEach(function(pth) { pth.classList.toggle('hot', !!sel && (pth.dataset.f === sel || pth.dataset.t === sel)); });
-    if (!sel) { insp.dataset.open = '0'; return; }
-    const n = byId[sel];
-    if (!n) { insp.dataset.open = '0'; return; }  // unknown id (console misuse) — no-op (sec nit N3)
-    ibody.textContent = '';
-    const h4 = document.createElement('h4'); h4.textContent = n.name || n.id; h4.appendChild(badgeEl(n.badge)); ibody.appendChild(h4);
-    const plain = document.createElement('p'); plain.className = 'plain'; plain.textContent = n.plain || ''; ibody.appendChild(plain);
-    const prov = document.createElement('p'); prov.className = 'prov';
-    prov.textContent = provText(n.badge) + ((n.badge && n.badge.detail) ? ' — ' + n.badge.detail : '') + ((n.badge && n.badge.warn) ? ' · ⚠ ' + n.badge.warn : '');
-    ibody.appendChild(prov);
-    const ul = document.createElement('ul'); ul.className = 'sysmap-comp';
-    asArr(n.components).forEach(function(c) {
-      const li = document.createElement('li');
-      li.appendChild(badgeEl(c.badge));
-      li.appendChild(document.createTextNode(' '));
-      const cn = document.createElement('span'); cn.className = 'cn'; cn.textContent = c.name || c.id; li.appendChild(cn);
-      const b = c.badge || {};
-      if (b.detail || c.note) { const cv = document.createElement('span'); cv.className = 'cv'; cv.textContent = [b.detail, c.note].filter(Boolean).join(' · '); li.appendChild(cv); }
-      if (b.warn) { const cw = document.createElement('span'); cw.className = 'cw'; cw.textContent = '⚠ ' + b.warn; li.appendChild(cw); }
-      const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = provText(b); li.appendChild(cp);
-      ul.appendChild(li);
-    });
-    ibody.appendChild(ul);
-    insp.dataset.open = '1';
-  };
-  if (!window._sysmapEscBound) {  // bind ONCE — renderOps re-runs re-boot the panel (sec nit N1)
-    window._sysmapEscBound = true;
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && window._sysmapSel) sysmapSelect(window._sysmapSel); });
-  }
-
-  // legend filter + search
-  let activeB = null;
-  const q = document.getElementById('sysmap-q');
-  function applyDim() {
-    const s = (q && q.value || '').trim().toLowerCase();
-    svg.querySelectorAll('.node').forEach(function(g) {
-      const n = byId[g.dataset.id];
-      const comps = n.components || [];
-      let ok = true;
-      if (activeB) ok = (n.badge && n.badge.status === activeB) || comps.some(function(c) { return c.badge && c.badge.status === activeB; });
-      if (ok && s) {
-        const hay = [n.name, n.ds, n.plain].concat(comps.map(function(c) { return (c.name || '') + ' ' + ((c.badge && c.badge.detail) || '') + ' ' + ((c.badge && c.badge.computedFrom) || ''); })).join(' ').toLowerCase();
-        ok = hay.indexOf(s) >= 0;
-      }
-      g.classList.toggle('dim', !ok);
-    });
-  }
-  document.querySelectorAll('#sysmap-legend .sysmap-chip').forEach(function(ch) {
-    function toggle() {
-      activeB = (activeB === ch.dataset.b) ? null : ch.dataset.b;
-      document.querySelectorAll('#sysmap-legend .sysmap-chip').forEach(function(x) {
-        var on = x.dataset.b === activeB;
-        x.dataset.on = on ? '1' : '0';
-        x.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-      applyDim();
-    }
-    ch.onclick = toggle;
-    ch.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggle(); }
-    });
-  });
-  if (q) q.addEventListener('input', applyDim);
-
-  // pan / zoom / pinch
-  const FIT = { x: 0, y: 0, w: view.w, h: view.h };
-  let vb = Object.assign({}, FIT);
-  function setVB() { svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h); }
-  function zoom(f, cx, cy) {
-    const nw = Math.min(Math.max(vb.w * f, 320), view.w * 2), nh = nw * (view.h / view.w);
-    const px = cx == null ? vb.x + vb.w / 2 : cx, py = cy == null ? vb.y + vb.h / 2 : cy;
-    vb.x = px - (px - vb.x) * (nw / vb.w); vb.y = py - (py - vb.y) * (nh / vb.h); vb.w = nw; vb.h = nh; setVB();
-  }
-  function cursorPt(cx, cy) {
-    const r = svg.getBoundingClientRect();
-    return { x: vb.x + (cx - r.left) / r.width * vb.w, y: vb.y + (cy - r.top) / r.height * vb.h };
-  }
-  const zin = document.getElementById('sysmap-zin'), zout = document.getElementById('sysmap-zout'), zfit = document.getElementById('sysmap-fit');
-  if (zin) zin.onclick = function() { zoom(0.8); };
-  if (zout) zout.onclick = function() { zoom(1.25); };
-  if (zfit) zfit.onclick = function() { vb = Object.assign({}, FIT); setVB(); };
-  svg.addEventListener('wheel', function(e) { e.preventDefault(); const pt = cursorPt(e.clientX, e.clientY); zoom(e.deltaY > 0 ? 1.12 : 0.89, pt.x, pt.y); }, { passive: false });
-  const ptrs = {};
-  let pan = null, pinch = null;
-  svg.addEventListener('pointerdown', function(e) {
-    ptrs[e.pointerId] = e;
-    const ids = Object.keys(ptrs);
-    if (ids.length === 2) { // pinch start
-      const a = ptrs[ids[0]], b = ptrs[ids[1]];
-      pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), vb: Object.assign({}, vb) };
-      pan = null;
-      return;
-    }
-    if (e.target.closest('.node')) return;
-    pan = { x: e.clientX, y: e.clientY, vx: vb.x, vy: vb.y };
-    svg.classList.add('panning'); svg.setPointerCapture(e.pointerId);
-  });
-  svg.addEventListener('pointermove', function(e) {
-    if (ptrs[e.pointerId]) ptrs[e.pointerId] = e;
-    const ids = Object.keys(ptrs);
-    if (pinch && ids.length === 2) {
-      const a = ptrs[ids[0]], b = ptrs[ids[1]];
-      const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-      if (d > 0 && pinch.d > 0) {
-        const mid = cursorPt((a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2);
-        const f = pinch.d / d;
-        vb = Object.assign({}, pinch.vb);
-        zoom(f, mid.x, mid.y);
-      }
-      return;
-    }
-    if (!pan) return;
-    const r = svg.getBoundingClientRect(), k = vb.w / r.width;
-    vb.x = pan.vx - (e.clientX - pan.x) * k; vb.y = pan.vy - (e.clientY - pan.y) * k; setVB();
-  });
-  function ptrUp(e) {
-    delete ptrs[e.pointerId];
-    if (Object.keys(ptrs).length < 2) pinch = null;
-    if (!Object.keys(ptrs).length) { pan = null; svg.classList.remove('panning'); }
-  }
-  svg.addEventListener('pointerup', ptrUp);
-  svg.addEventListener('pointercancel', ptrUp);
-  setVB();
-  // phone: open zoomed to the revenue lane (pinch/pan reaches the rest)
-  if (window.matchMedia && matchMedia('(max-width:767.98px)').matches) { vb = { x: 20, y: 20, w: 820, h: 390 }; setVB(); }
-}
 function opsApplyRowVisibility(row) {
   row.hidden = row.dataset.filterHidden === '1' || row.dataset.searchHidden === '1';
 }
@@ -4399,10 +4066,6 @@ async function renderOps() {
   const dnc = Number(fu.dnc_count) || 0;
   const sys = p.system || {};
   const gl = p.go_live || null;
-  // Live system map block (build_system_status, hourly). Stashed for the
-  // System-tab SVG boot; treated as data (all rendering via textContent).
-  const smap = p.system_status || null;
-  window._sysmapData = smap;
   const sp = p.spend || null;
   const co = p.content || {};
   const mediaHost = p.media_host || p.asset_host || {};
@@ -5044,10 +4707,9 @@ async function renderOps() {
   // unshifted to the front so a broken monitoring node leads the Alerts list.
   const infraAlerts = [];
   const brokenNodeTotal = asArr(sys.broken_nodes).length;
-  const sysTotalNodes = smap ? asArr(smap.nodes).length : 0;
   for (const bn of asArr(sys.broken_nodes)) infraAlerts.push({
     type:'system', tone:'bad', title:'System node broken: ' + (bn || 'unnamed node'),
-    sub:'live system map · ' + brokenNodeTotal + (sysTotalNodes ? ' of ' + sysTotalNodes : '') + ' nodes broken · needs a fix', tab:'system',
+    sub:'system map · ' + brokenNodeTotal + ' node' + (brokenNodeTotal === 1 ? '' : 's') + ' broken · needs a fix', tab:'system',
   });
   const unknownNodes = Number(sys.unknown_count) || 0;
   if (unknownNodes) infraAlerts.push({
@@ -6739,60 +6401,6 @@ async function renderOps() {
   // undefined===undefined would fire a green "All sources OK" on NO data (finding S1).
   const sysHasSources = Number.isFinite(Number(sys.sources_total)) && Number(sys.sources_total) > 0;
   const sysOk = sysHasSources && Number(sys.sources_ok) === Number(sys.sources_total);
-  // Live system map — the truthful status backbone. The block is computed
-  // HOURLY by push_operator_snapshot.build_system_status() from deterministic
-  // sources only (single-source rule: every panel below that states health is
-  // a projection of the same data-truth/monitor rails this map reads). The
-  // SVG itself is DOM-built in opsSysmapBoot() after render.
-  let sysmapH = '<div class="ops-panel" id="ops-sysmap-panel" style="margin-bottom:16px">' +
-    '<div class="ops-panel-h"><h3 class="ops-panel-t">Live system map</h3><span class="ops-count">hourly · deterministic</span></div>';
-  if (!smap) {
-    sysmapH += '<p class="ops-muted ops-pad">No system_status block in the snapshot yet — it lands with the next hourly push.</p></div>';
-  } else if (smap.error) {
-    sysmapH += '<p class="ops-muted ops-pad">Map dark: ' + esc(smap.error) + ' — explicit failure state; a stale map is never shown.</p></div>';
-  } else {
-    const smc = smap.counts || {};
-    const smAsofMs = Date.parse(smap.computed_at || '');
-    // pushes run 8:00–22:00 only — overnight age is scheduled, not a miss, so
-    // only accuse a missed push during viewing hours when one was actually due.
-    // Compute the hour in Pacific (the push schedule's zone), not the viewer's
-    // browser TZ, or a non-PT operator would mis-gate the staleness warning (W-12).
-    const smHour = new Date(new Date().toLocaleString("en-US", { timeZone: PT })).getHours();
-    const smStale = isFinite(smAsofMs) && (Date.now() - smAsofMs) > 2.5 * 3600e3
-      && smHour >= 9 && smHour <= 23;
-    const smComps = (Number(smc.live)||0)+(Number(smc.armed)||0)+(Number(smc.gated)||0)+(Number(smc.dead)||0)+(Number(smc.unknown)||0)+(Number(smc.warn)||0);
-    const smTotalNodes = asArr(smap.nodes).length;
-    const smNodeBroken = asArr(sys.broken_nodes).length;
-    const smNodeUnknown = Number(sys.unknown_count) || 0;
-    sysmapH += '<div class="sysmap-strip">' +
-      '<span><b>' + esc(Number(smc.live) || 0) + '</b> live</span>' +
-      '<span><b>' + esc(Number(smc.armed) || 0) + '</b> armed</span>' +
-      '<span><b>' + esc(Number(smc.gated) || 0) + '</b> blocked</span>' +
-      '<span' + ((Number(smc.dead) || 0) ? ' style="color:var(--bad)"' : '') + '><b>' + esc(Number(smc.dead) || 0) + '</b> broken</span>' +
-      ((Number(smc.unknown) || 0) ? '<span><b>' + esc(Number(smc.unknown)) + '</b> unknown</span>' : '') +
-      (smComps ? '<span class="ops-muted">across ' + esc(smComps) + ' components</span>' : '') +
-      '<span class="sysmap-asof">' + (smStale ? '⚠ ' : '') + 'data as of ' + esc(ptTime(smap.computed_at)) + (smStale ? ' — hourly push missed?' : '') + '</span></div>';
-    if (smNodeBroken || smNodeUnknown) {
-      sysmapH += '<div class="sysmap-nodeline ops-muted"><b' + (smNodeBroken ? ' style="color:var(--bad)"' : '') + '>' + esc(smNodeBroken) + '</b>' +
-        (smTotalNodes ? ' of ' + esc(smTotalNodes) : '') + ' nodes broken' +
-        (smNodeUnknown ? ' · <b>' + esc(smNodeUnknown) + '</b> unknown' : '') +
-        ' — this is the System tab badge count</div>';
-    }
-    sysmapH += '<div class="sysmap-bar" id="sysmap-legend">' +
-      '<span class="sysmap-chip" data-b="LIVE" role="button" tabindex="0" aria-pressed="false"><i style="background:var(--ok)"></i>Live</span>' +
-      '<span class="sysmap-chip" data-b="ARMED" role="button" tabindex="0" aria-pressed="false"><i style="background:var(--warn)"></i>Armed</span>' +
-      '<span class="sysmap-chip" data-b="GATED" role="button" tabindex="0" aria-pressed="false"><i style="background:var(--accent)"></i>Blocked on purpose</span>' +
-      '<span class="sysmap-chip" data-b="DEAD" role="button" tabindex="0" aria-pressed="false"><i style="background:var(--bad)"></i>Broken</span>' +
-      '<span class="sysmap-chip" data-b="UNKNOWN" role="button" tabindex="0" aria-pressed="false"><i style="background:var(--text-2)"></i>Unknown</span>' +
-      '<input type="search" id="sysmap-q" placeholder="find a script, gate, check…" aria-label="search nodes">' +
-      '<button class="sysmap-zbtn" id="sysmap-zin" title="zoom in">＋</button>' +
-      '<button class="sysmap-zbtn" id="sysmap-zout" title="zoom out">－</button>' +
-      '<button class="sysmap-zbtn" id="sysmap-fit">fit</button></div>';
-    sysmapH += '<div class="sysmap-wrap" id="sysmap-wrap"></div>';
-    sysmapH += '<div class="ops-pad" style="border-top:1px solid var(--border-1)"><span class="ops-muted" style="font-size:12px">' +
-      'Tap a box for the plain-English story, components and provenance. Badges recompute hourly from the existing monitors, gate files, crontab and dead-man checks — an unreadable source shows UNKNOWN, never a guess. This panel renders; alerting stays with the briefing/Healthchecks rails.' +
-      '</span></div></div>';
-  }
   // ── ctOS system atlas (operator-only; the interactive map, upgraded) ──────
   // The atlas loads through a SAME-ORIGIN loader (system/system-map.html): it
   // reads the operator's Supabase session from localStorage, fetches the
@@ -6808,7 +6416,9 @@ async function renderOps() {
     '<iframe src="system/system-map.html" title="Rankwise ctOS system atlas" loading="lazy" ' +
     'style="display:block;width:100%;height:78vh;min-height:520px;border:0;background:var(--surface-0)"></iframe>' +
     '</div>';
-  let sysH = atlasH + sysmapH + '<div class="ops-colset two">';
+  // (The hourly SVG flowchart panel was retired 2026-07-23 — operator call: the atlas
+  // replaces the flowcharts. Infra-failure alerts still read sys.broken_nodes upstream.)
+  let sysH = atlasH + '<div class="ops-colset two">';
   // Snapshot contract
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Snapshot contract</h3>' +
     '<span class="ops-count">' + esc(schemaVersion || 'missing schema') + '</span></div>' +
@@ -6819,7 +6429,7 @@ async function renderOps() {
   // Data integrity (single-source rule: this list and the map above are both
   // projections of the same data-truth stamp — the button is the cross-link)
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Data integrity</h3>' +
-    '<button class="ops-btn ghost" style="margin-left:auto" onclick="document.getElementById(\'ops-sysmap-panel\').scrollIntoView({behavior:\'smooth\'})">Map</button>' +
+    '<button class="ops-btn ghost" style="margin-left:auto" onclick="document.getElementById(\'ops-atlas-panel\').scrollIntoView({behavior:\'smooth\'})">Map</button>' +
     '<span class="ops-count">' + esc(Number(sys.sources_ok)||0) + ' / ' + esc(Number(sys.sources_total)||0) + ' OK</span></div>';
   sysH += '<ul class="ops-list">';
   // Single-source render: uniqueSources first, then any not_ok/warns NOT already
@@ -7733,7 +7343,6 @@ async function renderOps() {
   opsStartFreshTick();    // 60s relative-timestamp tick (idempotent)
   opsMmapBoot();  // relationship-map canvas (no-op unless the Market tab is visible)
   opsMmapEdgeAlt();  // Pass Y: fill the vh edge summary (no-op unless the map rendered)
-  opsSysmapBoot();  // live system map SVG (System tab; SVG renders fine while hidden)
   // Cold-load / refresh into #tab=market: the hash-seed sets _opsTab but never ran
   // opsTab(), so the deferred 513KB map fetch never fired and the panel stuck on
   // "Loading map…". Kick it here once painted (idempotent — no-ops if already loaded) (finding 8).
@@ -8321,4 +7930,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 3ac5d463c024 -->
+<!-- rankwise-portal-version: 258147eb755a -->
