@@ -4060,13 +4060,17 @@ async function renderOps() {
   const pendingExp = p.pending_expenses || [];
   const contentItems = p.content_items || [];
   const dueCalls = p.due_calls || [];
-  const fu = p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null, byChannel = fu.by_channel || {};
-  const s = p.seller || {}, trial = s.trial || {}, totals = s.totals || {};
+  // Money-truth numbers come from the ONE scoreboard object (business_metrics,
+  // unified-business-metrics ticket) so every tab shows the SAME figures; legacy
+  // top-level keys remain the fallback for a stale cached snapshot.
+  const bmRoot = p.business_metrics || {};
+  const fu = bmRoot.funnel || p.funnel || {}, pipe = fu.pipeline || {}, gate = fu.gate || null, byChannel = fu.by_channel || {};
+  const s = bmRoot.seller || p.seller || {}, trial = s.trial || {}, totals = s.totals || {};
   const callbacksDue = Number(s.callbacks_due) || 0;
   const dnc = Number(fu.dnc_count) || 0;
   const sys = p.system || {};
   const gl = p.go_live || null;
-  const sp = p.spend || null;
+  const sp = bmRoot.spend || p.spend || null;
   const co = p.content || {};
   const mediaHost = p.media_host || p.asset_host || {};
   const uploads = p.uploads || p.content_uploads || {};
@@ -6227,13 +6231,15 @@ async function renderOps() {
   }
 
   // ── MONEY section ─────────────────────────────────────────────────────────
-  const costsP = p.costs || null;
+  // Same scoreboard object as the Today tab (business_metrics) — tabs cannot disagree.
+  const bmMoney = p.business_metrics || {};
+  const costsP = bmMoney.costs || p.costs || null;
   let monH = '';
   // Revenue headline — lead the Money tab with dollar-truth (review Top-5 #5) BEFORE the
   // data-entry form. Consumes builder payload.revenue (fff691c); deals_closed is ALL-TIME
   // (load_revenue exposes no MTD deal count), so it is labelled as such next to the
   // month-scoped revenue. [Zero-state copy PROVISIONAL — pending Zack sign-off.]
-  const rev = p.revenue || {};
+  const rev = bmMoney.revenue || p.revenue || {};
   const revMonth = Number(rev.month_revenue) || 0;
   const revMrr = Number(rev.mrr) || 0;
   const revDeals = Number(rev.deals_closed) || 0;
@@ -7930,4 +7936,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 258147eb755a -->
+<!-- rankwise-portal-version: 67f85c09c6a9 -->
