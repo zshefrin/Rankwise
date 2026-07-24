@@ -2030,10 +2030,26 @@ function sellerNextSel(justLoggedSlug) {
   done[justLoggedSlug] = 1;
   const cards = asArr(d.queue).slice().sort(function(a, b) { return ((a.slug in done) ? 1 : 0) - ((b.slug in done) ? 1 : 0) || a.rank - b.rank; });
   const remaining = cards.filter(function(p) { return !(p.slug in done); });
-  const due = remaining.filter(function(p) {
+  // Post-log auto-advance follows the SAME callback state model as the rail
+  // (edge review LOW-2): actionable = overdue/due_soon per window._cbState, which
+  // already excludes dnc_blocked — never advance-select a DNC-held lead. Fallback
+  // to the raw callback_at rule only when no state map exists yet (first render).
+  const cbSt = window._cbState || null;
+  const _actionable = function(p) {
+    if (cbSt) {
+      const s = cbSt[p.slug];
+      return !!(s && (s.state === "overdue" || s.state === "due_soon"));
+    }
     const row = latestRow[p.slug];
-    return row && row.callback_at && new Date(row.callback_at).getTime() <= Date.now();
-  }).sort(function(a, b) { return new Date(latestRow[a.slug].callback_at) - new Date(latestRow[b.slug].callback_at); });
+    return !!(row && row.callback_at && new Date(row.callback_at).getTime() <= Date.now());
+  };
+  const _atMs = function(p) {
+    const at = cbSt && cbSt[p.slug] ? cbSt[p.slug].at
+      : (latestRow[p.slug] || {}).callback_at;
+    const t = new Date(at).getTime();
+    return isNaN(t) ? Infinity : t;   // garbage note timestamps sort last, never crash
+  };
+  const due = remaining.filter(_actionable).sort(function(a, b) { return _atMs(a) - _atMs(b); });
   return (due[0] && due[0].slug) || (remaining[0] && remaining[0].slug) || (cards[0] && cards[0].slug) || null;
 }
 
@@ -2567,11 +2583,18 @@ function buildRail(cards, done, sel) {
     '<button class="rf-chip" data-f="callback" onclick="sellerRailSetFilter(this)">Callback due</button>' +
     '</div></div>';
   const cbDue = window._cbDueSlugs || {};
+  const cbSt = window._cbState || {};
   const rows = cards.map((p) => {
     const it = p.intel || {};
     const isDone = done[p.slug];
     const dots = (it.map_pack && it.map_pack.length)
       ? '<span class="dots">' + it.map_pack.map((m) => '<span class="dot' + (m.rank != null ? ' on' : '') + '"></span>').join('') + '</span>' : '';
+    // Callback state badge: the queue must SHOW why a card jumped the rank order.
+    const st = (cbSt[p.slug] || {}).state;
+    const cbChip = isDone ? '' :
+      st === 'overdue' ? '<span class="chip chip--bad">callback overdue</span>' :
+      st === 'due_soon' ? '<span class="chip chip--warn">callback soon</span>' :
+      st === 'dnc_blocked' ? '<span class="chip chip--bad">DNC — do not dial</span>' : '';
     return '<button class="railrow' + (p.slug === sel ? ' active' : '') + (isDone ? ' done' : '') +
       '" data-slug="' + esc(p.slug) + '"' +
       ' data-name="' + esc(String(p.business_name || '').toLowerCase()) + '"' +
@@ -2580,6 +2603,7 @@ function buildRail(cards, done, sel) {
       ' data-cb="' + (cbDue[p.slug] ? '1' : '0') + '"' +
       ' data-act="selectProspect" data-arg="' + esc(p.slug) + '">' +
       '<div class="railrow__top"><span class="railrow__nm">' + esc(p.business_name) + '</span>' +
+      (cbChip || '') +
       (isDone ? '<span class="chip chip--ok">✓</span>' : '<span class="dc__rk">#' + (p.rank || 0) + '</span>') + '</div>' +
       '<div class="railrow__sub"><span class="t">' + esc(p.city) + (it.hook ? ' · ' + esc(clip(it.hook, 26)) : '') + '</span>' + dots + '</div>' +
       '</button>';
@@ -3005,23 +3029,78 @@ async function renderSeller(data) {
   const cards = (queue || []).slice().sort((a, b) => (a.slug in sunk ? 1 : 0) - (b.slug in sunk ? 1 : 0) || a.rank - b.rank);
   const remainingCards = cards.filter((p) => !(p.slug in sunk));
 
-  // ── Callbacks due ──────────────────────────────────────────────────────────
-  // Open = the newest log row per slug has a callback_at and nothing newer was
-  // logged after it (also picks up pre-migration "CALLBACK <when> —" notes).
-  const cbs = [];
+  // ── Callback state model (callback-first-class ticket) ───────────────────
+  // Derived from the append-only seller_call_log: the NEWEST row per slug owns the
+  // open callback (also picks up pre-migration "CALLBACK <when> —" notes); a newer
+  // row without one completes it. States:
+  //   overdue     — promised time has passed (dial these FIRST)
+  //   due_soon    — due within the next 2h (the dial-shift horizon)
+  //   scheduled   — open, further out (stays in rank order; not actionable yet)
+  //   rescheduled — open, and an OLDER row also carried a callback (time was moved)
+  //   completed   — a callback existed historically; none open now
+  //   dnc_blocked — open callback on a DNC-flagged lead: NEVER dialed, never prioritized
+  // (in_progress/failed aren't derivable from an append-only log with no session
+  // marker — a failed attempt gets re-logged and becomes rescheduled or completed.)
+  const cbState = {};
+  const _cbNames = {};
+  const _nowMs = Date.now(), _soonMs = 2 * 3600 * 1000;
   for (const slug in attempts) {
-    const latest = attempts[slug][0]; // rows are newest-first
+    const rows = attempts[slug]; // newest-first
+    const latest = rows[0];
     let at = latest.callback_at || null;
     if (!at && /^CALLBACK ([0-9T:\-]+)/.test(latest.note || "")) at = (latest.note.match(/^CALLBACK ([0-9T:\-]+)/) || [])[1];
-    if (at) cbs.push({ slug, name: latest.prospect_name, at, note: latest.note || "" });
+    const hadEarlier = rows.slice(1).some((r) => r.callback_at);
+    _cbNames[slug] = latest.prospect_name;
+    if (at) {
+      const t = new Date(at).getTime();
+      let state;
+      if (latest.disposition === "do_not_contact") state = "dnc_blocked";
+      else if (t <= _nowMs) state = "overdue";
+      else if (t <= _nowMs + _soonMs) state = "due_soon";
+      else state = hadEarlier ? "rescheduled" : "scheduled";
+      cbState[slug] = { state, at, note: latest.note || "" };
+    } else if (hadEarlier) {
+      cbState[slug] = { state: "completed", at: null, note: "" };
+    }
+  }
+  // Intel-level DNC also blocks: a promised callback does not override a DNC hold.
+  cards.forEach((p) => {
+    const s = cbState[p.slug];
+    if (s && s.at && p.intel && p.intel.dnc) s.state = "dnc_blocked";
+  });
+  window._cbState = cbState;
+  // Open, dialable callbacks (blocked ones surface via the DNC pill, never the queue).
+  const cbs = [];
+  for (const slug in cbState) {
+    const s = cbState[slug];
+    if (s.at && s.state !== "dnc_blocked") cbs.push({ slug, name: _cbNames[slug], at: s.at, note: s.note });
   }
   cbs.sort((a, b) => String(a.at).localeCompare(String(b.at)));
-  const dueCallbacks = cbs.filter((c) => new Date(c.at) <= new Date());
-  // A promised callback is a trust obligation, not just another signal. Keep the
-  // full rail rank order for browsing, but make the next-action selection callback-first.
-  const dueBySlug = {}; dueCallbacks.forEach((c) => { dueBySlug[c.slug] = 1; });
-  const callbackCards = remainingCards.filter((p) => dueBySlug[p.slug]);
-  const freshCards = remainingCards.filter((p) => !dueBySlug[p.slug]);
+  const dueCallbacks = cbs.filter((c) => cbState[c.slug].state === "overdue");
+  // A promised callback is a trust obligation, not just another signal. The RENDERED
+  // queue is callback-first (the old code computed a callback-first list but only used
+  // it to pick the auto-focused card — the visible rail still sold rank order):
+  // overdue (earliest promise first) → due-soon → fresh leads by rank; sunk cards last.
+  const _cbPri = { overdue: 0, due_soon: 1 };
+  const _pri = (p) => {
+    const s = cbState[p.slug];
+    return s && _cbPri[s.state] !== undefined ? _cbPri[s.state] : 2;
+  };
+  const railCards = cards.slice().sort((a, b) => {
+    const sa = a.slug in sunk ? 1 : 0, sb = b.slug in sunk ? 1 : 0;
+    if (sa !== sb) return sa - sb;
+    const pa = _pri(a), pb = _pri(b);
+    if (pa !== pb) return pa - pb;
+    if (pa < 2) {
+      // numeric compare — `at` mixes ISO-with-offset (DB) and zone-less note
+      // timestamps; lexical compare mis-orders across formats (edge review LOW-1).
+      const ta = new Date(cbState[a.slug].at).getTime(), tb = new Date(cbState[b.slug].at).getTime();
+      return (isNaN(ta) ? Infinity : ta) - (isNaN(tb) ? Infinity : tb);
+    }
+    return (a.rank || 0) - (b.rank || 0);
+  });
+  const callbackCards = railCards.filter((p) => !(p.slug in sunk) && _pri(p) < 2);
+  const freshCards = railCards.filter((p) => !(p.slug in sunk) && _pri(p) === 2);
   const prioritizedCards = callbackCards.concat(freshCards);
   const nextDial = prioritizedCards[0] || null;
   const intelReady = cards.filter((c) => c.intel && Object.keys(c.intel || {}).length).length;
@@ -3070,7 +3149,11 @@ async function renderSeller(data) {
   // ── Pre-render state for the dial console (rail/dossier), rail filter, milestone toast ──
   window._cards = cards; window._done = sunk; window._attempts = attempts;
   window._nm = {}; cards.forEach((p) => { window._nm[p.slug] = p.business_name; });
-  window._cbDueSlugs = {}; dueCallbacks.forEach((c) => { window._cbDueSlugs[c.slug] = 1; });
+  // "Callback due" filter chip matches overdue AND due-soon (the actionable states).
+  window._cbDueSlugs = {};
+  Object.keys(cbState).forEach((s) => {
+    if (cbState[s].state === "overdue" || cbState[s].state === "due_soon") window._cbDueSlugs[s] = 1;
+  });
   window._railFilter = 'all';   // a rebuilt rail re-hardcodes the "All" chip active — keep filter state in sync
   const sel = (window._sel && cards.some((c) => c.slug === window._sel)) ? window._sel : (nextDial ? nextDial.slug : (cards[0] && cards[0].slug));
   // First-milestone celebration — one-time per browser, guarded by localStorage. [PROVISIONAL]
@@ -3124,7 +3207,7 @@ async function renderSeller(data) {
     (intelReady < cards.length ? '<div class="ckpt-hud-m warn"><b>' + intelReady + '/' + cards.length + '</b><span>intel ready</span></div>' : '') +
     '</div></section>' +
     // The console IS the page now: one prospect on stage (dossier) + the queue rail beside it.
-    '<div class="console">' + buildRail(cards, sunk, sel) + '<div class="dossier" id="dossier"></div></div>' +
+    '<div class="console">' + buildRail(railCards, sunk, sel) + '<div class="dossier" id="dossier"></div></div>' +
     '<div class="role-grid two seller-shift">' +
     '<section class="role-card"><h3>Shift path</h3><div class="mission">' +
     '<div class="mission-step"><div><b>' + esc(missionOne.title) + '</b><span>' + esc(missionOne.sub) + '</span></div></div>' +
@@ -8238,4 +8321,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: e0db4d4d23a6 -->
+<!-- rankwise-portal-version: 3ac5d463c024 -->
