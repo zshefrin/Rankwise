@@ -1095,6 +1095,7 @@ function renderInspector(n) {
     <div class="isec"><span class="spill" style="background:${st.c}">${st.label}</span>
       ${n.status_conflict ? ` <span style="font-family:var(--mono);font-size:10px;color:var(--unknown)">≠ ${esc(n.status_conflict)}</span>` : ''}</div>
     ${n.scan_disagrees ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
+    ${n._outcome ? `<div class="isec"><p class="lbl">LAST OUTPUT</p><p style="font-family:var(--mono);font-size:11px;color:${n._outcome.status === 'FAIL' ? 'var(--dead, #E85C5C)' : n._outcome.status === 'WARN' ? 'var(--armed)' : 'var(--ink-mut)'}">${esc(n._outcome.status)} — ${esc(n._outcome.detail)}</p></div>` : ''}
     ${sec('At current time', `<p class="nowline">${nowLine(n)}</p>${fireStrip(n)}`)}
     ${sec('Function', `<p>${esc(n.what)}</p>`)}
     ${sec('Trigger', `<p style="font-family:var(--mono);font-size:11.5px">${esc(n.trigger || '')}</p>`)}
@@ -1394,6 +1395,67 @@ if (REDUCED) $('playBtn').style.display = 'none';
    The scanner (vault/_system/system_map_scan.py) recomputes schedule/freshness/gates.
    Merge policy: scan may push a node to FROZEN or DEAD(-by-staleness) and confirms LIVE
    freshness; ARMED/DORMANT/CUT are curation semantics the scan never flips. */
+/* ══ truth strip: the map's own trustworthiness, visible (batch-5 item 1) ══
+   semantics age from the baked meta (renders even with the scan offline);
+   coverage verdict + what-changed chip when the live scan is present. */
+function renderTruthStrip(scan) {
+  let el = $('truthChip');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'truthChip';
+    el.style.cssText = 'font-family:var(--mono);font-size:10px;letter-spacing:.05em;display:inline-flex;align-items:center;gap:8px';
+    $('freshPill').insertAdjacentElement('afterend', el);
+  }
+  const bits = [];
+  const dates = String(((M && M.meta) || {}).surveyed || '').match(/\d{4}-\d{2}-\d{2}/g);
+  if (dates) {
+    const age = Math.max(0, Math.floor((Date.now() - new Date(dates[dates.length - 1] + 'T00:00:00')) / 86400000));
+    const col = age > 14 ? 'var(--dead, #E85C5C)' : age > 7 ? 'var(--armed)' : 'var(--live, #46D68C)';
+    bits.push(`<span style="color:${col}" title="days since the last semantic truth audit — >7d amber, >14d run /sysmap-truth-audit">SEMANTICS ${age}d</span>`);
+  }
+  const cov = scan && scan.coverage;
+  if (cov && cov.available) {
+    const dirty = (cov.unmapped_jobs || []).length + (cov.vanished_cron_nodes || []).length + (cov.missing_paths || []).length;
+    bits.push(dirty
+      ? `<span style="color:var(--dead, #E85C5C)" title="the coverage sentinel found map lies — see banner">COVERAGE ✗${dirty}</span>`
+      : '<span style="color:var(--live, #46D68C)" title="no unmapped jobs, vanished schedules or missing paths">COVERAGE ✓</span>');
+    let bn = $('truthBanner');
+    if (dirty) {
+      if (!bn) {
+        bn = document.createElement('div');
+        bn.id = 'truthBanner';
+        bn.style.cssText = 'position:absolute;top:0;left:0;right:0;z-index:14;background:rgba(60,12,12,.94);border-bottom:1px solid var(--dead, #E85C5C);color:#F0B6B6;font-family:var(--mono);font-size:11px;padding:7px 14px';
+        $('stage').appendChild(bn);
+      }
+      const items = [...(cov.unmapped_jobs || []).map((j) => `unmapped job ${j}`),
+                     ...(cov.vanished_cron_nodes || []).map((n2) => `vanished schedule ${n2}`),
+                     ...(cov.missing_paths || []).map((m2) => `missing path ${m2.id}`)];
+      bn.innerHTML = '⛔ MAP IS LYING: ' + items.slice(0, 6).map(esc).join(' · ') + (items.length > 6 ? ` · +${items.length - 6} more` : '') + ' — run /sysmap-truth-audit';
+    } else if (bn) bn.remove();
+  }
+  const ch = (scan && scan.changes) || [];
+  if (ch.length) {
+    const adds = ch.filter((e) => e.kind === 'added').length, flips = ch.filter((e) => e.kind === 'status').length, gone = ch.filter((e) => e.kind === 'removed').length;
+    bits.push(`<button id="chgChip" style="background:none;border:1px solid var(--line);border-radius:3px;color:var(--accent);font:inherit;cursor:pointer;padding:2px 7px" title="registry changes, last 14 days — click for the list">Δ14d ${adds ? '+' + adds : ''}${flips ? ' ~' + flips : ''}${gone ? ' −' + gone : ''}</button>`);
+  }
+  el.innerHTML = bits.join(' ');
+  const chip = $('chgChip');
+  if (chip) chip.addEventListener('click', () => {
+    let p = $('chgPanel');
+    if (p) { p.remove(); return; }
+    p = document.createElement('div');
+    p.id = 'chgPanel';
+    p.style.cssText = 'position:absolute;top:6px;right:10px;z-index:15;max-width:min(70vw,420px);max-height:50vh;overflow:auto;background:rgba(11,17,23,.95);border:1px solid var(--line);border-radius:3px;padding:9px 12px;font-family:var(--mono);font-size:10px;line-height:1.6;color:var(--ink-mut)';
+    p.innerHTML = '<b style="color:var(--accent)">REGISTRY Δ — last 14 days</b><br>' + ch.slice(-40).reverse().map((e) =>
+      `<span style="white-space:nowrap">${esc(e.date)} ${e.kind === 'added' ? '+' : e.kind === 'removed' ? '−' : '~'} <button data-goto="${esc(e.id)}" style="background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:0">${esc(e.id)}</button>${e.kind === 'status' ? ' ' + esc(e.from || '') + '→' + esc(e.to || '') : e.to ? ' (' + esc(e.to) + ')' : ''}</span>`).join('<br>');
+    p.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-goto]');
+      if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); p.remove(); }
+    });
+    $('stage').appendChild(p);
+  });
+}
+
 async function applyLiveScan() {
   let scan;
   if (window.__RW_SCAN__) { scan = window.__RW_SCAN__; }
@@ -1431,6 +1493,12 @@ async function applyLiveScan() {
     }
   }
   const t = scan.scanned_at.replace('T', ' ').slice(5, 16);
+  /* outcome layer: per-node artifact verdict ("it ran" vs "it PRODUCED") */
+  for (const [nid, o] of Object.entries(scan.outcomes || {})) {
+    const on = nodeById.get(nid);
+    if (on) on._outcome = o;
+  }
+  renderTruthStrip(scan);
   $('stamp').textContent += ` · SCAN LIVE ${t}${scan.killswitch_engaged ? ' · ⛔ KILLSWITCH ENGAGED' : ''}`;
   $('freshDot').style.background = scan.killswitch_engaged ? 'var(--dead)' : 'var(--live)';
   $('freshTxt').textContent = (scan.killswitch_engaged ? '⛔ KILLSWITCH · ' : 'LIVE ') + t + (typeof changed === 'number' && changed ? ' · Δ' + changed : '');
@@ -1446,6 +1514,7 @@ async function applyLiveScan() {
     setTimeout(() => toast.remove(), 5000);
   }
 }
+renderTruthStrip(null);  /* semantics age renders even before/without the scan */
 applyLiveScan();
 
 /* ══ session persistence: reopen where the operator left off ══ */
