@@ -233,6 +233,7 @@
     <div class="days" id="days" role="group" aria-label="Day of week"></div>
     <button id="playBtn" aria-label="Play or pause the cron week">▶</button>
     <button id="nowBtn" style="font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--accent);cursor:pointer;border-radius:2px" title="Jump to the real current day and time">NOW</button>
+    <button id="modeBtn" style="display:none;font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--ink-mut);cursor:pointer;border-radius:2px">SCHED</button>
     <span class="clock" id="clock">06:00</span>
     <span id="nowChip" class="nowchip" aria-live="polite"></span>
     <span class="scrubwrap">
@@ -273,7 +274,7 @@ const nodeById = new Map(nodes.map((n) => [n.id, n]));
 const DISTRICT_TINT = {
   'intake': '46,125,158', 'intelligence': '125,111,184', 'content': '184,125,160',
   'outreach': '184,135,94', 'portal': '94,143,184', 'infra': '110,125,142',
-  'trading-boundary': '184,94,94',
+  'trading-boundary': '184,94,94', 'substrate': '128,128,140',
 };
 const PITCH = 1.9; /* intra-district grid pitch (was 1.35 — crammed at zoom) */
 const _PS = PITCH / 1.35;
@@ -285,6 +286,7 @@ const DISTRICT_PLAN = {
   'outreach':         { ax: 12 * _PS, ay: 5 * _PS,  cols: 6 },
   'infra':            { ax: 22 * _PS, ay: 3 * _PS,  cols: 5 },
   'trading-boundary': { ax: 31 * _PS, ay: -4 * _PS, cols: 3 },
+  'substrate':        { ax: 30 * _PS, ay: 9 * _PS,  cols: 5 },
 };
 const CADENCE_H = (n) => {
   const f = n.fires || [];
@@ -385,7 +387,7 @@ const visible = (n) => {
    firing job emits traveling pulses along its real downstream arcs plus a ticker
    line (time · job → targets · what) — flow you can watch, not just lit windows. */
 const DAY_FULL = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-const flow = { events: [], skip: false, nextGapAt: -1 };
+const flow = { events: [], skip: false, nextGapAt: -1, mode: 'sched' };  /* 'sched' | 'real' (yesterday's logged runs) */
 const FLOW_MS = 1400, FLOW_CAP = 24, TICK_CAP = 6;
 
 function pushTick(html, isDay) {
@@ -411,19 +413,31 @@ const whatBrief = (n) => {
   return s.length > 72 ? s.slice(0, 69) + '…' : s;
 };
 
-function spawnFires(a, b) { /* fires with minute in (a, b] on the CURRENT day */
+function emitFire(n, minute, real) {
+  const targets = (n.downstream || []).filter((d) => nodeById.has(d)).slice(0, 6);
+  if (!REDUCED) { /* reviewer note: under reduced-motion, undrained events kept rAF hot forever */
+    flow.events.push({ id: n.id, targets, born: performance.now() });
+    while (flow.events.length > FLOW_CAP) flow.events.shift();
+  }
+  pushTick(`<span class="t">${real ? '●' : ''}[${fmtHM(minute)}]</span> <button data-goto="${esc(n.id)}">${esc(n.id)}</button>`
+    + (targets.length ? ` → ${targets.slice(0, 3).map((t2) => `<button data-goto="${esc(t2)}">${esc(t2)}</button>`).join(', ')}${targets.length > 3 ? ` +${targets.length - 3}` : ''}` : '')
+    + ` <span class="w">· ${esc(whatBrief(n))}</span>`);
+}
+
+function spawnFires(a, b) { /* fires with minute in (a, b] — schedule, or yesterday's logged runs */
+  if (flow.mode === 'real') {
+    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
+      if (e.minute <= a || e.minute > b) continue;
+      const n = nodeById.get(e.id);
+      if (n && visible(n)) emitFire(n, e.minute, true);
+    }
+    return;
+  }
   for (const n of nodes) {
     if (!RUNS(n) || !visible(n)) continue;
     for (const f of firesToday(n)) {
       if (f.minute == null || f.minute <= a || f.minute > b) continue;
-      const targets = (n.downstream || []).filter((d) => nodeById.has(d)).slice(0, 6);
-      if (!REDUCED) { /* reviewer note: under reduced-motion, undrained events kept rAF hot forever */
-        flow.events.push({ id: n.id, targets, born: performance.now() });
-        while (flow.events.length > FLOW_CAP) flow.events.shift();
-      }
-      pushTick(`<span class="t">[${fmtHM(f.minute)}]</span> <button data-goto="${esc(n.id)}">${esc(n.id)}</button>`
-        + (targets.length ? ` → ${targets.slice(0, 3).map((t2) => `<button data-goto="${esc(t2)}">${esc(t2)}</button>`).join(', ')}${targets.length > 3 ? ` +${targets.length - 3}` : ''}` : '')
-        + ` <span class="w">· ${esc(whatBrief(n))}</span>`);
+      emitFire(n, f.minute, false);
     }
   }
 }
@@ -435,6 +449,12 @@ function advanceDay() {
 
 function nextFireGap(from) { /* sim-minutes until the next fire today (or to midnight) */
   let best = 1440 - from;
+  if (flow.mode === 'real') {
+    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
+      if (e.minute > from) { best = Math.min(best, e.minute - from); break; }  /* sorted */
+    }
+    return best;
+  }
   for (const n of nodes) {
     if (!RUNS(n) || !visible(n)) continue;
     for (const f of firesToday(n)) {
@@ -878,8 +898,9 @@ function loop(ts) {
     if (flow.skip) step = Math.min(step, Math.max(30 * dt, loop._gap - 6));
     let nm = prev + step;
     spawnFires(prev, Math.min(nm, 1439.999));
-    if (nm >= 1440) {          /* midnight: the week advances in day order */
-      advanceDay();
+    if (nm >= 1440) {          /* midnight: week advances in day order; replay loops its one day */
+      if (flow.mode === 'real') pushTick(`── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} restarts ──`, true);
+      else advanceDay();
       nm -= 1440;
       spawnFires(-0.001, nm);  /* early fires of the NEW day (post-advance) */
       loop._gapAt = -99;
@@ -1096,6 +1117,10 @@ function renderInspector(n) {
       ${n.status_conflict ? ` <span style="font-family:var(--mono);font-size:10px;color:var(--unknown)">≠ ${esc(n.status_conflict)}</span>` : ''}</div>
     ${n.scan_disagrees ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
     ${n._outcome ? `<div class="isec"><p class="lbl">LAST OUTPUT</p><p style="font-family:var(--mono);font-size:11px;color:${n._outcome.status === 'FAIL' ? 'var(--dead, #E85C5C)' : n._outcome.status === 'WARN' ? 'var(--armed)' : 'var(--ink-mut)'}">${esc(n._outcome.status)} — ${esc(n._outcome.detail)}</p></div>` : ''}
+    ${n._queue ? `<div class="isec"><p class="lbl">QUEUE</p><p style="font-family:var(--mono);font-size:11px;color:${n._queue.count > 50 ? 'var(--armed)' : 'var(--ink-mut)'}">${Number(n._queue.count)} ${esc(n._queue.label)}</p></div>` : ''}
+    ${n._rel ? `<div class="isec"><p class="lbl">RELIABILITY (14d)</p><p style="font-family:var(--mono);font-size:11px;color:${n._rel.fired < n._rel.expected * 0.7 ? 'var(--armed)' : 'var(--ink-mut)'}">fired ${Number(n._rel.fired)}× of ${Number(n._rel.expected)} expected — young/renamed jobs read low by design</p></div>` : ''}
+    ${n.blast_cls ? `<div class="isec"><p class="lbl">BLAST RADIUS</p><p style="font-family:var(--mono);font-size:11px"><span style="color:${['outward-send','money-spend','deploy-live'].includes(n.blast_cls) ? 'var(--dead, #E85C5C)' : ['repo-write','cloud-state-write'].includes(n.blast_cls) ? 'var(--armed)' : 'var(--ink-mut)'};font-weight:700">${esc(n.blast_cls)}</span> — ${esc(n.worst_case || '')}</p>${(n.checkpoints || []).length ? `<p style="font-family:var(--mono);font-size:11px;color:var(--ink-mut);margin-top:4px">HUMAN GATES: ${(n.checkpoints || []).map(esc).join(' → ')}</p>` : ''}</div>` : ''}
+    ${n.cost_cls || n.serves ? `<div class="isec"><p style="font-family:var(--mono);font-size:10px;color:var(--ink-dim)">${n.cost_cls ? 'COST: ' + esc(n.cost_cls) : ''}${n.cost_cls && n.serves ? ' · ' : ''}${n.serves ? 'SERVES: ' + esc(n.serves) : ''}</p></div>` : ''}
     ${sec('At current time', `<p class="nowline">${nowLine(n)}</p>${fireStrip(n)}`)}
     ${sec('Function', `<p>${esc(n.what)}</p>`)}
     ${sec('Trigger', `<p style="font-family:var(--mono);font-size:11.5px">${esc(n.trigger || '')}</p>`)}
@@ -1390,6 +1415,16 @@ function togglePlay() {
 }
 $('playBtn').addEventListener('click', togglePlay);
 if (REDUCED) $('playBtn').style.display = 'none';
+$('modeBtn').addEventListener('click', () => {
+  flow.mode = flow.mode === 'sched' ? 'real' : 'sched';
+  const mb = $('modeBtn');
+  mb.textContent = flow.mode === 'real' ? 'REAL' : 'SCHED';
+  mb.style.color = flow.mode === 'real' ? 'var(--accent)' : 'var(--ink-mut)';
+  pushTick(flow.mode === 'real'
+    ? `── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} (actual logged runs) ──`
+    : '── SCHEDULE MODE ──', true);
+  loop._gapAt = -99; needsDraw = true;
+});
 
 /* ══ live-scan seam: registry (embedded) + scan (fetched) ══
    The scanner (vault/_system/system_map_scan.py) recomputes schedule/freshness/gates.
@@ -1497,6 +1532,20 @@ async function applyLiveScan() {
   for (const [nid, o] of Object.entries(scan.outcomes || {})) {
     const on = nodeById.get(nid);
     if (on) on._outcome = o;
+  }
+  for (const [nid, q] of Object.entries(scan.queue_depths || {})) {
+    const qn = nodeById.get(nid);
+    if (qn) qn._queue = q;
+  }
+  for (const [nid, rr] of Object.entries(scan.reliability || {})) {
+    const rn = nodeById.get(nid);
+    if (rn) rn._rel = rr;
+  }
+  /* replay layer: yesterday's ACTUAL runs — reveal the REAL toggle when present */
+  if (scan.history && (scan.history.events || []).length) {
+    window.__RW_HIST__ = scan.history;
+    const mb = $('modeBtn');
+    if (mb) { mb.style.display = ''; mb.title = 'Replay the ACTUAL runs of ' + scan.history.date + ' (parsed from cron logs) instead of the schedule'; }
   }
   renderTruthStrip(scan);
   $('stamp').textContent += ` · SCAN LIVE ${t}${scan.killswitch_engaged ? ' · ⛔ KILLSWITCH ENGAGED' : ''}`;
