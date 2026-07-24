@@ -1115,8 +1115,10 @@ function renderInspector(n) {
     </div>
     <div class="isec"><span class="spill" style="background:${st.c}">${st.label}</span>
       ${n.status_conflict ? ` <span style="font-family:var(--mono);font-size:10px;color:var(--unknown)">≠ ${esc(n.status_conflict)}</span>` : ''}</div>
-    ${n.scan_disagrees ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
+    ${n._zombie ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--dead, #E85C5C);font-weight:700">⛔ MAP IS LYING — the map says ${esc(n._zombie.registry_status)} but the cron is firing LIVE${n._zombie.evidence ? ` (${esc(n._zombie.evidence)})` : ''}. Reconcile the registry — run /sysmap-truth-audit.</p></div>` : ''}
+    ${n.scan_disagrees && !n._zombie ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
     ${n._outcome ? `<div class="isec"><p class="lbl">LAST OUTPUT</p><p style="font-family:var(--mono);font-size:11px;color:${n._outcome.status === 'FAIL' ? 'var(--dead, #E85C5C)' : n._outcome.status === 'WARN' ? 'var(--armed)' : 'var(--ink-mut)'}">${esc(n._outcome.status)} — ${esc(n._outcome.detail)}</p></div>` : ''}
+    ${n._cloud ? `<div class="isec"><p class="lbl">CLOUD ACTION</p><p style="font-family:var(--mono);font-size:11px;color:${(!n._cloud.enabled || ['failure','cancelled','timed_out','startup_failure','action_required'].includes(n._cloud.last_conclusion)) ? 'var(--dead, #E85C5C)' : 'var(--ink-mut)'}">${n._cloud.enabled ? 'enabled' : 'DISABLED'} · last ${esc(n._cloud.last_conclusion || '—')}${n._cloud.last_age_h != null ? ` ${Number(n._cloud.last_age_h)}h ago` : ''}</p></div>` : ''}
     ${n._queue ? `<div class="isec"><p class="lbl">QUEUE</p><p style="font-family:var(--mono);font-size:11px;color:${n._queue.count > 50 ? 'var(--armed)' : 'var(--ink-mut)'}">${Number(n._queue.count)} ${esc(n._queue.label)}</p></div>` : ''}
     ${n._rel ? `<div class="isec"><p class="lbl">RELIABILITY (14d)</p><p style="font-family:var(--mono);font-size:11px;color:${n._rel.fired < n._rel.expected * 0.7 ? 'var(--armed)' : 'var(--ink-mut)'}">fired ${Number(n._rel.fired)}× of ${Number(n._rel.expected)} expected — young/renamed jobs read low by design</p></div>` : ''}
     ${n.blast_cls ? `<div class="isec"><p class="lbl">BLAST RADIUS</p><p style="font-family:var(--mono);font-size:11px"><span style="color:${['outward-send','money-spend','deploy-live'].includes(n.blast_cls) ? 'var(--dead, #E85C5C)' : ['repo-write','cloud-state-write'].includes(n.blast_cls) ? 'var(--armed)' : 'var(--ink-mut)'};font-weight:700">${esc(n.blast_cls)}</span> — ${esc(n.worst_case || '')}</p>${(n.checkpoints || []).length ? `<p style="font-family:var(--mono);font-size:11px;color:var(--ink-mut);margin-top:4px">HUMAN GATES: ${(n.checkpoints || []).map(esc).join(' → ')}</p>` : ''}</div>` : ''}
@@ -1568,6 +1570,20 @@ async function applyLiveScan() {
   for (const [nid, rr] of Object.entries(scan.reliability || {})) {
     const rn = nodeById.get(nid);
     if (rn) rn._rel = rr;
+  }
+  /* contradiction + cloud layers (2026-07-24): attach to the node so its inspector
+     shows the lie too, not only the fleet-view truth strip. Zombie = registry says OFF
+     but firing LIVE; stale_data is already covered by LAST OUTPUT (the raw verdict). */
+  const con2 = scan.contradictions;
+  if (con2 && con2.available) {
+    for (const z of con2.zombies || []) { const zn = nodeById.get(z.node); if (zn) zn._zombie = z; }
+  }
+  if (scan.cloud && scan.cloud.available) {
+    const CLOUD_NODE = { 'GA4 Fetch': 'fetch_ga4', 'GSC Fetch': 'fetch_gsc' };
+    for (const [wf, w] of Object.entries(scan.cloud.workflows || {})) {
+      const cn = nodeById.get(CLOUD_NODE[wf]);
+      if (cn) cn._cloud = w;
+    }
   }
   /* replay layer: yesterday's ACTUAL runs — reveal the REAL toggle when present */
   if (scan.history && (scan.history.events || []).length) {
