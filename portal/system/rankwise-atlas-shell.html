@@ -95,6 +95,19 @@
   #scrub { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; touch-action: none; }
   .scrubwrap:has(#scrub:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .clock { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); width: 52px; text-align: center; font-variant-numeric: tabular-nums; }
+  .clock[data-skip="1"]::after { content: '≫'; color: var(--ink-dim); font-size: 10px; margin-left: 3px; }
+  /* playback event ticker (week-play feed) */
+  #ticker { position: absolute; left: 10px; bottom: 44px; z-index: 11; display: none; max-width: min(46vw, 430px);
+    font-family: var(--mono); font-size: 10px; line-height: 1.5; color: var(--ink-mut);
+    background: rgba(11,17,23,.82); border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; pointer-events: auto; }
+  #ticker .tk { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ticker .tk:nth-last-child(n+4) { opacity: .45; }
+  #ticker .tk .t { color: var(--accent); }
+  #ticker .tk .w { color: var(--ink-dim); }
+  #ticker .tk button { background: none; border: 0; color: var(--ink); font: inherit; cursor: pointer; padding: 0; }
+  #ticker .tk button:hover { color: var(--accent); }
+  #ticker .tkday { display: block; color: var(--accent); letter-spacing: .18em; font-weight: 700; margin: 2px 0; opacity: .85; }
+  @media (max-width: 720px) { #ticker { max-width: 72vw; font-size: 9px; } }
   .nowchip { font-family: var(--mono); font-size: 10px; color: var(--ink-mut); letter-spacing: .04em; max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nowchip button { background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; padding: 2px 0; }
   .nowchip .idle { color: var(--ink-dim); }
@@ -213,11 +226,12 @@
 
     <aside class="attn" id="attnPanel" aria-label="Gap register and doc drift"></aside>
     <aside class="inspector" id="inspector" aria-label="Node inspector"></aside>
+    <div id="ticker" aria-label="Playback event feed"></div>
   </div>
 
   <div class="dock">
     <div class="days" id="days" role="group" aria-label="Day of week"></div>
-    <button id="playBtn" aria-label="Play or pause the cron day">▶</button>
+    <button id="playBtn" aria-label="Play or pause the cron week">▶</button>
     <button id="nowBtn" style="font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--accent);cursor:pointer;border-radius:2px" title="Jump to the real current day and time">NOW</button>
     <span class="clock" id="clock">06:00</span>
     <span id="nowChip" class="nowchip" aria-live="polite"></span>
@@ -365,6 +379,101 @@ const visible = (n) => {
   }
   return true;
 };
+
+/* ══ week playback: flow events + ticker + smart-skip ══
+   Play traverses the WEEK in day order (midnight advances the day chip), every
+   firing job emits traveling pulses along its real downstream arcs plus a ticker
+   line (time · job → targets · what) — flow you can watch, not just lit windows. */
+const DAY_FULL = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+const flow = { events: [], skip: false, nextGapAt: -1 };
+const FLOW_MS = 1400, FLOW_CAP = 24, TICK_CAP = 6;
+
+function pushTick(html, isDay) {
+  const tk = $('ticker');
+  if (!tk) return;
+  tk.style.display = 'block';
+  const row = document.createElement('span');
+  row.className = isDay ? 'tkday' : 'tk';
+  row.innerHTML = html;
+  tk.appendChild(row);
+  while (tk.children.length > TICK_CAP) tk.removeChild(tk.firstChild);
+  if (!tk._wired) {
+    tk._wired = true;
+    tk.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-goto]');
+      if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); }
+    });
+  }
+}
+const fmtHM = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(Math.floor(m) % 60).padStart(2, '0')}`;
+const whatBrief = (n) => {
+  const s = String(n.what || '').split(/(?<=[.!?])\s/)[0];
+  return s.length > 72 ? s.slice(0, 69) + '…' : s;
+};
+
+function spawnFires(a, b) { /* fires with minute in (a, b] on the CURRENT day */
+  for (const n of nodes) {
+    if (!RUNS(n) || !visible(n)) continue;
+    for (const f of firesToday(n)) {
+      if (f.minute == null || f.minute <= a || f.minute > b) continue;
+      const targets = (n.downstream || []).filter((d) => nodeById.has(d)).slice(0, 6);
+      if (!REDUCED) { /* reviewer note: under reduced-motion, undrained events kept rAF hot forever */
+        flow.events.push({ id: n.id, targets, born: performance.now() });
+        while (flow.events.length > FLOW_CAP) flow.events.shift();
+      }
+      pushTick(`<span class="t">[${fmtHM(f.minute)}]</span> <button data-goto="${esc(n.id)}">${esc(n.id)}</button>`
+        + (targets.length ? ` → ${targets.slice(0, 3).map((t2) => `<button data-goto="${esc(t2)}">${esc(t2)}</button>`).join(', ')}${targets.length > 3 ? ` +${targets.length - 3}` : ''}` : '')
+        + ` <span class="w">· ${esc(whatBrief(n))}</span>`);
+    }
+  }
+}
+
+function advanceDay() {
+  setDay(state.day + 1);
+  pushTick(`── ${DAY_FULL[state.day]} ──`, true);
+}
+
+function nextFireGap(from) { /* sim-minutes until the next fire today (or to midnight) */
+  let best = 1440 - from;
+  for (const n of nodes) {
+    if (!RUNS(n) || !visible(n)) continue;
+    for (const f of firesToday(n)) {
+      if (f.minute != null && f.minute > from) best = Math.min(best, f.minute - from);
+    }
+  }
+  return best;
+}
+
+function drawFlow(now) {
+  if (REDUCED) return;
+  for (const ev of flow.events) {
+    const u = (now - ev.born) / FLOW_MS;
+    if (u >= 1) continue;
+    const src = nodeById.get(ev.id);
+    if (!src || src._sx == null) continue;
+    /* source flash ring */
+    if (u < 0.4) {
+      ctx.strokeStyle = `rgba(53,199,232,${(0.55 * (1 - u / 0.4)).toFixed(3)})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(src._sx, src._top, 4 + u * 34 * cam.z, 0, 7); ctx.stroke();
+    }
+    const q = (a, b, c, t2) => (1 - t2) * (1 - t2) * a + 2 * (1 - t2) * t2 * b + t2 * t2 * c;
+    for (const tid of ev.targets) {
+      const tn = nodeById.get(tid);
+      if (!tn || tn._sx == null) continue;
+      const mx = (src._sx + tn._sx) / 2, my = Math.min(src._top, tn._top) - 40 * cam.z;
+      ctx.strokeStyle = `rgba(53,199,232,${(0.26 * (1 - u)).toFixed(3)})`;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(src._sx, src._top); ctx.quadraticCurveTo(mx, my, tn._sx, tn._top); ctx.stroke();
+      for (let k = 0; k < 3; k++) { /* traveling dot + short comet tail */
+        const tu = Math.max(0, u - k * 0.055);
+        ctx.fillStyle = `rgba(53,199,232,${((0.95 - 0.28 * k) * (1 - u * 0.35)).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(q(src._sx, mx, tn._sx, tu), q(src._top, my, tn._top, tu), 2.5 - 0.6 * k, 0, 7); ctx.fill();
+      }
+    }
+  }
+  flow.events = flow.events.filter((ev) => (now - ev.born) < FLOW_MS);
+}
 
 /* ══ hatch pattern for FROZEN ══ */
 const hatchCanvas = document.createElement('canvas');
@@ -680,6 +789,7 @@ function draw() {
   draw._ordered.forEach((n) => drawBuilding(n, t));
   syncDistrictLabels();
   drawEdges();
+  drawFlow(performance.now());
 
   /* city-wake moment: 05:55-06:05 — a soft ring expands from the wake source (infra district) */
   if (!REDUCED && state.minute >= 355 && state.minute <= 365) {
@@ -738,8 +848,10 @@ function tourGlide(now) {
     animateCam(wx, wy, cam.z, 1200);
   }
 }
-function loop() {
+function loop(ts) {
   frame++;
+  const dt = Math.min(0.1, ((ts || performance.now()) - (loop._t || ts || 0)) / 1000);
+  loop._t = ts || performance.now();
   tourGlide(performance.now());
   const camMoving = stepCamAnim(performance.now());
   const sweepActive = !REDUCED && (performance.now() % 16000) < 2600;
@@ -747,9 +859,32 @@ function loop() {
     loop._pulseCheckAt = frame;
     loop._anyPulse = !REDUCED && nodes.some((n) => pulseAt(n, state.minute));
   }
-  const animating = camMoving || sweepActive || state.playing || (!REDUCED && (state.sel || loop._anyPulse));
+  const animating = camMoving || sweepActive || state.playing || flow.events.length || (!REDUCED && (state.sel || loop._anyPulse));
   if (state.playing) {
-    state.minute = (state.minute + 1.2) % 1440;
+    /* smart-skip: fast-forward the quiet stretches so the week stays a show.
+       While skipping, recompute EVERY frame and clamp the step to decelerate INTO
+       the next burst (a 20-frame recheck at skip speed leapt whole bursts). */
+    if (flow.skip || frame - (loop._gapAt || -99) > 20) {
+      loop._gapAt = frame;
+      loop._gap = nextFireGap(state.minute);
+      flow.skip = loop._gap > 25 && !flow.events.length;
+      $('clock').dataset.skip = flow.skip ? '1' : '0';
+    }
+    const prev = state.minute;
+    /* TIME-based pace (frame-rate independent — 120Hz displays ran 2× before):
+       active 30 sim-min/s (busy hour ≈ 2s of watching); skip 540 sim-min/s,
+       clamped to decelerate INTO the next burst, never overshoot it. */
+    let step = (flow.skip ? 540 : 30) * dt;
+    if (flow.skip) step = Math.min(step, Math.max(30 * dt, loop._gap - 6));
+    let nm = prev + step;
+    spawnFires(prev, Math.min(nm, 1439.999));
+    if (nm >= 1440) {          /* midnight: the week advances in day order */
+      advanceDay();
+      nm -= 1440;
+      spawnFires(-0.001, nm);  /* early fires of the NEW day (post-advance) */
+      loop._gapAt = -99;
+    }
+    state.minute = nm;
     $('scrub').value = Math.floor(state.minute);
     syncClock();
   }
@@ -1158,7 +1293,7 @@ function toggleHelp() {
       lines: <b>solid</b> = downstream (code-verified) · <b>dashed</b> = upstream · <b>dotted</b> = curated/asserted<br>
       tap district (zoomed out) — dive in · <b>f</b> — fit world<br>
       <b>/</b> — search · <b>g</b> — cycle through gap nodes<br>
-      <b>space</b> — play the cron day · <b>d</b> — next day<br>
+      <b>space</b> — play the WEEK (days advance at midnight; pulses ride the edges; quiet hours fast-forward ≫) · <b>d</b> — next day<br>
       ▲ Attention — gap register + 🙋 Needs-Zack filter<br>
       <span style="color:var(--ink-dim)">beams/lit windows = scheduled activity at the scrub time — never status, never success. Statuses read from shape + texture + label.</span>
       <div style="margin-top:10px;color:var(--ink-dim)">tap anywhere or ESC to close</div></div>`;
@@ -1173,12 +1308,13 @@ function toggleHelp() {
 /* ══ dock: days + scrubber ══ */
 const DAY_LBL = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 $('days').innerHTML = DAY_LBL.map((l, i) => `<button class="day${i === state.day ? ' on' : ''}" data-d="${i}" aria-label="${DOW_LANES[i]}" aria-pressed="${i === state.day}">${l}</button>`).join('');
-$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => {
-  state.day = Number(el.dataset.d);
-  $('days').querySelectorAll('.day').forEach((x) => { x.classList.toggle('on', x === el); x.setAttribute('aria-pressed', String(x === el)); });
+function setDay(d) {
+  state.day = ((d % 7) + 7) % 7;
+  $('days').querySelectorAll('.day').forEach((x) => { const on = Number(x.dataset.d) === state.day; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
   drawScrub(); needsDraw = true;
   if (state.sel) renderInspector(nodeById.get(state.sel));
-}));
+}
+$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => setDay(Number(el.dataset.d))));
 
 $('scrub').value = Math.floor(state.minute);
 const scrubC = $('scrubCanvas'), scrubX = scrubC.getContext('2d');
@@ -1242,12 +1378,10 @@ $('scrub').addEventListener('input', (e) => {
 });
 $('nowBtn').addEventListener('click', () => {
   const d = new Date();
-  state.day = d.getDay();
   state.minute = d.getHours() * 60 + d.getMinutes();
-  $('days').querySelectorAll('.day').forEach((x) => { const on = Number(x.dataset.d) === state.day; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+  setDay(d.getDay());
   $('scrub').value = Math.floor(state.minute);
-  syncClock(); needsDraw = true;
-  if (state.sel) renderInspector(nodeById.get(state.sel));
+  syncClock();
 });
 function togglePlay() {
   state.playing = !state.playing;
