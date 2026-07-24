@@ -1454,19 +1454,47 @@ function renderTruthStrip(scan) {
     bits.push(dirty
       ? `<span style="color:var(--dead, #E85C5C)" title="the coverage sentinel found map lies — see banner">COVERAGE ✗${dirty}</span>`
       : '<span style="color:var(--live, #46D68C)" title="no unmapped jobs, vanished schedules or missing paths">COVERAGE ✓</span>');
-    let bn = $('truthBanner');
-    if (dirty) {
-      if (!bn) {
-        bn = document.createElement('div');
-        bn.id = 'truthBanner';
-        bn.style.cssText = 'position:absolute;top:0;left:0;right:0;z-index:14;background:rgba(60,12,12,.94);border-bottom:1px solid var(--dead, #E85C5C);color:#F0B6B6;font-family:var(--mono);font-size:11px;padding:7px 14px';
-        $('stage').appendChild(bn);
-      }
-      const items = [...(cov.unmapped_jobs || []).map((j) => `unmapped job ${j}`),
-                     ...(cov.vanished_cron_nodes || []).map((n2) => `vanished schedule ${n2}`),
-                     ...(cov.missing_paths || []).map((m2) => `missing path ${m2.id}`)];
-      bn.innerHTML = '⛔ MAP IS LYING: ' + items.slice(0, 6).map(esc).join(' · ') + (items.length > 6 ? ` · +${items.length - 6} more` : '') + ' — run /sysmap-truth-audit';
-    } else if (bn) bn.remove();
+  }
+  /* contradictions (2026-07-24): zombies = registry says OFF but the cron is firing LIVE
+     — the same class of hard lie as a coverage miss, so they join the banner. stale_data
+     = a LIVE node whose produced data is WARN/FAIL — softer, an amber chip, not the banner. */
+  const con = scan && scan.contradictions;
+  const zombies = (con && con.available && con.zombies) || [];
+  const staleData = (con && con.available && con.stale_data) || [];
+  if (zombies.length)
+    bits.push(`<span style="color:var(--dead, #E85C5C)" title="registry says OFF but the cron is firing LIVE — see banner">ZOMBIE ✗${zombies.length}</span>`);
+  if (staleData.length)
+    bits.push(`<span style="color:var(--armed)" title="${esc(staleData.map((s) => s.node + '(' + s.data_status + ')').join(' · '))} — LIVE nodes with WARN/FAIL data; verify (some are known/tracked)">DATA-STALE ⚠${staleData.length}</span>`);
+  /* one banner for every hard lie: coverage misses AND zombies */
+  const lies = [
+    ...(cov && cov.available ? [
+      ...(cov.unmapped_jobs || []).map((j) => `unmapped job ${j}`),
+      ...(cov.vanished_cron_nodes || []).map((n2) => `vanished schedule ${n2}`),
+      ...(cov.missing_paths || []).map((m2) => `missing path ${m2.id}`)] : []),
+    ...zombies.map((z) => `${z.node} is ${z.registry_status} on the map but FIRING`),
+  ];
+  let bn = $('truthBanner');
+  if (lies.length) {
+    if (!bn) {
+      bn = document.createElement('div');
+      bn.id = 'truthBanner';
+      bn.style.cssText = 'position:absolute;top:0;left:0;right:0;z-index:14;background:rgba(60,12,12,.94);border-bottom:1px solid var(--dead, #E85C5C);color:#F0B6B6;font-family:var(--mono);font-size:11px;padding:7px 14px';
+      $('stage').appendChild(bn);
+    }
+    bn.innerHTML = '⛔ MAP IS LYING: ' + lies.slice(0, 6).map(esc).join(' · ') + (lies.length > 6 ? ` · +${lies.length - 6} more` : '') + ' — run /sysmap-truth-audit';
+  } else if (bn) bn.remove();
+  /* cloud tier (2026-07-24): GA4/GSC Actions the on-box scan otherwise can't see.
+     ✓ = both enabled + last run healthy; ✗ = any disabled or bad-conclusion. Per-workflow
+     state + age on hover, so a stale-but-"success" workflow (e.g. GSC 99h) is visible. */
+  const cloud = scan && scan.cloud;
+  if (cloud && cloud.available) {
+    const wfs = Object.entries(cloud.workflows || {});
+    const badSet = ['failure', 'cancelled', 'timed_out', 'startup_failure', 'action_required'];
+    const bad = wfs.filter(([, w]) => !w.enabled || badSet.includes(w.last_conclusion));
+    const detail = wfs.map(([n2, w]) => `${n2}: ${w.enabled ? 'on' : 'OFF'} · last ${w.last_conclusion || '—'}${w.last_age_h != null ? ' ' + w.last_age_h + 'h ago' : ''}`).join('  |  ');
+    bits.push(bad.length
+      ? `<span style="color:var(--dead, #E85C5C)" title="${esc(detail)}">CLOUD ✗${bad.length}</span>`
+      : `<span style="color:var(--live, #46D68C)" title="${esc(detail)}">CLOUD ✓</span>`);
   }
   const ch = (scan && scan.changes) || [];
   if (ch.length) {
