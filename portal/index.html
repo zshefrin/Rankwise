@@ -84,12 +84,24 @@
   /* NOT .tag — that's the red "don't claim" chip below; this would inherit its pill. */
   .auth-brand .auth-tag { font-size:var(--fs-1); letter-spacing:.06em; text-transform:uppercase; color:var(--mut); font-weight:700; }
   .auth-sub { color:var(--mut); font-size:var(--fs-3); margin:0 0 16px; }
-  .auth-card { background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; }
+  /* Card + input borders pinned to --text-3, not --line (finding: 2026-07-18 audit —
+     --line against --surface-0/--surface-2 measured 1.46:1 / 1.26:1, both under the
+     3:1 WCAG 1.4.11 floor for control boundaries). --text-3 is already the token this
+     file vets to ≥4.5:1 on --surface-2 for TEXT (see the --text-3 comment above), so it
+     clears 3:1 here with margin — reusing the existing ramp instead of a new hex.
+     Scoped to .auth-* only; --line/--border-3 stay untouched everywhere else. */
+  .auth-card { background:var(--card); border:1px solid var(--text-3); border-radius:var(--r-lg); padding:20px; }
   .auth-form { display:grid; gap:14px; }
   .auth-field { display:grid; gap:6px; }
   .auth-field label { font-size:var(--fs-2); font-weight:600; color:var(--mut); }
-  .auth-form input { width:100%; box-sizing:border-box; font-size:var(--fs-5); } /* 16px: no iOS zoom-on-focus */
+  .auth-form input { width:100%; box-sizing:border-box; font-size:var(--fs-5); border-color:var(--text-3); } /* 16px: no iOS zoom-on-focus */
   .auth-form button { width:100%; }
+  /* Show/hide toggle lives inside the password field's own box (right-aligned) so it
+     reads as part of the input, not a floating extra control. Fixed 44px = a full
+     touch target without visibly widening the field. */
+  .pw-wrap { position:relative; }
+  .pw-wrap input { padding-right:44px; }
+  .pw-wrap .pw-toggle { position:absolute; top:0; right:0; width:44px; height:100%; min-height:44px; display:flex; align-items:center; justify-content:center; background:transparent; border:0; padding:0; color:var(--mut); cursor:pointer; }
   .auth-or { display:flex; align-items:center; gap:10px; color:var(--mut); font-size:var(--fs-2); }
   .auth-or::before, .auth-or::after { content:""; flex:1; height:1px; background:var(--line); }
   .auth-oauth { display:flex; align-items:center; justify-content:center; gap:9px; }
@@ -168,6 +180,14 @@
   button.dccall.hours-lock { background:var(--border-2); color:var(--mut); }
   .dccall.dnc { background:rgba(248,113,113,.12); color:var(--bad-soft); font-weight:700; font-size:var(--fs-4); }
   .dial-disclose { display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:var(--fs-1); color:var(--warn-soft); }
+  /* Call-lifecycle status pill (twilio-tel-fallback-recording-mislabel criterion 3): real
+     states from seller_call_attempts.status, never invented — hidden until dialBridge() has
+     something real to show, and silently hidden again if tracking can't confirm a state
+     (fail-soft: the toast-based flow this augments is already the source of truth). */
+  .call-status { display:none; align-items:center; gap:6px; margin:6px 0 0; font-size:var(--fs-2); font-weight:600; padding:4px 0; }
+  .call-status.show { display:flex; }
+  .call-status.wait { color:var(--warn-soft); } .call-status.ok { color:var(--ok-soft); }
+  .call-status.bad { color:var(--bad-soft); } .call-status.info { color:var(--accent-soft); }
   .sec { margin:11px 0 0; padding:10px 12px; border-radius:var(--r-lg); }
   .sec__l { font-size:var(--fs-1); font-weight:700; margin-bottom:7px; }
   .sec--open { background:rgba(96,165,250,.10); } .sec--open .sec__l { color:var(--accent-soft); }
@@ -249,6 +269,12 @@
   .kit--full { max-height:none; }
   label.cb { display:flex; gap:8px; align-items:center; font-size:var(--fs-4); margin:8px 0; }
   label.cb input[type=checkbox] { width:auto; transform:scale(1.3); }
+  /* structured-call-outcome-fields: collapsed optional detail — compact 2-col grid so it
+     never dominates the fast disposition/note/next-action flow above it. */
+  .call-more { margin-top:8px; }
+  .call-more summary { cursor:pointer; font-size:var(--fs-3); }
+  .call-more-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+  .call-more-grid .cb { grid-column:1 / -1; margin:2px 0; }
   .hist { font-size:var(--fs-3); border-top:1px solid var(--line); padding:6px 0; }
   table.pay { width:100%; border-collapse:collapse; font-size:var(--fs-3); }
   table.pay td, table.pay th { padding:4px 6px; text-align:left; border-bottom:1px solid var(--line); }
@@ -335,6 +361,14 @@
   .metric .m-note { color:var(--text-2); font-size:var(--fs-2); margin-top:3px; }
   .metric .m-info { appearance:none; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; margin-left:4px; padding:0; border:1px solid var(--border-3); border-radius:var(--r-pill); background:transparent; color:var(--text-2); font-size:var(--fs-1); font-weight:700; font-style:normal; line-height:1; cursor:pointer; vertical-align:middle; }  /* Pass Y: reachable metric-explanation affordance */
   .metric .m-info:hover { color:var(--text-0); border-color:var(--border-hover); }
+  /* Per-card stale indicator (stale-data-card-indicators): opt-in via metric()'s optional
+     sourceRow param — renders only when the CALLER passes a source_status row whose tone
+     (already computed elsewhere, never a new threshold) is not 'ok'. Small enough to sit
+     inline with the label; text-transform:none overrides the label's uppercase so the
+     badge text stays sentence-case and readable. */
+  .stale-tag { display:inline-flex; align-items:center; margin-left:5px; padding:1px 6px; border-radius:var(--r-pill); font-size:var(--fs-1); font-weight:700; text-transform:none; letter-spacing:normal; vertical-align:middle; }
+  .stale-tag.warn { background:#33290f; color:var(--warn-soft); }
+  .stale-tag.bad { background:#3a1c1c; color:var(--bad-soft); }
   .metric.ok .m-value { color:var(--ok); } .metric.warn .m-value { color:var(--warn); }
   .metric.bad .m-value { color:var(--bad); } .metric.info .m-value { color:var(--accent); }
   .role-grid { display:grid; gap:10px; grid-template-columns:1fr; margin:10px 0; align-items:start; }
@@ -753,6 +787,10 @@
   .client-action { border:1px solid var(--line); background:var(--surface-1); color:var(--text-1); border-radius:var(--r-md); padding:8px 10px; font-size:var(--fs-2); font-weight:700; }
   .client-action:disabled { opacity:.5; cursor:default; }
   .client-action-armed { background:var(--accent); color:var(--on-accent); border-color:transparent; }
+  /* Inspectable artifact fields (approval-request-inspectable-artifact-fields, 057) — what a
+     client is actually being asked to approve, shown before the action row. */
+  .crq-artifact { display:grid; gap:4px; margin-top:8px; padding:8px 10px; background:var(--surface-0); border-radius:var(--r-md); font-size:var(--fs-3); }
+  .crq-artifact-row b { color:var(--mut); font-weight:600; }
   /* Inline composer — replaces the native prompt() a client used to type into. */
   .crq-compose { display:grid; gap:7px; margin-top:9px; padding-top:9px; border-top:1px solid var(--line); }
   .crq-compose[hidden] { display:none; }
@@ -956,6 +994,8 @@
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
 </defs></svg>
 <div id="app"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1009,6 +1049,10 @@ function roleOf() {
 // are intentionally not reachable from the employee/client portal shell; the
 // private HQ application is the place for migration and QA work.
 const PORTAL_INTERNAL_SURFACES = false;
+// client-request-lifecycle-and-audit: an open client_request older than this gets an
+// OPERATOR-side aging badge in the client drilldown. Deliberately not surfaced to the
+// client (see PORTAL_DATA_CONTRACT.md) — computed from created_at, not a schema field.
+const CRQ_AGING_DAYS = 3;
 const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system'];
 if (PORTAL_INTERNAL_SURFACES) SAFE_TABS.push('hq','settings');
 const safeTab = (t) => (SAFE_TABS.indexOf(String(t || '')) >= 0 ? String(t) : 'today');
@@ -1068,6 +1112,9 @@ const ACTIONS = Object.assign(Object.create(null), {
   },
   opsContentRevise: (_arg, el) => opsContentRevise(el),
   selectProspect: (arg) => selectProspect(arg),
+  // Route through the standalone renderClient dispatcher so its operator-role
+  // guard applies here too — the two dispatch paths must never diverge on who
+  // gets preview semantics (edge-fn security review, note 2).
   renderClient: (arg) => renderClient(arg || undefined),
   renderClientFromRecord: (arg) => { opsCloseRecord(true); window._opsDrawerReturn = null; Promise.resolve(renderClient(arg || undefined)).then(clientFocusLanding); },
   // .ops-seg buttons already carry data-filter-group/-value; the onclick duplicated them.
@@ -1259,18 +1306,28 @@ async function withBusy(btn, label, fn) {
 
 async function login(e) {
   e.preventDefault();
-  const err = $("#err"), btn = $("#signin");
+  const err = $("#err"), btn = $("#signin"), em = $("#em"), pw = $("#pw");
   err.textContent = "";
+  em.removeAttribute("aria-invalid"); pw.removeAttribute("aria-invalid");
+  // #err is tabindex=-1 (programmatically focusable, never Tab-reachable) so a failure
+  // lands focus on the message without adding a stop to the form's tab order. Only a
+  // real credential failure marks the fields aria-invalid — a network/service error
+  // isn't a bad value in either field, so it shouldn't claim one is.
+  const showErr = (msg, badFields) => {
+    err.textContent = msg;
+    if (badFields) { em.setAttribute("aria-invalid", "true"); pw.setAttribute("aria-invalid", "true"); }
+    err.focus();
+  };
   await withBusy(btn, "Signing in…", async () => {
     let r, d;
     try {
       r = await fetch(SB + "/auth/v1/token?grant_type=password", {
         method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ email: $("#em").value.trim(), password: $("#pw").value }),
+        body: JSON.stringify({ email: em.value.trim(), password: pw.value }),
       });
     } catch {
       // Offline / DNS / CORS: fetch rejects and there is no response to read.
-      err.textContent = "Network error — check your connection and retry.";
+      showErr("Network error — check your connection and retry.");
       return;
     }
     try {
@@ -1278,7 +1335,7 @@ async function login(e) {
     } catch {
       // Reached the server but it did not return JSON (5xx HTML page, proxy error):
       // a backend/service fault, not the user's connection.
-      err.textContent = "Sign-in service error — please try again in a moment.";
+      showErr("Sign-in service error — please try again in a moment.");
       return;
     }
     if (d.access_token) {
@@ -1286,8 +1343,20 @@ async function login(e) {
       if (d.refresh_token) localStorage.setItem("rw_rtok", d.refresh_token); // enables silent renewal
       render();
     }
-    else err.textContent = d.error_description || d.msg || "Login failed";
+    else showErr(d.error_description || d.msg || "Login failed", true);
   });
+}
+
+// Password show/hide (finding: 2026-07-18 audit). Flips #pw's type and keeps the
+// icon/label/aria-pressed in lockstep so state, icon, and accessible name never drift.
+// Rewrites the button's innerHTML rather than replacing the button, so focus stays put.
+function togglePwVisibility() {
+  const pw = $("#pw"), btn = $("#pwToggle");
+  const wasShowing = pw.type === "text";
+  pw.type = wasShowing ? "password" : "text";
+  btn.setAttribute("aria-pressed", String(!wasShowing));
+  btn.setAttribute("aria-label", wasShowing ? "Show password" : "Hide password");
+  btn.innerHTML = '<svg class="i"><use href="#' + (wasShowing ? "i-eye" : "i-eye-off") + '"/></svg>';
 }
 
 // The page already handles the recovery redirect (implicit-flow hash → _recovery
@@ -1319,10 +1388,15 @@ const GOOGLE_G = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="t
 // Every unauthenticated screen (sign-in, set-password) shares one centered,
 // branded shell — this is the product's first impression for all three roles.
 function AUTH_SHELL(sub, inner) {
+  // Landmark + heading (finding: 2026-07-18 audit — no <main> anywhere on the
+  // unauthenticated screens). h1 stays the brand mark; .auth-sub becomes an h2 (same
+  // class, so identical CSS — no visual change) so every auth screen gets exactly one
+  // <main> and one real page-purpose heading, not just a paragraph.
   return '<div class="auth-shell"><div class="auth-box">' +
     '<div class="auth-brand"><h1>Rankwise</h1><span class="auth-tag">Dashboard</span></div>' +
-    '<p class="auth-sub">' + esc(sub) + '</p>' +
+    '<main><h2 class="auth-sub">' + esc(sub) + '</h2>' +
     '<div class="auth-card">' + inner + '</div>' +
+    '</main>' +
     '</div></div>';
 }
 
@@ -1625,6 +1699,52 @@ async function submitClientRequest(btn) {
   await enqueueAction("client_request.create", params);
 }
 
+// tracked-access-collection-tasks (061, NOT YET APPLIED): operator authoring surface — the
+// v1 write model is operator-only (061 header). Direct REST write under the operator's own
+// JWT (no worker/queue), mirroring opsClaimClientRequest's pattern: the security boundary is
+// server-side RLS (client_access_task_operator_insert), not this button. FAIL-SOFT: pre-061
+// the table doesn't exist and this 400s — an honest toast, never a broken form.
+async function submitClientAccessTask(btn) {
+  const wrap = btn.closest(".ops-catreq");
+  if (!wrap) { toast("Form not found"); return; }
+  const ck = (wrap.dataset.clientKey || "").trim();
+  const taskType = ((wrap.querySelector(".catreq-type") || {}).value || "owner_access");
+  const dest = ((wrap.querySelector(".catreq-dest") || {}).value || "").trim();
+  const instr = ((wrap.querySelector(".catreq-instr") || {}).value || "").trim();
+  if (!ck) { toast("No client on this form"); return; }
+  if (!dest) { toast("Destination required", "err"); return; }
+  const body = { client_key: ck, task_type: taskType, destination: dest };
+  if (instr) body.invite_instructions = instr;
+  let r;
+  try { r = await authedFetch(SB + "/rest/v1/client_access_task", { method: "POST", body: JSON.stringify(body) }); }
+  catch { toast("Could not track — check your connection and retry", "err"); return; }
+  if (r === null) return;
+  if (r.ok) { toast("Access task tracked"); renderOps(); }
+  // 404 = the table genuinely isn't there yet (pre-061); anything else is a
+  // REAL failure and must not hide behind the pending-migration excuse
+  // (edge-fn security review: misattributed toasts are dishonest displays).
+  else if (r.status === 404) toast("Access tasks aren't switched on yet (pending migration)", "err");
+  else toast("Could not track the access task — try again or check the queue", "err");
+}
+// Cycles a client_access_task through its state machine (requested→invited→confirmed→
+// verified, or →failed at any point) — reads the NEXT state off the button's own data-*
+// attribute (computed at render time, see the cAccessTasks render above), so this function
+// carries no state-machine knowledge of its own to drift out of sync.
+async function opsAdvanceAccessTask(btn) {
+  const id = btn.getAttribute("data-task-id");
+  const nextState = btn.getAttribute("data-task-state");
+  if (!id || !nextState) return;
+  let r;
+  try {
+    r = await authedFetch(SB + "/rest/v1/client_access_task?id=eq." + encodeURIComponent(id), {
+      method: "PATCH", body: JSON.stringify({ state: nextState }),
+    });
+  } catch { toast("Could not update — check your connection and retry", "err"); return; }
+  if (r === null) return;
+  if (r.ok) { toast("Marked " + nextState); renderOps(); }
+  else toast("Could not update the task", "err");
+}
+
 // client_approval.respond (operator cockpit): record a client's response to a request →
 // client_approval table (+ flips the request to responded). FORM action: request_id (from the ask
 // card; only sent when numeric) + kind + optional response text. Worker re-validates server-side.
@@ -1642,6 +1762,71 @@ async function submitClientResponse(btn) {
   if (/^\d+$/.test(rid)) params.request_id = rid;
   if (response) params.response = response;
   await enqueueAction("client_approval.respond", params);
+}
+
+// client_request.owner claim (058, client-initiated-question-thread): a client-question row
+// starts unowned (owner:'' — the 058 client-insert policy pins it). This PATCHes owner under
+// the OPERATOR's own JWT, direct REST (no worker/queue) — sanctioned by the EXISTING
+// client_request_operator_update policy (038/047, untouched by 058). Mirrors clientApprovalWrite's
+// self-serve pattern: the security boundary is server-side RLS (operator role), not this button.
+async function opsClaimClientRequest(btn) {
+  const rid = (btn.getAttribute("data-request-id") || "").trim();
+  if (!/^\d+$/.test(rid)) { toast("No request id on this row", "err"); return; }
+  let r;
+  try {
+    r = await authedFetch(SB + "/rest/v1/client_request?id=eq." + encodeURIComponent(rid), {
+      method: "PATCH", body: JSON.stringify({ owner: userEmail() || "operator" }),
+    });
+  } catch { toast("Could not claim — check your connection and retry", "err"); return; }
+  if (r === null) return;   // session dead; render() already fired
+  if (r.ok) { toast("Claimed"); renderOps(); }
+  else toast("Could not claim — the row may predate this feature", "err");
+}
+
+// client_asset view (059, client-upload-asset-record): storage_path is intentionally NEVER
+// persisted as a signed URL (they expire) — this resolves the CURRENT file for a request live
+// (operator JWT, RLS grants operator full read) and signs it at click time. Fails soft to a
+// toast at every step: no client_asset row yet (pre-059, or nothing actually uploaded through
+// the new flow), a sign-endpoint failure, or a malformed response all read as "not available",
+// never a broken UI.
+async function opsViewClientAsset(btn) {
+  const ck = (btn.getAttribute("data-client-key") || "").trim();
+  const rid = (btn.getAttribute("data-request-id") || "").trim();
+  if (!ck) { toast("No client on this row", "err"); return; }
+  // A row that carries a request marker that ISN'T a real numeric id must not
+  // silently drop the filter and open the client's NEWEST file — wrong file
+  // under the clicked request's label (edge-fn security review, note 1).
+  if (rid && !/^\d+$/.test(rid)) { toast("No file on record for this request yet", "err"); return; }
+  let rows;
+  try {
+    let q = "client_asset?client_key=eq." + encodeURIComponent(ck) + "&order=id.desc&limit=1&select=storage_path,filename";
+    if (rid) q += "&request_id=eq." + encodeURIComponent(rid);
+    rows = await rest(q);
+  } catch { toast("Could not look up the file — check your connection and retry", "err"); return; }
+  if (bad(rows) || !Array.isArray(rows) || !rows[0]) { toast("No file on record for this request yet", "err"); return; }
+  const path = String(rows[0].storage_path || "");
+  // Defense-in-depth on a CLIENT-writable value (edge-fn security review,
+  // LOW-1): 059's RLS pins only the first path segment to client_key at
+  // INSERT — a direct-REST insert could still carry `..`/`?`/`#` in the
+  // remainder. Re-validate the tenant segment against the row we're acting
+  // for, and URL-encode each segment so no character re-shapes the sign URL.
+  const segs = path.split("/");
+  if (segs[0] !== ck || segs.some((s) => !s || s === "." || s === "..")) {
+    toast("File path on record is malformed — flag this to engineering", "err"); return;
+  }
+  let sr;
+  try {
+    sr = await authedFetch(SB + "/storage/v1/object/sign/client-uploads/" + segs.map(encodeURIComponent).join("/"), {
+      method: "POST", body: JSON.stringify({ expiresIn: 600 }),
+    });
+  } catch { toast("Could not sign the file link — check your connection and retry", "err"); return; }
+  if (sr === null) return;   // session dead; render() already fired
+  if (!sr.ok) { toast("Could not sign the file link", "err"); return; }
+  let sd;
+  try { sd = await sr.json(); } catch { toast("Could not sign the file link", "err"); return; }
+  const signedURL = sd && (sd.signedURL || sd.signedUrl);
+  if (!signedURL) { toast("Could not sign the file link", "err"); return; }
+  window.open(SB + "/storage/v1" + signedURL, "_blank", "noopener");
 }
 
 window._opsActionParams = {};
@@ -1725,7 +1910,7 @@ async function clientApprovalWrite(requestId, kind, responseText, uploadRef) {
       .filter((box) => { const ta = box.querySelector('.crq-txt'); const card = box.closest('[data-crq]');
         return ta && ta.value.trim() && card && String(card.dataset.crq) !== String(requestId); });
     if (dirty.length && !confirm("You're typing a response in another request — discard it and refresh?")) return;
-    await Promise.resolve(renderClient()).then(clientFocusLanding);  // Pass Y: don't strand focus on <body>
+    await Promise.resolve(renderClientForCurrentUser()).then(clientFocusLanding);  // Pass Y: don't strand focus on <body>
   }
   else toast("Could not send — your Rankwise contact will follow up", "err");
 }
@@ -1752,7 +1937,9 @@ async function submitPublishPreview(contentId) {
 // before the queue write — the worker re-validates + stamps approvedBy server-side regardless.
 async function submitPublishLive(contentId) {
   if (!contentId) { toast("No content id", "err"); return; }
-  if (!confirm("This publishes to the live rankwise.ca site. Continue?")) return;
+  // publish-canonical-id-required: name the EXACT canonical target being shipped, not just a
+  // generic "Continue?" — the operator confirms the specific id/path, not a blind action.
+  if (!confirm("This publishes to the live rankwise.ca site.\n\nTarget: " + contentId + "\n\nContinue?")) return;
   await enqueueAction("publishing.dispatch", { content_id: contentId, confirm: true });
 }
 
@@ -1789,6 +1976,64 @@ async function clientComposeSubmit(btn) {
   await withBusy(btn, "Sending…", () =>
     clientApprovalWrite(card.dataset.crq, box.dataset.kind, text));
 }
+// Client-initiated question (058 — client-initiated-question-thread): unlike every ask above,
+// this one starts with the CLIENT, not the operator (client_request was operator-write-only
+// since 038 — a client could only ever RESPOND). Reuses the .crq-compose pattern; never a
+// native prompt() (same rule as clientCompose above).
+function clientAskOpen() {
+  const box = document.getElementById("crq-ask-compose");
+  const openBtn = document.getElementById("crq-ask-open");
+  if (!box) return;
+  box.hidden = false;
+  if (openBtn) openBtn.hidden = true;
+  const subj = document.getElementById("crq-ask-subject");
+  if (subj) subj.focus();
+}
+function clientAskCancel() {
+  const box = document.getElementById("crq-ask-compose");
+  const openBtn = document.getElementById("crq-ask-open");
+  if (!box) return;
+  box.hidden = true;
+  const subj = document.getElementById("crq-ask-subject"); if (subj) subj.value = "";
+  const det = document.getElementById("crq-ask-detail"); if (det) det.value = "";
+  if (openBtn) { openBtn.hidden = false; openBtn.focus(); }
+}
+// Writes DIRECTLY to client_request under the client's own JWT (RLS — migration 058's
+// additive client_request_client_insert policy, scoped to kind='question' + origin='client').
+// created_by is left OFF the body: the column already defaults to auth.uid() (038), which
+// satisfies the policy's `created_by = auth.uid()` check, so setting it explicitly here would
+// only duplicate what the server fills in.
+async function clientAskPost(title, detail) {
+  const ck = window._clientKey;
+  const body = { client_key: ck, kind: "question", origin: "client", status: "open", owner: "", title: title, detail: detail };
+  let r;
+  try { r = await authedFetch(SB + "/rest/v1/client_request", { method: "POST", body: JSON.stringify(body) }); }
+  catch { toast("Could not send — check your connection and retry", "err"); return; }
+  if (r === null) return;   // session dead; render() already fired
+  if (r.ok) {
+    toast("Question sent to your Rankwise team");
+    await Promise.resolve(renderClientForCurrentUser()).then(clientFocusLanding);
+  } else {
+    // FAIL-SOFT: pre-058 the kind check constraint rejects 'question' (or the column/table
+    // isn't there yet) — an honest fallback, never a broken UI.
+    toast("Questions aren't switched on yet — email your Rankwise contact meanwhile", "err");
+  }
+}
+async function clientAskSubmit(btn) {
+  const ck = window._clientKey;
+  if (!ck) { toast("Account not identified — please reload", "err"); return; }
+  const detEl = document.getElementById("crq-ask-detail");
+  // Cap mirrors the textarea's maxlength (edge-fn security review, LOW-2):
+  // detail was the one new client-writable field with no length ceiling —
+  // authenticated + tenant-scoped, but an uncapped multi-MB row would bloat
+  // the operator snapshot payload it feeds.
+  const detail = (detEl ? detEl.value : "").trim().slice(0, 4000);
+  if (!detail) { toast("Add your question before sending", "err"); if (detEl) detEl.focus(); return; }
+  const subjEl = document.getElementById("crq-ask-subject");
+  const subject = (subjEl ? subjEl.value : "").trim();
+  const title = (subject || detail).slice(0, 80);
+  await withBusy(btn, "Sending…", () => clientAskPost(title, detail));
+}
 // Approve is a real commitment: keep a confirmation, but make it a two-click
 // armed button rather than a browser dialog.
 async function clientApprove(btn, id) {
@@ -1810,6 +2055,18 @@ async function clientApprove(btn, id) {
   btn.classList.remove("client-action-armed");
   btn.setAttribute("aria-pressed", "false");
   await withBusy(btn, "Approving…", () => clientApprovalWrite(id, "approve", ""));
+}
+
+// Best-effort integrity marker for client_asset.checksum (059: client-supplied, never
+// server-verified — Storage doesn't compute one for us at insert time). A huge file (arrayBuffer()
+// reads the whole thing into memory) or a digest failure must never block the upload it accompanies
+// — degrade to '' rather than throw.
+async function sha256Hex(file) {
+  try {
+    const buf = await file.arrayBuffer();
+    const hash = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  } catch { return ""; }
 }
 
 // Client file upload (M4): upload to the PRIVATE client-uploads Storage bucket under the client's
@@ -1838,6 +2095,21 @@ async function clientUpload(requestId, inputEl) {
   if (!r.ok) { toast("Upload failed — please try again", "err"); return; }
   inputEl.value = "";                        // clear only once the upload actually succeeded
   toastClear();                              // drop the held "Uploading…" pill
+  // client_asset (059, client-upload-asset-record): the real file record — filename/MIME/size/
+  // checksum are only knowable client-side, at upload time. uploaded_by is left OFF the body
+  // (the column defaults to auth.uid(), same reasoning as clientAskPost's created_by, verified
+  // against 059's insert policy). FAIL-SOFT: if this table isn't applied yet (pre-059) the insert
+  // 400s — warn and continue; the Storage upload above + the client_approval row below are the
+  // EXISTING flow and must land regardless of whether this record does.
+  try {
+    const checksum = await sha256Hex(file);
+    const assetBody = {
+      client_key: ck, request_id: Number(requestId), storage_path: objName, filename: safe,
+      mime_type: file.type || "", size_bytes: file.size, checksum: checksum, status: "received",
+    };
+    const ar = await authedFetch(SB + "/rest/v1/client_asset", { method: "POST", body: JSON.stringify(assetBody) });
+    if (ar !== null && !ar.ok) console.warn("[clientUpload] client_asset insert failed (non-fatal, pre-059?):", ar.status);
+  } catch (e) { console.warn("[clientUpload] client_asset insert failed (non-fatal, pre-059?):", e); }
   await clientApprovalWrite(requestId, "upload", "uploaded: " + safe, objName);
 }
 
@@ -1897,10 +2169,43 @@ async function logCall(slug) {
   }
   const attemptId = card.dataset.attemptId || "";
   if (/^\d+$/.test(attemptId)) body.attempt_id = Number(attemptId);
+  // structured-call-outcome-fields (060, NOT YET APPLIED): read the optional "More call
+  // detail" section — every value is genuinely optional, so only NON-EMPTY values are sent
+  // (an empty string would just match the column's own '' default, but omitting keeps the
+  // payload honest about what the seller actually typed). next_action now ALSO lands in the
+  // real structured column, alongside (not instead of) the existing note-prefix above — the
+  // migration's own header comment: "freeform note is untouched and remains available
+  // alongside the structured set".
+  const g60 = (cls) => { const el = card.querySelector(cls); return el ? el.value.trim() : ""; };
+  const _60fields = {};
+  const ownerGk = g60(".owner-gk"); if (ownerGk) _60fields.owner_or_gatekeeper = ownerGk;
+  const contactName = g60(".contact-name"); if (contactName) _60fields.contact_name = contactName;
+  const objectionCat = g60(".objection-cat"); if (objectionCat) _60fields.objection_category = objectionCat;
+  const emailReqEl = card.querySelector(".email-req"); if (emailReqEl && emailReqEl.checked) _60fields.email_requested = true;
+  const cbReason = g60(".cb-reason"); if (cbReason) _60fields.callback_reason = cbReason;
+  const cbTz = g60(".cb-tz"); if (cbTz) _60fields.callback_timezone = cbTz;
+  const bookingAttEl = card.querySelector(".booking-attempted"); if (bookingAttEl && bookingAttEl.checked) _60fields.booking_attempted = true;
+  const bookingResult = g60(".booking-result"); if (bookingResult) _60fields.booking_result = bookingResult;
+  if (nextAction !== "none") _60fields.next_action = NEXT_ACTIONS[nextAction];
+  const nextOwner = g60(".next-owner"); if (nextOwner) _60fields.next_owner = nextOwner;
+  const nextDueRaw = card.querySelector(".next-due") ? card.querySelector(".next-due").value : "";
+  if (nextDueRaw) { const nd = new Date(nextDueRaw); if (isFinite(nd.getTime())) _60fields.next_due_at = nd.toISOString(); }
+  const has60Fields = Object.keys(_60fields).length > 0;
+  if (has60Fields) Object.assign(body, _60fields);
   const post = (b) => authedFetch(SB + "/rest/v1/seller_call_log", { method: "POST", body: JSON.stringify(b) });
   let r;
   try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
   if (r === null) return;
+  if (!r.ok && r.status === 400 && has60Fields) {
+    // Pre-060 backend: strip the structured-outcome columns and retry — the disposition/note/
+    // conversation/callback_at/attempt_id flow (already fail-soft below) must land regardless
+    // of whether these newer columns exist yet. Gated on 400 specifically
+    // (edge-fn security review): a transient 500/429 must NOT silently discard
+    // the seller's typed detail behind a green "Logged" toast.
+    Object.keys(_60fields).forEach((k) => { delete body[k]; });
+    try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
+    if (r === null) return;
+  }
   if (!r.ok && body.attempt_id) {
     // Older databases may not have the optional call-attempt link yet. Preserve the
     // disposition and retry without that one column while the migration rolls out.
@@ -2067,6 +2372,25 @@ function logForm(slug, open) {
     '</select></label>' +
     '<label class="cb" style="display:block"><span class="mut">Call back at (optional, Pacific):</span> ' +
     '<input type="datetime-local" class="cbat" min="' + localDatetimeNow() + '" aria-label="Callback date and time (Pacific)"></label>' +
+    // structured-call-outcome-fields (060, NOT YET APPLIED): a collapsed, entirely OPTIONAL
+    // section — every field the disposition/note/conversation/next-action/callback flow above
+    // already captures stays exactly as fast as it is today; this only ADDS somewhere to put
+    // detail that flow can't hold, never blocks Save.
+    '<details class="call-more"><summary class="mut">More call detail (optional)</summary>' +
+    '<div class="call-more-grid">' +
+    '<select class="owner-gk" aria-label="Talked to owner or gatekeeper">' +
+    '<option value="">Talked to — unspecified</option><option value="owner">Owner</option>' +
+    '<option value="gatekeeper">Gatekeeper</option><option value="unknown">Unknown</option></select>' +
+    '<input class="contact-name" aria-label="Contact name" placeholder="Contact name" maxlength="200">' +
+    '<input class="objection-cat" aria-label="Objection category" placeholder="Objection category" maxlength="200">' +
+    '<label class="cb"><input type="checkbox" class="email-req"> Email requested</label>' +
+    '<input class="cb-reason" aria-label="Callback reason" placeholder="Callback reason" maxlength="280">' +
+    '<input class="cb-tz" aria-label="Callback timezone" placeholder="Callback timezone (e.g. PT)" maxlength="40">' +
+    '<label class="cb"><input type="checkbox" class="booking-attempted"> Booking attempted</label>' +
+    '<input class="booking-result" aria-label="Booking result" placeholder="Booking result" maxlength="280">' +
+    '<input class="next-owner" aria-label="Next owner" placeholder="Next owner" maxlength="200">' +
+    '<label class="cb" style="display:block"><span class="mut">Next due:</span> <input type="datetime-local" class="next-due" aria-label="Next due date and time"></label>' +
+    '</div></details>' +
     '<button class="primary" style="width:100%;margin-top:8px" data-slug="' + esc(slug) + '"' +
     ' onclick="withBusy(this,\'Saving…\',()=>logCall(this.dataset.slug))">Save call log</button></details>';
 }
@@ -2230,12 +2554,32 @@ function actionResultSummary(raw) {
   } catch (e) { /* not JSON — treat as free text */ }
   return clip(s, 120);
 }
-function metric(label, value, note, tone, title) {
+// Per-card stale indicator (stale-data-card-indicators): sourceRow is a source_status row
+// ({source, status, ...}, the EXACT shape already in the payload) or undefined. Renders
+// nothing new — reuses sourceTone()'s ok/warn/bad classification (mirrored here as a tiny
+// pure function since sourceTone() itself lives inside renderOps' closure) on data the
+// caller already has, never a second freshness computation. Undefined/ok → '' (every
+// existing metric() call site is unaffected — this is additive-only).
+function staleTag(sourceRow) {
+  if (!sourceRow) return '';
+  const s = String(sourceRow.status || sourceRow.health || '').toLowerCase();
+  if (!s || s === 'ok' || s === 'connected' || s === 'fresh') return '';
+  // 'needed' = not connected YET — calling that "stale" would be exactly the
+  // dishonest display this bundle exists to remove (edge-fn security review,
+  // LOW: it's the only non-ok status the client builder emits today). The
+  // Sources status pill already tells that story honestly — no badge here.
+  if (s === 'needed') return '';
+  const bad = s === 'failed' || s === 'bad' || s === 'blocked';
+  return ' <span class="stale-tag ' + (bad ? 'bad' : 'warn') + '" title="' +
+    esc((sourceRow.source || sourceRow.name || 'Source') + ' — ' + (sourceRow.detail || sourceRow.status || 'degraded')) +
+    '">' + (bad ? 'source failed' : 'source stale') + '</span>';
+}
+function metric(label, value, note, tone, title, sourceRow) {
   // Pass Y: when an explanation exists, render a visible, focusable (i) affordance
   // (the div title= alone was unreachable on touch/keyboard). data-tip carries the
   // runtime text as an HTML attribute (esc is correct here) — dispatched via ACTIONS.
   const info = title ? ' <button type="button" class="m-info" data-act="metricInfo" data-tip="' + esc(title) + '" aria-label="' + esc('Explain: ' + label) + '">i</button>' : '';
-  return '<div class="metric ' + esc(tone || '') + '"' + (title ? ' title="' + esc(title) + '"' : '') + '><div class="m-label">' + esc(label) + info + '</div>' +
+  return '<div class="metric ' + esc(tone || '') + '"' + (title ? ' title="' + esc(title) + '"' : '') + '><div class="m-label">' + esc(label) + info + staleTag(sourceRow) + '</div>' +
     '<div class="m-value">' + esc(value == null || value === '' ? '—' : value) + '</div>' +
     (note ? '<div class="m-note">' + esc(note) + '</div>' : '') + '</div>';
 }
@@ -2392,7 +2736,51 @@ function callBtn(p) {
          '" data-tel="' + esc(tel) + '"><svg class="i"><use href="#i-phone"/></svg> ' + esc(p.phone) + '</button>';
   // Persistent recording disclosure — dual-channel recording starts on answer, so the
   // seller must disclose BEFORE the prospect speaks. A one-time confirm isn't enough.
-  return btn + '<div class="dial-disclose">🔴 Recorded call — tell the prospect it&rsquo;s being recorded before you begin.</div>';
+  return btn + '<div class="dial-disclose">🔴 Recorded call — tell the prospect it&rsquo;s being recorded before you begin.</div>' +
+    '<div class="call-status" data-call-status hidden></div>';
+}
+
+// Distinct call-lifecycle states (twilio-tel-fallback-recording-mislabel criterion 3):
+// real vocabulary from seller_call_attempts.status (migrations 048 + 056, the latter NOT YET
+// APPLIED). 'seller-answered'/'bridging' from the ticket's own wording have NO matching column
+// anywhere in that schema (Twilio's StatusCallback reports the OUTBOUND leg only) — inventing a
+// UI state with no backing data would be exactly the dishonest display this bundle removes, so
+// those two are deliberately NOT rendered; every state that DOES exist in the schema is.
+const CALL_STATUS_LABEL = {
+  initiating: ['Connecting…', 'wait'], ringing: ['Ringing…', 'wait'],
+  connected: ['Connected', 'ok'], completed: ['Call completed', 'ok'],
+  failed: ['Call failed', 'bad'], cancelled: ['Call cancelled', 'bad'],
+  'no-answer': ['No answer', 'bad'], busy: ['Line busy', 'bad'],
+};
+const CALL_STATUS_TERMINAL = new Set(['completed', 'failed', 'cancelled', 'no-answer', 'busy']);
+function paintCallStatus(el, status) {
+  const info = CALL_STATUS_LABEL[status];
+  if (!info) { el.hidden = true; el.className = 'call-status'; return; }
+  el.hidden = false;
+  el.className = 'call-status show ' + info[1];
+  el.textContent = info[0];
+}
+// Bounded, fail-soft poll of the attempt row this dial created. twilio-dial already writes
+// initiating/ringing/failed SYNCHRONOUSLY (048) — the first read below reflects that honestly
+// instead of assuming "ringing" from a bare 200. connected/completed/no-answer/busy only ever
+// appear once the (NOT YET DEPLOYED) twilio-status-callback function starts writing them
+// (migration 056) — until then this loop harmlessly exhausts on 'ringing' and the pill hides
+// itself; no error, no stuck state, and zero further page.html changes needed once that backend
+// piece ships. Mirrors watchQueuedAction's bounded-poll-to-terminal-state shape.
+async function trackCallStatus(card, attemptId) {
+  const el = card && card.querySelector('[data-call-status]');
+  if (!el || attemptId == null) return;
+  for (let i = 0; i < 6; i++) {
+    let rows;
+    try { rows = await rest("seller_call_attempts?id=eq." + encodeURIComponent(String(attemptId)) + "&select=status"); }
+    catch { return; }
+    const row = (!bad(rows) && Array.isArray(rows)) ? rows[0] : null;
+    const status = row ? String(row.status || '') : '';
+    if (!status) { el.hidden = true; el.className = 'call-status'; return; }
+    paintCallStatus(el, status);
+    if (CALL_STATUS_TERMINAL.has(status)) return;
+    await actionWait(3000);
+  }
 }
 
 // Mirror twilio-dial's server-side toE164NA so the POSTed number passes its E.164 gate.
@@ -2428,7 +2816,7 @@ async function dialBridge(btn) {
       try { payload = await r.json(); } catch (e) {}
       if (payload.attempt_id != null) {
         const card = btn.closest('[data-card]');
-        if (card) card.dataset.attemptId = String(payload.attempt_id);
+        if (card) { card.dataset.attemptId = String(payload.attempt_id); trackCallStatus(card, payload.attempt_id); }
       }
       toast("Your phone is ringing — answer it and we'll connect you.");
     } else if (r.status === 403) toast("This number is blocked, outside calling hours, or no longer callable.", "err");
@@ -2859,6 +3247,19 @@ function wordingBlock(it) {
   return '<div class="cond">' + (h || '<p class="mut">No further wording.</p>') + '</div>';
 }
 
+// structured-call-outcome-fields (060, NOT YET APPLIED): the dial console's seller_call_log
+// read is an EXPLICIT column list (trimmed on purpose, finding 55 — NOT select=*, despite
+// what 060's own header comment assumes), so adding new columns to it 400s the whole read
+// pre-060 exactly like every other enriched-select case in this file. Try the enriched list
+// first (adds the fields most useful to glance at for "next caller" context — the rest of
+// 060's columns stay write-only-for-now here, same reasoning finding 55 gave for trimming
+// this select in the first place); fall back to the untouched pre-060 list on failure.
+async function fetchSellerCallLog() {
+  const enriched = await rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at,owner_or_gatekeeper,contact_name,objection_category,next_action,next_owner,next_due_at&order=called_at.desc&limit=300");
+  if (!bad(enriched)) return enriched;
+  return rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at&order=called_at.desc&limit=300");
+}
+
 async function render() {
   document.body.classList.remove('ops', 'dial', 'client');
   const app = $("#app");
@@ -2879,20 +3280,27 @@ async function render() {
       'Sign in with the login Zack set up for you.',
       '<form class="auth-form" onsubmit="login(event)">' +
       '<div class="auth-field"><label for="em">Email</label>' +
-      '<input id="em" type="email" placeholder="you@company.com" autocomplete="username" required></div>' +
+      '<input id="em" type="email" placeholder="you@company.com" autocomplete="username" required aria-describedby="err"></div>' +
       '<div class="auth-field"><label for="pw">Password</label>' +
-      '<input id="pw" type="password" autocomplete="current-password" required></div>' +
+      '<div class="pw-wrap">' +
+      '<input id="pw" type="password" autocomplete="current-password" required aria-describedby="err">' +
+      '<button type="button" class="pw-toggle" id="pwToggle" aria-pressed="false" aria-label="Show password" onclick="togglePwVisibility()"><svg class="i"><use href="#i-eye"/></svg></button>' +
+      '</div></div>' +
       '<button id="signin" class="primary">Sign in</button>' +
-      '<p id="err" class="auth-err" role="alert"></p>' +
+      '<p id="err" class="auth-err" role="alert" tabindex="-1"></p>' +
       '<div class="auth-or">or</div>' +
       '<button type="button" class="auth-oauth" onclick="googleLogin()">' + GOOGLE_G + 'Continue with Google</button>' +
       '</form>' +
-      '<p class="auth-foot"><a href="#" onclick="forgotPw();return false;">Forgot password?</a></p>');
-    if (window._oauthErr) $("#err").textContent = window._oauthErr;
+      '<p class="auth-foot"><a href="#" onclick="forgotPw();return false;">Forgot password?</a></p>' +
+      '<p class="auth-foot">Need access? Ask your Rankwise contact to set up your account.</p>' +
+      '<p class="auth-foot">Get help: <a href="mailto:zshef@rankwise.ca">zshef@rankwise.ca</a></p>' +
+      '<p class="auth-foot"><a href="https://rankwise.ca">Back to Rankwise</a></p>');
+    if (window._oauthErr) { $("#err").textContent = window._oauthErr; $("#err").focus(); }
+    else $("#em").focus();
     return;
   }
   const role = roleOf();
-  if (role === "client") return renderClient();
+  if (role === "client") return renderClientForCurrentUser();
   if (role !== "seller" && role !== "operator") {
     app.innerHTML = AUTH_SHELL(
       'Signed in as ' + (userEmail() || 'this account') + '.',
@@ -2922,8 +3330,13 @@ async function render() {
   const [queue, log, snapRows] = await Promise.all([
     rest("seller_queue?select=*&order=rank.asc"),
     // Trimmed to the columns the console reads (was select=*; the log is up to
-    // 1,000 rows — finding 55).
-    rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at&order=called_at.desc&limit=1000"),
+    // 1,000 rows — finding 55). Cap tightened to 300 (ticket
+    // seller-call-log-fetch-cap): the console only needs the newest row per
+    // slug for attempt pills / callback state, so 300 gives ample headroom
+    // over the active dial-queue size without the payload scaling unbounded
+    // with total historical call volume. fetchSellerCallLog() layers the
+    // structured-call-outcome-fields two-tier fallback on top of this same list.
+    fetchSellerCallLog(),
     rest("seller_ops_snapshot?select=payload,updated_at&id=eq.1"),
   ]);
   app.classList.remove('seller-refreshing');        // fetch settled — undim (swap-once, finding 2)
@@ -3310,8 +3723,21 @@ async function renderSeller(data) {
   // ── Recent calls (still inside the readable-width column) ────────────────────
   if (rows.length) {
     h += '<div class="card"><details><summary>My recent calls (' + rows.length + (rows.length >= 1000 ? ' shown, capped' : ' logged') + ')</summary>' +
-      rows.slice(0, 15).map((r) => '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
-        (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') + '</div>').join("") +
+      rows.slice(0, 15).map((r) => {
+        // structured-call-outcome-fields (060): the "next caller/operator view" the ticket's
+        // Test criterion asks for — undefined fields (pre-060, or just not filled in) simply
+        // drop out of the join, so this degrades to exactly today's two-line row.
+        const _outcome = [
+          r.owner_or_gatekeeper ? 'talked to ' + r.owner_or_gatekeeper : '',
+          r.contact_name ? 'contact: ' + r.contact_name : '',
+          r.objection_category ? 'objection: ' + r.objection_category : '',
+        ].filter(Boolean).join(' · ');
+        const _next = r.next_action ? ('Next: ' + r.next_action + (r.next_owner ? ' (' + r.next_owner + ')' : '') + (r.next_due_at ? ' by ' + ptTime(r.next_due_at) : '')) : '';
+        return '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
+          (r.note ? '<br><span class="mut">' + esc(r.note) + '</span>' : '') +
+          (_outcome ? '<br><span class="mut">' + esc(_outcome) + '</span>' : '') +
+          (_next ? '<br><span class="mut">' + esc(_next) + '</span>' : '') + '</div>';
+      }).join("") +
       '</details></div>';
   }
   h += '</div>';   // close .dial-top
@@ -3949,7 +4375,7 @@ document.addEventListener('visibilitychange', function() {
   if (document.visibilityState !== 'visible') return;
   if (Date.now() - (window._lastFetchMs || 0) < 600000) return;
   if (document.body.classList.contains('ops')) renderOps();
-  else if (document.body.classList.contains('client')) renderClient(window._clientKey);
+  else if (document.body.classList.contains('client')) clientRefresh();
   else if (document.body.classList.contains('dial')) render();
 });
 // Last-resort net (finding 1): if a render's promise rejected and left the app frozen
@@ -4144,7 +4570,12 @@ async function renderOps() {
   const uniqueSources = (function() {
     const seen = {}, out = [];
     for (const r of sourceStatus) {
-      const k = String(r.source || r.name || '').toLowerCase();
+      const name = String(r.source || r.name || '').toLowerCase();
+      // portal-source-dedup-key-fix: key on source+status, not name alone — a same-named
+      // source reporting a DIFFERENT status (e.g. a failed row sharing a name with an
+      // already-listed healthy one) is a distinct fact and must not be dropped as a
+      // "duplicate" of the other.
+      const k = name ? name + '|' + String(r.status || '').toLowerCase() : '';
       if (k && seen[k]) continue;   // dedup keyed rows; keep nameless rows (can't key, don't drop)
       if (k) seen[k] = true;
       out.push(r);
@@ -6123,6 +6554,12 @@ async function renderOps() {
   }
   clientH += '</div></div>';
 
+  // tracked-access-collection-tasks (061, NOT YET APPLIED): ONE fetch for all clients (not
+  // per-client in the loop below — table doesn't exist pre-061, so rest() returns {__error},
+  // normalized to [] and every client's task list below is simply empty — the mailto fallback
+  // on the client side keeps working exactly as it does today).
+  let clientAccessTasksAll = clients.length ? await rest("client_access_task?order=id.desc&limit=200") : [];
+  if (bad(clientAccessTasksAll) || !Array.isArray(clientAccessTasksAll)) clientAccessTasksAll = [];
   if (clients.length) {
     const defaultClient = clientsNeedingAttention[0] || clients[0];
     const defaultKey = clientKey(defaultClient);
@@ -6151,6 +6588,7 @@ async function renderOps() {
       const cAudit = auditEvents.filter(function(item) {
         return (item.client_key || item.client || '') === key || (item.client_name || '') === clientName(c);
       }).slice(0, 5);
+      const cAccessTasks = clientAccessTasksAll.filter(function(item) { return item.client_key === key; });
       clientH += '<div class="ops-client-detail ops-detail" data-client-key="' + esc(key) + '"' + (key !== defaultKey ? ' hidden' : '') + '>' +
         '<div class="ops-detail-head"><div><div class="ops-detail-title">' + esc(clientName(c)) + '</div>' +
         '<div class="ops-detail-sub">' + esc([f.label, pending ? plural(pending, 'approval') : '', planned ? plural(planned, 'planned item') : '', sourceBad ? plural(sourceBad, 'source issue') : ''].filter(Boolean).join(' · ') || 'client command detail') + '</div></div>' +
@@ -6174,11 +6612,34 @@ async function renderOps() {
           // sends its own id (which would collide with an unrelated request). The worker also
           // scopes the PATCH by client_key, so a stray id is a clean no-op.
           const askId = ask.request_id || ask.id || ask.approval_id || ask.title || ask.name;
-          clientH += '<div class="ops-client-ask"><div class="ops-client-ask-head"><div><div class="ops-client-ask-title">' + esc(ask.title || ask.name || ask.type || 'Client approval') + '</div>' +
-            '<div class="ops-client-ask-sub">' + esc([ask.status || ask.stage || 'open', ask.due || ask.due_at, ask.note || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
-            '<span class="ops-pill ' + (ask.status === 'blocked' ? 'bad' : 'warn') + '">' + esc(ask.status || 'open') + '</span></div>' +
+          // origin/owner (058) exist ONLY on client_request rows, never on client_approval rows
+          // (which carry their own unrelated kind vocabulary: respond/approve/request_changes/
+          // upload). ask.origin !== undefined is therefore the fail-soft signal for "this is a
+          // request row AND 058 is applied" — pre-058, or an approval row, everything below is
+          // skipped and the card renders exactly as it did before this ticket
+          // (client-initiated-question-thread).
+          const _isReq = ask.origin !== undefined;
+          const _kindBadge = _isReq ? ' <span class="ops-pill info">' + esc(ask.kind || 'ask') + (ask.origin === 'client' ? ' · client' : '') + '</span>' : '';
+          const _owner = _isReq ? String(ask.owner || '') : '';
+          const _ownerBadge = _isReq ? ' <span class="ops-pill dim">' + esc(_owner || 'Unassigned') + '</span>' : '';
+          // Aging (client-request-lifecycle-and-audit): a client-visible nag would be a bad
+          // idea (don't pressure the client on their own portal) so this is OPERATOR-side only,
+          // computed here from created_at — no schema field by design (see PORTAL_DATA_CONTRACT.md).
+          const _ageDays = (_isReq && ask.created_at) ? Math.floor((Date.now() - new Date(ask.created_at).getTime()) / 86400000) : null;
+          const _agingBadge = (_isReq && (ask.status || 'open') === 'open' && _ageDays != null && _ageDays >= CRQ_AGING_DAYS) ? ' <span class="ops-pill warn">open ' + esc(_ageDays) + 'd</span>' : '';
+          const _claimBtn = (_isReq && !_owner) ? '<button class="ops-btn ghost" data-client-key="' + esc(key) + '" data-request-id="' + esc(String(askId)) + '" onclick="withBusy(this,\'Claiming…\',()=>opsClaimClientRequest(this))">Claim</button>' : '';
+          // client_asset (059, client-upload-asset-record): wherever an upload-kind row surfaces,
+          // offer to open the file. The snapshot doesn't carry client_asset rows (no writer —
+          // see PORTAL_DATA_CONTRACT.md), so this resolves LIVE at click time under the operator
+          // JWT rather than at render time; opsViewClientAsset fails soft to a toast if none is
+          // on file yet (pre-059, or the client hasn't uploaded through the new flow).
+          const _viewFileBtn = ask.kind === 'upload' ? '<button class="ops-btn ghost" data-client-key="' + esc(key) + '" data-request-id="' + esc(String(askId)) + '" onclick="withBusy(this,\'Opening…\',()=>opsViewClientAsset(this))">View file</button>' : '';
+          clientH += '<div class="ops-client-ask"><div class="ops-client-ask-head"><div><div class="ops-client-ask-title">' + esc(ask.title || ask.name || ask.type || 'Client approval') + _kindBadge + '</div>' +
+            '<div class="ops-client-ask-sub">' + esc([ask.status || ask.stage || 'open', ask.due || ask.due_at, ask.note || ask.detail].filter(Boolean).join(' · ')) + _ownerBadge + '</div></div>' +
+            '<span class="ops-pill ' + (ask.status === 'blocked' ? 'bad' : 'warn') + '">' + esc(ask.status || 'open') + '</span>' + _agingBadge + '</div>' +
             '<div class="ops-command-actions">' +
             actionButton('client_request.resolve', 'Resolve', { client_key: key, request_id: askId }, { sub:'audit closeout' }) +
+            _claimBtn + _viewFileBtn +
             '</div>' +
             '<div class="ops-cresp" data-client-key="' + esc(key) + '" data-request-id="' + esc(String(askId)) + '" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">' +
             '<select class="ops-input cresp-kind" aria-label="response kind" style="max-width:150px"><option value="respond">respond</option><option value="approve">approve</option><option value="request_changes">request changes</option><option value="upload">upload</option></select>' +
@@ -6191,7 +6652,9 @@ async function renderOps() {
           clientH += '<div class="ops-client-ask"><div class="ops-client-ask-head"><div><div class="ops-client-ask-title">' + esc(up.title || up.name || 'Asset upload request') + '</div>' +
             '<div class="ops-client-ask-sub">' + esc([up.status || 'waiting', up.asset_type || up.type, up.due || up.due_at].filter(Boolean).join(' · ')) + '</div></div>' +
             '<span class="ops-pill info">upload</span></div>' +
-            '<div class="ops-command-actions">' + actionButton('client_request.resolve', 'Mark received', { client_key: key, request_id: upId }, { sub:'requires asset row' }) + '</div></div>';
+            '<div class="ops-command-actions">' + actionButton('client_request.resolve', 'Mark received', { client_key: key, request_id: upId }, { sub:'requires asset row' }) +
+            '<button class="ops-btn ghost" data-client-key="' + esc(key) + '" data-request-id="' + esc(String(upId)) + '" onclick="withBusy(this,\'Opening…\',()=>opsViewClientAsset(this))">View file</button>' +
+            '</div></div>';
         }
         clientH += '</div>';
       } else {
@@ -6203,6 +6666,31 @@ async function renderOps() {
         '<input class="ops-input creq-detail" aria-label="Ask detail (optional)" placeholder="detail (optional)" maxlength="280" style="flex:1;min-width:140px">' +
         '<select class="ops-input creq-kind" aria-label="ask kind" style="max-width:130px"><option value="ask">ask</option><option value="approval">approval</option><option value="upload">upload</option></select>' +
         '<button class="ops-btn primary" onclick="withBusy(this,null,()=>submitClientRequest(this))">Raise ask</button>' +
+        '</div>';
+      // tracked-access-collection-tasks (061): tracked owner/analytics access tasks, replacing
+      // the client-side mailto-only Access step once a task exists. v1 write model is
+      // OPERATOR-ONLY (migration 061 header) — this create form + the per-row state-advance
+      // button are the operator's authoring surface; the client gets read-only visibility
+      // (renderClientImpl's Access setup step).
+      if (cAccessTasks.length) {
+        clientH += '<div class="ops-pad" style="padding-top:0">' + cAccessTasks.map(function(t) {
+          const _stateTone = t.state === 'verified' || t.state === 'confirmed' ? 'ok' : t.state === 'failed' ? 'bad' : 'warn';
+          const _next = { requested:'invited', invited:'confirmed', confirmed:'verified' }[t.state];
+          return '<div class="ops-client-ask"><div class="ops-client-ask-head"><div><div class="ops-client-ask-title">' +
+            esc(t.task_type === 'owner_access' ? 'Owner access' : t.task_type === 'analytics_access' ? 'Analytics access' : t.task_type) + '</div>' +
+            '<div class="ops-client-ask-sub">' + esc([t.destination, t.follow_up_owner ? 'follow-up: ' + t.follow_up_owner : ''].filter(Boolean).join(' · ')) + '</div></div>' +
+            '<span class="ops-pill ' + esc(_stateTone) + '">' + esc(t.state || 'requested') + '</span></div>' +
+            '<div class="ops-command-actions">' +
+            (_next ? '<button class="ops-btn ghost" data-task-id="' + esc(String(t.id)) + '" data-task-state="' + esc(_next) + '" onclick="withBusy(this,null,()=>opsAdvanceAccessTask(this))">Mark ' + esc(_next) + '</button>' : '') +
+            (t.state !== 'failed' ? '<button class="ops-btn ghost" data-task-id="' + esc(String(t.id)) + '" data-task-state="failed" onclick="withBusy(this,null,()=>opsAdvanceAccessTask(this))">Mark failed</button>' : '') +
+            '</div></div>';
+        }).join('') + '</div>';
+      }
+      clientH += '<div class="ops-catreq" data-client-key="' + esc(key) + '" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #2a323a">' +
+        '<select class="ops-input catreq-type" aria-label="Access task type" style="max-width:150px"><option value="owner_access">owner access</option><option value="analytics_access">analytics access</option></select>' +
+        '<input class="ops-input catreq-dest" aria-label="Destination (e.g. GBP listing, GSC property)" placeholder="Destination" maxlength="200" style="flex:1;min-width:140px">' +
+        '<input class="ops-input catreq-instr" aria-label="Invite instructions (optional)" placeholder="Invite instructions (optional)" maxlength="500" style="flex:1;min-width:140px">' +
+        '<button class="ops-btn ghost" onclick="withBusy(this,null,()=>submitClientAccessTask(this))">Track access task</button>' +
         '</div>';
       clientH += '</div>';
       clientH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Activity / audit trail</h3><span class="ops-count">' + esc(cAudit.length) + '</span></div>';
@@ -6329,6 +6817,12 @@ async function renderOps() {
     '<div class="ops-tile"><div class="ops-b">$' + money(spendUSD) + '</div><div class="ops-l">USD</div></div>' +
     '<div class="ops-tile"><div class="ops-b">$' + money(spendCAD) + '</div><div class="ops-l">CAD</div></div>' +
     '</div>' +
+    // portal-spend-tile-currency-clarification: the note previously lived ONLY in the
+    // conditionally-rendered YTD subline below — a reader glancing at just the always-rendered,
+    // prominent side-by-side tiles above had no cue that USD and CAD are two separate cost
+    // pools, not one number split across currencies. Same wording as the YTD line so the two
+    // surfaces never say different things; unconditional (the tiles above always render).
+    '<div class="ops-muted ops-pad">Two separate cost pools — <b>not</b> a currency conversion.</div>' +
     (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD by cost pool (separate categories — <b>not</b> a currency conversion): ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
     '<div class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">' +
     (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
@@ -6633,8 +7127,16 @@ async function renderOps() {
   if (failedActions.length) {
     sysH += '<div class="ops-minihead"><span>Retry-ready failures</span><span>' + esc(failedActions.length) + '</span></div><ul class="ops-list">';
     for (const row of failedActions.slice(0, 5)) {
+      // Retry count (failed-job-row-retry-control): no new column — counted from the SAME
+      // recentActions window already loaded (last 10 operator_action_queue rows, order=id.desc),
+      // matching rows that share this row's exact action+params (opsRetryAction resubmits both
+      // unchanged, so a retry IS another row with this same key). Honestly scoped to that
+      // window — "recent", never a fabricated lifetime total.
+      const _attempts = recentActions.filter(function(r) {
+        return r.action === row.action && JSON.stringify(r.params || r.action_params || {}) === JSON.stringify(row.params || row.action_params || {});
+      }).length;
       sysH += '<li class="ops-li"><span class="ops-pill bad">failed</span><div class="ops-grow"><div class="ops-li-ttl">' + esc(actionName(row.action)) + '</div>' +
-        '<div class="ops-li-meta">' + esc(row.result || ptTime(row.created_at)) + '</div></div>' +
+        '<div class="ops-li-meta">' + esc(row.result || ptTime(row.created_at)) + (_attempts > 1 ? ' · ' + esc(_attempts) + ' attempts (recent)' : '') + '</div></div>' +
         '<button class="ops-btn ghost" data-act="opsRetryAction" data-arg="' + esc(String(row.id)) + '">Retry</button>' +
         '<button class="ops-btn ghost" onclick="opsTab(\'today\')">Decision</button></li>';
     }
@@ -7384,8 +7886,26 @@ async function renderOps() {
   if (window._opsTab === 'market') opsMmapEnsure();
 }
 
+// approval-request-inspectable-artifact-fields (057, NOT YET APPLIED): 057 adds
+// target_type/target_id/artifact_url/version/summary_of_changes/consequence to client_request.
+// PostgREST 400s the WHOLE select on an unknown column (same class of problem as bundle 2's
+// origin/owner fix) — try the enriched select first, fall back to the pre-057 column list
+// (queryBase, unchanged) on failure, so every client_request read keeps working right up
+// until 057 lands.
+async function fetchClientRequests(queryBase) {
+  const enriched = await rest(queryBase + ",target_type,target_id,artifact_url,version,summary_of_changes,consequence");
+  if (!bad(enriched)) return enriched;
+  return rest(queryBase);
+}
 // ── Client dashboard (role=client; operators pass an explicit key to preview) ─
-async function renderClient(key) {
+// Mode is an EXPLICIT param, never inferred from key (finding: the header Refresh button,
+// the Retry button, and the focus-regain refetch all called renderClient(window._clientKey)
+// — for a REAL client that key is truthy, so the old `opPreview = !!key` derivation silently
+// flipped their OWN refresh into preview semantics: it skipped the resolved-request filter
+// below and mislabeled the header "Client preview"). Use the wrappers below
+// (renderClientForCurrentUser / renderClientPreview / clientRefresh) — renderClientImpl is
+// the shared body, not a call target outside this file.
+async function renderClientImpl(key, opPreview) {
   // Was a client dashboard already on screen? (body still carries 'client' from the
   // prior paint until the next line clears it.) Drives swap-once below.
   const _wasClient = document.body.classList.contains('client');
@@ -7401,7 +7921,6 @@ async function renderClient(key) {
   if (!_wasClient || !app.querySelector('.role-shell')) app.innerHTML = '<h1>Rankwise — Dashboard</h1><p class="mut">Loading…</p>';
   else app.classList.add('client-refreshing');
   window._clientKey = key || undefined; // read back by the header Refresh button
-  const opPreview = !!key;              // operators pass an explicit key to preview a client
   let q = "client_portal_snapshot?select=client_key,payload,updated_at";
   if (key) q += "&client_key=eq." + encodeURIComponent(key);
   // For a real client (no explicit key) RLS already scopes client_request to their
@@ -7421,7 +7940,7 @@ async function renderClient(key) {
     // which open requests the client already answered (see clientResolvedIds). Fail-soft to [].
     [rows, _reqParallel, _apprParallel] = await Promise.all([
       rest(q),
-      rest("client_request?status=eq.open&order=id.desc&limit=20&select=id,kind,title,detail,created_at"),
+      fetchClientRequests("client_request?status=eq.open&order=id.desc&limit=20&select=id,kind,title,detail,status,created_at"),
       rest("client_approval?select=request_id&order=id.desc&limit=200"),
     ]);
   }
@@ -7429,7 +7948,7 @@ async function renderClient(key) {
   if (rows === null) return;                        // session dead; render() already fired
   // A client seeing zeroed metrics would read them as "my campaign is failing",
   // not "the dashboard couldn't load". Never render this view on a failed fetch.
-  if (bad(rows) || !Array.isArray(rows)) { app.innerHTML = errorCard(bad(rows) ? rows.__error : "parse", "renderClient(window._clientKey)"); return; }
+  if (bad(rows) || !Array.isArray(rows)) { app.innerHTML = errorCard(bad(rows) ? rows.__error : "parse", "clientRefresh()"); return; }
   const snap = rows[0] || null;
   const back = roleOf() === "operator" ? '<button class="role-btn primary" onclick="renderOps()">← Operator cockpit</button>' : '';
   // No stamp at all before the first snapshot — "no snapshot" is engineer-voice on a
@@ -7444,7 +7963,7 @@ async function renderClient(key) {
     // NEVER interpolate key into a JS string inside an onclick — esc() is an
     // HTML-entity escaper and cannot escape a JS string context (the known
     // bug-class; Pass I sweeps the rest). Stash it on window instead.
-    '<button class="role-btn" onclick="renderClient(window._clientKey)">↻ Refresh</button>' +
+    '<button class="role-btn" onclick="clientRefresh()">↻ Refresh</button>' +
     back +
     '<button class="role-btn" onclick="logout()">Log out</button></header>' +
     '<div class="role-top"><div class="role-title">' +
@@ -7471,9 +7990,9 @@ async function renderClient(key) {
   // would scope it anyway); for an OPERATOR PREVIEW (sees all via RLS) it limits to the previewed
   // client, so an operator can't accidentally act on another client's request (edge-fn-security #1).
   let myRequestsRaw = opPreview
-    ? (window._clientKey ? (await rest("client_request?status=eq.open&order=id.desc&limit=20" +
+    ? (window._clientKey ? (await fetchClientRequests("client_request?status=eq.open&order=id.desc&limit=20" +
         "&client_key=eq." + encodeURIComponent(window._clientKey) +
-        "&select=id,kind,title,detail,created_at")) : [])
+        "&select=id,kind,title,detail,status,created_at")) : [])
     : _reqParallel;   // client role: already fetched in parallel above (RLS-scoped)
   // Distinguish a real FAILURE from an honest empty list (finding 3): collapsing both
   // to [] made a failed requests fetch look like "no open requests". The panel below
@@ -7485,7 +8004,16 @@ async function renderClient(key) {
   // Skipped for operator preview (read-only; sees all, resolves via the cockpit form).
   const _resolvedReq = new Set(clientResolvedIds(window._clientKey));
   if (Array.isArray(_apprParallel)) _apprParallel.forEach((a) => { if (a && a.request_id != null) _resolvedReq.add(Number(a.request_id)); });
-  const myRequests = opPreview ? myRequestsRaw : myRequestsRaw.filter((rq) => !_resolvedReq.has(Number(rq.id)));
+  // The server row is authoritative on open/closed — sessionStorage (_resolvedReq) is strictly
+  // an optimistic overlay that can only SUBTRACT a row the client just answered client-side,
+  // never add one back. status is re-checked here (not just in the query filter) so a stale
+  // cached row can never outrank what the server just said (finding: render-split ticket).
+  const myRequests = opPreview ? myRequestsRaw : myRequestsRaw.filter((rq) => String(rq.status || 'open') === 'open' && !_resolvedReq.has(Number(rq.id)));
+  // tracked-access-collection-tasks (061, NOT YET APPLIED): real tracked owner/analytics
+  // access tasks, replacing the mailto-only Access setup step where any exist. Table doesn't
+  // exist pre-061 → rest() returns {__error}, normalized to [] (fail-soft to today's mailto).
+  let clientAccessTasks = window._clientKey ? await rest("client_access_task?client_key=eq." + encodeURIComponent(window._clientKey) + "&order=id.desc&limit=10") : [];
+  if (bad(clientAccessTasks) || !Array.isArray(clientAccessTasks)) clientAccessTasks = [];
   const clientGeneratedAt = p.generated_at || p.generatedAt || snap.updated_at;
   const clientSourceStatus = asArr(p.source_status || p.sources);
   const clientSourceBad = clientSourceStatus.filter((s) => s.status && s.status !== 'ok').length;
@@ -7546,6 +8074,17 @@ async function renderClient(key) {
   const latestClientProof = digestProof[0] || proofTimeline[0] || null;
   const clientOutcomeWatch = tracking[0] || clientAiRows[0] || clientPresenceRows[0] || null;
   const attention = [];
+  // Stale-snapshot verdict guard (stale-snapshot-client-verdict-warning): reuses the SAME
+  // staleness definition already shown on this exact timestamp (the 'Updated' freshnessPill
+  // below uses warn=192h/bad=264h) — a second, invented threshold for the same field would be
+  // a second truth (data-honesty rule: surface what the payload already carries, never
+  // fabricate a freshness number). unshift, not push: staleness undermines confidence in every
+  // OTHER attention item too, so it leads. Any non-'ok' tone here also, by construction,
+  // prevents the false-confident "No urgent issues in this snapshot" copy below from
+  // rendering (that branch only fires when attention.length === 0).
+  const _snapFresh = freshnessInfo(clientGeneratedAt, 192, 264);
+  if (_snapFresh.tone === 'bad') attention.unshift({ title:'This snapshot may be out of date', sub:'Last updated ' + _snapFresh.label + ' — the numbers below may not reflect the latest activity yet.', tone:'bad' });
+  else if (_snapFresh.tone === 'warn') attention.unshift({ title:'This snapshot is aging', sub:'Last updated ' + _snapFresh.label + ' — a fresh pull is due soon.', tone:'warn' });
   if (String(clicks.delta || '').startsWith('-')) attention.push({ title:'Search clicks dipped', sub:'We are watching query movement and the next content action.', tone:'warn' });
   if (String(imps.delta || '').startsWith('-')) attention.push({ title:'Visibility dipped', sub:'Impressions are down versus the prior window.', tone:'warn' });
   if (!toNum(map3.value)) attention.push({ title:'Map-pack wins are still opening up', sub:'Local pack top-3 terms are a primary target.', tone:'warn' });
@@ -7635,11 +8174,16 @@ async function renderClient(key) {
   const _rankMetricDetail = _rankDataMismatch ? 'data check needed' : (_trackedKpi != null ? 'of your tracked search terms' : 'tracked terms counted in this snapshot');
   h += '<section class="role-hero client-hero"><div class="role-kicker">Scorecard</div><h2>' + esc(heroTitle) + '</h2><p>' + esc(periodLine) + '</p>' +
     '<div class="metric-grid">' +
-    metric(clicks.label || 'Clicks', clicks.value, clicks.delta ? clicks.delta + ' vs prior' : 'Google Search', toNum(clicks.value) < 10 ? 'info' : deltaTone(clicks.delta), 'People who clicked through to your site from Google Search.') +
-    metric(imps.label || 'Impressions', imps.value, imps.delta ? imps.delta + ' vs prior' : 'search visibility', toNum(imps.value) < 10 ? 'info' : deltaTone(imps.delta), 'How many times your site appeared in Google Search results.') +
+    metric(clicks.label || 'Clicks', clicks.value, clicks.delta ? clicks.delta + ' vs prior' : 'Google Search', toNum(clicks.value) < 10 ? 'info' : deltaTone(clicks.delta), 'People who clicked through to your site from Google Search.', _srcStat('GSC')) +
+    metric(imps.label || 'Impressions', imps.value, imps.delta ? imps.delta + ' vs prior' : 'search visibility', toNum(imps.value) < 10 ? 'info' : deltaTone(imps.delta), 'How many times your site appeared in Google Search results.', _srcStat('GSC')) +
     metric('Ranked in top results', _rankMetricValue, _rankMetricDetail, toNum(terms.value) ? 'ok' : 'info', 'How many of your tracked search terms currently show up in the top results.') +
     metric(map3.label || 'Map-pack top 3', map3.value, 'local pack wins', toNum(map3.value) ? 'ok' : 'warn', 'Search terms where you appear in the Google Maps top 3 (the local pack).') +
-    (ga4.latest_sessions != null ? metric('Site sessions', ga4.latest_sessions, (ga4.sessions_delta != null ? (ga4.sessions_delta >= 0 ? '+' : '') + ga4.sessions_delta + ' vs prior' : 'GA4'), ga4.sessions_delta < 0 ? 'warn' : 'info', 'Visits to your website in this period (from Google Analytics).') : '') +
+    // stale-data-card-indicators: sourceRow reuses _srcStat, the SAME GSC/GA4 lookup already
+    // proven correct for _gscOk/_ga4Ok above — no new source-name assumption. "Ranked in top
+    // results"/"Map-pack top 3" are NOT wired: their KPIs come from the ranking tracker, and
+    // nothing in this file already asserts which source_status row (if any) backs them, so
+    // wiring them would be a fabricated mapping, not a reused one.
+    (ga4.latest_sessions != null ? metric('Site sessions', ga4.latest_sessions, (ga4.sessions_delta != null ? (ga4.sessions_delta >= 0 ? '+' : '') + ga4.sessions_delta + ' vs prior' : 'GA4'), ga4.sessions_delta < 0 ? 'warn' : 'info', 'Visits to your website in this period (from Google Analytics).', _srcStat('GA4')) : '') +
     (aeo.citation_rate_pct != null ? metric('AI citations', (aeo.cited || 0) + ' of ' + (aeo.total || 0), aeo.citation_rate_pct + '% of checked queries cited you', Number(aeo.citation_rate_pct) > 0 ? 'ok' : 'warn', 'How often AI answers (like Google AI Overviews) cite your business, out of the queries we check.') : '') +
     '</div></section>';
   h += '<div class="role-kicker" style="margin:12px 0 -2px">At a glance</div><div class="status-row">' +
@@ -7693,11 +8237,44 @@ async function renderClient(key) {
     h += '<section class="role-card"><h3>Requests from your Rankwise team</h3><div class="client-workspace">' +
       myRequests.map(function(rq) {
         const rid = Number(rq.id); // numeric → safe to inline in the onclick JS-string
+        // approval-request-inspectable-artifact-fields (057, NOT YET APPLIED): render whichever
+        // of target_type/target_id/version/summary_of_changes/consequence/artifact_url the row
+        // carries — fields are absent entirely pre-057 (fetchClientRequests' fallback tier) or on
+        // any row an operator hasn't filled them in for, so this is purely additive.
+        const _hasArtifactClaim = !!(rq.target_type || rq.target_id || rq.version || rq.summary_of_changes || rq.consequence);
+        const _artifactRows = [
+          (rq.target_type || rq.target_id) ? ['Target', [rq.target_type, rq.target_id].filter(Boolean).join(' · ')] : null,
+          rq.version ? ['Version', rq.version] : null,
+          rq.summary_of_changes ? ['What changed', rq.summary_of_changes] : null,
+          rq.consequence ? ['If you approve', rq.consequence] : null,
+        ].filter(Boolean);
+        const _artifactBlock = (_hasArtifactClaim || rq.artifact_url) ? (
+          '<div class="crq-artifact">' +
+          _artifactRows.map(function(r) { return '<div class="crq-artifact-row"><b>' + esc(r[0]) + ':</b> ' + esc(r[1]) + '</div>'; }).join('') +
+          // Scheme-validated before it becomes an href (edge-fn security review,
+          // MED-LOW): esc() blocks attribute breakout but not javascript:/data:
+          // schemes. Operator-authored today, but 057 anticipates an authoring
+          // UI — trusted-at-render is the exact assumption behind prior bugs.
+          (rq.artifact_url ? (/^https?:\/\//i.test(rq.artifact_url)
+            ? '<a class="client-action" href="' + esc(rq.artifact_url) + '" target="_blank" rel="noopener">Open for review <span aria-hidden="true">↗</span></a>'
+            : '<div class="crq-artifact-row"><b>Artifact:</b> ' + esc(rq.artifact_url) + '</div>') : '') +
+          '</div>'
+        ) : '';
+        // Gate Approve ONLY when the operator explicitly claimed something to inspect (a
+        // target_type/version/summary/consequence is set) but gave no way to actually see it
+        // (artifact_url empty) — never on a plain ask with none of these fields, which is every
+        // approval request today (no operator authoring UI for these fields exists yet) and
+        // would otherwise regress the entire approve flow to always-blocked.
+        const _artifactGateBlocked = rq.kind === 'approval' && _hasArtifactClaim && !rq.artifact_url;
+        const _approveBtn = _artifactGateBlocked
+          ? '<button class="client-action" disabled title="Waiting on a preview link from your Rankwise team">Approve</button>'
+          : '<button class="client-action" aria-pressed="false" onclick="clientApprove(this,' + rid + ')">Approve</button>';
         return '<div class="client-ask" data-crq="' + rid + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
           '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
           '<span class="pill warn">open</span></div>' +
+          _artifactBlock +
           '<div class="client-btnrow">' +
-          '<button class="client-action" aria-pressed="false" onclick="clientApprove(this,' + rid + ')">Approve</button>' +
+          _approveBtn +
           '<button class="client-action" onclick="clientCompose(' + rid + ',\'request_changes\')">Request changes</button>' +
           '<button class="client-action" onclick="clientCompose(' + rid + ',\'respond\')">Respond</button>' +
           (rq.kind === 'upload' ?
@@ -7731,8 +8308,26 @@ async function renderClient(key) {
     h += '<section class="role-card"><h3>Requests from your Rankwise team</h3>' +
       '<div class="banner bad"><b>This section failed to load</b><br>' +
       'Your open requests could not be loaded — this is a read error, not an empty list. Your data is safe.</div>' +
-      '<div class="client-btnrow"><button class="role-btn" onclick="renderClient(window._clientKey)">Retry</button></div>' +
+      '<div class="client-btnrow"><button class="role-btn" onclick="clientRefresh()">Retry</button></div>' +
       '</section>';
+  }
+
+  // Client-initiated question (058): start a NEW thread, not just respond to one of the asks
+  // above. Real clients only — never operator preview (the write would carry the OPERATOR's
+  // uid via auth.uid(), the same mis-attribution guard as the requests panel above).
+  if (roleOf() !== 'operator') {
+    h += '<section class="role-card"><h3>Ask a question</h3>' +
+      '<p class="mut" style="margin:0 0 8px">Something else on your mind? Start a new thread with your Rankwise team.</p>' +
+      '<button class="client-action" id="crq-ask-open" onclick="clientAskOpen()">Ask a question</button>' +
+      '<div class="crq-compose" id="crq-ask-compose" hidden>' +
+      '<label class="crq-label" for="crq-ask-subject">Subject (optional)</label>' +
+      '<input id="crq-ask-subject" class="crq-txt" type="text" maxlength="200">' +
+      '<label class="crq-label" for="crq-ask-detail">Your question</label>' +
+      '<textarea id="crq-ask-detail" class="crq-txt" rows="3" maxlength="4000" placeholder="Type your question…"></textarea>' +
+      '<div class="client-btnrow">' +
+      '<button class="client-action client-action-center" onclick="clientAskSubmit(this)">Send</button>' +
+      '<button class="client-action" onclick="clientAskCancel()">Cancel</button>' +
+      '</div></div></section>';
   }
 
   h += '<section class="role-card" id="client-setup"><h3>Setup and first 30 days</h3>' +
@@ -7747,10 +8342,24 @@ async function renderClient(key) {
       const _mailBody = 'Re: ' + _lbl + (step.detail || step.note ? '\n\n' + (step.detail || step.note) : '') + '\n\n';
       const _mailto = 'mailto:zshef@rankwise.ca?subject=' + encodeURIComponent('Rankwise onboarding — ' + _lbl) +
         '&body=' + encodeURIComponent(_mailBody);
+      // tracked-access-collection-tasks (061): the Access step specifically — real tracked
+      // tasks REPLACE the mailto CTA once any exist for this client; mailto stays the fallback
+      // (never a regression) for a client with zero tasks yet (pre-061, or the operator hasn't
+      // created one). Every other setup step (Payment/Business profile/First plan/First proof)
+      // is untouched — out of this ticket's scope.
+      const _accessTasksBlock = (_lbl === 'Access' && clientAccessTasks.length) ?
+        '<div class="crq-artifact">' + clientAccessTasks.map(function(t) {
+          const _stateTone = t.state === 'verified' || t.state === 'confirmed' ? 'ok' : t.state === 'failed' ? 'bad' : 'warn';
+          return '<div class="crq-artifact-row"><span class="pill ' + esc(_stateTone) + '">' + esc(t.state || 'requested') + '</span> ' +
+            '<b>' + esc(t.task_type === 'owner_access' ? 'Owner access' : t.task_type === 'analytics_access' ? 'Analytics access' : t.task_type) + '</b>' +
+            (t.destination ? ' — ' + esc(t.destination) : '') +
+            (t.invite_instructions ? '<br><span class="mut">' + esc(t.invite_instructions) + '</span>' : '') + '</div>';
+        }).join('') + '</div>' : '';
       return '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(_lbl) + '</div>' +
         '<div class="client-ask__sub">' + esc(step.detail || step.note || step.owner || step.due || step.status || 'in progress') + '</div></div>' +
         '<span class="pill ' + esc(tone === 'bad' ? 'bad' : tone === 'ok' ? 'ok' : tone === 'warn' ? 'warn' : '') + '">' + esc(step.status || step.state || (tone === 'ok' ? 'done' : 'open')) + '</span></div>' +
-        (tone === 'ok' ? '' : '<div class="client-btnrow"><a class="client-action" href="' + esc(_mailto) + '">' + esc(_cta) + '</a></div>') +
+        _accessTasksBlock +
+        (tone === 'ok' ? '' : (_accessTasksBlock ? '' : '<div class="client-btnrow"><a class="client-action" href="' + esc(_mailto) + '">' + esc(_cta) + '</a></div>')) +
         '</div>';
     }).join('') + '</div></section>';
 
@@ -7958,11 +8567,32 @@ async function renderClient(key) {
   // gate (>10 min) actually engages and every focus-regain stops force-reloading.
   window._lastFetchMs = Date.now();
   opsStartFreshTick();   // 60s relative-timestamp tick — role-agnostic, idempotent (finding 5)
-  } catch (e) { app.innerHTML = errorCard('parse', 'renderClient(window._clientKey)'); }
+  } catch (e) { app.innerHTML = errorCard('parse', 'clientRefresh()'); }
+}
+// A real client, viewing their OWN dashboard — key is never inferred, always undefined.
+function renderClientForCurrentUser() { return renderClientImpl(undefined, false); }
+// An operator previewing a specific client — clientKey is REQUIRED. Never silently falls
+// back to current-user mode: that would read the OPERATOR's own (nonexistent) client rows,
+// not the previewed tenant's.
+function renderClientPreview(clientKey) {
+  if (!clientKey) { toast("No client selected to preview", "err"); return; }
+  return renderClientImpl(clientKey, true);
+}
+// The single refresh/refetch entry point (header Refresh, failed-section Retry, focus-regain
+// staleness refetch). Resolves mode from the CURRENT viewer's own role — never from whether
+// window._clientKey happens to be set — which is what let a real client's own refresh silently
+// flip into preview semantics (see renderClientImpl's header comment).
+function clientRefresh() {
+  return roleOf() === 'operator' ? renderClientPreview(window._clientKey) : renderClientForCurrentUser();
+}
+// Thin dispatcher for anything unlisted: an operator with an explicit key previews that
+// client; anything else (no key, or a real client on their own JWT) renders their own view.
+function renderClient(key) {
+  return (roleOf() === 'operator' && key) ? renderClientPreview(key) : renderClientForCurrentUser();
 }
 render();
 </script>
 </body>
 </html>
 
-<!-- rankwise-portal-version: 406eaf47a0bd -->
+<!-- rankwise-portal-version: 85c4ea8b58e1 -->
