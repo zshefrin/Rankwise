@@ -163,7 +163,6 @@ main{padding-top:76px}
 }
 .hero-closer::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold-on-forest);flex-shrink:0}
 .hero-note{font-size:.8125rem;color:var(--on-forest-dim)}
-.market-echo{display:inline-block;margin:0 0 16px;padding:6px 13px;border:1px solid rgba(255,255,255,.22);border-radius:999px;font-size:.8125rem;color:var(--on-forest);letter-spacing:.01em}
 @media(max-width:640px){.audit-hero{padding:52px 20px 44px}}
 
 /* ── STEPS (01) ──────────────────────────────────────────────────── */
@@ -408,14 +407,13 @@ html.js .reveal.in{opacity:1;transform:none}
 <section class="audit-hero">
   <div class="hero-inner">
     <p class="hero-eyebrow">Free 15-minute local search audit · Lower Mainland, BC</p>
-    <p class="market-echo" id="marketEcho" hidden></p>
-    <h1>See where you show up on Google — and where you don't.</h1>
-    <p class="hero-copy">Book a 15-minute call with me, Zack, the operator behind Rankwise. I'll show how your business appears in local search today, who's showing up ahead of you in your city, and the first moves I'd make to fix it.</p>
+    <h1 id="auditH1">See where you show up on Google — and where you don't.</h1>
+    <p class="hero-copy" id="auditSub">Book a 15-minute call with me, Zack, the operator behind Rankwise. I'll show how your business appears in local search today, who's showing up ahead of you in your city, and the first moves I'd make to fix it.</p>
     <div class="hero-actions">
       <a href="#book" class="btn-primary btn-amber" data-cta-location="hero-primary">Book my free audit →</a>
       <span class="hero-closer">Miss the target, your billing pauses.</span>
     </div>
-    <p class="hero-note">One business per city, per category · Lower Mainland, BC only</p>
+    <p class="hero-note" id="auditNote">One business per city, per category · Lower Mainland, BC only</p>
   </div>
 </section>
 
@@ -671,22 +669,41 @@ document.addEventListener('click', function(event){
 </script>
 
 <script>
-// ?trade=&city= echo — carried from the homepage pickers (persona re-run
-// 2026-07-08: the picks were being thrown away). Allowlist-only: raw query
-// input NEVER reaches the DOM (labels come from the maps below, set via
-// textContent). No/invalid params -> chip stays hidden, page unchanged.
+// ?trade=&city= hero templating — carried from the homepage pickers
+// (persona re-run 2026-07-08) or a direct link (e.g. mail-pilot QR codes
+// that land straight on /audit/ with only ?src= set). Allowlist-only: raw
+// query input NEVER reaches the DOM — trade/city text always comes from
+// the maps below, written via textContent. No/invalid params -> the
+// neutral multi-trade default markup above stands untouched.
+// (ticket: audit-page-dynamic-trade-city)
 (function(){
-  var el = document.getElementById('marketEcho');
-  if (!el || !window.URLSearchParams) return;
+  var h1 = document.getElementById('auditH1');
+  var sub = document.getElementById('auditSub');
+  var note = document.getElementById('auditNote');
+  if (!h1 || !sub || !note || !window.URLSearchParams) return;
   var TRADE = {plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',roofer:'Roofer',landscaper:'Landscaper',auto:'Auto repair',dentist:'Dentist',chiropractor:'Chiropractor',medspa:'Med spa',lawyer:'Lawyer',vet:'Veterinarian'};
   var CITIES = ['Vancouver','North Vancouver','West Vancouver','Burnaby','Richmond','New Westminster','Coquitlam','Port Moody','Port Coquitlam','Pitt Meadows','Maple Ridge','Surrey','Delta','White Rock','Langley','Abbotsford','Mission','Chilliwack'];
   var p = new URLSearchParams(location.search);
   var t = TRADE[(p.get('trade') || '').toLowerCase()] || '';
-  var cRaw = (p.get('city') || '').toLowerCase(), c = '';
+  // Accepts both slug (?city=maple-ridge) and space/plus-encoded
+  // (?city=North+Vancouver, as sent by the homepage pickers) formats.
+  var cRaw = (p.get('city') || '').toLowerCase().replace(/[-_]+/g, ' ').trim(), c = '';
   for (var i = 0; i < CITIES.length; i++) { if (CITIES[i].toLowerCase() === cRaw) { c = CITIES[i]; break; } }
-  if (!t && !c) return;
-  el.textContent = 'Your market: ' + (t && c ? t + ' · ' + c : (t || c));
-  el.hidden = false;
+  if (!t && !c) return; // no valid params -> neutral default copy stands
+
+  if (t && c) {
+    h1.textContent = 'See where your ' + t + ' business shows up on Google in ' + c + ' — and where you don’t.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search in ' + c + ' today, who’s showing up ahead of you, and the first moves I’d make to fix it.';
+    note.textContent = 'One ' + t + ' per city, per category · ' + c + ', Lower Mainland BC';
+  } else if (t) {
+    h1.textContent = 'See where your ' + t + ' business shows up on Google — and where you don’t.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search today, who’s showing up ahead of you in your city, and the first moves I’d make to fix it.';
+    note.textContent = 'One ' + t + ' per city, per category · Lower Mainland, BC only';
+  } else {
+    h1.textContent = 'See where you show up on Google in ' + c + ' — and where you don’t.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your business appears in local search in ' + c + ' today, who’s showing up ahead of you, and the first moves I’d make to fix it.';
+    note.textContent = 'One business per city, per category · ' + c + ', Lower Mainland BC';
+  }
 })();
 </script>
 
