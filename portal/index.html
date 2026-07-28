@@ -6906,7 +6906,13 @@ async function renderOps() {
     // tab go 57 days stale un-noticed (burn-truth session 2026-07-21). Surfaced right on the
     // Spend panel so a rotting ledger is visible, not silently wrong again.
     (costsP && costsP.ledger && costsP.ledger.stale ? '<div class="ops-muted ops-pad"><span class="stale-tag warn" title="Newest expenses.csv row: ' + esc(costsP.ledger.newestDate || '?') + '">ledger stale</span> — expenses.csv last touched ' + esc(costsP.ledger.staleDays) + 'd ago. Reconcile recurring costs.</div>' : '') +
-    (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD by cost pool (separate categories — <b>not</b> a currency conversion): ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
+    // ytd-label-honesty (reviewer finding, pass 2): ytdTotal counts each ledger row ONCE
+    // at its dated amount — recurring lines aren't accrued per elapsed month, so this is
+    // NOT cumulative year-to-date spend (a recurring line re-verified today reads as one
+    // month, not N months of real charges). Labeled "ledger entries," not "spend," so the
+    // tile can't be misread as understating the real recurring burn — see
+    // hq/loaders_seller.py::load_expenses()'s ytdTotal comment for the full reasoning.
+    (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD ledger entries by cost pool (recurring lines counted once, not accrued monthly — separate categories, <b>not</b> a currency conversion): ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
     '<div class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">' +
     (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
     '</div>');
@@ -8678,4 +8684,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 3ea4234bb3a7 -->
+<!-- rankwise-portal-version: f3dfb1436f7c -->
