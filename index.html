@@ -2567,6 +2567,10 @@ document.addEventListener('click', function(event) {
   const text = (link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
   if (href.indexOf('/audit/') !== -1) {
     gtag('event', 'audit_cta_clicked', { cta_text: text, link_url: link.href, page_path: window.location.pathname });
+  } else if (href.indexOf('tel:') === 0) {
+    gtag('event', 'phone_click', { cta_text: text, link_url: link.href, page_path: window.location.pathname });
+  } else if (href.indexOf('mailto:') === 0) {
+    gtag('event', 'email_click', { cta_text: text, link_url: link.href, page_path: window.location.pathname });
   }
 });
 

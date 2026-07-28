@@ -658,6 +658,22 @@ document.addEventListener('click', function(event){
   var link = event.target.closest('a');
   if (!link || typeof gtag !== 'function') return;
   var href = link.getAttribute('href') || '';
+  if (href.indexOf('tel:') === 0) {
+    gtag('event', 'phone_click', {
+      page_path: window.location.pathname,
+      cta_text: (link.textContent || '').replace(/\s+/g,' ').trim().slice(0,80),
+      link_url: link.href
+    });
+    return;
+  }
+  if (href.indexOf('mailto:') === 0) {
+    gtag('event', 'email_click', {
+      page_path: window.location.pathname,
+      cta_text: (link.textContent || '').replace(/\s+/g,' ').trim().slice(0,80),
+      link_url: link.href
+    });
+    return;
+  }
   var isCal = href.indexOf('cal.com') !== -1;
   var isBookAnchor = href.indexOf('#book') !== -1;
   if (!isCal && !isBookAnchor) return;
