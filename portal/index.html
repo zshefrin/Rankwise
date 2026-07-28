@@ -6901,6 +6901,11 @@ async function renderOps() {
     // pools, not one number split across currencies. Same wording as the YTD line so the two
     // surfaces never say different things; unconditional (the tiles above always render).
     '<div class="ops-muted ops-pad">Two separate cost pools — <b>not</b> a currency conversion.</div>' +
+    // ledger-freshness-flag: costsP.ledger.stale is true when the newest expenses.csv row
+    // is >35d old (hq/loaders_seller.py::load_expenses) — the exact condition that let this
+    // tab go 57 days stale un-noticed (burn-truth session 2026-07-21). Surfaced right on the
+    // Spend panel so a rotting ledger is visible, not silently wrong again.
+    (costsP && costsP.ledger && costsP.ledger.stale ? '<div class="ops-muted ops-pad"><span class="stale-tag warn" title="Newest expenses.csv row: ' + esc(costsP.ledger.newestDate || '?') + '">ledger stale</span> — expenses.csv last touched ' + esc(costsP.ledger.staleDays) + 'd ago. Reconcile recurring costs.</div>' : '') +
     (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD by cost pool (separate categories — <b>not</b> a currency conversion): ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
     '<div class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">' +
     (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
@@ -8673,4 +8678,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 4900084bca4c -->
+<!-- rankwise-portal-version: 3ea4234bb3a7 -->
