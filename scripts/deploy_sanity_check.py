@@ -294,9 +294,19 @@ class _LinkParser(HTMLParser):
             self.links.append(val)
 
 
+# The dead-path check guards SERVED content only — html/css/js/xml that the live
+# site actually delivers. Repo tooling legitimately contains the retired-path
+# strings (this script's own DEAD_PATH_NEEDLES constants, CLAUDE.md's docs of
+# them) — on its first real push this gate flagged its own source (2026-07-29),
+# which is a scoping bug, not a detection win.
+_DEAD_PATH_SCOPE = (".html", ".css", ".js", ".xml", ".txt")
+
+
 def check_dead_paths(contents):
     errors = []
     for rel, text in contents.items():
+        if not rel.endswith(_DEAD_PATH_SCOPE):
+            continue
         for needle in DEAD_PATH_NEEDLES:
             if needle in text:
                 errors.append(f"{rel}: references retired path containing '{needle}'")
