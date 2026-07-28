@@ -4800,7 +4800,17 @@ async function renderOps() {
   // into HTML text/attribute contexts only; the ticket id is re-validated server-side (slug + FM scan).
   function ticketsSection() {
     const tickets = asArr(p.tickets);
-    if (!tickets.length) return '';
+    // portal-enterprise-audit-2026-07-28: this used to return '' on empty, so the
+    // whole panel vanished — indistinguishable from "night shift hasn't reported"
+    // or "this feature broke". Every other queue on Today (findings, decision
+    // inbox, command queue) shows an honest zero instead of disappearing; ticket
+    // review is one of the operator's daily checks, so it gets the same treatment.
+    if (!tickets.length) {
+      return '<div class="ops-panel" id="ops-tickets" style="margin-top:16px">' +
+        '<div class="ops-panel-h"><h3 class="ops-panel-t">Overnight tickets</h3>' +
+        '<span class="ops-count">0 ranked</span></div>' +
+        '<p class="ops-muted ops-pad">Nothing from the night shift to review right now.</p></div>';
+    }
     const rows = tickets.map(function (t, i) {
       const tid = String(t.id || '');
       const sev = String(t.severity || '').toLowerCase();
@@ -5497,28 +5507,17 @@ async function renderOps() {
     deckLane('Content', contentBadge, contentBadge ? 'approval or media gate' : 'lane is clear', 'content', 'ops-content-workflow') +
     deckLane('Clients', clientsNeedingAttention.length, clientsNeedingAttention.length ? 'client work needs attention' : 'no client escalation', 'clients', 'ops-clients-attention') +
     '</div></section>';
-  // next-move hero
-  if (nm) {
-    // The hero lives on the Today view, so an Open button pointing at 'today' with no
-    // row anchor navigates nowhere (opsTab skips a same-tab push). Suppress it in that
-    // case rather than render a dead-end CTA (Pass X). A real destination or an anchor
-    // still renders the button. Backend fix (give the two 'today' rows a destination)
-    // is deferred cross-lane.
-    const nmTab = nm.tab || 'today';
-    const nmDead = nmTab === 'today' && !nm.anchor;
-    todayH += '<div class="ops-nextmove">' +
-      '<div class="nm-i"><svg class="i"><use href="#i-arrow-right"/></svg></div>' +
-      '<div class="nm-t"><div class="nm-k">Next best move</div>' +
-      '<div class="nm-h">' + esc(nm.title) + (nm.sub ? ' <span>— ' + esc(nm.sub) + '</span>' : '') + '</div></div>' +
-      (nmDead ? '' : '<button class="ops-btn primary" data-act="opsTab" data-arg="' + esc(nmTab) + '"' + anchorAttr(nm.anchor) + '>' + 'Open' + '</button>') + '</div>';
-  } else {
-    todayH += '<div class="ops-nextmove">' +
-      '<div class="nm-i"><svg class="i"><use href="#i-arrow-right"/></svg></div>' +
-      '<div class="nm-t"><div class="nm-k">Next best move</div>' +
-      '<div class="nm-h">All clear <span>— nothing queued right now</span></div></div></div>';
-  }
+  // The standalone "Next best move" .ops-nextmove hero (every other tab's one-hero
+  // pattern) used to render here too, directly under the Command deck above. Since
+  // the deck's "Recommended next action" already reads from the SAME nm fallback
+  // (deckSource = nextCommand || nm, defined above) it made this block pure
+  // duplication when the queue was empty — and a second, DIFFERENT, unlabelled
+  // "next move" when the queue was non-empty (deck shows nextCommand, this showed
+  // nm), i.e. two disagreeing directives stacked on the operator's landing screen.
+  // portal-enterprise-audit-2026-07-28: removed as dead weight; nm's data still
+  // flows into the deck, nothing is lost.
 
-  // Daily loop — pinned directly under Next best move (the "did I do my job" widget
+  // Daily loop — pinned directly under the Command deck (the "did I do my job" widget
   // was buried at the very bottom of the right rail). Deps hoisted from the rail;
   // zero-states are uniform (a category is done when nothing is pending).
   const fueDue = fu.due || {};
@@ -5683,6 +5682,10 @@ async function renderOps() {
     objectCard('pipeline', leadQualityRows.length + ' lead ledger rows', replyInbox.length + ' replies · ' + bookingInbox.length + ' bookings', pipelineBadge ? 'warn' : 'info', 'pipeline') +
     objectCard('content', workflowItems.length + ' board rows', contentBadge + ' in approval' + (contentApprovalBreakdown ? ' (' + contentApprovalBreakdown + ')' : '') + ' · ' + (workflowCounts.assets || 0) + ' media blocked', (workflowCounts.assets || contentBadge) ? 'warn' : 'ok', 'content') +
     objectCard('outreach', dueCalls.length + ' due calls', callbacksDue + ' callbacks · ' + dnc + ' DNC rows', dueCalls.length ? 'warn' : 'info', 'outreach') +
+    // portal-enterprise-audit-2026-07-28: Money is one of the Daily loop's 6 tracked
+    // areas (moneyBadge already drives that checklist item + the Money tab badge)
+    // but had no card in this at-a-glance grid — every other Daily-loop area does.
+    objectCard('money', pendingExp.length ? pendingExp.length + ' invoice' + (pendingExp.length === 1 ? '' : 's') + ' to confirm' : 'no invoices pending', (s.pay_due_cad > 0 ? '$' + money(s.pay_due_cad) + ' pay due' : 'no pay due'), moneyBadge ? 'warn' : 'ok', 'money') +
     objectCard('sources', uniqueSources.length + ' source feeds', (sys.not_ok || []).length + ' failed · ' + (sys.warns || []).length + ' stale', ((sys.not_ok || []).length ? 'bad' : ((sys.warns || []).length ? 'warn' : 'ok')), 'system', 'sys-sec-sources') +
     objectCard('findings', findingsTotal + ' open findings', (Number(findingSev.critical)||0) + ' critical · ' + (Number(findingSev.high)||0) + ' high', findingsTotal ? 'warn' : 'ok', 'system', 'sys-sec-findings') +
     objectCard('go-live', gl ? (gl.sending_enabled ? 'send gate open' : 'send gate closed') : 'no gate snapshot', gate ? ((Number(gate.checks_passing)||0) + '/' + (Number(gate.checks_total)||0) + ' prerequisites') : 'needs gate payload', gl && gl.sending_enabled ? 'ok' : 'warn', 'system', 'sys-sec-golive') +
@@ -6901,18 +6904,25 @@ async function renderOps() {
     // pools, not one number split across currencies. Same wording as the YTD line so the two
     // surfaces never say different things; unconditional (the tiles above always render).
     '<div class="ops-muted ops-pad">Two separate cost pools — <b>not</b> a currency conversion.</div>' +
+    // blended-cad-estimate (pass 3, 2026-07-28): the two tiles above are the real,
+    // never-summed per-currency truth; this line exists ONLY because a human reading
+    // two unsummed currencies next to each other is itself part of why the old numbers
+    // "didn't seem correct" — one clearly-labeled estimate, sourced to
+    // expense_reader.FX_USD_TO_CAD_ESTIMATE, never used for anything but display.
+    (costsP && costsP.ledger && costsP.ledger.blendedMonthlyCad != null ? '<div class="ops-muted ops-pad">≈ $' + money(costsP.ledger.blendedMonthlyCad) + ' CAD/mo blended @ ' + esc(costsP.ledger.blendedFxRate) + 'x — estimate, not a filing figure.</div>' : '') +
     // ledger-freshness-flag: costsP.ledger.stale is true when the newest expenses.csv row
     // is >35d old (hq/loaders_seller.py::load_expenses) — the exact condition that let this
     // tab go 57 days stale un-noticed (burn-truth session 2026-07-21). Surfaced right on the
     // Spend panel so a rotting ledger is visible, not silently wrong again.
     (costsP && costsP.ledger && costsP.ledger.stale ? '<div class="ops-muted ops-pad"><span class="stale-tag warn" title="Newest expenses.csv row: ' + esc(costsP.ledger.newestDate || '?') + '">ledger stale</span> — expenses.csv last touched ' + esc(costsP.ledger.staleDays) + 'd ago. Reconcile recurring costs.</div>' : '') +
-    // ytd-label-honesty (reviewer finding, pass 2): ytdTotal counts each ledger row ONCE
-    // at its dated amount — recurring lines aren't accrued per elapsed month, so this is
-    // NOT cumulative year-to-date spend (a recurring line re-verified today reads as one
-    // month, not N months of real charges). Labeled "ledger entries," not "spend," so the
-    // tile can't be misread as understating the real recurring burn — see
-    // hq/loaders_seller.py::load_expenses()'s ytdTotal comment for the full reasoning.
-    (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD ledger entries by cost pool (recurring lines counted once, not accrued monthly — separate categories, <b>not</b> a currency conversion): ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
+    // ytd-accrual (pass 3, 2026-07-28): ytdTotal now ACCRUES recurring rows with a known
+    // started_on (months-active x amount, or a verified ytd_override_usd for volatile
+    // lines like Anthropic's API bill — see expense_reader.py's module docstring) instead
+    // of counting each row once. Rows still missing a start date fall back to a single
+    // count (needsStartDate lists which), so this is a floor, not a ceiling, until every
+    // vendor's start date is confirmed — the label says so rather than implying precision
+    // pass 2 didn't have and pass 3 doesn't fully have either.
+    (costsP && costsP.ledger && costsP.ledger.ytdTotal && Object.keys(costsP.ledger.ytdTotal).length ? '<div class="ops-muted ops-pad">YTD spend by cost pool' + ((costsP.ledger.needsStartDate || []).length ? ' (accrued where start date is confirmed — ' + esc((costsP.ledger.needsStartDate || []).length) + ' vendor' + ((costsP.ledger.needsStartDate || []).length === 1 ? '' : 's') + ' still counted once: ' + esc((costsP.ledger.needsStartDate || []).join(', ')) + ')' : ' (fully accrued)') + ' — separate categories, <b>not</b> a currency conversion: ' + Object.keys(costsP.ledger.ytdTotal).map(function(k){ const kk = String(k).toUpperCase(); return esc(fmtMoney(costsP.ledger.ytdTotal[k], kk)) + (kk === 'USD' ? ' (AI/API)' : (kk === 'CAD' ? ' (ops)' : '')); }).join(' · ') + '</div>' : '') +
     '<div class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">' +
     (sp && sp.as_of ? 'as of ' + esc(ptTime(sp.as_of)) : 'No spend data yet.') +
     '</div>');
@@ -8684,4 +8694,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: f3dfb1436f7c -->
+<!-- rankwise-portal-version: 385c0d731a01 -->
