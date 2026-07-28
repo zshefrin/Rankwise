@@ -1,0 +1,47 @@
+#!/bin/sh
+# Rankwise1 pre-push gate (installed 2026-07-24; extended 2026-07-28 with
+# scripts/deploy_sanity_check.py). This repo is the LIVE public site — every
+# push here lands on rankwise.ca, and the daily armed auto_fix rail
+# (rankwise-dashboard, PROD_REPUBLISH_ARMED=true) republishes whatever is on
+# origin/main unattended. Two checks run in order:
+#   1. scripts/secret_scan.py --all   — whole-tree credential scan
+#   2. scripts/deploy_sanity_check.py — dead ~/Documents path refs, malformed
+#      HTML, broken internal links — scoped to what THIS push changed
+#
+# Both checks FAIL CLOSED: if either script is missing, the push is BLOCKED,
+# not silently allowed (the 2026-07-24 version of this hook warned-and-passed
+# on a missing scanner — a live-site deploy gate that fails open on its own
+# absence is the exact "guard fails open" pattern the 2026-07-25 production
+# review flagged against secret_scan.py; this hook doesn't repeat it).
+#
+# NOTE: .git/hooks is not version-controlled. This file is the INSTALLED copy
+# of the tracked source at scripts/git-hooks/pre-push. On a fresh clone or a
+# replacement machine, reinstall with:
+#   cp scripts/git-hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+# The committed .github/workflows/ CI (secret-scan.yml, deploy-sanity.yml) runs
+# the same checks on a machine without this hook installed — but GitHub Pages
+# builds and serves whatever lands on origin/main regardless of CI's pass/fail
+# status. CI is DETECT-AFTER there, not a gate: on a hookless machine a bad
+# push still goes live; CI only tells you it happened. THIS hook is the only
+# thing that can actually stop a bad push from reaching origin.
+#
+# Bypass a verified false positive only: git push --no-verify
+set -e
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+if [ -f scripts/secret_scan.py ]; then
+    python3 scripts/secret_scan.py --all
+else
+    echo "pre-push FAIL: scripts/secret_scan.py missing — refusing to push ungated" >&2
+    exit 1
+fi
+
+if [ -f scripts/deploy_sanity_check.py ]; then
+    python3 scripts/deploy_sanity_check.py
+else
+    echo "pre-push FAIL: scripts/deploy_sanity_check.py missing — refusing to push ungated" >&2
+    exit 1
+fi
+
+echo "✓ pre-push: secret-scan + deploy-sanity passed."
