@@ -1577,7 +1577,17 @@ async function watchQueuedAction(id, action) {
     if (bad(row) || !Array.isArray(row) || !row[0]) continue;
     const state = String(row[0].status || "").toLowerCase();
     if (state === "processing") toast("Running — " + action, "wait", 2600);
-    if (state === "done") { toast("Completed — " + action, "ok", 4200); renderOps(); return; }
+    if (state === "done") {
+      toast("Completed — " + action, "ok", 4200);
+      renderOps();
+      // Content/ticket mutations write through to source, but the cockpit reads a CACHED
+      // operator_portal_snapshot regenerated only 2×/day — without a real regen the repaint
+      // above still shows pre-mutation counts and the operator can't tell the action landed.
+      // Chain one real refresh_ops. Guarded to content./ticket.* only, so refresh_ops itself
+      // (which matches neither prefix) can never re-trigger this and loop.
+      if (/^(content|ticket)\./.test(String(action))) enqueueAction("refresh_ops", {});
+      return;
+    }
     if (state === "failed") { toast("Failed — " + (row[0].result || action) + ". Retry is available below.", "err", 6500); renderOps(); return; }
   }
   toast("Still queued — check Recent actions for the final result.", "wait", 5000);
@@ -2202,9 +2212,30 @@ async function logCall(slug) {
     // of whether these newer columns exist yet. Gated on 400 specifically
     // (edge-fn security review): a transient 500/429 must NOT silently discard
     // the seller's typed detail behind a green "Logged" toast.
-    Object.keys(_60fields).forEach((k) => { delete body[k]; });
-    try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
-    if (r === null) return;
+    //
+    // FF5 (re-review 2026-07-25): "any 400" was still too broad a gate — a genuine
+    // post-060 constraint/validation 400 (e.g. objection_category failing a CHECK)
+    // would ALSO strip the structured fields and retry as a legacy insert, landing
+    // a green "Logged" toast while silently discarding the seller's typed detail.
+    // Only strip-and-retry when the error body itself says the columns don't exist
+    // yet — PostgREST's schema-cache miss (PGRST204, "Could not find the 'X'
+    // column... in the schema cache") or the raw Postgres undefined_column error
+    // (42703) if the cache doesn't intercept first. Any OTHER 400 falls through
+    // with `body` untouched and `r.ok` still false, so the existing honest-failure
+    // toast at the bottom of this function fires instead of a false "Logged".
+    let missingColumn = false;
+    try {
+      const errBody = await r.json();
+      const code = errBody && errBody.code;
+      const msg = (errBody && errBody.message) || "";
+      missingColumn = code === "PGRST204" || code === "42703" ||
+        (/column/i.test(msg) && /schema cache|does not exist/i.test(msg));
+    } catch {}
+    if (missingColumn) {
+      Object.keys(_60fields).forEach((k) => { delete body[k]; });
+      try { r = await post(body); } catch { toast("Log failed — check your connection and retry", "err"); return; }
+      if (r === null) return;
+    }
   }
   if (!r.ok && body.attempt_id) {
     // Older databases may not have the optional call-attempt link yet. Preserve the
@@ -4230,7 +4261,7 @@ function opsRestoreFocus(sig) {
   if (el && el.focus) el.focus({ preventScroll: true });
 }
 function captureOpsUI() {
-  const st = { scrollY: window.scrollY, filters: {}, search: [], client: null, density: [], record: window._opsOpenRecordId || null, focus: opsFocusSig() };
+  const st = { scrollY: window.scrollY, filters: {}, search: [], client: null, density: [], record: window._opsOpenRecordId || null, focus: opsFocusSig(), notes: [] };
   document.querySelectorAll('[data-filter-group]').forEach(function(b) {
     if (b.classList.contains('active')) st.filters[b.dataset.filterGroup] = b.dataset.filterValue;
   });
@@ -4241,6 +4272,19 @@ function captureOpsUI() {
   const ac = document.querySelector('.ops-client-pick.active');
   if (ac) st.client = ac.dataset.clientKey;
   document.querySelectorAll('.ops-density-compact').forEach(function(el) { if (el.id) st.density.push(el.id); });
+  // Approval-note drafts (finding: typed text wiped on re-render). .cr-note (content revise)
+  // and .tk-note (ticket revise) carry no id of their own; key the snapshot on the ancestor
+  // row's existing stable id (data-content-id / data-ticket-id — already rendered for other
+  // reasons, see opsContentRevise/opsTicketRevise) so a background repaint can find the same
+  // row again. Only non-empty fields are captured — an untouched textarea needs no restore.
+  document.querySelectorAll('.cr-note, .tk-note').forEach(function(ta) {
+    if (!ta.value) return;
+    const isCr = ta.classList.contains('cr-note');
+    const row = ta.closest(isCr ? '.ops-li[data-content-id]' : '.tk-row[data-ticket-id]');
+    const key = row ? (isCr ? row.dataset.contentId : row.dataset.ticketId) : '';
+    if (!key) return;   // no stable ancestor id — nothing safe to key the restore on
+    st.notes.push({ cls: isCr ? 'cr-note' : 'tk-note', key: key, value: ta.value, focused: ta === document.activeElement, start: ta.selectionStart, end: ta.selectionEnd });
+  });
   return st;
 }
 function restoreOpsUI(st) {
@@ -4254,8 +4298,26 @@ function restoreOpsUI(st) {
   });
   if (st.client) opsClientDetail(st.client);
   st.density.forEach(function(id) { const el = document.getElementById(id); if (el && !el.classList.contains('ops-density-compact')) opsDensity(id); });
+  // Re-fill approval-note drafts by the same ancestor-row id, unhiding the revise box first
+  // (a fresh render always redraws it hidden) so a typed-but-unsent note reappears instead of
+  // silently vanishing. .value is a property assignment, never innerHTML — safe for operator text.
+  let focusedNote = null;
+  (st.notes || []).forEach(function(n) {
+    const sel = n.cls === 'cr-note' ? '.ops-li[data-content-id="' + CSS.escape(n.key) + '"] .cr-note'
+                                     : '.tk-row[data-ticket-id="' + CSS.escape(n.key) + '"] .tk-note';
+    const ta = document.querySelector(sel);
+    if (!ta) return;   // row no longer on the board (e.g. approved/rejected elsewhere) — note is moot
+    ta.value = n.value;
+    const box = ta.closest(n.cls === 'cr-note' ? '.cr-revise' : '.tk-revise');
+    if (box) box.hidden = false;
+    if (n.focused) focusedNote = { el: ta, start: n.start, end: n.end };
+  });
   window.scrollTo({ top: st.scrollY, behavior: 'instant' });
   if (st.record && window._opsRecords && window._opsRecords[st.record]) opsOpenRecord(st.record);
+  else if (focusedNote) {
+    focusedNote.el.focus({ preventScroll: true });
+    try { if (focusedNote.start != null) focusedNote.el.setSelectionRange(focusedNote.start, focusedNote.end); } catch (e) {}
+  }
   else opsRestoreFocus(st.focus);
 }
 function opsSetFilter(group, value) {
@@ -4269,6 +4331,13 @@ function opsSetFilter(group, value) {
     row.dataset.filterHidden = !(value === 'all' || raw.split(' ').indexOf(value) >= 0) ? '1' : '0';
     opsApplyRowVisibility(row);
   });
+}
+// Home cockpit deep-link (findability fix): jump straight to the Content tab pre-filtered to
+// the approval lane, instead of leaving the operator to find "Approve chip" on their own —
+// both the tab and its filter chips are already-rendered DOM, so this is a plain function chain.
+function opsGotoApprovals() {
+  opsTab('content');
+  opsSetFilter('content', 'approval');
 }
 function opsSearch(group, value) {
   const q = String(value || '').trim().toLowerCase();
@@ -5657,9 +5726,14 @@ async function renderOps() {
     '</div></div>' +
     (actBad ? '<span class="ops-pill bad">load failed</span>'
             : (failedActions.length ? '<span class="ops-pill bad">' + esc(failedActions.length) + ' failed</span>' : '<span class="ops-pill ok">ready</span>')) +
+    '</div>' +
+    // Findability fix: the approval controls live on Content's "Approve & revise content"
+    // board, several scrolls away — surface a direct jump here, computed from the same
+    // snapshot field (contentBadge) the Content tab's own "needs approval" tile reads.
+    (contentBadge ? '<div class="ops-command-actions"><button class="ops-btn primary ops-actionbtn" onclick="opsGotoApprovals()"><b>Needs your review (' + esc(contentBadge) + ')</b><span>jump to Content · approval filter</span></button></div>' : '') +
     // Two labelled rows (Pass X): the safe refresh writes, then the tab-nav shortcuts —
     // no longer one undifferentiated strip mixing an action queue with jump links.
-    '</div><div class="ops-command-actions">' +
+    '<div class="ops-command-actions">' +
     actionButton('refresh_ops', 'Refresh ops', {}, { primary:true, sub:'safe snapshot refresh' }) +
     actionButton('refresh_seller', 'Refresh seller', {}, { sub:'seller queue refresh' }) +
     actionButton('refresh_clients', 'Refresh clients', {}, { sub:'client pages refresh' }) +
@@ -6105,7 +6179,11 @@ async function renderOps() {
   let contH = '';
   contH += '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-file"/></svg></div><div class="nm-t"><div class="nm-k">Content control</div>' +
     '<div class="nm-h">' + (contentBadge ? esc(plural(contentBadge, 'item')) + ' awaiting approval' : 'No approvals waiting') +
-    ' <span>— ' + (Number(co.hold) ? 'incl. ' + esc(Number(co.hold)) + ' on hold (human-flagged) · ' : '') + 'queue, hold, outreach and approved work in one glance</span></div></div></div>';
+    ' <span>— ' + (Number(co.hold) ? 'incl. ' + esc(Number(co.hold)) + ' on hold (human-flagged) · ' : '') + 'queue, hold, outreach and approved work in one glance</span></div></div>' +
+    // Same enqueue path as the Home-tab "Refresh ops" action — a real snapshot regen, not just
+    // a refetch of the stale cache (Fix B: actions complete invisibly against the 2×/day cache).
+    '<button class="ops-btn ghost" onclick="enqueueAction(\'refresh_ops\')" title="Regenerates the snapshot this tab reads from">↻ Refresh data</button>' +
+    '</div>';
   contH += '<div class="metric-grid">' +
     metric('Inbox', Number(co.inbox)||0, 'new drafts', Number(co.inbox) ? 'warn' : 'ok') +
     metric('Hold', Number(co.hold)||0, 'needs human pass', Number(co.hold) ? 'warn' : '') +
@@ -6142,7 +6220,7 @@ async function renderOps() {
     contH += '<p class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">No staged upload inventory in the current snapshot.</p>';
   }
   contH += '</div>';
-  contH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Approval flow</h3>' +
+  contH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Content pipeline at a glance</h3>' +
     '<span class="ops-count">' + esc(workflowItems.length) + ' board rows</span></div>' +
     '<div class="ops-tiles">' +
     '<div class="ops-tile"><div class="ops-b">' + esc(workflowCounts.draft || 0) + '</div><div class="ops-l">draft</div></div>' +
@@ -6153,7 +6231,7 @@ async function renderOps() {
     '<div class="ops-tile"><div class="ops-b">' + esc(workflowCounts.published || 0) + '</div><div class="ops-l">published</div></div>' +
     '</div></div>';
 
-  contH += '<div class="ops-panel" id="ops-content-workflow" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Workflow board</h3>' +
+  contH += '<div class="ops-panel" id="ops-content-workflow" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Approve &amp; revise content</h3>' +
     '<span class="ops-count">filterable execution view</span></div>' +
     '<div class="ops-toolbar">' +
     '<button class="ops-seg active" data-filter-group="content" data-filter-value="all" data-act="opsSetFilter">All</button>' +
@@ -7813,7 +7891,7 @@ async function renderOps() {
     '<span class="ops-spacer"></span>' +
     (userEmail() ? '<span class="ops-who">' + esc(userEmail()) + '</span>' : '') +
     '<span class="ops-asof">' + asof + '</span>' +
-    '<button class="ops-iconbtn ops-hdr-refresh" onclick="renderOps()">↻ Refresh</button>' +
+    '<button class="ops-iconbtn ops-hdr-refresh" onclick="renderOps()" title="Re-reads the cached snapshot; actions auto-refresh the snapshot when they complete.">↻ Reload view</button>' +
     '<button class="ops-iconbtn ops-hdr-dial" aria-label="Dial console" onclick="opsOpenConsole()"><svg class="i"><use href="#i-phone"/></svg><span class="ops-hdr-label">Dial console →</span></button>' +
     '<button class="ops-iconbtn ops-hdr-logout" onclick="logout()">Log out</button>' +
     '</header>' +
@@ -8595,4 +8673,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 85c4ea8b58e1 -->
+<!-- rankwise-portal-version: 4900084bca4c -->
