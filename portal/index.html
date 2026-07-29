@@ -961,8 +961,6 @@
   body.ops .tk-tone.bad { color:var(--bad); }
   body.ops .tk-tone.warn { color:var(--warn); }
   body.ops .tk-tone.calm { color:var(--text-3); }
-  body.ops .tk-pill { margin-left:auto; font-size:var(--fs-1); font-weight:600; padding:1px 8px; border-radius:var(--r-pill); background:var(--surface-3); color:var(--text-2); border:1px solid var(--border-2); }
-  body.ops .tk-pill.tk-ok { color:var(--ok); }
   body.ops .tk-title { font-size:var(--fs-3); font-weight:600; color:var(--text-1); margin-bottom:3px; }
   body.ops .tk-src { font-size:var(--fs-1); color:var(--text-3); font-family:ui-monospace,monospace; margin-bottom:6px; word-break:break-all; }
   body.ops .tk-x { font-size:var(--fs-2); color:var(--text-2); line-height:1.5; margin-top:3px; }
@@ -4816,9 +4814,12 @@ async function renderOps() {
       const sev = String(t.severity || '').toLowerCase();
       const sevCls = sev === 'high' ? 'bad' : (sev === 'medium' ? 'warn' : 'calm');
       const approved = t.approved === true;
+      // tk-pill -> ops-pill unification (portal-home-ia-consolidation): same base
+      // treatment as every other status pill on the page; margin-left:auto inline
+      // preserves the right-alignment .tk-pill used to carry (its only caller).
       const statePill = approved
-        ? '<span class="tk-pill tk-ok">approved · ready to build</span>'
-        : '<span class="tk-pill">needs your call</span>';
+        ? '<span class="ops-pill ok" style="margin-left:auto">approved · ready to build</span>'
+        : '<span class="ops-pill" style="margin-left:auto">needs your call</span>';
       const src = t.source ? (esc(String(t.source)) + (t.sourceLine != null ? ':' + esc(String(t.sourceLine)) : '')) : '';
       const approveBtn = actionButton('ticket.approve', approved ? 'Approved' : 'Approve', { id: tid },
         { primary: !approved, sub: approved ? 'marked ready to build' : 'mark ready to build' });
@@ -5037,78 +5038,19 @@ async function renderOps() {
     return fallback != null && fallback !== '' ? fallback : 0;
   }
 
-  function normalizeDecision(item) {
-    item = item || {};
-    return {
-      id: item.id || item.slug || item.suppress_key || item.proposal_id || item.key || '',
-      title: compact(item.title || item.name || item.label, 'Decision needed'),
-      sub: compact(item.sub || item.detail || item.note || item.reason, ''),
-      severity: item.severity || item.tone || 'warn',
-      tab: item.action_tab || item.tab || 'today',
-      action: item.action_label || item.action || 'Open',
-      kind: item.kind || 'routine',
-    };
-  }
-  // Real strategic decisions (fund-a-build, launch calls) come from decision_inbox;
-  // the auto-generated content/invoice/source items below are routine. Tagging so
-  // the render can group strategic above routine (review: they sat at equal weight).
-  const decisionItems = asArr(p.decision_inbox || p.decisions).map(function(d){ const nd = normalizeDecision(d); nd.kind = 'strategic'; return nd; });
-  for (const row of failedActions.slice(0, 2)) {
-    decisionItems.push(normalizeDecision({
-      title:'Fix failed action: ' + actionName(row.action),
-      sub: row.result || ptTime(row.created_at),
-      severity:'bad',
-      tab:'system',
-      action_label:'Open',
-    }));
-  }
-  for (const n of actNow.concat(todayNeeds).slice(0, 5)) decisionItems.push(normalizeDecision(n));
-  for (const ci of contentItems.slice(0, 3)) {
-    decisionItems.push(normalizeDecision({
-      title:'Review content: ' + (ci.title || 'Untitled draft'),
-      sub:[ci.type, ci.readiness].filter(Boolean).join(' · '),
-      severity: String(ci.readiness || '').toLowerCase().indexOf('ship') >= 0 ? 'warn' : 'info',
-      tab:'content',
-      action_label:'Review',
-    }));
-  }
-  for (const row of pendingExp.slice(0, 2)) {
-    decisionItems.push(normalizeDecision({
-      title:'Confirm invoice: ' + (row.vendor || 'expense'),
-      sub:[(row.amount != null ? fmtMoney(row.amount, row.currency) : null), row.description].filter(Boolean).join(' · '),
-      severity:'warn',
-      tab:'money',
-      action_label:'Review',
-    }));
-  }
-  if (needsMediaUrl) {
-    decisionItems.push(normalizeDecision({
-      title:'Attach public media URLs',
-      sub: plural(needsMediaUrl, 'content asset') + (needsMediaUrl === 1 ? ' needs' : ' need') + ' a public URL before publishing',
-      severity:'warn',
-      tab:'content',
-      action_label:'Open',
-    }));
-  }
-  for (const row of asArr(sys.not_ok).slice(0, 2)) {
-    decisionItems.push(normalizeDecision({
-      title:'Fix data source: ' + (row.source || 'source'),
-      sub: row.detail || row.status || '',
-      severity:'bad',
-      tab:'system',
-      action_label:'Open',
-    }));
-  }
-  const seenDecision = {};
-  const uniqueDecisions = decisionItems.filter(function(d) {
-    // Dedup on a stable proposal id/slug when the source carries one so a re-nagged
-    // proposal (same id, slightly different sub) collapses to one card (finding S20);
-    // fall back to title+sub+tab for rows without an id.
-    const k = d.id ? ('id:' + String(d.id).toLowerCase()) : (d.title + '|' + d.sub + '|' + d.tab).toLowerCase();
-    if (seenDecision[k]) return false;
-    seenDecision[k] = true;
-    return true;
-  });
+  // portal-home-ia-consolidation (2026-07-28): the standalone "Decision inbox" panel
+  // and its normalizeDecision/decisionItems/uniqueDecisions computation (formerly
+  // here) were an independently-derived SECOND "needs your decision" list, built
+  // from the same-ish sources as Command queue's universalCommands but through a
+  // different normalizer with no cross-list dedup — the two disagreed on counts and
+  // occasionally on wording for the same underlying fact. Coverage-equivalence audit
+  // (see near universalQueue below) found the panel had exactly 4 item types no path
+  // to Command queue reached (real decision_inbox rows, client blockers, the media-URL
+  // gate, per-vendor invoices) plus one path-dependent gap (needs_you tiers only
+  // reached Command queue when a backend command_queue was present). All 5 are folded
+  // into the universalCommands pipeline below; the rest of the old panel's rows
+  // (failed actions, content items, stale sources) were pure re-derivations of facts
+  // Command queue already carries under different wording — dropped, not lost.
   function clientKey(c) { return compact(c.client_key || c.key || c.slug || c.id, ''); }
   function clientName(c) { return compact(c.client_name || c.name || c.title || clientKey(c), 'Client'); }
   function clientFreshness(c) { return freshnessInfo(c.generated_at || c.updated_at || c.last_updated_at, c.warn_hours || 24, c.bad_hours || 168); }
@@ -5129,9 +5071,8 @@ async function renderOps() {
   const clientPlannedCount = clients.reduce(function(sum, c) { return sum + (c.is_internal ? 0 : clientPlanned(c)); }, 0);
 
   // badge counts
-  // Badge tracks the Decisions panel (its true referent); uniqueDecisions already
-  // includes actNow+todayNeeds, so the old || fallback was dead code (finding S21).
-  const todayBadge = uniqueDecisions.length;
+  // todayBadge (Home nav pill) is assigned after myCommands below — it now tracks
+  // "commands that are mine" on the ONE consolidated queue, not a second list.
   const outreachBadge = dueCalls.length;
   const pipelineBadge = replyInbox.length + bookingInbox.length || (Number(pipe.replied_interested) || 0) + (Number(pipe.booked_audit) || 0);
   // Canonical "awaiting approval" = inbox + hold (builder co.awaiting_approval, fff691c) —
@@ -5370,6 +5311,7 @@ async function renderOps() {
   function normalizeCommand(row) {
     return {
       id: row.id || row.key || row.title || row.name || '',
+      dedupId: row.id || row.key || '',
       type: row.type || row.kind || row.lane || 'command',
       title: row.title || row.name || row.summary || 'Command item',
       sub: row.sub || row.detail || row.note || row.reason || '',
@@ -5427,7 +5369,69 @@ async function renderOps() {
       action:'client_request.create', source:'client_onboarding',
     });
   }
+  // needs_you (act_now/today tiers) — backend command_queue's own needs_you loop
+  // already covers this when a backend queue exists; only the no-backend fallback
+  // path was missing it (portal-home-ia-consolidation: the retired Decision inbox
+  // panel rendered these unconditionally, so this gate closes a real gap that would
+  // otherwise have dropped pay-due/go-live-gate/etc rows from Command queue whenever
+  // the backend queue was absent).
+  // Explicit field mapping (not a wholesale Object.assign(n)) so this row is
+  // structurally action-free like the 4 other fold-ins below, regardless of what
+  // fields a future needs_you row might carry (edge-fn-security-reviewer note).
+  for (const n of actNow.concat(todayNeeds).slice(0, 5)) pushCommand({
+    title: n.title, sub: n.sub, priority: n.severity, tab: n.action_tab || n.tab,
+    next_action: n.action_label, source: 'needs_you',
+  });
   }
+  // ── Decision inbox fold-in (portal-home-ia-consolidation) ──────────────────
+  // decision_inbox carries two row shapes: real operator_decision_queue rows
+  // (title/sub/action_label, no source_category) and _derive_decision_inbox_triggers
+  // rows (title/reason/recommended_action/source_category). Neither shape is part of
+  // the backend command_queue projection (worker_health + needs_you + due_calls only)
+  // or any other loop on this page EXCEPT client_blocker and the 2 items below it —
+  // so both always fold in here, regardless of whether a backend command_queue exists.
+  // The other 5 derived-trigger categories (findings/failed_action/money/stale_source/
+  // content_approval) are deliberately NOT folded in: each already reaches this queue
+  // through a different existing path (needs_you's own aggregate rows above, the
+  // worker_health loop, or the sourceStatus/brainItems loops below) — re-adding them
+  // here under decision_inbox's wording would just be the same fact twice.
+  const decisionInboxRaw = asArr(p.decision_inbox || p.decisions);
+  // Lifecycle filter (home-IA security pass, reviewer note N2): derived items carry
+  // a state field (open/answered/dismissed, written by transition_decision_inbox_item
+  // in push_operator_snapshot.py) — a dismissed or answered item must stop rendering
+  // as an open command. Real operator_decision_queue rows never carry a state field
+  // at all (they're pre-filtered server-side to status=pending), so d.state is
+  // undefined there and the check below passes them through unchanged — missing or
+  // unrecognized state stays open (fail-visible, not fail-hidden).
+  const decisionInboxOpen = decisionInboxRaw.filter(function(d) { return d.state !== 'dismissed' && d.state !== 'answered'; });
+  const decisionInboxReal = decisionInboxOpen.filter(function(d) { return !d.source_category; }).slice(0, 5);
+  const decisionInboxClientBlockers = decisionInboxOpen.filter(function(d) { return d.source_category === 'client_blocker'; }).slice(0, 3);
+  for (const d of decisionInboxReal.concat(decisionInboxClientBlockers)) pushCommand({
+    id: d.id || '',
+    type: d.source_category === 'client_blocker' ? 'client' : 'decision',
+    title: d.title || 'Decision needed',
+    sub: d.sub || d.reason || '',
+    owner: d.owner || 'operator',
+    priority: d.severity || 'warn',
+    lifecycle: 'waiting',
+    tab: d.tab || 'today',
+    next_action: d.action_label || d.recommended_action || '',
+    source: d.source_category || 'decision_inbox',
+  });
+  // Missing public media URLs — no other loop on the page carries this gate.
+  if (needsMediaUrl) pushCommand({
+    type:'content', priority:'warn', title:'Attach public media URLs',
+    sub: plural(needsMediaUrl, 'content asset') + (needsMediaUrl === 1 ? ' needs' : ' need') + ' a public URL before publishing',
+    owner:'operator', lifecycle:'waiting', tab:'content', source:'media_gate',
+  });
+  // Per-vendor invoices — needs_you only carries an AGGREGATE count ("N expense
+  // draft(s) awaiting confirmation"); the retired Decision inbox panel was the only
+  // place the per-vendor breakdown reached the operator, so it folds in here.
+  for (const row of pendingExp.slice(0, 3)) pushCommand({
+    type:'money', priority:'warn', title:'Confirm invoice: ' + (row.vendor || 'expense'),
+    sub:[(row.amount != null ? fmtMoney(row.amount, row.currency) : null), row.description].filter(Boolean).join(' · '),
+    owner:'operator', lifecycle:'waiting', tab:'money', source:'pending_expenses',
+  });
   for (const row of localPresenceRows.concat(reputationRows).concat(competitorRows).concat(aiVisibilityRows).slice(0, 4)) pushCommand({
     type:'growth', priority:oldTone(row.status || row.state || row.severity), title:row.title || row.name || row.issue || 'Local growth item',
     sub:[row.client_name || row.client_key, row.next_action || row.action || row.detail].filter(Boolean).join(' · '),
@@ -5451,7 +5455,9 @@ async function renderOps() {
   const priorityRank = { critical:0, bad:1, high:2, warn:3, normal:4, info:5, lo:6, ok:7 };
   const seenCommand = {};
   const universalCommands = universalQueue.filter(function(item) {
-    const key = (item.type + '|' + item.title + '|' + item.sub).toLowerCase();
+    const key = item.dedupId
+      ? (item.source + '|id:' + String(item.dedupId)).toLowerCase()
+      : (item.type + '|' + item.title + '|' + item.sub).toLowerCase();
     if (seenCommand[key]) return false;
     seenCommand[key] = true;
     return true;
@@ -5471,9 +5477,9 @@ async function renderOps() {
   const clientCommands = universalCommands.filter(function(item) { return item.type === 'client' || !!item.client_key; });
   const contentCommands = universalCommands.filter(function(item) { return item.type === 'content' || item.tab === 'content'; });
   const nextCommand = universalCommands[0] || null;
-
-  // ── Helper: dot color from severity ──────────────────────────────────────
-  function dotCls(sev) { return esc(sev === 'bad' ? 'bad' : sev === 'warn' ? 'warn' : sev === 'info' ? 'info' : 'lo'); }
+  // Home nav pill: "commands that are mine" on the ONE consolidated queue — the
+  // direct successor to the old Decisions-panel badge (uniqueDecisions.length).
+  const todayBadge = myCommands.length;
 
   // ── TODAY section ─────────────────────────────────────────────────────────
   const nm = p.next_move ? deDragItem(p.next_move) : null;
@@ -5693,35 +5699,15 @@ async function renderOps() {
 
   todayH += '<div class="ops-grid-today">';
 
-  // ── Left: Decision inbox ──
-  todayH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Decision inbox</h3><span class="ops-count">' +
-    (uniqueDecisions.length ? esc(uniqueDecisions.length) + ' open' : 'clear') + '</span></div>';
-  if (!uniqueDecisions.length) {
-    todayH += '<p class="ops-muted ops-pad">Nothing needs Zack right now.</p>';
-  } else {
-    todayH += '<ul class="ops-list">';
-    // Strategic decisions (fund/launch) group above routine sign-offs.
-    const sortedDecisions = uniqueDecisions.slice().sort(function(a, b){ return (a.kind === 'strategic' ? 0 : 1) - (b.kind === 'strategic' ? 0 : 1); });
-    let lastDecisionKind = null;
-    for (const d of sortedDecisions.slice(0, 9)) {
-      if (d.kind !== lastDecisionKind) {
-        lastDecisionKind = d.kind;
-        todayH += '<li class="ops-li" style="padding-bottom:0"><span class="ops-muted" style="font-size:11px;letter-spacing:.05em;text-transform:uppercase">' + (d.kind === 'strategic' ? 'Strategic' : 'Routine') + '</span></li>';
-      }
-      const tab = d.tab || 'today';
-      const btnStyle = d.severity === 'bad' ? ' primary' : d.severity === 'lo' ? ' ghost' : '';
-      todayH += '<li class="ops-li"><span class="ops-pill ' + dotCls(d.severity) + '">' + esc(d.severity || 'open') + '</span>' +
-        '<div class="ops-grow"><div class="ops-li-ttl">' + esc(d.title) + '</div>' +
-        (d.sub ? '<div class="ops-li-meta">' + esc(d.sub) + '</div>' : '') + '</div>' +
-        '<button class="ops-btn' + btnStyle + '" data-act="opsTab" data-arg="' + esc(tab) + '"' + anchorAttr(d.anchor) + '>' + esc(d.action || 'Open') + '</button></li>';
-    }
-    if (uniqueDecisions.length > 9) {
-      todayH += '<li class="ops-li"><span class="ops-pill dim">more</span><div class="ops-grow"><div class="ops-li-ttl">' +
-        esc(plural(uniqueDecisions.length - 9, 'more decision')) + '</div><div class="ops-li-meta">Open the tabs for the full queue.</div></div></li>';
-    }
-    todayH += '</ul>';
-  }
-  todayH += '<div class="ops-command"><div class="ops-command-head"><div><div class="ops-command-k">Execution hub</div>' +
+  // ── Left: Execution hub ──
+  // portal-home-ia-consolidation: this panel used to open with a "Decision inbox"
+  // list — its own, separately-computed "needs your decision" surface sitting right
+  // next to Command queue's. That list is retired (folded into universalCommands
+  // above, see the Decision inbox fold-in comment near universalQueue); Command
+  // queue is now the one decision surface. This panel's real, undisputed content —
+  // the daily refresh loop + action contracts below — keeps its own header.
+  todayH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Execution hub</h3></div>';
+  todayH += '<div class="ops-command"><div class="ops-command-head"><div><div class="ops-command-k">Daily refresh</div>' +
     '<div class="ops-command-title">Run the daily refresh loop</div>' +
     '<div class="ops-command-note">' +
     (actBad ? 'Action queue failed to load — see System · Recent actions to retry'
@@ -8694,4 +8680,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 385c0d731a01 -->
+<!-- rankwise-portal-version: 52afd21091d0 -->
