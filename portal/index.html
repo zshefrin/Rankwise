@@ -4607,6 +4607,13 @@ async function renderOps() {
   const findings = p.findings || {};
   const findingSev = findings.by_severity || {};
   const findingsTotal = Number(findings.total) || 0;
+  // R5 (tripletrack-audit-2026-07-29): the backend's findings/fixitCenter build wraps
+  // the ledger read in one try/except that, on failure, leaves payload["findings"]
+  // absent — indistinguishable here from a genuinely empty ledger (findingsTotal
+  // defaults to 0 either way). findings_build_ok === false means the backend hit an
+  // exception building this section THIS push (detail lands in system.warns); every
+  // "findings" surface below must render that as an error state, never a silent zero.
+  const findingsBuildFailed = p.findings_build_ok === false;
   // One tiles builder for Today + System so both always break down the SAME header
   // count — critical+high+medium+low, plus an "other" bucket when severities the
   // backend didn't itemize would otherwise make the tiles under-sum (finding S5).
@@ -4798,6 +4805,12 @@ async function renderOps() {
   // into HTML text/attribute contexts only; the ticket id is re-validated server-side (slug + FM scan).
   function ticketsSection() {
     const tickets = asArr(p.tickets);
+    // R2 (tripletrack-audit-2026-07-29): the backend caps this list at top_n=25 but the real
+    // ranked backlog can be larger — tickets_ranked_total is the FULL count so the badge can
+    // say "N of total" instead of implying the visible count is everything. Falls back to
+    // tickets.length (no overflow) when the field is absent, e.g. an older snapshot.
+    const ticketsRankedTotal = Math.max(Number(p.tickets_ranked_total) || 0, tickets.length);
+    const ticketsOverflow = ticketsRankedTotal - tickets.length;
     // portal-enterprise-audit-2026-07-28: this used to return '' on empty, so the
     // whole panel vanished — indistinguishable from "night shift hasn't reported"
     // or "this feature broke". Every other queue on Today (findings, decision
@@ -4843,10 +4856,21 @@ async function renderOps() {
         '</div>' +
       '</div>';
     }).join('');
+    const ticketsBadge = ticketsOverflow > 0
+      ? (esc(String(tickets.length)) + ' of ' + esc(String(ticketsRankedTotal)) + ' ranked · approve to greenlight')
+      : (esc(String(tickets.length)) + ' ranked · approve to greenlight');
+    // Honest overflow disclosure (R2) — mirrors queue_triage.py's digest wording
+    // ("capped … by design; overflow is ranked, never lost, never surfaced").
+    const ticketsOverflowLine = ticketsOverflow > 0
+      ? '<div class="ops-muted" style="margin-top:6px">' + esc(String(ticketsOverflow)) +
+        ' more ranked but not shown — capped at ' + esc(String(tickets.length)) +
+        ' by design; overflow is ranked, never lost, never surfaced.</div>'
+      : '';
     return '<div class="ops-panel" id="ops-tickets" style="margin-top:16px">' +
       '<div class="ops-panel-h"><h3 class="ops-panel-t">Overnight tickets</h3>' +
-      '<span class="ops-count">' + esc(String(tickets.length)) + ' ranked · approve to greenlight</span></div>' +
+      '<span class="ops-count">' + ticketsBadge + '</span></div>' +
       '<div class="tk-intro">The night shift ranks its work here, most valuable first. <b>Approve</b> greenlights a ticket for building, <b>Reject</b> drops it, <b>Revise</b> keeps it open with a note. Approving marks it ready to build — it does not run the work on its own.</div>' +
+      ticketsOverflowLine +
       '<div class="tk-list">' + rows + '</div></div>';
   }
   window._opsRecords = {};
@@ -5494,13 +5518,22 @@ async function renderOps() {
   const deckOpenAnchor = deckTab === 'today' ? 'ops-command-queue' : (deckSource && deckSource.anchor);
   const deckOpen = '<button class="ops-btn primary" data-act="opsTab" data-arg="' + esc(deckTab) + '"' + anchorAttr(deckOpenAnchor) + '>' + (deckTab === 'today' ? 'Review command queue' : 'Open workspace') + ' <span aria-hidden="true">→</span></button>';
   const deckAttention = actNow.length + todayNeeds.length;
-  const deckHealth = findingsTotal ? findingsTotal + ' open finding' + (findingsTotal === 1 ? '' : 's') : 'No open findings';
+  const deckHealth = findingsBuildFailed ? 'Findings unknown — build failed' : (findingsTotal ? findingsTotal + ' open finding' + (findingsTotal === 1 ? '' : 's') : 'No open findings');
   const deckLane = function(label, value, note, tab, anchor) {
     return '<div class="ops-deck-lane"><div class="ops-deck-lane-k">' + esc(label) + '</div><div class="ops-deck-lane-v">' + esc(value) + '</div><div class="ops-deck-lane-n">' + esc(note) + '</div><button class="ops-btn ghost" data-act="opsTab" data-arg="' + esc(safeTab(tab)) + '"' + anchorAttr(anchor) + '>Open</button></div>';
   };
+  // R4 (tripletrack-audit-2026-07-29): deckAttention only counts needs_you's act_now/
+  // today tiers, but deckSource/deckTitle (the "Recommended next action" block above)
+  // reads universalCommands[0] — an 8-source merged queue (due_calls, findings, source
+  // checks, decision inbox, etc). Two disjoint populations: the deck-state badge and
+  // the Decisions lane note used deckAttention, so they could say "steady state" /
+  // "nothing waiting" while a real, specific action rendered right next to them. Both
+  // now read universalCommands.length instead, matching the Command-queue panel's own
+  // header count just below. deckAttention itself stays correct for the narrower
+  // "Needs your decision" context row, which isn't making a steady-state claim.
   todayH += '<section class="ops-command-deck" aria-labelledby="ops-deck-title">' +
     '<div class="ops-deck-head"><div><div class="ops-deck-k">Command deck · one next move</div><h2 class="ops-deck-title" id="ops-deck-title">' + esc(deckTitle) + '</h2><p class="ops-deck-sub">' + esc(deckSub) + '</p></div>' +
-    '<span class="ops-deck-state">' + (deckAttention ? esc(deckAttention + ' needs you') : 'steady state') + '</span></div>' +
+    '<span class="ops-deck-state">' + (universalCommands.length ? esc(universalCommands.length + ' needs you') : 'steady state') + '</span></div>' +
     '<div class="ops-deck-main"><div class="ops-deck-next"><div class="ops-deck-label">Recommended next action</div><div class="ops-deck-next-title">' + esc(deckTitle) + '</div><div class="ops-deck-next-sub">' + esc(deckSub) + '</div>' + deckOpen + '</div>' +
     '<div class="ops-deck-context"><div class="ops-deck-label">Operating context</div>' +
     '<div class="ops-deck-context-row"><span>Needs your decision</span><b>' + esc(deckAttention) + '</b></div>' +
@@ -5508,7 +5541,7 @@ async function renderOps() {
     '<div class="ops-deck-context-row"><span>Content waiting</span><b>' + esc(contentBadge) + '</b></div>' +
     '<div class="ops-deck-context-row"><span>System watch</span><b>' + esc(deckHealth) + '</b></div></div></div>' +
     '<div class="ops-deck-lanes">' +
-    deckLane('Decisions', deckAttention, deckAttention ? 'your call first' : 'nothing waiting', 'today', 'ops-command-queue') +
+    deckLane('Decisions', universalCommands.length, universalCommands.length ? 'your call first' : 'nothing waiting', 'today', 'ops-command-queue') +
     deckLane('Outreach', dueCalls.length, dueCalls.length ? 'callbacks and calls due' : 'no due calls', 'outreach', 'ops-outreach-due') +
     deckLane('Content', contentBadge, contentBadge ? 'approval or media gate' : 'lane is clear', 'content', 'ops-content-workflow') +
     deckLane('Clients', clientsNeedingAttention.length, clientsNeedingAttention.length ? 'client work needs attention' : 'no client escalation', 'clients', 'ops-clients-attention') +
@@ -5554,7 +5587,7 @@ async function renderOps() {
     metric('Due calls', dueCalls.length, dueCalls.filter(function(c){return c.overdue;}).length + ' overdue', dueCalls.length ? 'info' : 'ok') +
     metric('Pipeline', pipelineBadge, (campaigns.length ? plural(campaigns.length, 'campaign') : 'acquisition workspace'), pipelineBadge ? 'info' : '') +
     metric('Content queue', contentBadge, contentBadge ? ((((Number(co.inbox)||0)+(Number(co.hold)||0)) === contentBadge) ? ((Number(co.inbox)||0) + ' in inbox' + (Number(co.hold) ? ' · ' + (Number(co.hold)||0) + ' on hold' : '')) : 'awaiting approval') : 'planned + approved', contentBadge ? 'warn' : 'ok') +
-    metric('Findings', findingsTotal, (Number(findingSev.critical)||0) + ' critical · ' + (Number(findingSev.high)||0) + ' high', findingsTotal ? ((Number(findingSev.critical)||0) ? 'bad' : 'warn') : 'ok') +
+    metric('Findings', findingsBuildFailed ? 'unknown' : findingsTotal, findingsBuildFailed ? 'build failed this push' : ((Number(findingSev.critical)||0) + ' critical · ' + (Number(findingSev.high)||0) + ' high'), findingsBuildFailed ? 'warn' : (findingsTotal ? ((Number(findingSev.critical)||0) ? 'bad' : 'warn') : 'ok')) +
     '</div>';
   todayH += '<div class="status-row">' +
     freshnessPill('Snapshot', generatedAt, 4, 24) +
@@ -5566,16 +5599,27 @@ async function renderOps() {
     '</div>';
 
   // Compute the rendered slice BEFORE the Saved-view pills so their counts describe
-  // exactly what the DOM-only filters can reach (finding S4). Ordering: operator's own
-  // items first, then blocked non-mine, then the rest; the visible cap front-loads
-  // blocked so a Blocked pill can't read >0 with zero reachable cards.
-  const cmdNonMine = universalCommands.filter(function(c){ return myCommands.indexOf(c) < 0; });
-  const displayCommands = myCommands
-    .concat(cmdNonMine.filter(function(c){ return blockedCommands.indexOf(c) >= 0; }))
-    .concat(cmdNonMine.filter(function(c){ return blockedCommands.indexOf(c) < 0; }));
+  // exactly what the DOM-only filters can reach (finding S4).
+  //
+  // R3 (tripletrack-audit-2026-07-29): blocked rows must always be reachable via the
+  // "Blocked" saved view — opsSetFilter is DOM-only, it can only reveal a row already
+  // rendered, never one the cap truncated away before render. The old ordering
+  // concatenated myCommands WHOLE ahead of blocked-non-mine, then sliced to CMD_CAP; on
+  // a day mine alone reaches the cap (routine — normalizeCommand defaults owner to
+  // 'operator' in several fold-in loops), blocked-non-mine rows never entered the DOM
+  // and the Blocked view had nothing to reveal, even though its own pill read >0 (it
+  // was computed from that same truncated slice, so it actually read low/zero too).
+  // Fix: every blocked command is ALWAYS rendered, uncapped; CMD_CAP applies only to
+  // the non-blocked remainder (mine first, same priority as before). On a day blocked
+  // count is high this can push the "All" view past 12 rows — an intentional tradeoff,
+  // a blocked row is a stronger signal than the cap's cosmetic ceiling.
+  const cmdMineNonBlocked = myCommands.filter(function(c){ return blockedCommands.indexOf(c) < 0; });
+  const cmdRestNonBlocked = universalCommands.filter(function(c){ return myCommands.indexOf(c) < 0 && blockedCommands.indexOf(c) < 0; });
   const CMD_CAP = 12;
-  const visibleCommands = displayCommands.slice(0, CMD_CAP);
-  const cmdOverflow = Math.max(0, displayCommands.length - visibleCommands.length);
+  const cmdNonBlockedCapped = cmdMineNonBlocked.concat(cmdRestNonBlocked).slice(0, CMD_CAP);
+  const displayCommands = blockedCommands.concat(cmdNonBlockedCapped);
+  const visibleCommands = displayCommands;
+  const cmdOverflow = Math.max(0, universalCommands.length - visibleCommands.length);
   const vBlocked = visibleCommands.filter(function(c){ return blockedCommands.indexOf(c) >= 0; }).length;
   const vMine = visibleCommands.filter(function(c){ return myCommands.indexOf(c) >= 0; }).length;
   const vGriffin = visibleCommands.filter(function(c){ return griffinCommands.indexOf(c) >= 0; }).length;
@@ -5675,7 +5719,11 @@ async function renderOps() {
     }
     todayH += '</ul>';
     if (cmdOverflow) {
-      todayH += '<div class="ops-pad" style="border-top:1px solid var(--border-1)"><span class="ops-muted">Showing ' + esc(visibleCommands.length) + ' of ' + esc(displayCommands.length) + ' — ' + esc(plural(cmdOverflow, 'more command')) + ' open the linked tabs.</span></div>';
+      // universalCommands.length, not displayCommands.length — R3 made displayCommands
+      // === visibleCommands (blocked rows are never truncated), so the old
+      // "N of displayCommands.length" text would read "12 of 12 — 3 more", which is
+      // self-contradictory. The true total is universalCommands.length.
+      todayH += '<div class="ops-pad" style="border-top:1px solid var(--border-1)"><span class="ops-muted">Showing ' + esc(visibleCommands.length) + ' of ' + esc(universalCommands.length) + ' — ' + esc(plural(cmdOverflow, 'more command')) + ' open the linked tabs.</span></div>';
     }
   } else {
     todayH += '<div class="ops-empty"><b>Queue is clear</b>Command rows will collect client, content, outreach, source, finding, integration and money work into one daily lane.</div>';
@@ -5693,7 +5741,7 @@ async function renderOps() {
     // but had no card in this at-a-glance grid — every other Daily-loop area does.
     objectCard('money', pendingExp.length ? pendingExp.length + ' invoice' + (pendingExp.length === 1 ? '' : 's') + ' to confirm' : 'no invoices pending', (s.pay_due_cad > 0 ? '$' + money(s.pay_due_cad) + ' pay due' : 'no pay due'), moneyBadge ? 'warn' : 'ok', 'money') +
     objectCard('sources', uniqueSources.length + ' source feeds', (sys.not_ok || []).length + ' failed · ' + (sys.warns || []).length + ' stale', ((sys.not_ok || []).length ? 'bad' : ((sys.warns || []).length ? 'warn' : 'ok')), 'system', 'sys-sec-sources') +
-    objectCard('findings', findingsTotal + ' open findings', (Number(findingSev.critical)||0) + ' critical · ' + (Number(findingSev.high)||0) + ' high', findingsTotal ? 'warn' : 'ok', 'system', 'sys-sec-findings') +
+    objectCard('findings', findingsBuildFailed ? 'unknown' : (findingsTotal + ' open findings'), findingsBuildFailed ? 'build failed this push — see System tab' : ((Number(findingSev.critical)||0) + ' critical · ' + (Number(findingSev.high)||0) + ' high'), findingsBuildFailed ? 'warn' : (findingsTotal ? 'warn' : 'ok'), 'system', 'sys-sec-findings') +
     objectCard('go-live', gl ? (gl.sending_enabled ? 'send gate open' : 'send gate closed') : 'no gate snapshot', gate ? ((Number(gate.checks_passing)||0) + '/' + (Number(gate.checks_total)||0) + ' prerequisites') : 'needs gate payload', gl && gl.sending_enabled ? 'ok' : 'warn', 'system', 'sys-sec-golive') +
     '</div></div>';
 
@@ -5744,7 +5792,7 @@ async function renderOps() {
     '<div class="ops-actiongrid">' +
     contractCard('Content approval', 'Preview, approve, reject or request changes on a content record.', 'warn', 'content.approve', 'Approve', { source:'operator_today' }, statusPill('record', 'content_item', 'info') + statusPill('audit', 'required', 'warn')) +
     contractCard('Client request', 'Create a client-safe ask for access, assets, approvals or answers.', 'info', 'client_request.create', 'Create ask', { source:'operator_today' }, statusPill('scope', 'client_id', 'info') + statusPill('visible', 'client-safe', 'ok')) +
-    contractCard('Finding review', 'Preview fix, verify, queue, resolve or ignore a Brain finding.', findingsTotal ? 'warn' : 'info', 'autofix.preview', 'Preview fix', { source:'operator_today' }, statusPill('findings', findingsTotal || 0, findingsTotal ? 'warn' : 'ok')) +
+    contractCard('Finding review', 'Preview fix, verify, queue, resolve or ignore a Brain finding.', findingsBuildFailed ? 'warn' : (findingsTotal ? 'warn' : 'info'), 'autofix.preview', 'Preview fix', { source:'operator_today' }, statusPill('findings', findingsBuildFailed ? 'unknown' : (findingsTotal || 0), findingsBuildFailed ? 'warn' : (findingsTotal ? 'warn' : 'ok'))) +
     contractCard('Go-live preflight', 'Run the safe checklist before anything public is sent.', gl ? 'warn' : 'info', 'golive.preflight', 'Preflight', { source:'operator_today' }, statusPill('send gate', gate && gate.sending_enabled ? 'open' : 'closed', gate && gate.sending_enabled ? 'ok' : 'warn')) +
     '</div></div>';
   todayH += '</div>'; // ops-panel
@@ -5788,8 +5836,13 @@ async function renderOps() {
 
   // Brain findings
   todayH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Findings</h3><span class="ops-count">' +
-    esc(findingsTotal) + ' open</span></div>';
-  if (findingsTotal) {
+    (findingsBuildFailed ? 'unknown' : esc(findingsTotal) + ' open') + '</span></div>';
+  if (findingsBuildFailed) {
+    // R5: a build failure must never render identically to a genuine zero — see
+    // findingsBuildFailed's definition above for why this is distinct from the
+    // findingsTotal===0 branch below.
+    todayH += '<p class="ops-pill bad ops-pad" style="margin:12px 16px">Could not compute findings this push — this is NOT a clean sweep. See System tab · Data integrity for the error.</p>';
+  } else if (findingsTotal) {
     todayH += findingsTilesHtml();
     todayH += '<div class="ops-pad" style="border-top:1px solid var(--border-1)"><span class="ops-muted">The full findings list lives on the System tab.</span> ' +
       '<button class="ops-btn ghost" onclick="opsTab(\'system\')">Open System</button></div>';
@@ -7077,7 +7130,12 @@ async function renderOps() {
       const wk = String(r.source || r.name || '').toLowerCase();
       if (wk && diSeen[wk]) continue;
       if (wk) diSeen[wk] = true;
-      sysH += '<li class="ops-li"><span class="ops-pill warn">stale</span>' +
+      // security-fix-round item 5 cosmetic note: this list hardcoded "stale" for
+      // every warns row, but a push_operator_snapshot:* entry (R5/R6) is a BUILD
+      // failure, not a stale data source — cheap, reliable distinction on the
+      // source prefix (same one _derive_decision_inbox_triggers now excludes on).
+      const isBuildWarn = /^push_operator_snapshot:/.test(String(r.source || ''));
+      sysH += '<li class="ops-li"><span class="ops-pill warn">' + (isBuildWarn ? 'build error' : 'stale') + '</span>' +
         '<div class="ops-grow"><div class="ops-li-ttl">' + esc(r.source) + '</div>' +
         '<div class="ops-li-meta">' + esc(r.detail) + '</div></div></li>';
     }
@@ -7345,6 +7403,13 @@ async function renderOps() {
       sysH += '</ul>';
     }
     sysH += '</div>';
+  } else if (findingsBuildFailed) {
+    // security-fix-round item 1 follow-up to R5: the guard above is false when the
+    // build failed (findings absent → findingsTotal===0 AND findings.total!==0 is
+    // undefined, not 0) — this panel used to just not render, silently, which on a
+    // System HEALTH tab is worse than a wrong zero: no signal anything is wrong here.
+    sysH += '<div class="ops-panel" id="sys-sec-findings" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Findings</h3><span class="ops-count">unknown</span></div>' +
+      '<p class="ops-pill bad ops-pad" style="margin:12px 16px">Could not compute findings this push — see Data integrity above for the error.</p></div>';
   }
 
   sysH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Findings triage</h3>' +
@@ -7524,7 +7589,7 @@ async function renderOps() {
     metric('Automation', autoWired ? (automation.wrapperCount || cronWrappers.length) : '', autoWired ? ((automation.pythonCount || 0) + ' scripts · ' + automationLogs.length + ' recent logs') : 'not wired into this snapshot', autoWired ? (automationLogs.length ? 'info' : '') : 'warn') +
     metric('Site pages', siteCounts.pages == null ? '' : siteCounts.pages, siteCounts.pages == null ? 'not wired into this snapshot' : ((siteCounts.blog || 0) + ' blog · ' + (siteCounts.lab || 0) + ' lab'), siteIssues.length ? 'warn' : 'info') +
     metric('Signals', (signalItems.length || signalIntake.total != null) ? (signalItems.length || signalIntake.total || 0) : '', (signalItems.length || signalIntake.total != null) ? (signalIntake.verdictCounts && signalIntake.verdictCounts.IMPLEMENT ? signalIntake.verdictCounts.IMPLEMENT + ' implement' : 'intake pipeline') : 'not wired into this snapshot', signalIntake.ok === false ? 'bad' : 'info') +
-    metric('Findings', fixitSummary.total || fixitItems.length || findingsTotal, (fixitSummary.critical || 0) + ' critical · ' + (fixitSummary.high || 0) + ' high', (fixitSummary.critical || 0) ? 'bad' : ((fixitSummary.high || 0) ? 'warn' : 'info')) +
+    metric('Findings', findingsBuildFailed ? 'unknown' : (fixitSummary.total || fixitItems.length || findingsTotal), findingsBuildFailed ? 'build failed this push' : ((fixitSummary.critical || 0) + ' critical · ' + (fixitSummary.high || 0) + ' high'), findingsBuildFailed ? 'warn' : ((fixitSummary.critical || 0) ? 'bad' : ((fixitSummary.high || 0) ? 'warn' : 'info'))) +
     '</div>';
 
   hqH += '<div class="ops-colset two" style="margin-top:16px">';
@@ -7924,7 +7989,9 @@ async function renderOps() {
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='market'?'true':'false') + '" data-v="market" onclick="opsTab(\'market\')">Market' +
     (marketBadge ? ' <span class="ops-badge">' + esc(marketBadge) + '</span>' : '') + '</button>' +
     '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='system'?'true':'false') + '" data-v="system" onclick="opsTab(\'system\')">System' +
-    (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' : (findingsTotal ? ' <span class="ops-badge">' + esc(findingsTotal) + '</span>' : '')) + '</button>' +
+    (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' :
+      (findingsBuildFailed ? ' <span class="ops-badge hot" title="Findings build failed this push">?</span>' :
+        (findingsTotal ? ' <span class="ops-badge">' + esc(findingsTotal) + '</span>' : ''))) + '</button>' +
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='hq'?'true':'false') + '" data-v="hq" onclick="opsTab(\'hq\')">Legacy HQ' +
     (hqRiskCount ? ' <span class="ops-badge">' + esc(hqRiskCount) + '</span>' : '') + '</button>' : '') +
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
@@ -8680,4 +8747,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 52afd21091d0 -->
+<!-- rankwise-portal-version: 6e44fd0ea0bd -->
