@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<!-- CSP (portal-csp-meta-tag): GitHub Pages can't set HTTP headers, so this meta
+     tag is the only defense-in-depth layer for the auth-token-bearing portal.
+     script-src/style-src cover 'self' 'unsafe-inline' because the whole page is
+     one inline <script>/<style> block with no external bundle — no 'unsafe-eval'
+     needed (no eval/new Function anywhere). The Supabase origin is NOT added to
+     script-src (nothing loads JS from it) — every Supabase call is a same-script
+     fetch() to REST/auth/storage/functions endpoints, which CSP governs via
+     connect-src, so https://mxzkzgbonxrgkwanhnxs.supabase.co lives there instead. https://mxzkzgbonxrgkwanhnxs.supabase.co is substituted at
+     publish time by publish_portal_page.py (same placeholder as the script below) —
+     do not hand-edit a literal URL here. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://mxzkzgbonxrgkwanhnxs.supabase.co; img-src 'self' data:; font-src 'self'; frame-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
 <!-- add-to-homescreen (finding 92): no chrome flash on a #101418 app, no white
      status bar. apple-touch-icon deliberately omitted — data: URIs don't work on
      iOS and this file stays self-contained (no network asset). -->
@@ -2651,6 +2662,26 @@ function safeHref(url) {
   url = String(url == null ? '' : url).trim();
   return /^https?:\/\//i.test(url) ? url : '';
 }
+// Purchase-queue outbound "Buy" link: stricter than safeHref on purpose. This
+// href is built from a purchase_queue.py ledger row — a proposal payload, not
+// operator-authored copy — and the whole feature's safety property (build
+// task's HARD RULE: nothing in this build may ever spend, buy, or auto-
+// approve) rests on the click-target being one of a small, hardcoded set of
+// registrars/vendors, not whatever URL a future proposer happens to write.
+// esc() alone only blocks HTML/attribute breakout, not a javascript:/data:
+// scheme or an off-list host — https-only PLUS a hostname allowlist, both
+// checked here in the frontend (never trusted from the payload).
+const PURCHASE_LINK_ALLOWED_HOSTS = ['namecheap.com', 'www.namecheap.com'];
+function safePurchaseHref(url) {
+  url = String(url == null ? '' : url).trim();
+  if (!/^https:\/\//i.test(url)) return '';
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return PURCHASE_LINK_ALLOWED_HOSTS.indexOf(host) >= 0 ? url : '';
+  } catch (e) {
+    return '';
+  }
+}
 // Non-color status cue (finding 32): a glyph so ok/warn/bad are distinguishable
 // without relying on the pill's colour alone. aria-hidden — screen readers already
 // read the pill's label/value text; the glyph is a redundant VISUAL cue only.
@@ -2747,7 +2778,15 @@ function callBtn(p) {
   // ANY-row match, not newest-row (edge review LOW): a later logged disposition on
   // a DNC'd lead must not resurrect the dial button — DNC is permanent, no undo.
   const _everDnc = ((window._attempts || {})[p.slug] || []).some(function(r) { return r.disposition === 'do_not_contact'; });
-  if ((_st && _st.state === 'dnc_blocked') || _everDnc) {
+  // ticket seller-queue-dnc-server-stamp: window._attempts is built from a
+  // seller_call_log fetch capped at 300 rows (PR #38) — a do_not_contact row
+  // older than that window is invisible to _everDnc while the prospect is
+  // still queued. p.dnc_logged is push_seller_queue.py's server-side stamp
+  // from the FULL Supabase table (paginated past PostgREST's per-response
+  // row cap — fixed 2026-07-30; a single request there is NOT actually
+  // uncapped), checked IN ADDITION to (never instead of) the client-window
+  // scan above — either signal blocks the call.
+  if ((_st && _st.state === 'dnc_blocked') || _everDnc || p.dnc_logged) {
     return '<div class="dccall dnc">📵 DO NOT CALL — marked do-not-contact</div>';
   }
   if (!p.phone) return '';
@@ -4434,17 +4473,119 @@ document.addEventListener('keydown', function(e) {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
-// When the tab regains focus after being hidden, a view whose data is >10 min old
-// silently refetches (finding 46). All three roles now have swap-once (finding 2), so
-// the refetch is invisible in every role — the stale view stays put until the fresh
-// one swaps in, instead of flashing a bare 'Loading…'.
+// ── Auto-refresh (2026-07-31) ───────────────────────────────────────────────────
+// Until now the portal had NO periodic refetch at all. The two 60s intervals are
+// cosmetic — opsTickFreshness only relabels "x min ago" strings and sellerHoursTick
+// only moves a clock; neither fetches anything. So an open portal showed whatever it
+// loaded on page load, forever, and the ONLY automatic refetch was the visibility
+// handler below, gated at a full 10 minutes. Tab away for three minutes, come back,
+// still stale — and no way to tell, because the freshness label kept ticking.
+//
+// The server half of this: the cockpit reads a CACHED operator_portal_snapshot that
+// regenerated only at 09:00 and 17:00, so a tighter client poll alone would just
+// re-fetch the same stale row faster. push_snapshot.sh --snapshot-only now runs every
+// 10 min (crontab, 2026-07-31), which is what makes polling worth doing.
+const PORTAL_REFRESH_MS = 120000;   // refetch an idle, visible view every 2 min
+const PORTAL_STALE_MS   = 45000;    // …and on focus-regain if the data is older than this
+// The dial console keeps the ORIGINAL 10-minute focus-regain gate. Cutting it to 45s
+// shrank a seller's draft-loss window 13x: renderSeller wipes #app wholesale and
+// snapshotDraft() only runs from renderDossier, i.e. AFTER the wipe, so an in-progress
+// call note / disposition / callback is simply gone. The ops and client views survive a
+// repaint (captureOpsUI + restoreOpsUI); the dial console does not, so it does not get
+// the faster gate. This makes the exclusion real — the periodic timer already skipped
+// 'dial', but the visibility path did not, which is the contradiction this closes.
+const PORTAL_STALE_MS_DIAL = 600000;
+
+// Skip an automatic repaint while the operator is typing. Every render path already
+// preserves scroll/filters/drawer/note-drafts (captureOpsUI) and stamps a generation
+// so a slow fetch can't clobber a newer paint — but a repaint under a live caret is
+// still disruptive, and no amount of state-restore makes it feel right. A focused
+// field means someone is mid-thought; the next tick will pick it up.
+function portalUserIsTyping() {
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
+  // Unsent client response/ask drafts have NO capture-and-restore (unlike the ops
+  // .cr-note/.tk-note pair, which captureOpsUI preserves), so a repaint destroys them
+  // outright. Focus alone is not enough cover: blur the box, read the request for two
+  // minutes, and the idle tick would wipe what you typed and re-hide the composer.
+  // clientApprovalWrite already guards these with a discard confirm — an automatic
+  // repaint must not do silently what a deliberate action stops to ask about.
+  const drafts = document.querySelectorAll('.crq-txt');
+  for (let i = 0; i < drafts.length; i++) {
+    if ((drafts[i].value || '').trim()) return true;
+  }
+  return false;
+}
+
+// Refetch whichever view is currently mounted. Deliberately reuses the existing
+// render entry points rather than adding a parallel fetch path, so auto-refresh
+// inherits swap-once, the generation stamps, and the UI-state restore for free.
+function portalRefreshView() {
+  if (!tok()) return;                                   // signed out — nothing to refresh
+  if (document.visibilityState !== 'visible') return;   // never poll a hidden tab
+  if (portalUserIsTyping()) return;                     // both triggers, not just the timer
+  // In-flight guard: the fetch clock is only stamped once a fetch RESOLVES, and the
+  // generation stamps discard stale RESULTS, not stale REQUESTS. Against a hung
+  // backend (responses slower than the tick) that means a fresh multi-GET cycle piles
+  // on every 30s until one returns. Fast failures already back off via the clock; this
+  // covers the slow ones.
+  // The flag EXPIRES rather than latching forever. fetch has no spec-bound settle time,
+  // so a slow-drip response could otherwise leave this true permanently and kill
+  // auto-refresh silently for the life of the tab. Failing closed is the right
+  // direction — it degrades to exactly the pre-change portal, and manual Refresh
+  // bypasses this function entirely — but permanent-and-silent is worse than bounded.
+  // Deliberately an expiry, not an AbortController: a slow-but-live fetch should finish;
+  // we only stop letting its flag outlive plausibility.
+  if (window._portalRefreshInFlight &&
+      Date.now() - (window._portalRefreshInFlightAt || 0) < 300000) return;
+  window._portalRefreshInFlight = true;
+  window._portalRefreshInFlightAt = Date.now();
+  const done = () => { window._portalRefreshInFlight = false; };
+  const c = document.body.classList;
+  let p;
+  // try/catch belt: a SYNCHRONOUS throw between setting the flag and attaching the
+  // settle handler would skip done() and latch until the expiry above. Unreachable
+  // today (all three entry points are async, so sync throws surface as rejections that
+  // .then(done, done) catches) — but it is one refactor away from real, and the guard
+  // costs nothing.
+  try {
+    if (c.contains('ops')) p = renderOps();
+    else if (c.contains('client')) p = clientRefresh();
+    else if (c.contains('dial')) p = render();
+    else { done(); return; }
+  } catch (e) { done(); throw e; }
+  Promise.resolve(p).then(done, done);
+}
+
+// When the tab regains focus after being hidden, a stale view silently refetches
+// (finding 46). All three roles have swap-once (finding 2), so the refetch is
+// invisible — the stale view stays put until the fresh one swaps in, instead of
+// flashing a bare 'Loading…'. Threshold cut 10 min → 45s: the old window was chosen
+// when nothing regenerated the snapshot intraday, so there was little point looking.
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState !== 'visible') return;
-  if (Date.now() - (window._lastFetchMs || 0) < 600000) return;
-  if (document.body.classList.contains('ops')) renderOps();
-  else if (document.body.classList.contains('client')) clientRefresh();
-  else if (document.body.classList.contains('dial')) render();
+  // Per-view threshold: the dial console keeps the original 10-minute window because a
+  // repaint there destroys an in-progress call note (see PORTAL_STALE_MS_DIAL).
+  const stale = document.body.classList.contains('dial') ? PORTAL_STALE_MS_DIAL : PORTAL_STALE_MS;
+  if (Date.now() - (window._lastFetchMs || 0) < stale) return;
+  portalRefreshView();
 });
+
+// Periodic refetch for a portal left open and visible. Scoped to the operator cockpit
+// and the client view ONLY — the dial console is excluded on purpose: it is a live-work
+// surface where a seller may be mid-call with unsaved notes, and its existing triggers
+// (logCall's optimistic repaint + focus-regain) already cover it without a timer
+// repainting underneath them. Ticks every 30s but acts only when the data is actually
+// PORTAL_REFRESH_MS old, so a manual Refresh or a post-write repaint resets the clock
+// instead of being followed moments later by a redundant fetch.
+window._portalRefreshTimer = setInterval(function() {
+  if (document.visibilityState !== 'visible') return;
+  if (portalUserIsTyping()) return;
+  const c = document.body.classList;
+  if (!c.contains('ops') && !c.contains('client')) return;
+  if (Date.now() - (window._lastFetchMs || 0) < PORTAL_REFRESH_MS) return;
+  portalRefreshView();
+}, 30000);
 // Last-resort net (finding 1): if a render's promise rejected and left the app frozen
 // on the bare 'Loading…' placeholder, show the honest read-error card instead of a
 // permanently-stuck screen. Guarded so an unrelated rejection never clobbers a view
@@ -4548,6 +4689,15 @@ async function renderOps() {
   ]);
   app.classList.remove('ops-refreshing');
   if (myGen !== window._opsGen) return;             // superseded by a newer render (finding 6)
+  // Stamp the fetch clock (2026-07-31). renderOps never did, so for an operator who
+  // only ever sees the cockpit `_lastFetchMs` stayed 0 and the staleness guards read
+  // `Date.now() - 0`, i.e. always stale — the "refetch only if >10 min old" visibility
+  // check has silently been "refetch on EVERY focus regain" since it was written. The
+  // 30s auto-refresh tick would have escalated that to a refetch storm. Stamped after
+  // the generation check (a superseded render must not claim the fetch) but BEFORE the
+  // error returns below, so a failing backend backs off for PORTAL_REFRESH_MS instead
+  // of being retried every 30s.
+  window._lastFetchMs = Date.now();
   if (rows === null) return;                        // session dead; render() already fired
   // The operator snapshot IS the cockpit. If it failed, every count below would be
   // a zero that looks exactly like this pre-revenue product's honest zeros — so
@@ -4614,6 +4764,18 @@ async function renderOps() {
   // exception building this section THIS push (detail lands in system.warns); every
   // "findings" surface below must render that as an error state, never a silent zero.
   const findingsBuildFailed = p.findings_build_ok === false;
+  // Purchase-queue (build-purchase-queue lane): same build-failure-vs-empty
+  // distinction as findings above — purchase_queue_build_ok === false means the
+  // backend hit an exception this push (detail lands in system.warns under the
+  // push_operator_snapshot:purchase_queue source); the card renders that as an
+  // explicit error, never a silent "nothing to review". items is a small
+  // (cap 10) open-only slice; total_open is the true count for an honest
+  // "showing N of M" line. p.purchase_queue only (no hq.* fallback) — `hq` isn't
+  // declared until below (line ~4713); the builder writes this top-level anyway.
+  const purchaseQueue = p.purchase_queue || {};
+  const purchaseQueueItems = asArr(purchaseQueue.items);
+  const purchaseQueueTotalOpen = Number(purchaseQueue.total_open) || 0;
+  const purchaseQueueBuildFailed = p.purchase_queue_build_ok === false;
   // One tiles builder for Today + System so both always break down the SAME header
   // count — critical+high+medium+low, plus an "other" bucket when severities the
   // backend didn't itemize would otherwise make the tiles under-sum (finding S5).
@@ -5729,6 +5891,41 @@ async function renderOps() {
     todayH += '<div class="ops-empty"><b>Queue is clear</b>Command rows will collect client, content, outreach, source, finding, integration and money work into one daily lane.</div>';
   }
   todayH += '</div>';
+
+  // Purchase queue (build-purchase-queue lane): every recommended purchase (domains,
+  // API top-ups, subscriptions) lands here for review — read-only + one outbound link
+  // per row, deliberately kept OUT of the Command queue above rather than folded in
+  // (HONEST-ACTIONS CONTRACT for v1: no action keys, no approve/decline buttons, no
+  // allowlist-gated write — the command queue's whole shape assumes an action/lifecycle/
+  // owner triple none of these rows have). No dedupId needed for the same reason: this
+  // list is sourced from exactly one ledger (purchase_queue.py) keyed by its own stable
+  // slug ids, not merged from multiple triggers the way command_queue rows are.
+  todayH += opsPanel(
+    'Purchases awaiting you',
+    purchaseQueueBuildFailed ? 'unknown' : esc(purchaseQueueTotalOpen || 'clear'),
+    purchaseQueueBuildFailed
+      ? '<p class="ops-pill bad ops-pad" style="margin:12px 16px">Could not compute the purchase queue this push — this is NOT a clean sweep. See System tab for the error.</p>'
+      : (purchaseQueueItems.length
+          ? '<div class="ops-pad ops-muted" style="padding-bottom:0">Proposals only — nothing here spends or buys anything. Review each item and finalize the purchase yourself via the outbound link.</div>' +
+            '<ul class="ops-list">' + purchaseQueueItems.map(function(it) {
+              // safePurchaseHref, not safeHref: this is the outward BUY click-target
+              // sourced from a ledger row, so it's gated by scheme + hardcoded host
+              // allowlist (see the function's own comment), not scheme alone.
+              const buyUrl = safePurchaseHref(it.link);
+              const costTxt = (it.cost_estimate != null && it.currency) ? ('~$' + money(it.cost_estimate) + ' ' + esc(it.currency) + '/yr') : '';
+              const evidenceName = it.evidence ? String(it.evidence).split('/').pop() : '';
+              return opsLi(
+                esc(it.title || it.id || 'Purchase') + (costTxt ? ' <span class="ops-muted">' + costTxt + '</span>' : ''),
+                [it.why ? esc(it.why) : '', evidenceName ? 'Evidence: ' + esc(evidenceName) : ''].filter(Boolean).join(' · '),
+                buyUrl ? '<a class="ops-btn ghost" href="' + esc(buyUrl) + '" target="_blank" rel="noopener">Buy <span aria-hidden="true">↗</span></a>' : ''
+              );
+            }).join('') + '</ul>' +
+            (purchaseQueueTotalOpen > purchaseQueueItems.length
+              ? '<div class="ops-pad" style="border-top:1px solid var(--border-1)"><span class="ops-muted">Showing ' + esc(purchaseQueueItems.length) + ' of ' + esc(purchaseQueueTotalOpen) + ' open proposals.</span></div>'
+              : '')
+          : '<div class="ops-empty"><b>Queue is clear</b>No purchase proposals waiting on you.</div>'),
+    { id: 'ops-purchase-queue', style: 'margin-top:16px' }
+  );
 
   todayH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Queues by area</h3><span class="ops-count">object lifecycle states</span></div>' +
     '<div class="ops-object-grid">' +
@@ -8097,14 +8294,25 @@ async function renderClientImpl(key, opPreview) {
     ]);
   }
   app.classList.remove('client-refreshing');        // fetch settled — undim (swap-once, finding 2)
+  // Stamp the fetch clock HERE, at settle, not on the success paint below (moved
+  // 2026-07-31). The old placement stamped only the full-snapshot paint, deliberately
+  // skipping the failure and no-snapshot returns — correct when the sole consumer was
+  // a 10-minute visibility gate, fatal once a 30s timer reads the same clock: every
+  // unstamped return left _lastFetchMs stale, so a client whose backend was failing —
+  // or a signed-in client with no snapshot row yet — refetched and repainted every 30
+  // seconds, indefinitely (~2,880 cycles/day). Stamping at settle means a failing
+  // backend backs off for PORTAL_REFRESH_MS exactly like renderOps does.
+  window._lastFetchMs = Date.now();
   if (rows === null) return;                        // session dead; render() already fired
   // A client seeing zeroed metrics would read them as "my campaign is failing",
   // not "the dashboard couldn't load". Never render this view on a failed fetch.
   if (bad(rows) || !Array.isArray(rows)) { app.innerHTML = errorCard(bad(rows) ? rows.__error : "parse", "clientRefresh()"); return; }
   const snap = rows[0] || null;
   const back = roleOf() === "operator" ? '<button class="role-btn primary" onclick="renderOps()">← Operator cockpit</button>' : '';
-  // No stamp at all before the first snapshot — "no snapshot" is engineer-voice on a
-  // client-facing surface, and the setup card below already says what's happening.
+  // No "synced …" LABEL before the first snapshot — "no snapshot" is engineer-voice on
+  // a client-facing surface, and the setup card below already says what's happening.
+  // (This is about the visible label only. The fetch CLOCK, _lastFetchMs, is stamped
+  // unconditionally at settle-time above — do not read this as a skipped stamp path.)
   const clientAsof = (snap && snap.updated_at) ? 'synced ' + esc(ptTime(snap.updated_at)) : '';
   let h = '<div class="role-shell">' +
     '<header class="app-top"><div class="app-brand"><span class="app-wordmark">Rankwise</span>' +
@@ -8714,10 +8922,8 @@ async function renderClientImpl(key, opPreview) {
 
   h += '<p class="mut" style="margin:14px 2px">Questions any time: <a href="mailto:zshef@rankwise.ca" style="color:var(--accent)">zshef@rankwise.ca</a> · <a href="tel:+17788870311" style="color:var(--accent)">+1 778 887 0311</a></p></div>';
   app.innerHTML = h;
-  // Stamp the fetch clock (finding 4) ONLY on this successful full-snapshot paint —
-  // NOT on the no-snapshot / failure returns above — so the visibility-change stale
-  // gate (>10 min) actually engages and every focus-regain stops force-reloading.
-  window._lastFetchMs = Date.now();
+  // (The fetch clock is stamped at settle-time above, not here — see that comment.
+  // Stamping only the success paint let every failure path retry without back-off.)
   opsStartFreshTick();   // 60s relative-timestamp tick — role-agnostic, idempotent (finding 5)
   } catch (e) { app.innerHTML = errorCard('parse', 'clientRefresh()'); }
 }
@@ -8747,4 +8953,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 6e44fd0ea0bd -->
+<!-- rankwise-portal-version: 3eb2c187cc09 -->
