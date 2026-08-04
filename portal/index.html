@@ -2921,6 +2921,30 @@ function chipsRow(it) {
     ? '<span class="chip chip--warn" title="Outside the ideal-customer profile — call with judgment">' + esc(it.icp_label) + '</span>'
     : '<span class="chip chip--ok" title="Fits the ideal-customer profile">ICP ✓</span>');
   if (it.trust) c.push('<span class="chip" title="Data-confidence tier from the enrichment crawl">trust ' + esc(it.trust) + '</span>');
+  // Dial-intel badges (portal-dial-card-intel-render, 2026-08-04) — line type,
+  // ad infra, invisible. Same vocabulary + source data as the markdown call
+  // sheets' "Intel:" line (render_call_sheets.py render_sheet()/build_card_intel()).
+  // Each degrades to nothing when its field is absent: build_card_intel only
+  // emits these keys when the underlying signal was actually measured
+  // (dial-intel-extras.json / line-type-cache.json), so "absent" means
+  // "never measured", not zero — never invent a badge from a missing key.
+  // NOTE: it.invisible is read defensively but build_card_intel does not yet
+  // promote it (dial-intel-extras.json carries the flag; only ad_intel/
+  // call_window/why_now are currently mirrored into the pushed intel) — this
+  // branch is a no-op today and will start rendering the moment that
+  // one-line backend gap is closed, without another portal change.
+  if (it.line_intel && it.line_intel.dial_line_type) {
+    c.push(it.line_intel.owner_cell_likely
+      ? '<span class="chip chip--ok" title="Number-level line-type lookup — this is a personal/cell line, likely the owner">📱 owner-cell likely</span>'
+      : '<span class="chip" title="Line-type lookup (' + esc(it.line_intel.confidence || 'unknown') + ' confidence)">☎️ ' + esc(it.line_intel.dial_line_type) + '</span>');
+  }
+  if (it.ad_intel && it.ad_intel.infra && it.ad_intel.infra.length) {
+    c.push('<span class="chip chip--warn" title="Ad-infrastructure detected on their site (pixel/tag presence) — not a spend figure">💸 running ads (' +
+      it.ad_intel.infra.map((s) => esc(s)).join(', ') + ')</span>');
+  }
+  if (it.invisible) {
+    c.push('<span class="chip chip--bad" title="No live website and no Google Business Profile signal found">👻 invisible</span>');
+  }
   // Per-lead DNC status right at the dial button (2-state clear/hold). [PROVISIONAL wording — Zack sign-off]
   c.push(it.dnc
     ? '<span class="chip chip--bad" title="On the do-not-contact hold list — do not dial">DNC hold</span>'
@@ -2961,6 +2985,24 @@ function gapViz(it) {
       ' — no review count captured for this prospect to compare against.</p></div>';
   }
   return '';
+}
+
+// Best-call-window + "why now" lines (portal-dial-card-intel-render,
+// 2026-08-04) — mirrors render_call_sheets.py's render_sheet() Intel/WHY-NOW
+// block on the markdown call sheets, reading the same build_card_intel()
+// call_window/why_now keys pushed onto the card's intel. Absent when never
+// measured (no dial-intel-extras.json entry, or the entry has no
+// window/why_now) — each line is skipped independently, never a placeholder.
+function dialIntelLines(it) {
+  let h = '';
+  if (it.call_window && it.call_window.suggest) {
+    h += '<div class="mut" style="font-size:12.5px;margin:4px 0 0">🕗 Best window: ' + esc(it.call_window.suggest) + '</div>';
+  }
+  if (it.why_now) {
+    h += '<div style="margin:6px 0;padding:7px 10px;border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;font-size:12.5px">' +
+      '<b>⚡ WHY NOW:</b> ' + esc(it.why_now) + '</div>';
+  }
+  return h;
 }
 
 // Card-face sections are SHORT and labelled by action — the verbose verifier
@@ -3151,7 +3193,7 @@ function buildDossier(p, done, attemptPill) {
   if (p.pushed_at) h += '<div style="margin-top:5px">' + freshnessPill('pushed', p.pushed_at, 48, 168) + '</div>';
   if (attemptPill) h += '<div style="margin-top:7px">' + attemptPill + '</div>';
   if (!has) return h + callBtn(p) + logForm(p.slug, true) + '</div>';   // degrade; Log control pinned open
-  h += hookBlock(it) + chipsRow(it) + momentumRow(it);
+  h += hookBlock(it) + chipsRow(it) + momentumRow(it) + dialIntelLines(it);
   // Opener — elevated out of a <details>: the line you read the second they pick up.
   if (p.opener) h += '<div class="stage-lbl">Opener — read when they pick up</div>' +
     '<div class="opener opener--stage">' + esc(fillSellerName(p.opener)) + '</div>';
@@ -4298,7 +4340,7 @@ function opsRestoreFocus(sig) {
   if (el && el.focus) el.focus({ preventScroll: true });
 }
 function captureOpsUI() {
-  const st = { scrollY: window.scrollY, filters: {}, search: [], client: null, density: [], record: window._opsOpenRecordId || null, focus: opsFocusSig(), notes: [] };
+  const st = { scrollY: window.scrollY, filters: {}, search: [], client: null, density: [], record: window._opsOpenRecordId || null, focus: opsFocusSig(), notes: [], cresp: [], creq: [], catreq: [], gvCheck: null, revenue: {} };
   document.querySelectorAll('[data-filter-group]').forEach(function(b) {
     if (b.classList.contains('active')) st.filters[b.dataset.filterGroup] = b.dataset.filterValue;
   });
@@ -4321,6 +4363,61 @@ function captureOpsUI() {
     const key = row ? (isCr ? row.dataset.contentId : row.dataset.ticketId) : '';
     if (!key) return;   // no stable ancestor id — nothing safe to key the restore on
     st.notes.push({ cls: isCr ? 'cr-note' : 'tk-note', key: key, value: ta.value, focused: ta === document.activeElement, start: ta.selectionStart, end: ta.selectionEnd });
+  });
+  // Client-response / raise-ask / access-task drafts (portal-captureops-misses-unsaved-fields,
+  // 2026-08-04) — extends the .cr-note/.tk-note pattern above to the fields the edge-fn-
+  // security-reviewer flagged as uncovered (finding 4, 2026-07-31 auto-refresh review): the
+  // client-response composer (.cresp-kind/.cresp-text), the "raise an ask" form (.creq-*), and
+  // the "track access task" form (.catreq-*). Each can appear MULTIPLE times in the DOM at once
+  // — opsClientDetail only toggles `hidden`, every client's panel is rendered — so each row is
+  // keyed on its own data-client-key (+ data-request-id for .ops-cresp, which repeats per ask).
+  // A row counts as "touched" when it has typed text OR a select whose value differs from its
+  // own first option; an untouched select always reports its default as .value, and that must
+  // not count as an edit (acceptance criterion: a clean repaint restores nothing). Selection
+  // range is tracked only on the plain text inputs, mirroring notes' focused/start/end — in
+  // practice this is defensive/dead like that pattern already is (portalUserIsTyping blocks the
+  // auto-refresh path while any of these is focused, and a click-triggered renderOps() always
+  // moves focus to the clicked button first), kept for parity with the established shape.
+  document.querySelectorAll('.ops-cresp[data-client-key][data-request-id]').forEach(function(wrap) {
+    const kindEl = wrap.querySelector('.cresp-kind'), textEl = wrap.querySelector('.cresp-text');
+    if (!kindEl || !textEl) return;
+    const kind = kindEl.value, text = textEl.value;
+    if (!text.trim() && kind === kindEl.options[0].value) return;
+    st.cresp.push({ ck: wrap.dataset.clientKey, rid: wrap.dataset.requestId, kind: kind, text: text,
+      focused: textEl === document.activeElement, start: textEl.selectionStart, end: textEl.selectionEnd });
+  });
+  document.querySelectorAll('.ops-creq[data-client-key]').forEach(function(wrap) {
+    const titleEl = wrap.querySelector('.creq-title'), detailEl = wrap.querySelector('.creq-detail'), kindEl = wrap.querySelector('.creq-kind');
+    if (!titleEl || !detailEl || !kindEl) return;
+    const title = titleEl.value, detail = detailEl.value, kind = kindEl.value;
+    if (!title.trim() && !detail.trim() && kind === kindEl.options[0].value) return;
+    const onTitle = titleEl === document.activeElement, onDetail = detailEl === document.activeElement;
+    st.creq.push({ ck: wrap.dataset.clientKey, title: title, detail: detail, kind: kind,
+      focusedField: onTitle ? 'title' : onDetail ? 'detail' : '',
+      start: onTitle ? titleEl.selectionStart : onDetail ? detailEl.selectionStart : null,
+      end: onTitle ? titleEl.selectionEnd : onDetail ? detailEl.selectionEnd : null });
+  });
+  document.querySelectorAll('.ops-catreq[data-client-key]').forEach(function(wrap) {
+    const typeEl = wrap.querySelector('.catreq-type'), destEl = wrap.querySelector('.catreq-dest'), instrEl = wrap.querySelector('.catreq-instr');
+    if (!typeEl || !destEl || !instrEl) return;
+    const type = typeEl.value, dest = destEl.value, instr = instrEl.value;
+    if (!dest.trim() && !instr.trim() && type === typeEl.options[0].value) return;
+    const onDest = destEl === document.activeElement, onInstr = instrEl === document.activeElement;
+    st.catreq.push({ ck: wrap.dataset.clientKey, type: type, dest: dest, instr: instr,
+      focusedField: onDest ? 'dest' : onInstr ? 'instr' : '',
+      start: onDest ? destEl.selectionStart : onInstr ? instrEl.selectionStart : null,
+      end: onDest ? destEl.selectionEnd : onInstr ? instrEl.selectionEnd : null });
+  });
+  // Go-live check select + record-revenue form — both single global instances (no per-row key
+  // needed: the panel each lives in is rendered once). Revenue fields use the plain element ids
+  // already in the markup (#rev-*); the go-live select has none, so it's scoped by its panel's
+  // stable id (#sys-sec-golive). "Touched" for the select uses the same differs-from-default
+  // rule as the ones above.
+  const gv = document.querySelector('#sys-sec-golive .gv-check');
+  st.gvCheck = (gv && gv.value !== gv.options[0].value) ? gv.value : null;
+  ['rev-business', 'rev-collected', 'rev-mrr', 'rev-city', 'rev-clientid', 'rev-note'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el && el.value) st.revenue[id] = el.value;
   });
   return st;
 }
@@ -4349,11 +4446,51 @@ function restoreOpsUI(st) {
     if (box) box.hidden = false;
     if (n.focused) focusedNote = { el: ta, start: n.start, end: n.end };
   });
+  // Re-fill client-response / raise-ask / access-task drafts by the same client_key(+request_id)
+  // key, mirroring the notes restore above. .value is a property assignment, never innerHTML —
+  // safe for operator text. A missing wrap (row resolved/claimed elsewhere while typing) is a
+  // silent no-op, same as the notes' "row no longer on the board" case.
+  let focusedDraft = null;
+  (st.cresp || []).forEach(function(r) {
+    const wrap = document.querySelector('.ops-cresp[data-client-key="' + CSS.escape(r.ck) + '"][data-request-id="' + CSS.escape(r.rid) + '"]');
+    if (!wrap) return;
+    const kindEl = wrap.querySelector('.cresp-kind'), textEl = wrap.querySelector('.cresp-text');
+    if (kindEl) kindEl.value = r.kind;
+    if (textEl) { textEl.value = r.text; if (r.focused) focusedDraft = { el: textEl, start: r.start, end: r.end }; }
+  });
+  (st.creq || []).forEach(function(r) {
+    const wrap = document.querySelector('.ops-creq[data-client-key="' + CSS.escape(r.ck) + '"]');
+    if (!wrap) return;
+    const titleEl = wrap.querySelector('.creq-title'), detailEl = wrap.querySelector('.creq-detail'), kindEl = wrap.querySelector('.creq-kind');
+    if (titleEl) { titleEl.value = r.title; if (r.focusedField === 'title') focusedDraft = { el: titleEl, start: r.start, end: r.end }; }
+    if (detailEl) { detailEl.value = r.detail; if (r.focusedField === 'detail') focusedDraft = { el: detailEl, start: r.start, end: r.end }; }
+    if (kindEl) kindEl.value = r.kind;
+  });
+  (st.catreq || []).forEach(function(r) {
+    const wrap = document.querySelector('.ops-catreq[data-client-key="' + CSS.escape(r.ck) + '"]');
+    if (!wrap) return;
+    const typeEl = wrap.querySelector('.catreq-type'), destEl = wrap.querySelector('.catreq-dest'), instrEl = wrap.querySelector('.catreq-instr');
+    if (typeEl) typeEl.value = r.type;
+    if (destEl) { destEl.value = r.dest; if (r.focusedField === 'dest') focusedDraft = { el: destEl, start: r.start, end: r.end }; }
+    if (instrEl) { instrEl.value = r.instr; if (r.focusedField === 'instr') focusedDraft = { el: instrEl, start: r.start, end: r.end }; }
+  });
+  if (st.gvCheck) {
+    const gv = document.querySelector('#sys-sec-golive .gv-check');
+    if (gv) gv.value = st.gvCheck;
+  }
+  Object.keys(st.revenue || {}).forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.value = st.revenue[id];
+  });
   window.scrollTo({ top: st.scrollY, behavior: 'instant' });
   if (st.record && window._opsRecords && window._opsRecords[st.record]) opsOpenRecord(st.record);
   else if (focusedNote) {
     focusedNote.el.focus({ preventScroll: true });
     try { if (focusedNote.start != null) focusedNote.el.setSelectionRange(focusedNote.start, focusedNote.end); } catch (e) {}
+  }
+  else if (focusedDraft) {
+    focusedDraft.el.focus({ preventScroll: true });
+    try { if (focusedDraft.start != null) focusedDraft.el.setSelectionRange(focusedDraft.start, focusedDraft.end); } catch (e) {}
   }
   else opsRestoreFocus(st.focus);
 }
@@ -8953,4 +9090,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 3eb2c187cc09 -->
+<!-- rankwise-portal-version: 2e020bcb3571 -->
