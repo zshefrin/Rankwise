@@ -1298,10 +1298,10 @@ def main():
             f.write(_render(c))
         print(f"✓ {c['slug']}/index.html")
 
-# Plumbing pages — archived 2026-05-12, will re-enable after first paying HVAC client.
-# Data definitions (PLUMBING_CITIES, PLUMBING_LANDING) kept above so this block can be
-# uncommented when the Trade Expansion Plan Phase 1 trigger fires.
-# Old generated output preserved at _archive/plumbing-pages-2026-05-12/
+# Plumbing pages: not yet generated. This is a trade-expansion sequencing decision, not an
+# HVAC-first bias — plumbing gets the same bar as every other service (studies with receipts
+# before a trade goes live). Data definitions (PLUMBING_CITIES, PLUMBING_LANDING) kept above
+# so this block can be uncommented when the Trade Expansion Plan Phase 1 trigger fires.
 
 # for c in PLUMBING_CITIES:
 #     out_dir = os.path.join(base, c["slug"])
