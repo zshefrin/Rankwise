@@ -2580,8 +2580,33 @@ document.addEventListener('click', function(event) {
 
 // Cal.com embed (official bootstrap: init-queue stub must run BEFORE embed.js loads)
 (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+// UTM passthrough + conversion hook, mirroring the pattern already proven on
+// /audit/ (audit/index.html:719-778). Without these the homepage embed - the
+// primary CTA again since the widget restore - produces no attributable
+// conversion signal at all: Cal runs cross-origin, so its own form events can
+// never reach our GA4 (see vault/_dev/booking-tracking-2026-08-05.md).
+var __rwCalParams = new URLSearchParams(window.location.search);
+var __rwCalCfg = {"layout":"month_view"};
+["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(function(k){
+  var v = __rwCalParams.get(k); if (v) __rwCalCfg[k] = v;
+});
+var __rwCalConversionFired = false;
+function __rwFireHomeCalConversion(e){
+  if (__rwCalConversionFired || typeof gtag !== "function") return;
+  __rwCalConversionFired = true;
+  var bookingUid =
+    (e && e.detail && e.detail.data && e.detail.data.booking && e.detail.data.booking.uid) ||
+    (e && e.detail && e.detail.data && e.detail.data.uid) || "cal_com";
+  gtag("event","audit_request_submitted",{
+    event_category:"lead", event_label: bookingUid,
+    utm_source: __rwCalParams.get("utm_source") || "direct",
+    utm_campaign: __rwCalParams.get("utm_campaign") || "direct"
+  });
+}
 Cal("init", "15min", {origin:"https://app.cal.com"});
-Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", calLink: "zackary-shefrin-oy63zv/15min", layout: "month_view" });
+Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", config: __rwCalCfg, calLink: "zackary-shefrin-oy63zv/15min" });
+Cal.ns["15min"]("on", {action:"bookingSuccessful", callback: __rwFireHomeCalConversion});
+Cal.ns["15min"]("on", {action:"bookingSuccessfulV2", callback: __rwFireHomeCalConversion});
 </script>
 
 <script>
