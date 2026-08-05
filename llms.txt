@@ -1,0 +1,21 @@
+# Rankwise
+
+> Rankwise is a local-marketing agency for local service businesses in the Lower Mainland, BC, Canada. We work to win service businesses a top-3 Google Map Pack position in their city, tracked against a 90-day position target agreed in writing before month one. If we miss the agreed milestone, billing pauses until we hit it.
+
+Rankwise works across local service categories (plumbers, electricians, HVAC, roofers, landscapers, and other local trades). Published audit examples are currently concentrated in heating and cooling, where our published work started; the audit method is the same for every trade.
+
+## Pages
+
+- [Home](https://rankwise.ca/): what we do, pricing tiers, and the guarantee
+- [Free audit booking](https://rankwise.ca/audit/): book a free 15-minute local search audit
+- [Audit examples](https://rankwise.ca/audits/): real audits of Lower Mainland businesses, showing the method (not client results)
+- [Rankwise Lab](https://rankwise.ca/lab/): market studies of how local businesses actually rank in the Metro Vancouver Map Pack
+- [Blog](https://rankwise.ca/blog/): answers to common local-marketing questions for service businesses
+- [About](https://rankwise.ca/about/): who runs Rankwise
+
+## Facts
+
+- Service area: Lower Mainland / Metro Vancouver, BC, Canada
+- Contact: through the booking page at https://rankwise.ca/audit/
+- Pricing: three monthly tiers, listed on the home page
+- Rankwise does not sell ads management, website builds, or social media management as headline services
