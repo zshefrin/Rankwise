@@ -364,10 +364,10 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
 .hero-cta-group{display:flex;flex-direction:column;align-items:flex-start;gap:7px}
 .hero-closer{
   display:inline-flex;align-items:center;gap:6px;
-  font-family:'Switzer',sans-serif;font-size:.75rem;font-weight:600;
+  font-family:'Switzer',sans-serif;font-size:1rem;font-weight:700;
   color:var(--gold-on-forest);padding-left:2px;
 }
-.hero-closer::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold-on-forest);flex-shrink:0}
+.hero-closer::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold-on-forest);flex-shrink:0}
 @media(max-width:640px){
   .hero-cta-group{width:100%}
   .hero-closer{padding-left:0}
@@ -1444,6 +1444,8 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 </style>
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
 <script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
+<link rel="stylesheet" href="/assets/audit-widget.css?v=aw-20260805">
+<script src="/assets/audit-widget.js?v=aw-20260805" defer></script>
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -1561,6 +1563,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <p class="hero-copy">
       We work to win you the winnable top-3 Map Pack spot, the results nearby customers see first, so they call you instead of a competitor. Your Google profile, your reviews, and a page for every area you serve, tracked against a 90-day position target we put in writing. Every month, you see the numbers that prove it.
     </p>
+    <div id="audit-widget" data-endpoint="https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/instant-audit" data-turnstile-sitekey="0x4AAAAAADjMBGvdtAUcYW6u"></div>
     <div class="hero-actions">
       <div class="hero-cta-group">
         <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=hero-primary" class="btn-primary btn-amber" data-cta-location="hero-primary">Book my free audit</a>
