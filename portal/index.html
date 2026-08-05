@@ -2188,7 +2188,7 @@ async function logCall(slug) {
   }
   const attemptId = card.dataset.attemptId || "";
   if (/^\d+$/.test(attemptId)) body.attempt_id = Number(attemptId);
-  // structured-call-outcome-fields (060, NOT YET APPLIED): read the optional "More call
+  // structured-call-outcome-fields (060 — APPLIED, verified live 2026-08-05): read the optional "More call
   // detail" section — every value is genuinely optional, so only NON-EMPTY values are sent
   // (an empty string would just match the column's own '' default, but omitting keeps the
   // payload honest about what the seller actually typed). next_action now ALSO lands in the
@@ -2412,7 +2412,7 @@ function logForm(slug, open) {
     '</select></label>' +
     '<label class="cb" style="display:block"><span class="mut">Call back at (optional, Pacific):</span> ' +
     '<input type="datetime-local" class="cbat" min="' + localDatetimeNow() + '" aria-label="Callback date and time (Pacific)"></label>' +
-    // structured-call-outcome-fields (060, NOT YET APPLIED): a collapsed, entirely OPTIONAL
+    // structured-call-outcome-fields (060 — APPLIED, verified live 2026-08-05): a collapsed, entirely OPTIONAL
     // section — every field the disposition/note/conversation/next-action/callback flow above
     // already captures stays exactly as fast as it is today; this only ADDS somewhere to put
     // detail that flow can't hold, never blocks Save.
@@ -2928,11 +2928,11 @@ function chipsRow(it) {
   // emits these keys when the underlying signal was actually measured
   // (dial-intel-extras.json / line-type-cache.json), so "absent" means
   // "never measured", not zero — never invent a badge from a missing key.
-  // NOTE: it.invisible is read defensively but build_card_intel does not yet
-  // promote it (dial-intel-extras.json carries the flag; only ad_intel/
-  // call_window/why_now are currently mirrored into the pushed intel) — this
-  // branch is a no-op today and will start rendering the moment that
-  // one-line backend gap is closed, without another portal change.
+  // it.invisible IS promoted by build_card_intel (render_call_sheets.py, the
+  // `if _ex.get("invisible"): out["invisible"] = True` mirror) — the backend gap
+  // this comment used to describe was closed 2026-08-04 and re-verified in source
+  // 2026-08-05. All four keys (line_intel/ad_intel/invisible + call_window/why_now)
+  // now arrive by the same path; none of these branches is a no-op.
   if (it.line_intel && it.line_intel.dial_line_type) {
     c.push(it.line_intel.owner_cell_likely
       ? '<span class="chip chip--ok" title="Number-level line-type lookup — this is a personal/cell line, likely the owner">📱 owner-cell likely</span>'
@@ -3357,15 +3357,24 @@ function wordingBlock(it) {
   return '<div class="cond">' + (h || '<p class="mut">No further wording.</p>') + '</div>';
 }
 
-// structured-call-outcome-fields (060, NOT YET APPLIED): the dial console's seller_call_log
+// structured-call-outcome-fields (060 — APPLIED, verified live 2026-08-05 against
+// information_schema: all 11 enriched columns exist). The dial console's seller_call_log
 // read is an EXPLICIT column list (trimmed on purpose, finding 55 — NOT select=*, despite
-// what 060's own header comment assumes), so adding new columns to it 400s the whole read
-// pre-060 exactly like every other enriched-select case in this file. Try the enriched list
-// first (adds the fields most useful to glance at for "next caller" context — the rest of
-// 060's columns stay write-only-for-now here, same reasoning finding 55 gave for trimming
-// this select in the first place); fall back to the untouched pre-060 list on failure.
+// what 060's own header comment assumes), so adding new columns to it would have 400'd the
+// whole read pre-060, exactly like every other enriched-select case in this file. The
+// enriched list adds the fields most useful to glance at for "next caller" context; the
+// rest of 060's columns stay write-only here, same reasoning finding 55 gave for trimming
+// this select in the first place.
+// The fallback below can no longer SUCCEED at anything the enriched select didn't already
+// do, and is kept deliberately: it costs one branch, and it is the same shape every other
+// enriched select in this file uses, so a future column addition degrades instead of
+// blanking the console. Do not read its presence as evidence the migration is pending.
+// Precise wording matters here (pre-deploy review, finding 5): bad() is true for ANY rest()
+// failure — network, 401, 500, parse — not just an unknown-column 400. So on a transient
+// error this branch still RUNS; it simply cannot return anything the first call wouldn't
+// have. "Unreachable" would be wrong; "cannot help on the current schema" is right.
 async function fetchSellerCallLog() {
-  const enriched = await rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at,owner_or_gatekeeper,contact_name,objection_category,next_action,next_owner,next_due_at&order=called_at.desc&limit=300");
+  const enriched = await rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at,owner_or_gatekeeper,contact_name,objection_category,next_action,next_owner,next_due_at,email_requested,callback_reason,callback_timezone,booking_attempted,booking_result&order=called_at.desc&limit=300");
   if (!bad(enriched)) return enriched;
   return rest("seller_call_log?select=prospect_slug,prospect_name,disposition,note,conversation,callback_at,called_at&order=called_at.desc&limit=300");
 }
@@ -8372,7 +8381,7 @@ async function renderOps() {
   if (window._opsTab === 'market') opsMmapEnsure();
 }
 
-// approval-request-inspectable-artifact-fields (057, NOT YET APPLIED): 057 adds
+// approval-request-inspectable-artifact-fields (057 — APPLIED 2026-08-05, verified live): 057 adds
 // target_type/target_id/artifact_url/version/summary_of_changes/consequence to client_request.
 // PostgREST 400s the WHOLE select on an unknown column (same class of problem as bundle 2's
 // origin/owner fix) — try the enriched select first, fall back to the pre-057 column list
@@ -8734,7 +8743,7 @@ async function renderClientImpl(key, opPreview) {
     h += '<section class="role-card"><h3>Requests from your Rankwise team</h3><div class="client-workspace">' +
       myRequests.map(function(rq) {
         const rid = Number(rq.id); // numeric → safe to inline in the onclick JS-string
-        // approval-request-inspectable-artifact-fields (057, NOT YET APPLIED): render whichever
+        // approval-request-inspectable-artifact-fields (057 — APPLIED 2026-08-05): render whichever
         // of target_type/target_id/version/summary_of_changes/consequence/artifact_url the row
         // carries — fields are absent entirely pre-057 (fetchClientRequests' fallback tier) or on
         // any row an operator hasn't filled them in for, so this is purely additive.
@@ -9090,4 +9099,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 2e020bcb3571 -->
+<!-- rankwise-portal-version: 06e6946f361a -->
