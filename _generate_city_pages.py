@@ -15,7 +15,7 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Vancouver, BC",
         "h1_city": "Vancouver.",
         "meta_title": "HVAC Marketing Agency in Vancouver | Rankwise",
-        "meta_desc": "HVAC marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and Google Business Profile management. One HVAC contractor per city.",
+        "meta_desc": "HVAC marketing for Vancouver contractors — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole. Map Pack optimization and Google Business Profile management. One business per city, per service category.",
         "og_desc": "HVAC marketing for Vancouver contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Vancouver: four signals that decide who gets the call",
         "aio_items": [
@@ -29,7 +29,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Vancouver — wherever high-intent homeowners are searching for furnace repair, AC installation, or heat pump service.",
         "cta_h2": "See your Vancouver Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Vancouver Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. It also means every strategy I build is built for your Vancouver market, not split across five contractors competing for the same jobs.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. It also means every strategy I build is built for your Vancouver market, not split across five contractors competing for the same jobs.",
         "utm_city": "vancouver",
     },
     {
@@ -52,7 +52,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Burnaby — wherever homeowners are searching for furnace repair, HVAC installation, or emergency heating service.",
         "cta_h2": "See your Burnaby Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Burnaby Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Burnaby is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Burnaby market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Burnaby is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Burnaby market specifically.",
         "utm_city": "burnaby",
     },
     {
@@ -61,7 +61,7 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Surrey, BC",
         "h1_city": "Surrey.",
         "meta_title": "HVAC Marketing Agency in Surrey | Rankwise",
-        "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for BC's largest city. One HVAC contractor per city.",
+        "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for BC's largest city. One business per city, per service category.",
         "og_desc": "HVAC marketing for Surrey contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Surrey: four signals that decide who gets the call",
         "aio_items": [
@@ -75,7 +75,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Surrey — wherever homeowners are searching for HVAC installation, furnace replacement, or air conditioning service.",
         "cta_h2": "See your Surrey Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Surrey Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Surrey is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Surrey market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Surrey is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Surrey market specifically.",
         "utm_city": "surrey",
     },
     {
@@ -98,7 +98,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Richmond — wherever homeowners are searching for AC repair, heat pump installation, or furnace service.",
         "cta_h2": "See your Richmond Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Richmond Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Richmond is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Richmond market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Richmond is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Richmond market specifically.",
         "utm_city": "richmond",
     },
     {
@@ -121,7 +121,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across North Vancouver — wherever homeowners are searching for furnace repair, heating contractors, or HVAC service.",
         "cta_h2": "See your North Vancouver Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live North Vancouver Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If North Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your North Vancouver market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If North Vancouver is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your North Vancouver market specifically.",
         "utm_city": "north-vancouver",
     },
     {
@@ -130,7 +130,7 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Langley, BC",
         "h1_city": "Langley.",
         "meta_title": "HVAC Marketing Agency in Langley | Rankwise",
-        "meta_desc": "HVAC marketing for Langley contractors — Walnut Grove, Willoughby, Brookswood. Map Pack and Google Business Profile management for furnace repair and heat pump installation. One HVAC contractor per city.",
+        "meta_desc": "HVAC marketing for Langley contractors — Walnut Grove, Willoughby, Brookswood. Map Pack and Google Business Profile management for furnace repair and heat pump installation. One business per city, per service category.",
         "og_desc": "HVAC marketing for Langley contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Langley: four signals that decide who gets the call",
         "aio_items": [
@@ -144,7 +144,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Langley — wherever homeowners in Walnut Grove, Willoughby, and Brookswood are searching for furnace repair, heat pump installation, or HVAC service.",
         "cta_h2": "See your Langley Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Langley Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Langley is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Langley market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Langley is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Langley market specifically.",
         "utm_city": "langley",
     },
     {
@@ -153,7 +153,7 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Abbotsford, BC",
         "h1_city": "Abbotsford.",
         "meta_title": "HVAC Marketing Agency in Abbotsford | Rankwise",
-        "meta_desc": "HVAC marketing for Abbotsford contractors — Clearbrook, Clayburn, West Abbotsford. Map Pack and Google Business Profile management for furnace repair and heat pump service. One HVAC contractor per city.",
+        "meta_desc": "HVAC marketing for Abbotsford contractors — Clearbrook, Clayburn, West Abbotsford. Map Pack and Google Business Profile management for furnace repair and heat pump service. One business per city, per service category.",
         "og_desc": "HVAC marketing for Abbotsford contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Abbotsford: four signals that decide who gets the call",
         "aio_items": [
@@ -167,7 +167,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Abbotsford — wherever homeowners in Clearbrook, Clayburn, and West Abbotsford are searching for furnace repair, heat pump service, or HVAC installation.",
         "cta_h2": "See your Abbotsford Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Abbotsford Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Abbotsford is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Abbotsford market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Abbotsford is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Abbotsford market specifically.",
         "utm_city": "abbotsford",
     },
     {
@@ -176,7 +176,7 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Coquitlam, BC",
         "h1_city": "Coquitlam.",
         "meta_title": "HVAC Marketing Agency in Coquitlam | Rankwise",
-        "meta_desc": "HVAC marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Heat pump and furnace Map Pack optimization. One HVAC contractor per city.",
+        "meta_desc": "HVAC marketing for Coquitlam contractors — Town Centre, Burke Mountain, Westwood Plateau. Heat pump and furnace Map Pack optimization. One business per city, per service category.",
         "og_desc": "HVAC marketing for Coquitlam contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Coquitlam: four signals that decide who gets the call",
         "aio_items": [
@@ -190,7 +190,7 @@ CITIES = [
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Coquitlam — wherever homeowners are searching for heating contractors, furnace repair, or HVAC installation.",
         "cta_h2": "See your Coquitlam Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Coquitlam Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": "No. I take one HVAC contractor per city — that's a hard rule. If Coquitlam is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Coquitlam market specifically.",
+        "faq_exclusivity": "No. I take one business per city, per service category — that's a hard rule. If Coquitlam is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your Coquitlam market specifically.",
         "utm_city": "coquitlam",
     },
 ]
@@ -212,7 +212,7 @@ def _build_hvac_city(
         "eyebrow": f"HVAC marketing agency · {name}, BC",
         "h1_city": f"{name}.",
         "meta_title": f"HVAC Marketing Agency in {name} | Rankwise",
-        "meta_desc": f"HVAC marketing for {name} contractors — {neighborhoods}. Map Pack and Google Business Profile management for {primary_services}. One HVAC contractor per city.",
+        "meta_desc": f"HVAC marketing for {name} contractors — {neighborhoods}. Map Pack and Google Business Profile management for {primary_services}. One business per city, per service category.",
         "og_desc": f"HVAC marketing for {name} contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": f"HVAC marketing in {name}: four signals that decide who gets the call",
         "aio_items": [
@@ -226,7 +226,7 @@ def _build_hvac_city(
         "services_copy": f"We tighten your Google Business Profile and local SEO structure so your company shows up across {name} — wherever homeowners are searching for {primary_services}.",
         "cta_h2": f"See your {name} Map Pack standing in 15 minutes.",
         "cta_sub": f"We pull your live {name} Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
-        "faq_exclusivity": f"No. I take one HVAC contractor per city — that's a hard rule. If {name} is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your {name} market specifically.",
+        "faq_exclusivity": f"No. I take one business per city, per service category — that's a hard rule. If {name} is open when you book the audit, your local competitors can't hire Rankwise while you're a client. Every strategy I build is built for your {name} market specifically.",
         "utm_city": utm_city,
     }
 
@@ -824,7 +824,7 @@ def build_page(c, cities_list):
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   "name": "Rankwise",
-  "description": "{tl} marketing agency serving {name}, BC — one contractor per city, no exceptions. Local SEO and Google Business Profile management for {tl} contractors.",
+  "description": "{tl} marketing agency serving {name}, BC — one business per city, per service category, no exceptions. Local SEO and Google Business Profile management for {tl} contractors.",
   "url": "https://rankwise.ca",
   "image": "https://rankwise.ca/rankwise-icon.svg.png",
   "email": "zshef@rankwise.ca",
@@ -883,7 +883,7 @@ def build_page(c, cities_list):
   <div class="container hero-grid">
     <div class="hero-left reveal in">
       <div class="eyebrow">{c["eyebrow"]}</div>
-      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One {tl} contractor per city — first to sign locks {name}</div>
+      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One business per city, per service category — first to sign locks {name}</div>
       <h1>Get more booked<br>{tl} jobs in <span class="serif">{c["h1_city"]}</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
@@ -1065,14 +1065,14 @@ def build_page(c, cities_list):
     </div>
     <div class="cta-promise reveal in">
       <div>No contracts. Month to month.</div>
-      <div>One {tl} contractor per city.</div>
+      <div>One business per city, per service category.</div>
       <div>Position guarantee — agreed in writing before month one.</div>
     </div>
     <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=founder-card" class="founder-card reveal in">
       <img class="founder-avatar" src="/assets/zack-shefrin.jpg" alt="Zack Shefrin, founder of Rankwise" width="46" height="46" loading="lazy">
       <div class="founder-text">
         <strong>Zack Shefrin — Founder, Rankwise</strong>
-        <span>Every audit lands in my inbox, not a team's. I work with one {tl} contractor per city, and I review the numbers myself before every call.</span>
+        <span>Every audit lands in my inbox, not a team's. I work with one business per city, per service category, and I review the numbers myself before every call.</span>
       </div>
     </a>
     <div class="reveal in" id="cal-embed"><div class="cal-loading">Loading the booking calendar…</div></div>
