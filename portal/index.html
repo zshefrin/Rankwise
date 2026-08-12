@@ -3850,6 +3850,18 @@ async function renderSeller(data) {
           r.owner_or_gatekeeper ? 'talked to ' + r.owner_or_gatekeeper : '',
           r.contact_name ? 'contact: ' + r.contact_name : '',
           r.objection_category ? 'objection: ' + r.objection_category : '',
+          // ticket call-outcome-render-missing-fields: the remaining 5 of 060's
+          // 11 structured fields were fetched + captured but never rendered, so
+          // the next caller lost the prior call's callback/booking context.
+          // Same conditional pattern as above — absent/null fields drop out and
+          // rows without them render exactly as before.
+          r.email_requested ? 'email requested' : '',
+          r.booking_attempted
+            ? 'booking attempted' + (r.booking_result ? ': ' + r.booking_result : '')
+            : (r.booking_result ? 'booking: ' + r.booking_result : ''),
+          r.callback_reason
+            ? 'callback: ' + r.callback_reason + (r.callback_timezone ? ' (' + r.callback_timezone + ')' : '')
+            : (r.callback_timezone ? 'callback tz: ' + r.callback_timezone : ''),
         ].filter(Boolean).join(' · ');
         const _next = r.next_action ? ('Next: ' + r.next_action + (r.next_owner ? ' (' + r.next_owner + ')' : '') + (r.next_due_at ? ' by ' + ptTime(r.next_due_at) : '')) : '';
         return '<div class="hist"><span class="pill">' + esc(r.disposition) + '</span> <b>' + esc(r.prospect_name) + '</b> <span class="mut">' + ptTime(r.called_at) + '</span>' +
@@ -9099,4 +9111,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 06e6946f361a -->
+<!-- rankwise-portal-version: af278a94475b -->
