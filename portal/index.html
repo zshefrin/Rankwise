@@ -1269,8 +1269,9 @@ function hoursBanner(ok) {
 function hoursStatus() {
   return '<div id="calling-hours">' + hoursBanner(insideCallingHours()) + '</div>';
 }
-// The banner alone doesn't STOP a dial (grep of twilio-dial confirms no server-side
-// window — server enforcement is deferred/load-bearing). So on the client we grey every
+// The banner is UX, not the gate: twilio-dial enforces the CRTC window server-side
+// (insideCallingHoursPT, finding F3, LOAD-BEARING since v4 — the old "no server-side
+// window" note here was batch-2 finding 7 doc drift). On the client we still grey every
 // dial button when outside the window AND re-check every 60s, so a session that crosses
 // the boundary mid-shift can't keep dialing off a stale render.
 function sellerHoursTick() {
@@ -3776,8 +3777,8 @@ async function renderSeller(data) {
   if (snap && snap.trial && snap.trial.configured) {
     const t = snap.trial, needD = 200, needC = 5;
     h += '<div class="card"><b>Trial: ' + esc(t.verdict || "") + '</b><p class="mut">window ' + esc(t.window || "") + '</p>' +
-      '<p class="mut" style="margin-top:6px">' + (t.dials || 0) + ' / ' + needD + ' dials</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.dials || 0) / needD) + '%"></i></div>' +
-      '<p class="mut">' + (t.conversations || 0) + ' / ' + needC + ' real conversations</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.conversations || 0) / needC) + '%"></i></div>' +
+      '<p class="mut" style="margin-top:6px">' + (Number(t.dials) || 0) + ' / ' + needD + ' dials</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.dials || 0) / needD) + '%"></i></div>' +
+      '<p class="mut">' + (Number(t.conversations) || 0) + ' / ' + needC + ' real conversations</p><div class="bar"><i style="width:' + Math.min(100, 100 * (t.conversations || 0) / needC) + '%"></i></div>' +
       '</div>';
   }
   // ── Pay ledger — gated on real ledger rows, NOT trial.configured, so an owed
@@ -3796,7 +3797,7 @@ async function renderSeller(data) {
         const paidCell = paid
           ? '✓' + (w.paid_at ? ' <span class="mut">' + esc(w.paid_at) + '</span>' : '') + (ref ? ' <span class="mut">ref ' + esc(ref) + '</span>' : '')
           : 'due Friday';
-        return '<tr><td>' + esc(w.week) + '</td><td>' + (w.qualified_blocks || 0) + '</td><td>' + (w.shows || 0) + '</td><td>$' + money(due) + '</td><td>' + paidCell + '</td></tr>';
+        return '<tr><td>' + esc(w.week) + '</td><td>' + (Number(w.qualified_blocks) || 0) + '</td><td>' + (Number(w.shows) || 0) + '</td><td>$' + money(due) + '</td><td>' + paidCell + '</td></tr>';
       }).join("") +
       '</table><p class="mut">Blocks count when a day hits the minimum dials. Bounties land the week of the show.</p></details></div>';
   }
@@ -3811,7 +3812,7 @@ async function renderSeller(data) {
       const b = co.blocks[0]; // most recent block
       if (b.best_line) h += '<div class="opener">' + esc(b.best_line) + '</div>';
       if (b.what_worked && b.what_worked.length)
-        h += '<details><summary>What worked (' + esc(b.date) + ', ' + (b.n_calls || 0) + ' calls)</summary><div class="kit">' + esc(b.what_worked.join('\n')) + '</div></details>';
+        h += '<details><summary>What worked (' + esc(b.date) + ', ' + (Number(b.n_calls) || 0) + ' calls)</summary><div class="kit">' + esc(b.what_worked.join('\n')) + '</div></details>';
       if (b.what_to_fix && b.what_to_fix.length)
         h += '<details><summary>Fix next block</summary><div class="kit">' + esc(b.what_to_fix.join('\n')) + '</div></details>';
       if (b.themes && b.themes.length)
@@ -3819,7 +3820,7 @@ async function renderSeller(data) {
       if (co.blocks.length > 1) {
         h += '<details><summary>Earlier blocks (' + (co.blocks.length - 1) + ')</summary>';
         for (const ob of co.blocks.slice(1)) {
-          h += '<p class="mut"><b>' + esc(ob.date) + '</b> · ' + (ob.n_calls || 0) + ' calls</p>';
+          h += '<p class="mut"><b>' + esc(ob.date) + '</b> · ' + (Number(ob.n_calls) || 0) + ' calls</p>';
           if (ob.best_line) h += '<div class="opener">' + esc(ob.best_line) + '</div>';
         }
         h += '</details>';
@@ -9111,4 +9112,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: af278a94475b -->
+<!-- rankwise-portal-version: c1466efba496 -->
