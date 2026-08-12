@@ -1444,7 +1444,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 </style>
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
 <script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
-<link rel="stylesheet" href="/assets/audit-widget.css?v=aw-20260805">
+<link rel="stylesheet" href="/assets/audit-widget.css?v=aw-20260812">
 <script src="/assets/audit-widget.js?v=aw-20260805" defer></script>
 <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -2603,10 +2603,43 @@ function __rwFireHomeCalConversion(e){
     utm_campaign: __rwCalParams.get("utm_campaign") || "direct"
   });
 }
-Cal("init", "15min", {origin:"https://app.cal.com"});
-Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", config: __rwCalCfg, calLink: "zackary-shefrin-oy63zv/15min" });
-Cal.ns["15min"]("on", {action:"bookingSuccessful", callback: __rwFireHomeCalConversion});
-Cal.ns["15min"]("on", {action:"bookingSuccessfulV2", callback: __rwFireHomeCalConversion});
+// Booking confirmed → hand off to /prep. Kept separate from the conversion fn:
+// that one early-returns when gtag is missing; the redirect must fire regardless.
+// 1s delay = conversion beacon out + Cal's own confirmation flash.
+var __rwPrepDone = false;
+function __rwGoPrep(){
+  if (__rwPrepDone) return; __rwPrepDone = true;
+  setTimeout(function(){ window.location.assign("/prep/"); }, 1000);
+}
+function __rwHomeBookingDone(e){
+  try { __rwFireHomeCalConversion(e); } catch(_) {}
+  __rwGoPrep();
+}
+// Lazy-load the embed: #contact sits far below the fold, and booting app.cal.com at
+// parse time put it on the mobile critical path (PSI 2026-08-10: perf 44, LCP 17.7s).
+// Same IntersectionObserver gate as /audit/; the skeleton link covers the gap.
+var __rwCalStarted = false;
+function __rwLoadCal(){
+  if (__rwCalStarted) return; __rwCalStarted = true;
+  Cal("init", "15min", {origin:"https://app.cal.com"});
+  Cal.ns["15min"]("inline", { elementOrSelector: "#cal-embed", config: __rwCalCfg, calLink: "zackary-shefrin-oy63zv/15min" });
+  Cal.ns["15min"]("on", {action:"bookingSuccessful", callback: __rwHomeBookingDone});
+  Cal.ns["15min"]("on", {action:"bookingSuccessfulV2", callback: __rwHomeBookingDone});
+}
+(function(){
+  var el = document.getElementById("cal-embed");
+  if (!el) return;
+  if ("IntersectionObserver" in window) {
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) { __rwLoadCal(); obs.disconnect(); }
+      });
+    }, {rootMargin:"600px 0px"});
+    obs.observe(el);
+  } else {
+    __rwLoadCal();
+  }
+})();
 </script>
 
 <script>
