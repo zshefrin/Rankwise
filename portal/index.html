@@ -1014,7 +1014,9 @@
 <script>
 const SB = "https://mxzkzgbonxrgkwanhnxs.supabase.co", KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14emt6Z2JvbnhyZ2t3YW5obnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTI1NTMsImV4cCI6MjA5MTk2ODU1M30.OCLEdrLTOjvEe6HMk5cGL9JqoWQ5t2nTInaveKLoQPQ";
 const $ = (s) => document.querySelector(s);
-const tok = () => localStorage.getItem("rw_tok") || "";
+// Storage is a convenience session cache, not a reason for a read-only surface to throw.
+// Safari privacy mode and file-based QA previews can deny the storage area altogether.
+const tok = () => { try { return localStorage.getItem("rw_tok") || ""; } catch (e) { return ""; } };
 const hdr = () => ({ apikey: KEY, Authorization: "Bearer " + tok(), "Content-Type": "application/json" });
 // toast(msg, kind, ms) — kind: 'ok' | 'err' | 'wait'.
 // Failures used to render in the same success-green pill as successes, for a
@@ -4101,7 +4103,13 @@ function opsMmapEnsure() {
       if (bad(verRows) || !Array.isArray(verRows)) { opsMmapShell(sectionFail('opsMmapEnsure()', 'The relationship map (513KB) could not be loaded.')); return; }
       const ver = (verRows[0] && verRows[0].updated_at) || '';
       let payload = null;
-      if (ver && localStorage.getItem('rw_mmap_ver') === ver) {
+      // File previews, privacy modes, and hardened browser contexts can expose the page
+      // without a usable storage area. The map is an optional cache, never an auth or
+      // correctness dependency, so a storage read failure must fall through to Supabase
+      // instead of becoming an uncaught page error.
+      let cachedMapVersion = '';
+      try { cachedMapVersion = localStorage.getItem('rw_mmap_ver') || ''; } catch (e) { cachedMapVersion = ''; }
+      if (ver && cachedMapVersion === ver) {
         try { payload = JSON.parse(localStorage.getItem('rw_mmap_payload') || 'null'); } catch (e) { payload = null; }
       }
       if (!payload) {
@@ -8586,7 +8594,7 @@ async function renderClientImpl(key, opPreview) {
   // Rankwise team" below) into the digest so the "Needs you" count + primary card can't
   // read "Nothing pending" while real open requests exist (finding S7). Independent of
   // _thinMetrics — an established client with an open ask still needs to see it.
-  const liveClientAsks = asArr(myRequests).map(function(rq){ return { title: rq.title || rq.kind || 'Request', status:'open', kind: rq.kind, detail: rq.detail, _live:true }; });
+  const liveClientAsks = asArr(myRequests).map(function(rq){ return { title: rq.title || rq.kind || 'Request', status: rq.status || 'open', kind: rq.kind, detail: rq.detail, _live:true, _requestId: Number(rq.id), request: rq }; });
   const digestAsks = liveClientAsks.concat(clientApprovals).concat(clientAsks).concat(clientUploads).slice(0, 4);
   const primaryClientAsk = digestAsks[0] || null;
   const nextClientWork = digestNext[0] || planned[0] || null;
@@ -8675,10 +8683,23 @@ async function renderClientImpl(key, opPreview) {
   const clientNextMeta = clientNextItem
     ? ([clientNextItem.status || clientNextItem.type || clientNextItem.stage || 'next step', clientNextItem.due || clientNextItem.due_at || clientNextParts.date, clientNextParts.sub || clientNextItem.detail || clientNextItem.note].filter(Boolean).join(' · '))
     : 'Your Rankwise team is monitoring the work and will bring the next decision here.';
+  // Durable client_request rows are the real work queue. Keep the prominent next-action
+  // card connected to the exact request instead of falling back to a generic mailto. This
+  // preserves the existing snapshot-safe fallback for older approval/upload rows that do not
+  // carry an id, while making a live handoff one click from attention -> work item.
+  const clientRequestCta = function(item) {
+    const rid = Number(item && item._requestId);
+    if (!item || !item._live || !Number.isFinite(rid) || rid <= 0) return '';
+    const label = roleOf() === 'operator' ? 'Open request' : 'Review request';
+    return '<a class="client-action client-action-armed" href="#client-request-' + rid + '">' + label + ' <span aria-hidden="true">→</span></a>';
+  };
+  const needsYouCta = function(item, context) {
+    if (!item) return '';
+    if (item._setup) return '<a class="client-action client-action-armed" href="#client-setup">Review setup step <span aria-hidden="true">→</span></a>';
+    return clientRequestCta(item) || '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', context || planParts(item).title) + '</div>';
+  };
   const clientNextCta = needsYouPrimary
-    ? (needsYouPrimary._setup
-      ? '<a class="client-action client-action-armed" href="#client-setup">Review setup step <span aria-hidden="true">→</span></a>'
-      : clientContactBtn('Message Rankwise', clientNextTitle))
+    ? needsYouCta(needsYouPrimary, clientNextTitle)
     : (nextClientWork ? '<a class="client-action" href="#client-action-center">See action center <span aria-hidden="true">→</span></a>' : '');
   h += '<section class="client-next-action" aria-labelledby="client-next-title"><div class="role-kicker">Your next action</div><h2 id="client-next-title">' + esc(clientNextTitle) + '</h2><p>' + esc(clientNextMeta) + '</p>' + clientNextCta + '</section>';
   // Ranking cards must never invent a denominator from the display-capped rows.
@@ -8738,7 +8759,7 @@ async function renderClientImpl(key, opPreview) {
     '<div class="client-action-grid">' +
     '<div class="client-action-card"><div class="ca-k">Needs you now</div><div class="ca-v">' + esc(needsYouPrimary ? planParts(needsYouPrimary).title : 'Nothing pending') + '</div>' +
     '<div class="ca-n">' + esc(needsYouPrimary ? ([needsYouPrimary.status || needsYouPrimary.type || 'open', needsYouPrimary.due || needsYouPrimary.due_at || planParts(needsYouPrimary).date, planParts(needsYouPrimary).sub || needsYouPrimary.detail || needsYouPrimary.note].filter(Boolean).join(' · ')) : 'Approvals, uploads, or access requests will appear here.') + '</div>' +
-    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', planParts(needsYouPrimary).title) + '</div>') : '') + '</div>' +
+    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : needsYouCta(needsYouPrimary, planParts(needsYouPrimary).title)) : '') + '</div>' +
     '<div class="client-action-card"><div class="ca-k">Next publish</div><div class="ca-v">' + esc(nextClientWork ? planParts(nextClientWork).title : 'Plan being assembled') + '</div>' +
     '<div class="ca-n">' + esc(nextClientWork ? ([nextClientWork.status || nextClientWork.stage || nextClientWork.type, nextClientWork.due || nextClientWork.scheduled_for || planParts(nextClientWork).date, planParts(nextClientWork).sub].filter(Boolean).join(' · ')) : 'Content and delivery plan appears after kickoff.') + '</div></div>' +
     '<div class="client-action-card"><div class="ca-k">Latest proof</div><div class="ca-v">' + esc(latestClientProof ? planParts(latestClientProof).title : 'Proof pending') + '</div>' +
@@ -8788,7 +8809,7 @@ async function renderClientImpl(key, opPreview) {
         const _approveBtn = _artifactGateBlocked
           ? '<button class="client-action" disabled title="Waiting on a preview link from your Rankwise team">Approve</button>'
           : '<button class="client-action" aria-pressed="false" onclick="clientApprove(this,' + rid + ')">Approve</button>';
-        return '<div class="client-ask" data-crq="' + rid + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
+        return '<div class="client-ask" id="client-request-' + rid + '" data-crq="' + rid + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
           '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
           '<span class="pill warn">open</span></div>' +
           _artifactBlock +
@@ -8813,7 +8834,7 @@ async function renderClientImpl(key, opPreview) {
   } else if (myRequests.length) {
     h += '<section class="role-card"><h3>Requests from your Rankwise team</h3>' +
       '<div class="client-workspace">' + myRequests.map(function(rq) {
-        return '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
+        return '<div class="client-ask" id="client-request-' + Number(rq.id) + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
           '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
           '<span class="pill warn">open</span></div></div>';
       }).join('') + '</div>' +
@@ -8903,8 +8924,19 @@ async function renderClientImpl(key, opPreview) {
   h += '</section>';
 
   h += '<section class="role-card"><h3>Needs you</h3>';
-  if (clientApprovals.length || clientAsks.length || clientUploads.length) {
+  if (liveClientAsks.length || clientApprovals.length || clientAsks.length || clientUploads.length) {
     h += '<div class="client-workspace">';
+    // Mirror durable live requests here as a compact queue summary. The full request card
+    // above owns the response controls; this lower surface stays useful after a long scroll
+    // and always links back to that canonical work item.
+    liveClientAsks.slice(0, 6).forEach((ask) => {
+      const it = planParts(ask);
+      const rid = Number(ask._requestId);
+      h += '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(it.title || 'Request') + '</div>' +
+        '<div class="client-ask__sub">' + esc([ask.status || 'open', it.sub || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
+        '<span class="pill warn">' + esc(ask.status || 'open') + '</span></div>' +
+        '<div class="client-btnrow"><a class="client-action client-action-armed" href="#client-request-' + rid + '">' + (roleOf() === 'operator' ? 'Open request' : 'Review request') + ' <span aria-hidden="true">→</span></a></div></div>';
+    });
     clientApprovals.concat(clientAsks).slice(0, 6).forEach((ask) => {
       const it = planParts(ask);
       const status = ask.status || ask.stage || ask.type || 'open';
