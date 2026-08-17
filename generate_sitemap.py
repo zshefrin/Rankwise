@@ -3,7 +3,8 @@
 Regenerate sitemap.xml from the live blog directory.
 
 Uses git log for lastmod dates so they reflect real content changes,
-not filesystem timestamps. Falls back to today for uncommitted files.
+not filesystem timestamps. Uncommitted edits keep the last commit date
+(never today) — see git_lastmod.
 
 Usage:
     python3 generate_sitemap.py          # regenerate and print path
@@ -20,14 +21,15 @@ BASE = "https://rankwise.ca"
 
 
 def git_lastmod(rel_path: str) -> str:
-    """Return YYYY-MM-DD of the last commit that touched this path, or today."""
-    dirty = subprocess.run(
-        ["git", "status", "--porcelain", "--", rel_path],
-        capture_output=True, text=True, cwd=ROOT,
-    )
-    if dirty.stdout.strip():
-        return date.today().isoformat()
+    """Return YYYY-MM-DD of the last commit that touched this path.
 
+    NEVER "today" (fixed 2026-08-17): the old rule returned today for any file
+    with uncommitted changes, so a lane's parked WIP (69 uncommitted files on
+    2026-08-17) made 67 of 86 URLs claim lastmod=today on every automated
+    publish — an untruthful sitemap trains Google to ignore lastmod entirely.
+    Fallback order: last commit date → file mtime (a real timestamp) → today
+    only if the file does not exist at all.
+    """
     result = subprocess.run(
         ["git", "log", "-1", "--format=%aI", "--", rel_path],
         capture_output=True, text=True, cwd=ROOT,
@@ -35,7 +37,10 @@ def git_lastmod(rel_path: str) -> str:
     raw = result.stdout.strip()
     if raw:
         return raw[:10]  # YYYY-MM-DD from ISO timestamp
-    return date.today().isoformat()
+    try:
+        return date.fromtimestamp((ROOT / rel_path).stat().st_mtime).isoformat()
+    except OSError:
+        return date.today().isoformat()
 
 
 def build_sitemap() -> str:
