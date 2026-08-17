@@ -1014,9 +1014,7 @@
 <script>
 const SB = "https://mxzkzgbonxrgkwanhnxs.supabase.co", KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14emt6Z2JvbnhyZ2t3YW5obnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTI1NTMsImV4cCI6MjA5MTk2ODU1M30.OCLEdrLTOjvEe6HMk5cGL9JqoWQ5t2nTInaveKLoQPQ";
 const $ = (s) => document.querySelector(s);
-// Storage is a convenience session cache, not a reason for a read-only surface to throw.
-// Safari privacy mode and file-based QA previews can deny the storage area altogether.
-const tok = () => { try { return localStorage.getItem("rw_tok") || ""; } catch (e) { return ""; } };
+const tok = () => localStorage.getItem("rw_tok") || "";
 const hdr = () => ({ apikey: KEY, Authorization: "Bearer " + tok(), "Content-Type": "application/json" });
 // toast(msg, kind, ms) — kind: 'ok' | 'err' | 'wait'.
 // Failures used to render in the same success-green pill as successes, for a
@@ -1376,13 +1374,19 @@ function togglePwVisibility() {
 async function forgotPw() {
   const err = $("#err"), email = $("#em").value.trim();
   if (!email) { err.textContent = "Enter your email above first, then tap Forgot password."; $("#em").focus(); return; }
+  let r;
   try {
-    await fetch(SB + "/auth/v1/recover", {
+    r = await fetch(SB + "/auth/v1/recover", {
       method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ email: email }),
     });
   } catch {
     err.textContent = "Network error — check your connection and retry.";
+    return;
+  }
+  if (!r.ok) {
+    // Keep account existence private while refusing to imply that an email was sent.
+    err.textContent = "Couldn’t request a reset right now. Please try again.";
     return;
   }
   // Never disclose whether the account exists.
@@ -1595,9 +1599,9 @@ async function watchQueuedAction(id, action) {
       // Content/ticket mutations write through to source, but the cockpit reads a CACHED
       // operator_portal_snapshot regenerated only 2×/day — without a real regen the repaint
       // above still shows pre-mutation counts and the operator can't tell the action landed.
-      // Chain one real refresh_ops. Guarded to content./ticket.* only, so refresh_ops itself
+      // Chain one real refresh_ops. Guarded to content./ticket./record_revenue only, so refresh_ops itself
       // (which matches neither prefix) can never re-trigger this and loop.
-      if (/^(content|ticket)\./.test(String(action))) enqueueAction("refresh_ops", {});
+      if (/^(content|ticket)\./.test(String(action)) || action === "record_revenue") enqueueAction("refresh_ops", {});
       return;
     }
     if (state === "failed") { toast("Failed — " + (row[0].result || action) + ". Retry is available below.", "err", 6500); renderOps(); return; }
@@ -2342,8 +2346,11 @@ function sellerNextSel(justLoggedSlug) {
     return (s && s.state === "dnc_blocked") || (p.intel && p.intel.dnc);
   };
   const freshOk = remaining.filter(function(p) { return !_noDial(p); });
-  const anyOk = cards.filter(function(p) { return !_noDial(p); });
-  return (due[0] && due[0].slug) || (freshOk[0] && freshOk[0].slug) || (anyOk[0] && anyOk[0].slug) || null;
+  // Never fall back to `cards` here: it includes today's completed cards. When
+  // the last actionable card is logged, selecting one of those cards again puts a
+  // live Dial button on an already-called prospect and invites a duplicate call.
+  // A null selection is the honest "dial block clear" state.
+  return (due[0] && due[0].slug) || (freshOk[0] && freshOk[0].slug) || null;
 }
 
 // 'YYYY-MM-DDTHH:MM' in LOCAL time — the format a datetime-local min= expects.
@@ -2878,10 +2885,11 @@ async function dialBridge(btn) {
   }
   btn.disabled = true; btn.classList.add('dialing'); const orig = btn.innerHTML; btn.textContent = "Connecting…";
   try {
-    const r = await fetch(SB + "/functions/v1/twilio-dial", {
-      method: "POST", headers: hdr(),
+    const r = await authedFetch(SB + "/functions/v1/twilio-dial", {
+      method: "POST",
       body: JSON.stringify({ prospect_number: num, slug: slug }),
     });
+    if (r === null) return;
     if (r.ok) {
       let payload = {};
       try { payload = await r.json(); } catch (e) {}
@@ -4103,13 +4111,7 @@ function opsMmapEnsure() {
       if (bad(verRows) || !Array.isArray(verRows)) { opsMmapShell(sectionFail('opsMmapEnsure()', 'The relationship map (513KB) could not be loaded.')); return; }
       const ver = (verRows[0] && verRows[0].updated_at) || '';
       let payload = null;
-      // File previews, privacy modes, and hardened browser contexts can expose the page
-      // without a usable storage area. The map is an optional cache, never an auth or
-      // correctness dependency, so a storage read failure must fall through to Supabase
-      // instead of becoming an uncaught page error.
-      let cachedMapVersion = '';
-      try { cachedMapVersion = localStorage.getItem('rw_mmap_ver') || ''; } catch (e) { cachedMapVersion = ''; }
-      if (ver && cachedMapVersion === ver) {
+      if (ver && localStorage.getItem('rw_mmap_ver') === ver) {
         try { payload = JSON.parse(localStorage.getItem('rw_mmap_payload') || 'null'); } catch (e) { payload = null; }
       }
       if (!payload) {
@@ -4523,6 +4525,22 @@ function restoreOpsUI(st) {
     try { if (focusedDraft.start != null) focusedDraft.el.setSelectionRange(focusedDraft.start, focusedDraft.end); } catch (e) {}
   }
   else opsRestoreFocus(st.focus);
+}
+function opsHasUnsavedWork() {
+  const st = captureOpsUI();
+  if ((st.notes || []).length || (st.cresp || []).length || (st.creq || []).length ||
+      (st.catreq || []).length || st.gvCheck || Object.keys(st.revenue || {}).length) return true;
+  // Call-log controls are deliberately action-local and aren't restored across a
+  // cockpit rebuild. Treat a selected disposition or typed note as live work so
+  // the explicit reload button cannot erase it without an informed choice.
+  return Array.prototype.some.call(document.querySelectorAll('.ops-logcall select, .ops-logcall textarea, .ops-logcall input'), function(el) {
+    if (el.tagName === 'SELECT') return el.selectedIndex > 0;
+    return !!String(el.value || '').trim();
+  });
+}
+function opsManualRefresh() {
+  if (opsHasUnsavedWork() && !confirm("You have an unsaved note or form in progress. Reload and discard it?")) return;
+  renderOps();
 }
 function opsSetFilter(group, value) {
   document.querySelectorAll('[data-filter-group="' + group + '"]').forEach(function(btn) {
@@ -5757,7 +5775,32 @@ async function renderOps() {
   // undefined there and the check below passes them through unchanged — missing or
   // unrecognized state stays open (fail-visible, not fail-hidden).
   const decisionInboxOpen = decisionInboxRaw.filter(function(d) { return d.state !== 'dismissed' && d.state !== 'answered'; });
-  const decisionInboxReal = decisionInboxOpen.filter(function(d) { return !d.source_category; }).slice(0, 5);
+  // The decision feed is returned oldest-first by some producers.  A five-row
+  // slice before ordering let repeated, low-urgency nags hide a breached inbound
+  // lead SLA entirely.  Lead-SLA rows are an explicit first-client path: keep
+  // every open one visible, then fill the normal decision budget by urgency/newest.
+  function isLeadSlaDecision(d) {
+    const haystack = [d && d.source_category, d && d.source, d && d.title, d && d.sub, d && d.reason]
+      .filter(Boolean).join(' ').toLowerCase();
+    return /(?:audit[_ -]?lead|lead[_ -]?sla|inbound[_ -]?lead)/.test(haystack) ||
+      (/\blead\b/.test(haystack) && /\b(?:sla|disposition|inbound|audit)\b/.test(haystack));
+  }
+  function decisionRank(d) {
+    const severity = { critical:0, bad:0, high:1, warn:2, warning:2, info:3, normal:4 };
+    const created = Date.parse((d && (d.created_at || d.updated_at || d.date)) || '');
+    return [isLeadSlaDecision(d) ? 0 : 1, severity[String((d && d.severity) || '').toLowerCase()] ?? 4,
+      isNaN(created) ? 0 : -created];
+  }
+  function compareDecision(a, b) {
+    const ar = decisionRank(a), br = decisionRank(b);
+    for (let i = 0; i < ar.length; i++) if (ar[i] !== br[i]) return ar[i] - br[i];
+    return String((a && a.id) || '').localeCompare(String((b && b.id) || ''));
+  }
+  const decisionInboxRealAll = decisionInboxOpen.filter(function(d) { return !d.source_category; }).slice().sort(compareDecision);
+  const decisionInboxLeadSla = decisionInboxRealAll.filter(isLeadSlaDecision);
+  const decisionInboxReal = decisionInboxLeadSla.concat(decisionInboxRealAll.filter(function(d) {
+    return !isLeadSlaDecision(d);
+  }).slice(0, 5));
   const decisionInboxClientBlockers = decisionInboxOpen.filter(function(d) { return d.source_category === 'client_blocker'; }).slice(0, 3);
   for (const d of decisionInboxReal.concat(decisionInboxClientBlockers)) pushCommand({
     id: d.id || '',
@@ -5806,6 +5849,27 @@ async function renderOps() {
     owner:f.owner || 'operator', lifecycle:f.state || 'open', tab:'system', action:'autofix.preview', source:'findings',
   });
   const priorityRank = { critical:0, bad:1, high:2, warn:3, normal:4, info:5, lo:6, ok:7 };
+  // The operator is currently the only active seller. A card assigned to an
+  // inactive seller is still work Zack can do; treating it as someone else's
+  // work made the live dial block vanish from both Home and the Mine view.
+  const sellerUnavailable = !!(s && s.active === false);
+  function commandIsSellerLane(item) {
+    const owner = String((item && item.owner) || '').toLowerCase();
+    return owner.indexOf('griffin') >= 0 || (item && item.type === 'outreach');
+  }
+  function commandIsMine(item) {
+    const owner = String((item && item.owner) || '').toLowerCase();
+    return owner === 'zack' || owner === 'operator' || owner === 'me' ||
+      (sellerUnavailable && commandIsSellerLane(item));
+  }
+  function commandIsLeadSla(item) {
+    return isLeadSlaDecision({
+      source_category: item && item.source,
+      source: item && item.source,
+      title: item && item.title,
+      sub: item && item.sub,
+    });
+  }
   const seenCommand = {};
   const universalCommands = universalQueue.filter(function(item) {
     const key = item.dedupId
@@ -5815,18 +5879,23 @@ async function renderOps() {
     seenCommand[key] = true;
     return true;
   }).sort(function(a, b) {
+    // Real inbound leads and work executable by the signed-in operator beat a
+    // permanently-gated dashboard warning. The latter stays visible, but cannot
+    // monopolize the "one next move" slot while calls or replies are actionable.
+    const actionRank = function(item) {
+      if (commandIsLeadSla(item)) return 0;
+      if (commandIsMine(item) && item.action) return 1;
+      return 2;
+    };
+    const actionDelta = actionRank(a) - actionRank(b);
+    if (actionDelta) return actionDelta;
     return (priorityRank[String(a.priority || '').toLowerCase()] ?? 4) - (priorityRank[String(b.priority || '').toLowerCase()] ?? 4);
   });
   const blockedCommands = universalCommands.filter(function(item) {
     return lifecycleState(item.lifecycle) === 'blocked' || ['critical','bad','high'].indexOf(String(item.priority || '').toLowerCase()) >= 0;
   });
-  const myCommands = universalCommands.filter(function(item) {
-    const owner = String(item.owner || '').toLowerCase();
-    return owner === 'zack' || owner === 'operator' || owner === 'me';
-  });
-  const griffinCommands = universalCommands.filter(function(item) {
-    return String(item.owner || '').toLowerCase().indexOf('griffin') >= 0 || item.type === 'outreach';
-  });
+  const myCommands = universalCommands.filter(commandIsMine);
+  const griffinCommands = universalCommands.filter(commandIsSellerLane);
   const clientCommands = universalCommands.filter(function(item) { return item.type === 'client' || !!item.client_key; });
   const contentCommands = universalCommands.filter(function(item) { return item.type === 'content' || item.tab === 'content'; });
   const nextCommand = universalCommands[0] || null;
@@ -5983,11 +6052,10 @@ async function renderOps() {
     todayH += '<ul class="ops-commandqueue">';
     for (const item of visibleCommands) {
       const tone = item.priority === 'critical' || item.priority === 'bad' || item.priority === 'high' ? 'bad' : (item.priority === 'warn' || lifecycleTone(item.lifecycle) === 'warn' ? 'warn' : 'info');
-      const ownerLower = String(item.owner || '').toLowerCase();
       const filterVals = ['all', item.type || 'command', lifecycleState(item.lifecycle), item.tab || 'today'];
       if (lifecycleState(item.lifecycle) === 'blocked' || tone === 'bad') filterVals.push('blocked');
-      if (ownerLower === 'zack' || ownerLower === 'operator' || ownerLower === 'me') filterVals.push('mine');
-      if (ownerLower.indexOf('griffin') >= 0 || item.type === 'outreach') filterVals.push('griffin');
+      if (commandIsMine(item)) filterVals.push('mine');
+      if (commandIsSellerLane(item)) filterVals.push('griffin');
       if (item.type === 'client' || item.client_key) filterVals.push('client');
       if (item.type === 'content' || item.tab === 'content') filterVals.push('content');
       const commandSearchText = [item.title, item.sub, item.owner, item.type, item.source, item.client_key, item.tab, item.priority, item.lifecycle].filter(Boolean).join(' ');
@@ -7247,7 +7315,7 @@ async function renderOps() {
   monH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Revenue</h3><span class="ops-count">' +
     (revDeals ? esc(revDeals) + ' closed-won all-time' : 'pre-revenue') + '</span></div>' +
     '<div class="ops-tiles">' +
-    '<div class="ops-tile"><div class="ops-b' + (revMonth > 0 ? ' ops-up' : '') + '">' + fmtMoney(revMonth) + '</div><div class="ops-l">this month · CAD</div></div>' +
+    '<div class="ops-tile"><div class="ops-b' + (revMonth > 0 ? ' ops-up' : '') + '">' + fmtMoney(revMonth) + '</div><div class="ops-l">collected this month · CAD</div></div>' +
     '<div class="ops-tile"><div class="ops-b' + (revMrr > 0 ? ' ops-up' : '') + '">' + fmtMoney(revMrr) + '</div><div class="ops-l">MRR · CAD</div></div>' +
     '<div class="ops-tile"><div class="ops-b">' + esc(revDeals) + '</div><div class="ops-l">deals closed · all-time</div></div>' +
     '</div>' +
@@ -8162,6 +8230,9 @@ async function renderOps() {
   const mktCited = asArr(mkt.top_ai_cited);
   const mktTotals = mkt.totals || {};
   const mktGen = mkt.generated_at || (mktSnap && mktSnap.updated_at) || '';
+  const mktTradeMix = Object.entries(mktTotals.prospects_by_trade || {})
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .map(([trade, count]) => String(count) + ' ' + trade).join(' · ');
   const marketBadge = mktCons.length ? String(mktCons.length) : '';
   function mktNum(v) { const n = Number(v); return isFinite(n) ? n.toLocaleString("en-CA") : v; }
   let marketH = '';
@@ -8217,19 +8288,24 @@ async function renderOps() {
     marketH += '<div class="ops-colset two">';
     // Who beats our prospects — named top competitor from prospect_signals.
     marketH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Who beats our prospects</h3><span class="ops-count">' + esc(mktWho.length) + '</span></div>';
+    if (mktTradeMix) marketH += '<div class="ops-muted ops-pad" style="border-bottom:1px solid var(--border-1)">Prospect trade mix: ' + esc(mktTradeMix) + '</div>';
     if (mktWho.length) {
       marketH += '<ul class="ops-list">';
       for (const w of mktWho) {
+        const tradeMix = Object.entries(w.trade_counts || {})
+          .sort((a, b) => Number(b[1]) - Number(a[1]))
+          .map(([trade, count]) => String(count) + ' ' + trade).join(' · ');
         marketH += '<li class="ops-li"><span class="ops-pill warn">' + esc(w.prospects) + 'x</span>' +
           '<div class="ops-grow"><div class="ops-li-ttl">' + esc(w.name) + '</div>' +
-          '<div class="ops-li-meta">' + (w.max_reviews ? esc(mktNum(w.max_reviews)) + ' reviews' : '') + '</div></div></li>';
+          '<div class="ops-li-meta">' + (w.max_reviews ? esc(mktNum(w.max_reviews)) + ' reviews' : '') +
+          (tradeMix ? ' · ' + esc(tradeMix) : '') + '</div></div></li>';
       }
       marketH += '</ul>';
       if (Number(mktTotals.prospects_with_competitor)) marketH += '<div class="ops-muted ops-pad" style="border-top:1px solid var(--border-1)">' + esc(plural(mktWho.length, 'named competitor')) + ' across ' + esc(mktTotals.prospects_with_competitor) + ' prospects that have one.</div>';
     } else { marketH += '<p class="ops-muted ops-pad">No competitor data.</p>'; }
     marketH += '</div>';
     // Who AI Overviews cite — earned third-party mentions, not own sites.
-    marketH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Who AI Overviews cite</h3><span class="ops-count">' + esc(mktCited.length) + '</span></div>';
+    marketH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Who AI Overviews cite · tracked trades</h3><span class="ops-count">' + esc(mktCited.length) + '</span></div>';
     if (mktCited.length) {
       marketH += '<ul class="ops-list">';
       for (const t of mktCited) {
@@ -8327,7 +8403,7 @@ async function renderOps() {
     '<span class="ops-spacer"></span>' +
     (userEmail() ? '<span class="ops-who">' + esc(userEmail()) + '</span>' : '') +
     '<span class="ops-asof">' + asof + '</span>' +
-    '<button class="ops-iconbtn ops-hdr-refresh" onclick="renderOps()" title="Re-reads the cached snapshot; actions auto-refresh the snapshot when they complete.">↻ Reload view</button>' +
+    '<button class="ops-iconbtn ops-hdr-refresh" onclick="opsManualRefresh()" title="Re-reads the cached snapshot. If a form is in progress, you will be asked before it is discarded.">↻ Reload view</button>' +
     '<button class="ops-iconbtn ops-hdr-dial" aria-label="Dial console" onclick="opsOpenConsole()"><svg class="i"><use href="#i-phone"/></svg><span class="ops-hdr-label">Dial console →</span></button>' +
     '<button class="ops-iconbtn ops-hdr-logout" onclick="logout()">Log out</button>' +
     '</header>' +
@@ -8594,7 +8670,7 @@ async function renderClientImpl(key, opPreview) {
   // Rankwise team" below) into the digest so the "Needs you" count + primary card can't
   // read "Nothing pending" while real open requests exist (finding S7). Independent of
   // _thinMetrics — an established client with an open ask still needs to see it.
-  const liveClientAsks = asArr(myRequests).map(function(rq){ return { title: rq.title || rq.kind || 'Request', status: rq.status || 'open', kind: rq.kind, detail: rq.detail, _live:true, _requestId: Number(rq.id), request: rq }; });
+  const liveClientAsks = asArr(myRequests).map(function(rq){ return { title: rq.title || rq.kind || 'Request', status:'open', kind: rq.kind, detail: rq.detail, _live:true }; });
   const digestAsks = liveClientAsks.concat(clientApprovals).concat(clientAsks).concat(clientUploads).slice(0, 4);
   const primaryClientAsk = digestAsks[0] || null;
   const nextClientWork = digestNext[0] || planned[0] || null;
@@ -8683,23 +8759,10 @@ async function renderClientImpl(key, opPreview) {
   const clientNextMeta = clientNextItem
     ? ([clientNextItem.status || clientNextItem.type || clientNextItem.stage || 'next step', clientNextItem.due || clientNextItem.due_at || clientNextParts.date, clientNextParts.sub || clientNextItem.detail || clientNextItem.note].filter(Boolean).join(' · '))
     : 'Your Rankwise team is monitoring the work and will bring the next decision here.';
-  // Durable client_request rows are the real work queue. Keep the prominent next-action
-  // card connected to the exact request instead of falling back to a generic mailto. This
-  // preserves the existing snapshot-safe fallback for older approval/upload rows that do not
-  // carry an id, while making a live handoff one click from attention -> work item.
-  const clientRequestCta = function(item) {
-    const rid = Number(item && item._requestId);
-    if (!item || !item._live || !Number.isFinite(rid) || rid <= 0) return '';
-    const label = roleOf() === 'operator' ? 'Open request' : 'Review request';
-    return '<a class="client-action client-action-armed" href="#client-request-' + rid + '">' + label + ' <span aria-hidden="true">→</span></a>';
-  };
-  const needsYouCta = function(item, context) {
-    if (!item) return '';
-    if (item._setup) return '<a class="client-action client-action-armed" href="#client-setup">Review setup step <span aria-hidden="true">→</span></a>';
-    return clientRequestCta(item) || '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', context || planParts(item).title) + '</div>';
-  };
   const clientNextCta = needsYouPrimary
-    ? needsYouCta(needsYouPrimary, clientNextTitle)
+    ? (needsYouPrimary._setup
+      ? '<a class="client-action client-action-armed" href="#client-setup">Review setup step <span aria-hidden="true">→</span></a>'
+      : clientContactBtn('Message Rankwise', clientNextTitle))
     : (nextClientWork ? '<a class="client-action" href="#client-action-center">See action center <span aria-hidden="true">→</span></a>' : '');
   h += '<section class="client-next-action" aria-labelledby="client-next-title"><div class="role-kicker">Your next action</div><h2 id="client-next-title">' + esc(clientNextTitle) + '</h2><p>' + esc(clientNextMeta) + '</p>' + clientNextCta + '</section>';
   // Ranking cards must never invent a denominator from the display-capped rows.
@@ -8759,7 +8822,7 @@ async function renderClientImpl(key, opPreview) {
     '<div class="client-action-grid">' +
     '<div class="client-action-card"><div class="ca-k">Needs you now</div><div class="ca-v">' + esc(needsYouPrimary ? planParts(needsYouPrimary).title : 'Nothing pending') + '</div>' +
     '<div class="ca-n">' + esc(needsYouPrimary ? ([needsYouPrimary.status || needsYouPrimary.type || 'open', needsYouPrimary.due || needsYouPrimary.due_at || planParts(needsYouPrimary).date, planParts(needsYouPrimary).sub || needsYouPrimary.detail || needsYouPrimary.note].filter(Boolean).join(' · ')) : 'Approvals, uploads, or access requests will appear here.') + '</div>' +
-    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : needsYouCta(needsYouPrimary, planParts(needsYouPrimary).title)) : '') + '</div>' +
+    (needsYouPrimary ? (needsYouPrimary._setup ? '<div class="ca-n" style="margin-top:6px">Resolve it in the setup checklist below.</div>' : '<div class="client-btnrow">' + clientContactBtn('Message Rankwise', planParts(needsYouPrimary).title) + '</div>') : '') + '</div>' +
     '<div class="client-action-card"><div class="ca-k">Next publish</div><div class="ca-v">' + esc(nextClientWork ? planParts(nextClientWork).title : 'Plan being assembled') + '</div>' +
     '<div class="ca-n">' + esc(nextClientWork ? ([nextClientWork.status || nextClientWork.stage || nextClientWork.type, nextClientWork.due || nextClientWork.scheduled_for || planParts(nextClientWork).date, planParts(nextClientWork).sub].filter(Boolean).join(' · ')) : 'Content and delivery plan appears after kickoff.') + '</div></div>' +
     '<div class="client-action-card"><div class="ca-k">Latest proof</div><div class="ca-v">' + esc(latestClientProof ? planParts(latestClientProof).title : 'Proof pending') + '</div>' +
@@ -8809,7 +8872,7 @@ async function renderClientImpl(key, opPreview) {
         const _approveBtn = _artifactGateBlocked
           ? '<button class="client-action" disabled title="Waiting on a preview link from your Rankwise team">Approve</button>'
           : '<button class="client-action" aria-pressed="false" onclick="clientApprove(this,' + rid + ')">Approve</button>';
-        return '<div class="client-ask" id="client-request-' + rid + '" data-crq="' + rid + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
+        return '<div class="client-ask" data-crq="' + rid + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
           '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
           '<span class="pill warn">open</span></div>' +
           _artifactBlock +
@@ -8834,7 +8897,7 @@ async function renderClientImpl(key, opPreview) {
   } else if (myRequests.length) {
     h += '<section class="role-card"><h3>Requests from your Rankwise team</h3>' +
       '<div class="client-workspace">' + myRequests.map(function(rq) {
-        return '<div class="client-ask" id="client-request-' + Number(rq.id) + '"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
+        return '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(rq.title || 'Request') + '</div>' +
           '<div class="client-ask__sub">' + esc([rq.kind || 'ask', rq.detail].filter(Boolean).join(' · ')) + '</div></div>' +
           '<span class="pill warn">open</span></div></div>';
       }).join('') + '</div>' +
@@ -8924,19 +8987,8 @@ async function renderClientImpl(key, opPreview) {
   h += '</section>';
 
   h += '<section class="role-card"><h3>Needs you</h3>';
-  if (liveClientAsks.length || clientApprovals.length || clientAsks.length || clientUploads.length) {
+  if (clientApprovals.length || clientAsks.length || clientUploads.length) {
     h += '<div class="client-workspace">';
-    // Mirror durable live requests here as a compact queue summary. The full request card
-    // above owns the response controls; this lower surface stays useful after a long scroll
-    // and always links back to that canonical work item.
-    liveClientAsks.slice(0, 6).forEach((ask) => {
-      const it = planParts(ask);
-      const rid = Number(ask._requestId);
-      h += '<div class="client-ask"><div class="client-ask__top"><div><div class="client-ask__title">' + esc(it.title || 'Request') + '</div>' +
-        '<div class="client-ask__sub">' + esc([ask.status || 'open', it.sub || ask.detail].filter(Boolean).join(' · ')) + '</div></div>' +
-        '<span class="pill warn">' + esc(ask.status || 'open') + '</span></div>' +
-        '<div class="client-btnrow"><a class="client-action client-action-armed" href="#client-request-' + rid + '">' + (roleOf() === 'operator' ? 'Open request' : 'Review request') + ' <span aria-hidden="true">→</span></a></div></div>';
-    });
     clientApprovals.concat(clientAsks).slice(0, 6).forEach((ask) => {
       const it = planParts(ask);
       const status = ask.status || ask.stage || ask.type || 'open';
@@ -9144,4 +9196,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: c1466efba496 -->
+<!-- rankwise-portal-version: 1292be9a5d30 -->
