@@ -40,8 +40,11 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});gtag('config','G-LRX309H9CH',_rwInt?{traffic_type:'internal'}:{});</script>
 
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+<!-- Fonts self-hosted 2026-08-17: the Fontshare multi-family request never delivered a Switzer face
+     (body text fell back to system sans) and its third-party CSS was render-blocking on this page. -->
+<link rel="preload" href="/assets/fonts/cabinet-grotesk-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/switzer-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-500.woff2) format('woff2')}@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-700.woff2) format('woff2')}@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:800;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-800.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/switzer-400.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/switzer-500.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/fonts/switzer-600.woff2) format('woff2')}</style>
 <link rel="preconnect" href="https://app.cal.com" crossorigin>
 
 <style>
