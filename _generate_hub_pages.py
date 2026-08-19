@@ -229,7 +229,9 @@ def build(fm: dict, body: str) -> str:
 <meta property="og:url" content="{url}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_CA">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{BASE}/assets/og/{slug}-og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{BASE}/assets/og/{slug}-og.png">
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {GA4}
