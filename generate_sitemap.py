@@ -94,6 +94,14 @@ def build_sitemap() -> str:
         if (ROOT / trade_html).exists():
             urls.append((f"{BASE}/{trade_slug}/", git_lastmod(trade_html), "monthly", "0.8"))
 
+    # Category hub pages — /<category>-marketing/ (added 2026-08-19, 11 hubs)
+    HUBS = ("plumber", "roofing", "landscaping", "electrician", "auto-repair", "hvac",
+            "law-firm", "dental", "chiropractor", "med-spa", "veterinary")
+    for hub in HUBS:
+        hub_html = f"{hub}-marketing/index.html"
+        if (ROOT / hub_html).exists():
+            urls.append((f"{BASE}/{hub}-marketing/", git_lastmod(hub_html), "monthly", "0.8"))
+
     # City landing pages — any top-level directory ending in -<trade>-marketing
     for slug_dir in sorted(ROOT.iterdir()):
         if not slug_dir.is_dir():

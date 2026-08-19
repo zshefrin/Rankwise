@@ -13,6 +13,20 @@ Rankwise works across local service categories (plumbers, electricians, HVAC, ro
 - [Blog](https://rankwise.ca/blog/): answers to common local-marketing questions for service businesses
 - [About](https://rankwise.ca/about/): who runs Rankwise
 
+## Category guides (Metro Vancouver market data per category)
+
+- [Roofing marketing](https://rankwise.ca/roofing-marketing/)
+- [Plumbing marketing](https://rankwise.ca/plumber-marketing/)
+- [Landscaping marketing](https://rankwise.ca/landscaping-marketing/)
+- [Electrician marketing](https://rankwise.ca/electrician-marketing/)
+- [Auto repair shop marketing](https://rankwise.ca/auto-repair-marketing/)
+- [HVAC marketing](https://rankwise.ca/hvac-marketing/)
+- [Law firm marketing](https://rankwise.ca/law-firm-marketing/)
+- [Dental practice marketing](https://rankwise.ca/dental-marketing/)
+- [Chiropractic clinic marketing](https://rankwise.ca/chiropractor-marketing/)
+- [Med spa marketing](https://rankwise.ca/med-spa-marketing/)
+- [Veterinary clinic marketing](https://rankwise.ca/veterinary-marketing/)
+
 ## Facts
 
 - Service area: Lower Mainland / Metro Vancouver, BC, Canada
