@@ -121,6 +121,36 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://rankwise.ca/best/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/best/methodology/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/best/hvac/vancouver/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/best/hvac/burnaby/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rankwise.ca/best/plumber/coquitlam/</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://rankwise.ca/abbotsford-hvac-marketing/</loc>
     <lastmod>2026-08-06</lastmod>
     <changefreq>monthly</changefreq>

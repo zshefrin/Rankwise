@@ -102,6 +102,26 @@ def build_sitemap() -> str:
         if (ROOT / hub_html).exists():
             urls.append((f"{BASE}/{hub}-marketing/", git_lastmod(hub_html), "monthly", "0.8"))
 
+    # Directory rankings -- /best/<trade>/<city>/ pages (citation-flywheel
+    # pilot, added 2026-08-25). Explicit list, not auto-discovered: the
+    # pilot is deliberately capped at 3 markets (indexing-capacity gate,
+    # directory-verdict.md section 6) -- auto-globbing best/ would silently
+    # include a future market the moment its directory is BUILT, before its
+    # own publish gate (data re-sweep + collision check) has cleared.
+    best_hub_html = "best/index.html"
+    if (ROOT / best_hub_html).exists():
+        urls.append((f"{BASE}/best/", git_lastmod(best_hub_html), "weekly", "0.8"))
+    best_methodology_html = "best/methodology/index.html"
+    if (ROOT / best_methodology_html).exists():
+        urls.append((f"{BASE}/best/methodology/", git_lastmod(best_methodology_html),
+                    "monthly", "0.6"))
+    for trade_slug, city_slug in (("hvac", "vancouver"), ("hvac", "burnaby"),
+                                  ("plumber", "coquitlam")):
+        best_page_html = f"best/{trade_slug}/{city_slug}/index.html"
+        if (ROOT / best_page_html).exists():
+            urls.append((f"{BASE}/best/{trade_slug}/{city_slug}/",
+                        git_lastmod(best_page_html), "weekly", "0.7"))
+
     # City landing pages — any top-level directory ending in -<trade>-marketing
     for slug_dir in sorted(ROOT.iterdir()):
         if not slug_dir.is_dir():
