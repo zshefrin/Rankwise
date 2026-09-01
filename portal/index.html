@@ -536,6 +536,27 @@
   body.ops .ops-deck-lane-n { color:#a8bbcc; font-size:var(--fs-1); margin-top:2px; line-height:1.3; }
   @media(max-width:760px) { body.ops .ops-deck-main { grid-template-columns:1fr; } body.ops .ops-deck-lanes { grid-template-columns:repeat(2,minmax(0,1fr)); } body.ops .ops-deck-state { display:none; } }
   @media(prefers-reduced-motion:reduce) { body.ops .ops-command-deck { box-shadow:0 1px 0 rgba(255,255,255,.05) inset; } }
+  /* Operator/AI workdesk (2026-08-25): Home is a short shared desk, not a
+     rendered transcript of every system. Detail remains available in its tab. */
+  body.ops .ops-workdesk { display:grid; gap:16px; }
+  body.ops .ops-workdesk-hero { border:1px solid #355878; border-radius:16px; padding:18px; background:radial-gradient(circle at 92% 0%,rgba(96,165,250,.17),transparent 38%),linear-gradient(145deg,#152638,#111a23 66%); }
+  body.ops .ops-workdesk-k { color:#9bc8f7; font-size:var(--fs-1); font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+  body.ops .ops-workdesk-title { margin:5px 0 0; font-size:clamp(22px,3vw,30px); line-height:1.08; letter-spacing:-.03em; }
+  body.ops .ops-workdesk-sub { color:#b5c6d6; font-size:var(--fs-3); margin:7px 0 0; max-width:740px; }
+  body.ops .ops-workdesk-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  body.ops .ops-workdesk-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr); gap:16px; align-items:start; }
+  body.ops .ops-workdesk-list { list-style:none; margin:0; padding:0; }
+  body.ops .ops-workdesk-row { display:flex; align-items:flex-start; gap:10px; padding:12px 15px; border-top:1px solid var(--border-1); }
+  body.ops .ops-workdesk-row:first-child { border-top:0; }
+  body.ops .ops-workdesk-row-main { flex:1; min-width:0; }
+  body.ops .ops-workdesk-row-title { font-size:var(--fs-3); font-weight:650; overflow-wrap:anywhere; }
+  body.ops .ops-workdesk-row-sub { color:var(--text-2); font-size:var(--fs-2); margin-top:3px; overflow-wrap:anywhere; }
+  body.ops .ops-workdesk-row .ops-btn { flex:none; }
+  body.ops .ops-workdesk-health { display:flex; align-items:center; gap:9px; padding:11px 14px; border:1px solid var(--border-3); border-radius:var(--r-md); background:var(--surface-1); font-size:var(--fs-3); }
+  body.ops .ops-workdesk-health.ok { border-color:#24513f; }
+  body.ops .ops-workdesk-health.bad { border-color:#643535; }
+  body.ops .ops-workdesk-health .ops-btn { margin-left:auto; }
+  @media(max-width:760px) { body.ops .ops-workdesk-grid { grid-template-columns:1fr; } body.ops .ops-workdesk-row { flex-wrap:wrap; } }
   body.ops .ops-grid-today { display:grid; gap:16px; margin-top:16px; grid-template-columns:1fr; }
   @media(min-width:1024px) {
     body.ops .ops-grid-today { grid-template-columns:1.55fr 1fr; align-items:start; }
@@ -1062,16 +1083,17 @@ const PORTAL_INTERNAL_SURFACES = false;
 // OPERATOR-side aging badge in the client drilldown. Deliberately not surfaced to the
 // client (see PORTAL_DATA_CONTRACT.md) — computed from created_at, not a schema field.
 const CRQ_AGING_DAYS = 3;
-const SAFE_TABS = ['today','pipeline','market','outreach','content','clients','money','system'];
+const SAFE_TABS = ['today','atlas','pipeline','market','outreach','content','clients','money','system'];
 if (PORTAL_INTERNAL_SURFACES) SAFE_TABS.push('hq','settings');
 const safeTab = (t) => (SAFE_TABS.indexOf(String(t || '')) >= 0 ? String(t) : 'today');
 // Human labels for the same ids (reused for document.title — finding 87). Keyed by
 // the SAFE_TABS ids so the two lists can never silently drift apart.
-const TAB_LABELS = { today:'Home', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', hq:'Legacy HQ', settings:'Admin' };
+const TAB_LABELS = { today:'Home', atlas:'ctOS', pipeline:'Pipeline', market:'Market', outreach:'Outreach', content:'Content', clients:'Clients', money:'Money', system:'System', hq:'Legacy HQ', settings:'Admin' };
 // One-line pre-click descriptions surfaced as the tab's native title tooltip (finding:
 // tab strip has no affordance for what each tab does). Keyed by SAFE_TABS ids.
 const TAB_DESC = {
   today:'Operator home — cockpit queue, next best move, overnight tickets, and everything that needs review, in one place',
+  atlas:'ctOS system atlas — the live automation graph (was buried as System\'s first sub-panel; promoted to its own tab 2026-08-21)',
   pipeline:'Acquisition pipeline — replies, bookings and lead quality',
   market:'Market study — competitor and AI-visibility research',
   outreach:'Seller call queue — dispositions, callbacks and DNC',
@@ -4800,10 +4822,8 @@ function cockpitHomeHTML(cp, updatedAt) {
     return '<div class="ckpt"><p class="ckpt-empty">Operator home is warming up — no snapshot yet. It refreshes automatically a few times a day.</p></div>';
   }
   const fr = cp.freshness || {}, fa = cp.faults || {};
-  const queue = Array.isArray(cp.queue) ? cp.queue : [];
   const flags = Array.isArray(cp.watch_flags) ? cp.watch_flags : [];
   const sb = Array.isArray(cp.scoreboard) ? cp.scoreboard : [];
-  const toneCls = (t) => (t === 'hot' || t === 'warn' || t === 'bad') ? t : 'calm';
   const faultN = Number(fa.count || 0);
   const stale = !!fr.scan_stale;
   const scanHrs = Number(fr.scan_hours);
@@ -4825,16 +4845,15 @@ function cockpitHomeHTML(cp, updatedAt) {
     + faultRow + freshRow
     + (flags.length ? '<div class="ckpt-digest"><div class="ckpt-dh">' + esc(flags.length) + ' ' + watchLbl + '</div>' + flagRows + '</div>' : '')
     + '<div class="ckpt-kpis">' + kpiCells + '</div></aside>';
-  const rows = queue.map((r, i) =>
-    '<div class="ckpt-row tone-' + toneCls(r.tone) + (i===0?' hero':'') + '"><span class="ckpt-spine"></span>'
-      + '<span class="ckpt-rk">' + esc(r.rank != null ? r.rank : (i+1)) + '</span>'
-      + '<div class="ckpt-main"><div class="ckpt-t">' + esc(r.text || '') + '</div><div class="ckpt-w">' + esc(r.why || '') + '</div>'
-      + '<div class="ckpt-meta"><span class="ckpt-num">' + esc(r.num || '') + '</span>'
-      + (r.tag ? '<span class="ckpt-tag ' + toneCls(r.tone) + '">' + esc(r.tag) + '</span>' : '') + '</div></div></div>').join('');
-  const queueBox = '<div class="ckpt-q"><div class="ckpt-qh"><span class="ckpt-qlbl">&#9656; your queue</span>'
-    + '<span class="ckpt-pill">' + esc(queue.length) + ' need you</span></div>' + rows + '</div>';
+  // 2026-08-21 portal reorg (merge #1 of 3 Home stacks): cp.queue's rows no longer
+  // render here as their own "your queue" box — they fold into the SAME merged
+  // Command queue as the operator_portal_snapshot commands and the alert-center
+  // notifications (see the cockpit/alert push loops near normalizeCommand), each
+  // carrying a visible source+freshness tag instead of three separately-ranked
+  // lists. The watch aside above is DIFFERENT in kind (system health signalling,
+  // not "needs you" work) and stays exactly as it was.
   const stamp = updatedAt ? '<div class="ckpt-stamp">live &middot; snapshot ' + esc(String(updatedAt).replace('T',' ').slice(0,16)) + ' UTC</div>' : '';
-  return '<div class="ckpt"><div class="ckpt-wrap">' + queueBox + watch + '</div>' + stamp + '</div>';
+  return '<div class="ckpt"><div class="ckpt-wrap">' + watch + '</div>' + stamp + '</div>';
 }
 
 async function renderOps() {
@@ -5703,6 +5722,17 @@ async function renderOps() {
         ? (row.notes || row.comments || row.operator_notes)
         : (row.notes || row.comments || row.operator_notes ? [row.notes || row.comments || row.operator_notes] : []),
       record_url: row.record_url || row.url || row.href || row.artifact_url || '',
+      anchor: row.anchor || '',
+      // portal-reorg-2026-08-21: every row in the universal queue now carries a
+      // visible source + freshness tag (done-when: "a stale item must LOOK stale,
+      // never silently outrank a fresh one"). Default source_tag 'command' covers
+      // every pre-existing pushCommand() call site (backend command_queue + the
+      // ~10 fallback/always-on loops below) without touching any of them; the
+      // cockpit and alert fold-in loops below pass their own explicit tag.
+      // freshness_at defaults to the operator_portal_snapshot's own generation
+      // stamp (generatedAt) since that's what every one of those sources reads.
+      source_tag: row.source_tag || 'command',
+      freshness_at: row.freshness_at || generatedAt || '',
     };
   }
   const universalQueue = asArr(p.command_queue || p.execution_queue || p.universal_command_queue).map(normalizeCommand).map(deDragItem);
@@ -5847,6 +5877,35 @@ async function renderOps() {
   for (const f of brainItems.filter(function(x) { return ['critical','high'].indexOf(String(x.severity || '').toLowerCase()) >= 0; }).slice(0, 3)) pushCommand({
     type:'finding', priority:f.severity, title:'Finding: ' + cleanTitle(f.title || 'Open finding'), sub:[f.category, f.sub].filter(Boolean).join(' · '),
     owner:f.owner || 'operator', lifecycle:f.state || 'open', tab:'system', action:'autofix.preview', source:'findings',
+  });
+  // ── portal-reorg-2026-08-21 (merge #1 of 3): cockpit + alert fold-ins ──────
+  // The two remaining "what needs me" stacks fold into this SAME universal queue
+  // — same normalizeCommand shape, same dedup, same sort, same Command-queue
+  // rendering/drawers/saved-views/search. Never gated behind universalQueue.length
+  // === 0 (unlike the fallback loops above): both are real, always-present data,
+  // not a substitute for an absent backend command_queue.
+  //
+  // cp.queue (cockpit_snapshot, refreshed ~3x/day) — read directly from ckSnap
+  // rather than through cockpitHomeHTML, which no longer renders these rows
+  // itself (see its own "watch stays, queue moves" comment).
+  const cpQueueRows = asArr((ckSnap && ckSnap.payload) ? ckSnap.payload.queue : null);
+  for (const r of cpQueueRows) pushCommand({
+    type: 'cockpit', title: r.text || 'Cockpit item', sub: r.why || '',
+    priority: r.tone === 'hot' ? 'bad' : (r.tone || 'normal'),
+    owner: 'operator', lifecycle: 'waiting', tab: 'today', source: 'cockpit_queue',
+    source_tag: 'cockpit', freshness_at: ckSnap ? ckSnap.updated_at : '',
+  });
+  // uniqueNotifications (Alert center, operator_portal_snapshot-derived — same
+  // generatedAt cadence as the backend command_queue rows above). item.type is
+  // kept as-is (system/failed action/source/content/seller/client/finding), not
+  // overwritten with a generic 'alert' — that's what makes an alert-derived row
+  // correctly show up under the existing Clients/Content saved-view filters too;
+  // source_tag carries the "this came from the alert center" distinction instead.
+  for (const n of uniqueNotifications) pushCommand({
+    type: n.type, title: n.title, sub: n.sub,
+    priority: n.tone === 'bad' ? 'bad' : (n.tone || 'warn'),
+    owner: 'operator', lifecycle: 'waiting', tab: n.tab || 'today', anchor: n.anchor,
+    source: 'alert_center', source_tag: 'alert', freshness_at: generatedAt,
   });
   const priorityRank = { critical:0, bad:1, high:2, warn:3, normal:4, info:5, lo:6, ok:7 };
   // The operator is currently the only active seller. A card assigned to an
@@ -6058,7 +6117,8 @@ async function renderOps() {
       if (commandIsSellerLane(item)) filterVals.push('griffin');
       if (item.type === 'client' || item.client_key) filterVals.push('client');
       if (item.type === 'content' || item.tab === 'content') filterVals.push('content');
-      const commandSearchText = [item.title, item.sub, item.owner, item.type, item.source, item.client_key, item.tab, item.priority, item.lifecycle].filter(Boolean).join(' ');
+      if (item.source_tag) filterVals.push(item.source_tag);
+      const commandSearchText = [item.title, item.sub, item.owner, item.type, item.source, item.source_tag, item.client_key, item.tab, item.priority, item.lifecycle].filter(Boolean).join(' ');
       const artifactUrl = safeHref(item.record_url);
       const recBtn = recordButton({
         kind: 'Command',
@@ -6110,6 +6170,11 @@ async function renderOps() {
         '<div class="ops-commanditem-meta">' +
         statusPill('owner', item.owner || 'operator', 'info') +
         statusPill('state', lifecycleState(item.lifecycle), lifecycleTone(item.lifecycle)) +
+        // Visible source + freshness tag (portal-reorg-2026-08-21 merge — a stale
+        // item must LOOK stale, never silently outrank a fresh one). Self-ticking
+        // (data-fresh-ts, same mechanism as the Snapshot-contract pill) so it
+        // doesn't freeze at paint time on a cockpit left open all day.
+        freshnessPill(item.source_tag || 'command', item.freshness_at, 6, 24) +
         (item.due ? statusPill('due', item.due, 'warn') : '') +
         '</div>' +
         '</li>';
@@ -7517,7 +7582,11 @@ async function renderOps() {
     '</div>';
   // (The hourly SVG flowchart panel was retired 2026-07-23 — operator call: the atlas
   // replaces the flowcharts. Infra-failure alerts still read sys.broken_nodes upstream.)
-  let sysH = atlasH + '<div class="ops-colset two">';
+  // 2026-08-21 portal reorg: atlasH moved OUT of System's first sub-panel into its own
+  // top-level "ctOS" tab (SAFE_TABS/ops-atlas section above) — it was the operator's
+  // stated favourite feature, buried at sub-panel 1 of tab 8 of 10. atlasH itself is
+  // rendered unchanged, just from a different tab; nothing here mutates it.
+  let sysH = '<div class="ops-colset two">';
   // Snapshot contract
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Snapshot contract</h3>' +
     '<span class="ops-count">' + esc(schemaVersion || 'missing schema') + '</span></div>' +
@@ -7528,7 +7597,10 @@ async function renderOps() {
   // Data integrity (single-source rule: this list and the map above are both
   // projections of the same data-truth stamp — the button is the cross-link)
   sysH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Data integrity</h3>' +
-    '<button class="ops-btn ghost" style="margin-left:auto" onclick="document.getElementById(\'ops-atlas-panel\').scrollIntoView({behavior:\'smooth\'})">Map</button>' +
+    // The atlas now lives on its own tab (2026-08-21), not this section — this cross-link
+    // switches tabs instead of the old same-tab scrollIntoView (which would silently no-op
+    // now that #ops-atlas-panel is never in the DOM while this section is visible).
+    '<button class="ops-btn ghost" style="margin-left:auto" data-act="opsTab" data-arg="atlas">Map</button>' +
     '<span class="ops-count">' + esc(Number(sys.sources_ok)||0) + ' / ' + esc(Number(sys.sources_total)||0) + ' OK</span></div>';
   sysH += '<ul class="ops-list">';
   // Single-source render: uniqueSources first, then any not_ok/warns NOT already
@@ -7880,56 +7952,32 @@ async function renderOps() {
   }
   sysH += '</div>';
 
-  // ── ALERTS section ────────────────────────────────────────────────────────
-  let alertH = '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-bell"/></svg></div><div class="nm-t"><div class="nm-k">Alert center</div>' +
-    '<div class="nm-h">' + (uniqueNotifications.length ? esc(plural(uniqueNotifications.length, 'alert')) + (uniqueNotifications.length === 1 ? ' needs' : ' need') + ' review' : 'No active alerts') +
-    ' <span>— broken system nodes, stale sources, failed actions, content blockers, seller pace and client freshness. Each row opens the tab where you resolve it.</span></div></div></div>';
-  alertH += '<div class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">Alerts</h3>' +
-    '<span class="ops-count">' + esc(uniqueNotifications.length) + '</span></div>' +
-    '<div class="ops-toolbar">' +
-    '<button class="ops-seg active" data-filter-group="alerts" data-filter-value="all" data-act="opsSetFilter">All</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="bad" data-act="opsSetFilter">Critical</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="warn" data-act="opsSetFilter">Warning</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="system" data-act="opsSetFilter">System</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="finding" data-act="opsSetFilter">Findings</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="failed-action" data-act="opsSetFilter">Failed</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="source" data-act="opsSetFilter">Sources</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="content" data-act="opsSetFilter">Content</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="client" data-act="opsSetFilter">Client</button>' +
-    '<button class="ops-seg" data-filter-group="alerts" data-filter-value="seller" data-act="opsSetFilter">Seller</button>' +
-    '</div>';
-  if (uniqueNotifications.length) {
-    alertH += '<div class="ops-pad" role="list" aria-label="Alerts">';
-    // Whitelist the routed tab: n.tab can come from the payload, and esc() is
-    // HTML-entity encoding — wrong for a JS-string literal inside an inline
-    // onclick (a stray quote would decode back and break out). Constrain to the
-    // known tab set so the interpolation can never inject.
-    for (const n of uniqueNotifications.slice(0, 40)) {
-      const tone = n.tone === 'bad' || n.tone === 'critical' ? 'bad' : (n.tone === 'warn' || n.tone === 'high' ? 'warn' : 'info');
-      const type = String(n.type || 'alert').toLowerCase();
-      // Filter tokens are matched by a single-space split (opsSetFilter), so a
-      // multi-word type like "failed action" must collapse to one token or no chip
-      // could ever select it. The display pill still shows the readable type.
-      const typeTok = type.replace(/\s+/g, '-');
-      const sevLabel = tone === 'bad' ? 'Critical' : (tone === 'warn' ? 'Warning' : 'Info');
-      alertH += '<div class="ops-notice ops-filtered" role="listitem" data-filter-target="alerts" data-filter-values="' + esc([tone, typeTok].join(' ')) + '">' +
-        '<span class="ops-pill ' + esc(tone) + '">' + esc(sevLabel) + '</span>' +
-        '<span class="ops-pill dim">' + esc(type) + '</span>' +
-        '<div class="ops-notice-body"><div class="ops-notice-title">' + esc(n.title) + '</div>' +
-        (n.sub ? '<div class="ops-notice-sub">' + esc(n.sub) + '</div>' : '') + '</div>' +
-        '<button class="ops-btn ghost" data-act="opsTab" data-arg="' + esc(n.tab || 'today') + '"' + anchorAttr(n.anchor) + '>Open →</button></div>';
-    }
-    if (uniqueNotifications.length > 40) {
-      alertH += '<div class="ops-notice" role="listitem"><span class="ops-pill lo">more</span><div class="ops-notice-body"><div class="ops-notice-title">Showing 40 of ' + esc(uniqueNotifications.length) + ' alerts</div><div class="ops-notice-sub">' + esc(plural(uniqueNotifications.length - 40, 'alert')) + ' beyond this list — the filter chips reach only shown rows; resolve the top of the queue to surface the rest.</div></div></div>';
-    }
-    alertH += '</div>';
-  } else {
-    alertH += '<div class="ops-empty"><b>All quiet</b>The alert center will fill from notifications, failed actions, stale sources, content blockers, seller pace, and client freshness.</div>';
-  }
-  alertH += '</div>';
+  // ── ALERTS section: REMOVED 2026-08-21 (merge #1 of 3) ─────────────────────
+  // The standalone Alert-center banner + Alerts panel (uniqueNotifications
+  // rendered a second time here, in its own ranking, on top of the Command
+  // queue below) is gone — every uniqueNotifications row now folds into the
+  // SAME merged Command queue (see the alert push loop near normalizeCommand),
+  // with a visible "alert" source tag + freshness, reachable via the queue's
+  // own saved-views/search/drawer instead of a separate filter-chip taxonomy.
+  // This was the entire point: three "what needs me" rankings that disagreed
+  // by data-age, collapsed into one. Known, disclosed change: the old Alerts
+  // panel's fine-grained type chips (System/Findings/Failed/Sources/Content/
+  // Client/Seller) have no direct replacement — the merged queue's saved-views
+  // are broader (All/Blocked/Mine/Griffin/Clients/Content) and free-text search
+  // now also matches on source_tag ("alert") and item.type. Flagged in the
+  // handoff, not silently dropped.
 
+  // ── SETTINGS + HQ OS sections: both permanently gated off (PORTAL_INTERNAL_
+  // SURFACES = false, never rendered — see SAFE_TABS/tab-strip above). Building
+  // their HTML was previously unconditional every renderOps() call even though the
+  // ternary at the final concat always discarded the result; skip the compute when
+  // gated (2026-08-21 portal reorg, "cheap honesty fix"). settingsH/hqH stay
+  // declared unconditionally ('') so the guarded concat below never sees an
+  // undefined identifier if the flag is ever flipped on mid-review.
+  let settingsH = '', hqH = '';
+  if (PORTAL_INTERNAL_SURFACES) {
   // ── SETTINGS section ──────────────────────────────────────────────────────
-  let settingsH = '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-sliders"/></svg></div><div class="nm-t"><div class="nm-k">Admin shell</div>' +
+  settingsH = '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-sliders"/></svg></div><div class="nm-t"><div class="nm-k">Admin shell</div>' +
     '<div class="nm-h">Mappings and QA checks <span>— read-only until backend admin systems exist</span></div></div></div>';
   settingsH += '<div class="ops-colset two" style="margin-top:16px">';
   settingsH += '<div class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Role mappings</h3><span class="ops-count">' + esc(roleMappings.length || 'contract') + '</span></div>';
@@ -8009,7 +8057,7 @@ async function renderOps() {
   settingsH += '</details>';
 
   // ── HQ OS section: old HQ systems that must not disappear in the portal merge ─
-  let hqH = '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-grid"/></svg></div><div class="nm-t"><div class="nm-k">Legacy HQ</div>' +
+  hqH = '<div class="ops-nextmove"><div class="nm-i"><svg class="i"><use href="#i-grid"/></svg></div><div class="nm-t"><div class="nm-k">Legacy HQ</div>' +
     '<div class="nm-h">Legacy HQ migration <span>— tiles fill in as feeds are ported; live tabs are authoritative.</span></div></div></div>';
   const hqHasKeys = (o) => !!o && (Array.isArray(o) ? o.length > 0 : Object.keys(o).length > 0);
   const leadsWired = hqHasKeys(leads) || oldLeadRecent.length > 0;
@@ -8220,6 +8268,7 @@ async function renderOps() {
     hqH += '<div class="ops-empty"><b>Findings queue not wired into this snapshot</b>This panel fills in once the legacy HQ feeds are ported. Use the live tabs for authoritative work.</div>';
   }
   hqH += '</div></div>';
+  }  // end if (PORTAL_INTERNAL_SURFACES) — settingsH/hqH compute-skip
 
   // ── MARKET section (operator-only; data via market_snapshot RLS) ──────────
   // SerpAPI ownership/AEO/synthesis intel that used to dead-end in vault markdown.
@@ -8389,6 +8438,77 @@ async function renderOps() {
   }
   marketH += '</div>';
 
+  // ── Operator/AI workdesk Home (2026-08-25) ─────────────────────────────────
+  // The old Today construction above remains the data/interaction compatibility
+  // layer for now, but it is intentionally NOT mounted. Home puts Zack's
+  // decisions, AI work, and only consequential health exceptions in front.
+  const deskCommands = universalCommands.filter(function(item) {
+    const owner = String(item.owner || '').toLowerCase();
+    return !owner || owner === 'operator' || owner === 'zack';
+  }).slice(0, 5);
+  const deskReady = deskCommands.filter(function(item) {
+    return ['outreach', 'content', 'client', 'money'].indexOf(String(item.type || '').toLowerCase()) >= 0 ||
+      ['outreach', 'pipeline', 'content', 'clients', 'money'].indexOf(String(item.tab || '').toLowerCase()) >= 0;
+  }).slice(0, 3);
+  // Producers can emit ai_work (preferred) as a small, operator-readable list:
+  // title/goal, why, status, tab and optional action. The older agent cards and
+  // queued safe actions are compatibility fallbacks, never fabricated activity.
+  const deskAiSource = asArr(p.ai_work || p.aiWork || p.agent_work || p.agentWork).concat(agentCards);
+  const deskAiWork = deskAiSource.filter(function(item) {
+    const status = String(item.status || item.state || '').toLowerCase();
+    return !status || ['active', 'running', 'working', 'queued', 'needs_review', 'waiting'].indexOf(status) >= 0;
+  }).slice(0, 3).map(function(item) {
+    return {
+      title: item.title || item.goal || item.name || 'AI task',
+      sub: [item.why || item.summary || item.detail || item.status || item.state, item.updated_at ? ptTime(item.updated_at) : ''].filter(Boolean).join(' · '),
+      tab: item.tab || item.workspace || 'system', action: item.action, params: item.params,
+    };
+  });
+  if (!deskAiWork.length) queuedActions.slice(0, 3).forEach(function(item) {
+    deskAiWork.push({ title: actionName(item.action || item.name || 'Automation task'), sub: [item.status || item.state || 'working', item.created_at ? ptTime(item.created_at) : ''].filter(Boolean).join(' · '), tab: 'system' });
+  });
+  if (!deskAiWork.length) workers.filter(function(item) { return workerStatus(item) === 'warn'; }).slice(0, 3).forEach(function(item) {
+    deskAiWork.push({ title: workerName(item), sub: item.detail || item.last_run_at || item.status || 'working in the background', tab: 'system' });
+  });
+  const deskHealth = infraAlerts.concat(failedActions.slice(0, 2).map(function(item) {
+    return { title:'Action failed: ' + actionName(item.action), tab:'system' };
+  })).slice(0, 2);
+  const deskRow = function(item, kind) {
+    const tab = safeTab(item.tab || 'today');
+    const action = item.action ? actionButton(item.action, kind === 'ai' ? 'Inspect' : 'Act', item.params || {}, { primary:kind !== 'ai', sub:'' }) : '';
+    return '<li class="ops-workdesk-row"><span class="ops-pill ' + (kind === 'ai' ? 'info' : 'warn') + '">' + esc(kind === 'ai' ? 'AI' : 'READY') + '</span>' +
+      '<div class="ops-workdesk-row-main"><div class="ops-workdesk-row-title">' + esc(item.title || 'Open work') + '</div><div class="ops-workdesk-row-sub">' + esc(item.sub || item.next_action || 'Open the workspace for detail and evidence.') + '</div></div>' +
+      (action || '<button class="ops-btn ' + (kind === 'ai' ? 'ghost' : 'primary') + '" data-act="opsTab" data-arg="' + esc(tab) + '">' + (kind === 'ai' ? 'Inspect' : 'Open') + '</button>') + '</li>';
+  };
+  // System/finding rows deliberately do not win the workdesk's lead slot. They
+  // are still visible in System watch, but a raw detector should never displace
+  // a real revenue, approval, client, or money decision on Zack's Home screen.
+  const deskLead = deskReady[0] || (dueCalls.length ? {
+    title: plural(dueCalls.length, 'outreach item') + ' due for review',
+    sub: dueCalls.filter(function(item) { return item.overdue; }).length + ' overdue',
+    tab: 'outreach', type: 'outreach', owner: 'operator',
+  } : (contentBadge ? {
+    title: plural(contentBadge, 'content item') + ' ready for review',
+    sub: 'Open the approval queue and make the next editorial call.',
+    tab: 'content', type: 'content', owner: 'operator',
+  } : null));
+  const deskLeadTab = safeTab((deskLead && (deskLead.tab || deskLead.action_tab)) || 'today');
+  const deskLeadTitle = deskLead ? (deskLead.title || 'Review the next open item') : 'No operator action is waiting right now';
+  const deskLeadSub = deskLead ? ([deskLead.owner || 'operator', deskLead.type, deskLead.sub || deskLead.next_action].filter(Boolean).join(' · ') || 'Open the linked workspace and move this work forward.') : 'The desk will surface the next decision, approval, reply, or send when one is ready.';
+  const workdeskHomeH = '<div class="ops-workdesk">' +
+    '<section class="ops-workdesk-hero" aria-labelledby="ops-workdesk-title"><div class="ops-workdesk-k">Your workdesk</div><h2 class="ops-workdesk-title" id="ops-workdesk-title">' + esc(deskLeadTitle) + '</h2><p class="ops-workdesk-sub">' + esc(deskLeadSub) + '</p><div class="ops-workdesk-actions">' +
+    '<button class="ops-btn primary" data-act="opsTab" data-arg="' + esc(deskLeadTab) + '">Open next action <span aria-hidden="true">→</span></button>' +
+    (contentBadge ? '<button class="ops-btn ghost" onclick="opsGotoApprovals()">Review content (' + esc(contentBadge) + ')</button>' : '') +
+    (dueCalls.length ? '<button class="ops-btn ghost" data-act="opsTab" data-arg="outreach">Open due outreach (' + esc(dueCalls.length) + ')</button>' : '') +
+    '</div></section><div class="ops-workdesk-grid"><div class="ops-workdesk-primary">' +
+    '<section class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">Ready for your call</h3><span class="ops-count">' + esc(deskReady.length || deskCommands.length) + ' shown</span></div>' +
+    (deskReady.length ? '<ul class="ops-workdesk-list">' + deskReady.map(function(item) { return deskRow(item, 'ready'); }).join('') + '</ul>' : '<div class="ops-empty"><b>Nothing is blocked on you</b>AI work and routine system detail stay out of the way until your input is needed.</div>') +
+    '</section><section class="ops-panel" style="margin-top:16px"><div class="ops-panel-h"><h3 class="ops-panel-t">AI is handling</h3><span class="ops-count">' + esc(deskAiWork.length || 'quiet') + '</span></div>' +
+    (deskAiWork.length ? '<ul class="ops-workdesk-list">' + deskAiWork.map(function(item) { return deskRow(item, 'ai'); }).join('') + '</ul>' : '<div class="ops-empty"><b>No active AI task to supervise</b>Completed and routine work stays in the system record; you will see it here only when it needs steering.</div>') +
+    '</section></div><aside class="ops-rail"><section class="ops-panel"><div class="ops-panel-h"><h3 class="ops-panel-t">System watch</h3><span class="ops-count">exceptions only</span></div><div class="ops-pad">' +
+    (deskHealth.length ? deskHealth.map(function(item) { return '<div class="ops-workdesk-health bad"><span class="ops-dot bad"></span><span>' + esc(item.title) + '</span><button class="ops-btn ghost" data-act="opsTab" data-arg="' + esc(safeTab(item.tab || 'system')) + '">Inspect</button></div>'; }).join('') : '<div class="ops-workdesk-health ok"><span class="ops-dot info"></span><span>Nothing is blocking your work right now.</span><button class="ops-btn ghost" data-act="opsTab" data-arg="system">System</button></div>') +
+    '</div></section></aside></div></div>';
+
   // ── Assemble full cockpit HTML ─────────────────────────────────────────────
   const snapFreshTs = generatedAt || (snap && snap.updated_at);
   const snapFresh = freshnessInfo(snapFreshTs, 4, 24);
@@ -8416,6 +8536,7 @@ async function renderOps() {
     '<nav class="ops-tabs" role="tablist">' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Home' +
     (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='atlas'?'true':'false') + '" data-v="atlas" onclick="opsTab(\'atlas\')">ctOS</button>' +
     '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
     (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + ' due</span>' : '') + '</button>' +
     '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='pipeline'?'true':'false') + '" data-v="pipeline" onclick="opsTab(\'pipeline\')">Pipeline' +
@@ -8437,7 +8558,8 @@ async function renderOps() {
     (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
     '</nav>' +
     '<main class="ops-main">' +
-    '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + homeH + todayH + alertH + '</section>' +
+    '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + workdeskHomeH + '</section>' +
+    '<section class="ops-view" id="ops-atlas" role="tabpanel"' + (window._opsTab!=='atlas'?' hidden':'') + '>' + atlasH + '</section>' +
     '<section class="ops-view" id="ops-pipeline" role="tabpanel"' + (window._opsTab!=='pipeline'?' hidden':'') + '>' + pipeH + '</section>' +
     '<section class="ops-view" id="ops-market" role="tabpanel"' + (window._opsTab!=='market'?' hidden':'') + '>' + marketH + '</section>' +
     '<section class="ops-view" id="ops-outreach" role="tabpanel"' + (window._opsTab!=='outreach'?' hidden':'') + '>' + outH + '</section>' +
@@ -9196,4 +9318,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: 1292be9a5d30 -->
+<!-- rankwise-portal-version: c18ba48e17b6 -->
