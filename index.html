@@ -891,6 +891,18 @@ section{padding:80px 24px}
   color:var(--muted);font-weight:600;
 }
 
+/* ── TWO SEARCHES panel (homepage-clarity variant 2, 2026-09-01) ──── */
+.two-search{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
+.ts-panel{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--card-radius);box-shadow:var(--card-shadow);padding:30px 28px}
+.ts-panel--ai{border-color:rgba(198,138,58,.35)}
+.ts-kicker{font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.ts-stat{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:2.75rem;letter-spacing:-.03em;line-height:.95;color:var(--ink);display:block;margin-bottom:14px}
+.ts-panel p{font-size:.9375rem;color:var(--muted);line-height:1.65;margin-bottom:14px}
+.ts-list{border-top:1px solid var(--hairline)}
+.ts-list div{padding:8px 0;border-bottom:1px solid var(--hairline);font-size:.8125rem;color:var(--ink)}
+.ts-source{text-align:center;font-size:.75rem;color:var(--muted);margin-top:16px;letter-spacing:.04em}
+@media(max-width:760px){.two-search{grid-template-columns:1fr}}
+
 /* ── SIGNALS (03) ─ visual scorecard ─────────────────────────────── */
 .scorecard-grid{
   list-style:none;display:grid;grid-template-columns:repeat(2,1fr);
@@ -1563,19 +1575,19 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
   <div class="hero-inner">
     <div class="hero-grid">
     <div class="hero-text">
-    <p class="hero-eyebrow">Rankwise · Local search visibility · Lower Mainland, BC</p>
+    <p class="hero-eyebrow">Rankwise · Local marketing for service businesses · Lower Mainland, BC</p>
     <h1>
-      More customers from the neighbourhood you serve.
-      <span class="h1-tagline">Claim the top of Google Maps in your city, first.</span>
+      There are two searches that decide who gets the call.
+      <span class="h1-tagline">We work to win you both.</span>
     </h1>
     <p class="hero-copy">
-      We work to win you the winnable top-3 Map Pack spot, the results nearby customers see first, so they call you instead of a competitor. Your Google profile, your reviews, and a page for every area you serve, tracked against a 90-day position target we put in writing. Every month, you see the numbers that prove it.
+      A homeowner searching Google Maps for "plumber near me" sees three names before any website. Increasingly, that same homeowner also asks an AI which one to call. Rankwise runs the Google side today, and tracks &amp; builds the AI side before most competitors know it exists.
     </p>
     <div id="audit-widget" data-endpoint="https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/instant-audit" data-turnstile-sitekey="0x4AAAAAADjMBGvdtAUcYW6u"></div>
     <div class="hero-actions">
       <div class="hero-cta-group">
         <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=hero-primary" class="btn-primary btn-amber" data-cta-location="hero-primary">Book my free audit</a>
-        <span class="hero-closer">Miss the target, your billing pauses.</span>
+        <span class="hero-closer">Position milestones agreed in writing before month one &mdash; miss one, billing pauses until we hit it.</span>
       </div>
       <a href="#cities" class="btn-secondary" data-cta-location="hero-secondary">Explore the local data</a>
     </div>
@@ -1693,6 +1705,69 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <span class="hl-label">Long-term contracts</span>
         <span class="hl-desc">Month to month, cancel anytime</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── THE TWO SEARCHES (homepage-clarity variant 2, 2026-09-01) ───── -->
+<section id="searches">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="section-label">The two searches</div>
+      <h2 style="max-width:680px">Same customer, two different places to be found.</h2>
+      <p class="section-sub">Here's what each search looks like today, and where Rankwise stands on both.</p>
+    </div>
+    <div class="two-search">
+      <div class="ts-panel">
+        <div class="ts-kicker">Search one &middot; Google Maps</div>
+        <span class="ts-stat">Top 3</span>
+        <p>A homeowner searches "plumber near me." Three names show before any website link. Two of those spots are usually locked in already &mdash; the third one moves.</p>
+        <div class="ts-list">
+          <div>Google Business Profile optimization</div>
+          <div>Review velocity &amp; response support</div>
+          <div>City pages for every area you serve</div>
+          <div>Weekly Map Pack rank tracking</div>
+        </div>
+      </div>
+      <div class="ts-panel ts-panel--ai">
+        <div class="ts-kicker">Search two &middot; AI answers</div>
+        <span class="ts-stat" style="color:var(--amber-text)">7/8</span>
+        <p>The same homeowner increasingly asks an AI instead. Perplexity now cites Rankwise-tracked pages on 7 of 8 tracked HVAC search questions, our most-measured category. Google's AI Overviews has cited us on 1 of 30 tracked queries; ChatGPT and Gemini citation tracking isn't live yet &mdash; that's the opening we're building toward next.</p>
+        <div class="ts-list">
+          <div>AI-citation tracking, engine by engine</div>
+          <div>The same reviews &amp; content signals AI pulls from</div>
+          <div>Honest reporting: named where we're cited, not where we aren't</div>
+        </div>
+      </div>
+    </div>
+    <p class="ts-source">Source: Rankwise's own AI-citation tracker, verified 2026-08-31.</p>
+  </div>
+</section>
+
+<!-- ── THREE THINGS, PLAINLY (homepage-clarity variant 1 block, 2026-09-01) ── -->
+<section class="s-alt" id="whatwedo">
+  <div class="container">
+    <div class="section-head reveal in">
+      <div class="section-label">What we actually do</div>
+      <h2>Three things, plainly.</h2>
+      <p class="section-sub">No agency-speak. Here is the actual work, in the order it matters to your phone ringing.</p>
+    </div>
+    <div class="services-grid">
+      <article class="svc-card">
+        <span class="svc-stat">Maps</span>
+        <h3>We fix your Google listing</h3>
+        <p>We optimize your Google Business Profile, post to it every week, and keep your business name, address, and phone number the same everywhere online &mdash; so Google trusts you enough to rank you.</p>
+      </article>
+      <article class="svc-card">
+        <span class="svc-stat">AI</span>
+        <h3>We get you named by AI</h3>
+        <p>When a homeowner asks ChatGPT or Perplexity who to call, we track whether your business gets named, and build the reviews and pages that make that more likely.</p>
+      </article>
+      <article class="svc-card">
+        <span class="svc-stat">Calls</span>
+        <h3>We turn searches into booked calls</h3>
+        <p>A page for every area you serve, reviews coming in every week, and a plain-English report each month &mdash; so you see calls booked, not just a rank number.</p>
+      </article>
     </div>
   </div>
 </section>
