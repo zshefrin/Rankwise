@@ -1210,6 +1210,17 @@ function toggleFaq(btn){{const item=btn.closest('.faq-item');const o=item.classL
       utm_campaign: params.get("utm_campaign") || "city-page"
     }});
   }}
+  // Booking confirmed → hand off to /prep. Separate from the conversion fn: that one
+  // early-returns when gtag is missing; the redirect must fire regardless.
+  var _prepDone = false;
+  function goPrep(){{
+    if (_prepDone) return; _prepDone = true;
+    setTimeout(function(){{ window.location.assign("/prep/"); }}, 1000);
+  }}
+  function cityBookingDone(e){{
+    try {{ fireAuditConversion(e); }} catch(_) {{}}
+    goPrep();
+  }}
   function loadCal(){{
     if (started) return;
     started = true;
@@ -1240,8 +1251,8 @@ function toggleFaq(btn){{const item=btn.closest('.faq-item');const o=item.classL
     Cal("init","15min",{{origin:"https://app.cal.com"}});
     Cal.ns["15min"]("inline",{{elementOrSelector:"#cal-embed",config:cfg,calLink:"zackary-shefrin-oy63zv/15min"}});
     Cal.ns["15min"]("ui",{{"theme":"light","hideEventTypeDetails":true,"layout":"month_view","cssVarsPerTheme":{{"light":{{"cal-brand":"#C75439"}}}}}});
-    Cal.ns["15min"]("on",{{action:"bookingSuccessful",callback:fireAuditConversion}});
-    Cal.ns["15min"]("on",{{action:"bookingSuccessfulV2",callback:fireAuditConversion}});
+    Cal.ns["15min"]("on",{{action:"bookingSuccessful",callback:cityBookingDone}});
+    Cal.ns["15min"]("on",{{action:"bookingSuccessfulV2",callback:cityBookingDone}});
   }}
   if ("IntersectionObserver" in window) {{
     var observer = new IntersectionObserver(function(entries){{
