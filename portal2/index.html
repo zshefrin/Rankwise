@@ -2475,11 +2475,84 @@ function viewBusiness(p, updatedAt){
     <div class="cards">${bal.map(b=>row(b.provider||"?", (b.state==="unknown"?"balance unknown — ":"")+firstLine(b.lastKnownEvent||""))).join("")}</div>`:""}`;
 }
 
-// masthead: compact-on-green, expand-on-degraded (F concept); manual toggle wins, remembered.
+// ctOS pulse is its own truth contract. Findings are one input elsewhere in the
+// portal, but zero findings must never be translated into "all systems green".
+// Missing/malformed summary data fails closed to UNKNOWN.
+const _CTOS_STATES=new Set(["healthy","attention","degraded","critical","stopped","unknown"]);
+const _CTOS_SCHEMA="ctos.summary.v1";
+const _CTOS_STALE_HOURS=8;
+// Per-state fallback text (F9e): a state with an empty reason used to render
+// "healthy · ctOS status unavailable", which reads as a contradiction.
+const _CTOS_FALLBACK_REASON={
+  healthy:"all required ctOS checks passed",
+  attention:"ctOS reported no reason for this state",
+  degraded:"ctOS reported no reason for this state",
+  critical:"ctOS reported no reason for this state",
+  stopped:"full-stop kill switch is engaged",
+  unknown:"ctOS status unavailable",
+};
+// F2 (MED, security review 2026-09-03). The snapshot is the ONLY clock the mast
+// had, and under the global kill switch both of its producers halt: the scanner
+// wrapper skips on the .brain_disarmed sentinel, and the pusher's _preflight.sh
+// full-stop gate halts it too. So the last pre-stop "healthy" froze in the mast
+// indefinitely and the operator saw green on a stopped system. The page now
+// re-checks the scan's own timestamp against the browser clock every render.
+// DOWNGRADE ONLY: this can send any state to unknown and can never produce
+// healthy, so a wrong browser clock costs honesty in the safe direction. The 8h
+// threshold and the "stale beats everything, including the kill switch" order
+// mirror the builder's precedence exactly.
+function _ctosScanAgeHours(value){
+  if(typeof value!=="string")return null;
+  // Require an explicit UTC offset. Date.parse() reads an offset-less date-time
+  // as LOCAL time, which would silently disagree with the builder's UTC reading
+  // by the viewer's timezone; unreadable is the honest answer.
+  if(!/(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(value.trim()))return null;
+  const t=Date.parse(value);
+  if(!Number.isFinite(t))return null;
+  return (Date.now()-t)/3600000;
+}
+function ctosPulse(p){
+  const raw=p&&p.ctos_summary;
+  if(!raw||typeof raw!=="object"||!_CTOS_STATES.has(raw.state)
+     ||raw.schema_version!==_CTOS_SCHEMA){
+    return {state:"unknown",reason:_CTOS_FALLBACK_REASON.unknown,top_exceptions:[]};
+  }
+  let state=raw.state;
+  let reason=String(raw.reason||_CTOS_FALLBACK_REASON[state]||_CTOS_FALLBACK_REASON.unknown);
+  if(state!=="unknown"){
+    const ageH=_ctosScanAgeHours(raw.scan_observed_at);
+    if(ageH===null){
+      state="unknown";
+      reason="scan timestamp is missing or unreadable in this snapshot";
+    }else if(ageH>_CTOS_STALE_HOURS){
+      state="unknown";
+      reason=`scan is ${ageH.toFixed(1)}h old (snapshot frozen?)`;
+    }
+  }
+  return {
+    state:state,
+    reason:reason,
+    top_exceptions:Array.isArray(raw.top_exceptions)?raw.top_exceptions:[],
+  };
+}
+function ctosPulseColor(state){
+  if(state==="healthy")return "var(--ok)";
+  if(state==="critical")return "var(--bad)";
+  if(state==="stopped")return "var(--info)";
+  if(state==="attention"||state==="degraded")return "var(--warn)";
+  return "var(--ink-3)";
+}
+function ctosPulseText(p){
+  const c=ctosPulse(p);
+  return `ctOS — ${c.state} · ${c.reason}`;
+}
+
+// masthead: compact only on explicitly healthy ctOS evidence; manual toggle
+// wins and is remembered, but even a manually compacted mast stays truthful.
 function mastMode(p){
   const manual=localStorage.getItem("rw_mast");
   if(manual==="min"||manual==="max")return manual;
-  return (findingsCounts(p).total||findingsBroken(p))?"max":"min";
+  return ctosPulse(p).state==="healthy"?"min":"max";
 }
 // record_revenue is _FORM_ONLY_ACTIONS server-side (operator_action_worker.py)
 // — deliberately excluded from p.action_allowlist (that gate is for generic
@@ -2615,6 +2688,7 @@ function render(p, updatedAt, srcNote){
   ACTS_REG = [];
   CUR_ALLOWLIST = Array.isArray(p.action_allowlist) ? p.action_allowlist : null;
   const fc=findingsCounts(p);
+  const ctos=ctosPulse(p);
   const convN=(p.due_calls||[]).length+(p.leads||[]).length;
   const mm=mastMode(p);
   DEC_REG = [];
@@ -2640,11 +2714,13 @@ function render(p, updatedAt, srcNote){
   <main>
     <div class="mast" style="${mm==="min"?"height:88px;min-height:88px":""}">
       ${mm==="min"
-        ?`<div style="height:100%;display:flex;align-items:center;gap:14px;padding:0 18px"><span style="width:9px;height:9px;border-radius:50%;background:${fc.total?"var(--warn)":"var(--ok)"}"></span><span style="color:var(--ink-3);font-size:13px">ctOS atlas — ${fc.total?esc(fc.total+" open exception"+(fc.total===1?"":"s")):"all systems green"}</span></div>`
+        ?`<div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="height:100%;display:flex;align-items:center;gap:14px;padding:0 18px"><span style="width:9px;height:9px;border-radius:50%;background:${ctosPulseColor(ctos.state)}"></span><span style="color:var(--ink-3);font-size:13px">${esc(ctosPulseText(p))}</span></div>`
         :(DEV?`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;letter-spacing:.05em">ctOS SYSTEM ATLAS — renders live (system/system-map.html)</div>`
              :`<iframe src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`)}
+      ${mm==="max"?`<div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="position:absolute;left:14px;bottom:10px;max-width:min(60vw,620px);display:flex;align-items:center;gap:8px;background:var(--overlay);border:1px solid var(--edge);border-radius:7px;padding:5px 10px;color:var(--ink-2);font-size:11.5px;backdrop-filter:blur(4px)"><span style="width:8px;height:8px;border-radius:50%;background:${ctosPulseColor(ctos.state)};flex:none"></span><span>${esc(ctosPulseText(p))}</span></div>`:""}
       <div class="hud">
         <button class="pill" data-refresh title="refresh now">snapshot <b>${esc(ago(updatedAt))}</b> ⟳</button>
+        <div class="pill" data-ctos-state>ctOS <b style="color:${ctosPulseColor(ctos.state)}">${esc(ctos.state)}</b></div>
         ${mm==="max"?`<div class="pill">findings <b style="color:${fc.total===0&&!findingsBroken(p)?"var(--ok)":"var(--warn)"}">${findingsBroken(p)?"?":fc.total}</b></div>`:""}
       </div>
       <button class="open-map" data-mast="${mm==="min"?"max":"min"}">${mm==="min"?"⌄ expand atlas":"⌃ collapse"}</button>
@@ -2963,4 +3039,5 @@ const DEMO={}, DEMO_ARTS=[];  // fixture stripped at publish (F5)
 boot();
 </script>
 </body></html>
-<!-- rankwise-portal2-version: dbd1fcdbb67f -->
+
+<!-- rankwise-portal2-version: aec2666bde50 -->
