@@ -74,9 +74,7 @@ nav{background:var(--surface-3);border-right:1px solid var(--edge);padding:18px 
 .navlink.on .n{background:var(--acc-soft-edge);color:var(--acc-ink)}
 nav .foot{margin-top:auto;padding:16px 18px 0;color:var(--ink-3);font-size:11px;line-height:1.6}
 main{padding:0 0 60px;min-width:0}
-.mast{position:relative;height:31vh;min-height:230px;border-bottom:1px solid var(--edge);background:var(--surface-3);
-  overflow:hidden;transition:height var(--dur) var(--ease),min-height var(--dur) var(--ease)}
-.mast iframe{display:block;width:100%;height:100%;border:0;background:var(--surface-3)}
+.mast{position:relative;height:64px;min-height:64px;border-bottom:1px solid var(--edge);background:var(--surface-3);overflow:hidden}
 .mast .hud{position:absolute;top:12px;right:14px;display:flex;gap:8px;pointer-events:none}
 .hud .pill{background:var(--overlay);border:1px solid var(--edge);border-radius:7px;padding:5px 11px;font:11.5px inherit;
   color:var(--ink-2);backdrop-filter:blur(4px);pointer-events:auto;cursor:default;
@@ -84,10 +82,13 @@ main{padding:0 0 60px;min-width:0}
 .hud button.pill{cursor:pointer}
 .hud .pill:hover{border-color:var(--ink-3)}
 .hud .pill b{color:var(--ink);font-variant-numeric:tabular-nums}
-.mast .open-map{position:absolute;bottom:10px;right:14px;color:var(--acc);font:12px inherit;background:var(--overlay);
-  border:1px solid var(--edge);border-radius:7px;padding:4px 10px;text-decoration:none;cursor:pointer;
-  pointer-events:auto;transition:border-color var(--dur) var(--ease)}
+.mast .open-map{color:var(--acc);font:12px inherit;background:var(--overlay);border:1px solid var(--edge);
+  border-radius:7px;padding:4px 10px;text-decoration:none;cursor:pointer;pointer-events:auto}
 .mast .open-map:hover{border-color:var(--ink-3)}
+.ctos-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0 22px}
+.ctos-stat{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius-lg);padding:14px 16px}
+.ctos-stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums;margin-top:3px}
+.ctos-atlas{width:100%;height:70vh;min-height:540px;border:1px solid var(--edge);border-radius:var(--radius-lg);background:var(--surface-3)}
 .brief{max-width:880px;margin:0 auto;padding:26px 28px}
 .status{font-size:23px;font-weight:750;letter-spacing:-.015em;display:flex;align-items:center;gap:11px;
   text-wrap:balance;margin-bottom:4px}
@@ -239,7 +240,9 @@ main{padding:0 0 60px;min-width:0}
   .navlink{flex:none;width:auto;margin:0 2px;padding:7px 11px;border-radius:var(--radius-sm);font-size:12.5px}
   .navlink:last-of-type{margin-right:6px}
   nav .foot{display:none}
-  .mast{height:22vh;min-height:130px}
+  .mast{height:76px;min-height:76px}
+  .ctos-grid{grid-template-columns:1fr 1fr}
+  .ctos-atlas{height:68vh;min-height:420px}
   .brief{padding:16px 14px}
   .status{font-size:19px}
   .proof{grid-template-columns:1fr}
@@ -249,6 +252,11 @@ main{padding:0 0 60px;min-width:0}
    (mocks/2026-09-01/variant-b-cardstack.html is the ratified visual reference).
    Mobile-first: the card unit never changes shape, a wide screen just centers it. */
 .decide-shell{max-width:430px;margin:0 auto}
+.wr-shell{max-width:1000px;margin:0 auto}
+.wr-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px;align-items:start}
+.wr-col{min-width:0}
+.wr-live{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:4px 16px 14px}
+@media(max-width:940px){.wr-cols{grid-template-columns:1fr}}
 .decide-top{display:flex;align-items:center;gap:10px;padding:2px 2px 8px}
 .decide-progress{margin-left:auto;font:700 12px ui-monospace,Menlo,monospace;color:var(--ink-3)}
 .decide-progress b{color:var(--ink);font-variant-numeric:tabular-nums}
@@ -686,11 +694,17 @@ async function enqueueAction(action, params, onstate){
     headers:{Prefer:"return=representation"},
     body:JSON.stringify({action, params: params||{}})});
   if(r===null)throw new Error("session-expired");   // authedFetch already tore the session down
-  if(!r.ok)throw new Error("enqueue "+r.status);
+  // The numeric status rides ON the error: a 409 from the queue's uniqueness index means
+  // "an attempt already exists", which is not the same claim as "it was recorded", and only
+  // the caller can reconcile that. Everything else stays an unknown submission.
+  if(!r.ok){const err=new Error("enqueue "+r.status);err.status=r.status;throw err;}
   const rows=await r.json(); const id=rows&&rows[0]&&rows[0].id;
   if(id==null){onstate&&onstate("queued");return}
   onstate&&onstate("queued");
-  for(let i=0;i<8;i++){
+  // The worker is scheduled every two minutes. Watch beyond one full worker
+  // interval so a normal action does not fall into a false "still queued"
+  // state seconds before its authoritative receipt arrives.
+  for(let i=0;i<90;i++){
     await new Promise(res=>setTimeout(res,1500));
     let row; try{row=await rest("operator_action_queue?id=eq."+encodeURIComponent(String(id))+"&select=id,status,result")}catch{break}
     const st=row&&row[0]&&String(row[0].status||"");
@@ -808,7 +822,7 @@ function changeLog(p){
 
 // ── views ────────────────────────────────────────────────────────────────
 let VIEW = "command";
-const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"],["pipeline","Pipeline"],["review","Review"],
+const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"],["war_room","War room"],["work","Work / Agents"],["pipeline","Pipeline"],["ctos","ctOS"],["review","Review"],
               ["content_review","Content Review"],
               ["conversations","Conversations"],["content","Content"],["machine","Machine"],["business","Business"]];
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
@@ -872,6 +886,31 @@ async function loadWip(){
     WIP=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
   }catch{WIP=null}
   return WIP;
+}
+// Work / Agents is the read-only operating surface over the canonical spine. It reads
+// the existing operator-RLS tables directly so leases, transitions, and verifications
+// do not wait for the 10-minute snapshot. No control is implied: router intake and the
+// dispatcher remain separately gated/dormant.
+let WORK = undefined;
+let ROUTER_READY = undefined;
+async function loadWork(){
+  if(DEV){ROUTER_READY=false;WORK={items:DEMO.spine_work_items,events:DEMO.spine_events,verifications:DEMO.spine_verifications,actions:DEMO.spine_actions};return WORK}
+  try{
+    const settled=await Promise.allSettled([
+      rest("work_items?select=id,type,title,state,priority,owner,consumer,wip_claim_owner,wip_claim_expires_at,model,cost_usd,outcome,next_action,due_at,created_at,closed_at,version&order=created_at.desc&limit=100"),
+      rest("events?select=id,work_id,event_type,actor,from_state,to_state,created_at&order=created_at.desc&limit=200"),
+      rest("verifications?select=id,work_id,verifier,verdict,created_at&order=created_at.desc&limit=100"),
+      rest("operator_action_queue?select=id,action,status,result,created_at,processed_at&order=created_at.desc&limit=50"),
+      rest("work_items?select=idempotency_key,task_packet&limit=0")
+    ]);
+    const value=i=>settled[i].status==="fulfilled"&&Array.isArray(settled[i].value)&&!(RWSession.bad&&RWSession.bad(settled[i].value))?settled[i].value:null;
+    const items=value(0),events=value(1),verifications=value(2),actions=value(3);
+    ROUTER_READY=value(4)!==null;
+    // Core lifecycle reads are one contract. Action receipts are a useful but separate
+    // queue: their outage must not blank ownership/lease visibility for the whole room.
+    WORK=[items,events,verifications].some(x=>x===null)?null:{items,events,verifications,actions};
+  }catch{WORK=null;ROUTER_READY=false}
+  return WORK;
 }
 // A failed re-render leaves a *.FAILED-QC.mp4 sibling next to a good render (plan
 // §2) -- that is NOT the same thing as this item's recorded qc.verdict being fail.
@@ -1195,12 +1234,21 @@ function opsBriefSection(p){
     ${chips.map(c=>`<span style="border:1px solid var(--edge);background:var(--surface);border-radius:99px;padding:4px 11px;font:600 11.5px inherit;color:var(--ink-2)">${esc(c.lbl)} <b style="font-variant-numeric:tabular-nums;color:${c.warn?"var(--warn)":"var(--ink)"}">${esc(String(c.v))}</b></span>`).join("")}</div>`;
   // ── tickets ──
   let tixBody;
+  // The banner is driven by the REASON, not by rows===null (PR #121 v2). A degraded build
+  // can still return real rows — a frontmatter read that raced a rename leaves partial
+  // results — and gating the banner on an empty list hid the warning in exactly the case
+  // where rows are present but incomplete.
+  const tixDegraded=p.tickets_degraded
+    ?`<div class="state state-error"><b>Ticket panel DEGRADED</b>This list may be incomplete — it is not a clean empty queue. Cause: ${esc(String(p.tickets_degraded))}</div>`
+    :"";
   if(rows===null){
-    tixBody=`<div class="empty">No tickets in this snapshot — triage queue empty or the projection predates this field. Absent is not zero.</div>`;
+    tixBody=tixDegraded||`<div class="empty">No tickets in this snapshot — triage queue empty or the projection predates this field. Absent is not zero.</div>`;
   }else{
     const open=rows.filter(t=>!t.approved&&t.status==="open");
     const sev=s=>open.filter(t=>String(t.severity||"").toLowerCase()===s).length;
-    const queued=rows.filter(t=>t.approved).length;
+    const approved=rows.filter(t=>t.approved);
+    const eligible=approved.filter(t=>t.executorEligible===true).length;
+    const blocked=approved.filter(t=>t.executorEligible===false).length;
     const top3=[...open].sort((x,y)=>(x.rank??99)-(y.rank??99)).slice(0,3);
     const batch=opsBatchRows(p);
     const batchOk=actionAllowed("ticket.approve");
@@ -1211,10 +1259,14 @@ function opsBriefSection(p){
     // "Nothing left to enqueue" toast (the button stays present so that honest
     // refusal is reachable rather than a silently disabled control).
     const batchEnabled=batch.filter(t=>!ACTS_DONE.has(actKey("ticket.approve",{id:t.id})));
-    tixBody=`
+    // tixDegraded is PREPENDED here too (PR #121 v3 blocker). It was built above and then
+    // used only in the rows===null branch, so a frontmatter failure that still returned
+    // valid rows rendered silently in exactly the case the reason exists for: a list that
+    // looks complete and is not.
+    tixBody=tixDegraded+`
       <p style="color:var(--ink-2);font-size:13.5px;line-height:1.55;max-width:62ch;margin-bottom:10px">
         <b style="color:var(--ink)">${open.length} open ticket${open.length===1?"":"s"} await your word</b>
-        (${sev("critical")+sev("high")} high/critical · ${sev("medium")} medium · ${sev("low")} low)${queued?`; ${queued} already queued for the executor`:""}${p.tickets_ranked_total?`; ${esc(String(p.tickets_ranked_total))} ranked in total`:""}.
+        (${sev("critical")+sev("high")} high/critical · ${sev("medium")} medium · ${sev("low")} low)${approved.length?`; ${approved.length} approved (${eligible} executor-eligible · ${blocked} blocked${approved.length-eligible-blocked?` · ${approved.length-eligible-blocked} eligibility unknown`:""})`:""}${p.tickets_ranked_total?`; ${esc(String(p.tickets_ranked_total))} ranked in total`:""}.
         ${top3.length?`Top of the stack: ${top3.map(t=>`<b style="color:var(--ink)">${esc(firstLine(t.title).slice(0,70))}</b>`).join(" · ")}.`:""}
       </p>
       <div class="acts" style="margin-bottom:8px">
@@ -1285,7 +1337,7 @@ function wireOpsBrief(p,updatedAt,srcNote){
     const btns=det?[...det.querySelectorAll("button[data-i]")].filter(x=>!x.disabled):[];
     const n=btns.length;
     if(!n){toast("Nothing left to enqueue — already queued or not allowed","err");return}
-    if(!confirm(`Enqueue ${n} separate ticket.approve row${n===1?"":"s"} (low severity · contained blast)? Each is audited individually; the 03:17 executor may then act on them unattended.`))return;
+    if(!confirm(`Enqueue ${n} separate ticket.approve row${n===1?"":"s"} (low severity · contained blast)? Each approval is audited individually. Only tickets that independently pass the Tier-A executor wall can run at 03:17.`))return;
     det.open=true;
     btns.forEach(x=>{if(!x.disabled)x.click();});
   };
@@ -2083,6 +2135,27 @@ function wireDecideNav(p,updatedAt,srcNote){
 // can replace without touching the card, the wiring, or the tests.
 let TIX_IDX = 0;                // stack cursor — client-side only
 const TIX_SKIPPED = new Set();  // ids skipped THIS sitting — dots color only
+const TIX_RESOLVED = new Set(); // worker-confirmed decisions hidden immediately
+// WHICH worker-confirmed ticket actions actually DECIDE a ticket (security review F2).
+// A named predicate rather than an inline condition at the call site, so a test can
+// execute the rule instead of searching the source for it.
+// `revise` records a note and leaves the ticket OPEN and awaiting the operator's word — it
+// is not a decision, and treating it as one hid the row from the stack while the nav badge,
+// which counts p.tickets from the server, still counted it.
+function tixDecides(action){return action==="ticket.approve"||action==="ticket.reject";}
+// What a worker-confirmed ticket action DOES to the local view. Extracted from the inline
+// `done` callback so a test can drive the real code rather than restate its condition:
+// the first version of the F2 test repeated `action==="ticket.approve"||...` itself, so
+// reverting the call site to an unconditional `TIX_RESOLVED.add` would have left it green
+// — the helper-not-the-caller shape, one more time. The gate lives HERE now, which is the
+// call site, so a test that calls this function is testing the decision.
+function tixApplyActionResult(action, id){
+  if(tixDecides(action))TIX_RESOLVED.add(String(id));
+  TIX_RECEIPT={id:String(id),label:action==="ticket.approve"?"Approved":action==="ticket.reject"?"Killed":"Revision recorded"};
+  TIX_NOTE_DRAFT={id:null,text:""};
+  if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+}
+let TIX_RECEIPT = null;         // durable in-room confirmation for the last decision
 // R1 (security review #3, MED): the draft is keyed by TICKET ID, not by stack
 // position — a 120s snapshot refresh can reorder or drop rows, swapping a
 // different ticket under the cursor; a position-keyed draft then re-applied
@@ -2132,26 +2205,425 @@ function ticketCard(t){
         ${actBtn("ticket.revise",{id:t.id},"Revise","")}
         ${actBtn("ticket.reject",{id:t.id},"Kill","")}
       </div>
-      <div style="font-size:10.5px;color:var(--ink-3);margin-top:6px">Kill = ticket.reject: sets status dropped and files the ticket to _closed/. Approve arms the executor gate: the 03:17 nightly may then act on this ticket unattended — a model call plus a commit and push through its own guards. Nothing runs from this button itself.</div>
+      <div style="font-size:10.5px;color:var(--ink-3);margin-top:6px">Kill = ticket.reject: sets status dropped and files the ticket to _closed/. Approve records authorization only. The 03:17 nightly runs a separate Tier-A eligibility, quota, grade, killswitch, commit and push gate; blocked tickets do not execute. Nothing runs from this button itself.</div>
       <div class="decide-nav">
         <button class="nav-btn" data-tix-nav="prev"${TIX_IDX===0?" disabled":""}>← Prev</button>
         <button class="nav-btn" data-tix-nav="skip">Skip for now →</button>
       </div>
     </div>`;
 }
+
+// Interruption recovery. WR_LOGGED is a session cache; the RECORD is the audited action
+// queue. On entering the room we ask it which prospects of this block already have a
+// worker-confirmed outreach.log_call, so a reload, a crash or a different tab resumes at
+// the right prospect instead of offering someone we already called. A read failure leaves
+// WR_RESUME null and the room says the resume state is unknown rather than pretending the
+// block is fresh.
+let WR_RESUME = undefined;          // undefined = not asked · null = read failed · Set = known
+async function loadWarRoomReceipts(blockId){
+  const epoch=WR_EPOCH;
+  const read=++WR_READ_REV;
+  if(DEV){WR_RESUME=new Set();return}
+  try{
+    const done=new Set();
+    const pending=new Map();
+    for(let offset=0;offset<4000;offset+=200){
+      const rows=await rest("operator_action_queue?select=id,action,status,params,created_at"
+        +"&action=eq.outreach.log_call&params->>block_id=eq."+encodeURIComponent(String(blockId))
+        +"&order=id.desc&limit=200&offset="+offset);
+      if(epoch!==WR_EPOCH||read!==WR_READ_REV)return;
+      if(!Array.isArray(rows))throw new Error("receipt read unavailable");
+      for(const r of rows){
+        const q=r&&r.params||{};
+        if(String(q.block_id||"")!==String(blockId)||!q.prospect_id)continue;
+        const id=String(q.prospect_id);
+        if(r.status==="done")done.add(id);
+        else pending.set(id,r.status==="failed"?"failed — review before retry":"queued or processing — awaiting receipt");
+      }
+      if(rows.length<200){
+        WR_RESUME=done;
+        pending.forEach((state,id)=>WR_PENDING.set(id,state));
+        // Only a CONFIRMED done clears a pending hold. An empty read is evidence of
+        // nothing, so an uncertain pending (a 409, a submission with no receipt) survives
+        // it - clearing on absence is exactly how a second submission gets offered.
+        done.forEach(id=>WR_PENDING.delete(id));
+        return;
+      }
+    }
+    throw new Error("receipt history exceeds safe read bound");
+  }catch(_){ if(epoch===WR_EPOCH&&read===WR_READ_REV)WR_RESUME=null; }
+}
+
+// ── War room (founder_call_room.v1) ───────────────────────────────────────────
+// The five-call validation block, rendered from the SERVER-COMPUTED read model.
+// Two rules this view exists to honour and cannot relax:
+//   1. FAIL CLOSED. `callable` is computed in push_operator_snapshot from DNC, identity,
+//      phone-source, evidence-freshness, script and calendar gates. This page never
+//      recomputes it and never ORs its way past it — an operator checkbox can satisfy
+//      "human source review", it cannot satisfy "DNC clearance".
+//   2. NO SECOND LEDGER. Nothing here is the record. A rehearsal writes NOTHING; a live
+//      log goes through the existing audited outreach.log_call action and the card only
+//      advances after the worker returns done.
+let WR_IDX = 0;                    // cursor within the block — client-side only
+let WR_MODE = "curious";           // curious | direct
+let WR_REHEARSAL = true;           // starts in rehearsal: no production write until turned off
+const WR_ACK = new Set();          // prospect ids whose source+DNC evidence the operator has read
+const WR_HELD = new Map();         // id -> bool  (did the opener hold past the first 20s)
+const WR_CONV = new Map();         // id -> bool  (was there a real conversation)
+let WR_ACT = "";                   // activation before the block, 1-5
+let WR_ENERGY = "";                // energy after the block, 1-5
+const WR_LOGGED = new Set();       // worker-confirmed dispositions this session
+let WR_RECEIPT = null;             // {id, label} of the last confirmed write
+let WR_EPOCH = 0, WR_READ_REV = 0, WR_BLOCK = null, WR_CURRENT = null;
+const WR_PRACTICED = new Set();
+const WR_PENDING = new Map();
+const WR_NOTES = new Map();
+function resetWarRoom(blockId=null){
+  WR_EPOCH++;WR_READ_REV++;WR_BLOCK=blockId;WR_CURRENT=null;WR_IDX=0;WR_MODE="curious";WR_REHEARSAL=true;
+  WR_ACT="";WR_ENERGY="";WR_RECEIPT=null;WR_RESUME=undefined;
+  [WR_ACK,WR_HELD,WR_CONV,WR_LOGGED,WR_PRACTICED,WR_PENDING,WR_NOTES].forEach(x=>x.clear());
+}
+function wrRows(room){
+  return (Array.isArray(room.prospects)?room.prospects:[]).filter(q=>{
+    // A receipt cannot identify which ambiguous row it covers. Keep every such
+    // row visible and held rather than announcing a falsely completed block.
+    if(wrIdentityFault(room,q))return true;
+    const id=String(q.id);
+    return !WR_LOGGED.has(id)&&!(WR_RESUME instanceof Set&&WR_RESUME.has(id))
+      &&!(WR_REHEARSAL&&WR_PRACTICED.has(id));
+  });
+}
+
+const WR_DISPOSITIONS = [
+  ["booked","Booked a call"],["interested","Interested, no time set"],
+  ["not_now","Not now"],["not_interested","Not interested"],
+  ["gatekeeper","Gatekeeper only"],["voicemail","Voicemail"],
+  ["no_answer","No answer"],["wrong_number","Wrong number"],["dnc","Do not contact again"],
+];
+// The canonical call log (call_log_capture.py, reached through the audited
+// outreach.log_call worker) accepts SEVEN dispositions and resolves the prospect by
+// BUSINESS NAME against prospect_registry.csv. The richer UI outcome rides on the queue
+// row as outcome_detail; the wire disposition is always one of the seven. An outcome
+// with no mapping never reaches the wire — the page refuses rather than guesses.
+const WR_CANON = {
+  booked:"booked", interested:"connect", not_now:"connect", not_interested:"declined",
+  gatekeeper:"no_answer", voicemail:"voicemail", no_answer:"no_answer",
+  wrong_number:"wrong_number", dnc:"do_not_contact",
+};
+
+function wrLocalNow(){
+  // Prospect-local time. Every prospect in this block is Lower Mainland, so the block's
+  // own tz is the prospect's; when that stops being true this must read per prospect.
+  try{ return new Date(new Date().toLocaleString("en-US",{timeZone:"America/Vancouver"})); }
+  catch(_){ return null; }   // unknown local time is NOT a compliant window
+}
+function wrWindowOpen(room){
+  const w=(room&&room.window_local)||{}; const now=wrLocalNow();
+  if(!now||!w.start||!w.end)return {open:false,why:"local time or window unknown"};
+  // No inferred schedule: missing/malformed days cannot authorize a call.
+  const days=w.days;
+  if(!Array.isArray(days)||!days.length||days.some(d=>!Number.isInteger(d)||d<0||d>6))
+    return {open:false,why:"block calling days unknown or invalid"};
+  const dow=now.getDay()===0?6:now.getDay()-1;          // 0=Mon
+  if(!days.includes(dow))return {open:false,why:"outside the block's weekday window"};
+  const [sh,sm]=String(w.start).split(":").map(Number), [eh,em]=String(w.end).split(":").map(Number);
+  const mins=now.getHours()*60+now.getMinutes();
+  const ok=mins>=(sh*60+sm)&&mins<=(eh*60+em);
+  return {open:ok, why:ok?"":`outside ${w.start}–${w.end} ${w.tz||""} (now ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")})`};
+}
+function wrHoldLabel(h){
+  const [gate,state]=String(h).split(":");
+  const nice={identity:"Identity",phone_source:"Phone source",dnc:"Do-not-contact",
+              evidence:"Evidence",script:"Script",calendar:"Calendar"}[gate]||gate;
+  const why={needs_ack:"needs your acknowledgement",unverified:"not verified — unknown is not clear",
+             unknown:"unknown","on-local-list":"ON the local do-not-contact list",
+             "on-national-list":"ON the national DNCL","no-capture-date":"no capture date",
+             failed:"FAILED","unparseable":"unparseable",
+             "id-invalid":"the prospect id is missing or malformed",
+             "id-duplicate":"another row in this block carries the same id",
+             "block-id-invalid":"the block id is missing or malformed"}[state]||state;
+  return `${nice}: ${why}`;
+}
+
+// Identity is the one server verdict this page RE-DERIVES instead of trusting. A forged or
+// corrupted payload can ship callable=true with a missing, malformed or duplicated id, and
+// every write below keys on that id (idempotency key, resume set, pending map). Valid means
+// a nonempty string with no surrounding whitespace, unique within the block. Anything else
+// denies the live tel and the enqueue, independently of any button's disabled attribute.
+function wrValidId(v){return typeof v==="string"&&v.length>0&&v.trim()===v}
+function wrIdentityFault(room,q){
+  if(!room||!wrValidId(room.block_id))return "block id missing or malformed";
+  if(!q||!wrValidId(q.id))return "prospect id missing or malformed";
+  const ps=Array.isArray(room.prospects)?room.prospects:[];
+  return ps.filter(x=>x&&typeof x.id==="string"&&x.id===q.id).length>1
+    ?"duplicate prospect id in this block":"";
+}
+
+function viewWarRoom(p){
+  const room=p.founder_call_room;
+  const degraded=p.founder_call_room_degraded
+    ?`<div class="state state-error"><b>Call room DEGRADED</b>Gates could not be fully evaluated (${esc(p.founder_call_room_degraded)}) — nothing in this block is callable this push.</div>`:"";
+  const head=`<div class="status sub">War room</div>${degraded}`;
+  if(!room)return head+`<div class="empty">No call block in this snapshot — none is configured, or the snapshot predates this panel.</div>`;
+  if(WR_BLOCK!==room.block_id)resetWarRoom(room.block_id);
+  const all=Array.isArray(room.prospects)?room.prospects:[];
+  const rows=wrRows(room);
+  const resumeNote=WR_RESUME===null
+    ?`<div class="wr-shell"><div class="state state-error" style="margin:12px 0"><b>Resume state UNKNOWN</b>The audited call log could not be read, so this room cannot tell which prospects were already called. Treat the order as unverified.</div></div>`
+    :(WR_RESUME instanceof Set&&WR_RESUME.size
+      ?`<div class="wr-shell"><div class="state" style="margin:12px 0"><b>Resumed</b>${WR_RESUME.size} prospect(s) in this block already have a confirmed call log and are not shown.</div></div>`:"");
+  const c=room.counts||{};
+  const win=wrWindowOpen(room);
+  const receipt=WR_RECEIPT?`<div class="wr-shell"><div class="state" data-wr-receipt style="margin:12px 0;background:var(--ok-soft)"><b>${WR_RECEIPT.rehearsal?"Practiced":"Logged"}</b> ${esc(WR_RECEIPT.label)}${WR_RECEIPT.rehearsal?"":" — recorded through the audited call log."}</div></div>`:"";
+
+  const banner=`<div class="wr-shell"><div class="state ${win.open?"":"state-error"}" style="margin:12px 0">
+    <b>${WR_REHEARSAL?"REHEARSAL — nothing is written":"LIVE BLOCK"}</b>
+    ${esc(room.target||"")} · ${esc(c.callable||0)} callable of ${esc(c.total||0)}${c.held?` · ${esc(c.held)} held`:""}${c.blocked?` · ${esc(c.blocked)} blocked`:""}
+    <div style="font-size:12px;color:var(--ink-3);margin-top:4px">Calling window ${esc((room.window_local||{}).start||"?")}–${esc((room.window_local||{}).end||"?")} ${esc((room.window_local||{}).tz||"")} — ${win.open?"OPEN now":"CLOSED: "+esc(win.why)}</div>
+    <div style="margin-top:8px"><button class="nav-btn" data-wr-mode-toggle>${WR_REHEARSAL?"Switch to a LIVE block":"Back to rehearsal"}</button> <button class="nav-btn" data-wr-reconcile>Refresh call receipts</button></div>
+  </div></div>`;
+
+  if(!all.length)return head+banner+resumeNote+`<div class="empty">The block has no prospects.</div>`;
+  if(!rows.length)return head+banner+resumeNote+receipt+`<div class="empty" style="text-align:center;padding:28px 0">${WR_REHEARSAL?"Rehearsal complete — practice is not a recorded call.":"Block complete — every prospect has a recorded outcome."}</div>${wrDebrief()}`;
+  const selected=rows.findIndex(q=>String(q.id)===WR_CURRENT);
+  // Duplicate ids are HELD, not hidden, so the cursor must still be able to walk past one.
+  // Stay on the index we are already on when it still carries WR_CURRENT; findIndex alone
+  // snaps back to the FIRST row sharing that id and strands its twin behind a dot.
+  if(!(rows[WR_IDX]&&String(rows[WR_IDX].id)===WR_CURRENT)&&selected>=0)WR_IDX=selected;
+  if(WR_IDX>=rows.length)WR_IDX=rows.length-1;
+  if(WR_IDX<0)WR_IDX=0;
+  const q=rows[WR_IDX];
+  WR_CURRENT=String(q.id);
+  const acked=WR_ACK.has(String(q.id));
+  const gatesOk=q.callable===true;                    // server verdict, never recomputed here
+  const idFault=wrIdentityFault(room,q);
+  const pending=WR_PENDING.get(String(q.id));
+  const liveHeld=!!pending||!(WR_RESUME instanceof Set);
+  const canCall=gatesOk&&!idFault&&acked&&win.open&&!WR_REHEARSAL&&!liveHeld;
+
+  const dots=`<div class="decide-dots">${rows.map((x,i)=>`<span class="dot ${i===WR_IDX?"current":""}" title="${escAttr(x.name)}"></span>`).join("")}</div>`;
+  const idNote=idFault?`<div class="state state-error" data-wr-identity-fault style="margin:10px 0"><b>Identity not verifiable</b>${esc(idFault)} - this row cannot be called or logged from here.</div>`:"";
+  const holds=(q.holds||[]).length?`<div class="state state-error" style="margin:10px 0"><b>HOLD — not callable</b>
+      <ul style="margin:6px 0 0 16px;padding:0">${q.holds.map(h=>`<li>${esc(wrHoldLabel(h))}</li>`).join("")}</ul>
+      ${q.blocked?`<div style="margin-top:6px"><b>This one is blocked outright and cannot be acknowledged.</b></div>`:""}</div>`:"";
+
+  const opener=(q.openers||{})[WR_MODE]||"";
+  return head+banner+resumeNote+receipt+`<div class="wr-shell" data-war-room><div class="wr-cols">
+    <div class="wr-col">
+    <div class="decide-top"><div style="font-size:13px;font-weight:750">${esc(q.name)} · ${esc(q.city)}</div>
+      <div class="decide-progress"><b>${WR_IDX+1}</b>/${rows.length}</div>${dots}</div>
+
+    <div style="padding:12px 0;border-top:1px solid var(--edge-soft)">
+      <div style="font-size:12px;color:var(--ink-3)">Why this one, specifically</div>
+      <div style="font-weight:650;margin-top:3px">${esc(q.reason_to_call)}</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">Source: ${esc(q.source)} · captured ${esc(q.captured)}${q.evidence_age_days!=null?` (${esc(q.evidence_age_days)}d old)`:""} · ${esc(q.phone)}</div>
+    </div>
+
+    ${idNote}${holds}
+
+    <div style="padding:10px 0;border-top:1px solid var(--edge-soft)">
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px">
+        <input type="checkbox" data-wr-ack ${acked?"checked":""}>
+        <span>I have read the source above and the do-not-contact state, and I am the human accountable for this call.</span>
+      </label>
+    </div>
+
+    </div>
+
+    <div class="wr-col wr-live">
+    <div class="voice-tabs" style="display:flex;gap:8px;align-items:center;padding:10px 0">
+      <span style="font-size:12px;color:var(--ink-3)">Pick the version that sounds like you</span>
+      <button class="nav-btn ${WR_MODE==="curious"?"badge-ok":""}" data-wr-voice="curious">Curious</button>
+      <button class="nav-btn ${WR_MODE==="direct"?"badge-ok":""}" data-wr-voice="direct">Direct</button>
+    </div>
+
+    <div style="padding:10px 0;border-top:1px solid var(--edge-soft)">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3);margin-bottom:6px">
+        <span><b>1 · Notice</b> one real thing</span><span><b>2 · Ask</b> ${esc(q.follow||"")}</span>
+        <span><b>3 · Listen</b> stop talking</span><span><b>4 · Offer</b> ${esc(q.safe||"")}</span>
+      </div>
+      <div style="white-space:pre-wrap;font-size:13.5px;line-height:1.5">${esc(opener)}</div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:6px">Loose read — do not perform it. Let the last question sound like a question.</div>
+      <div data-wr-branches style="margin-top:10px;display:grid;gap:4px">
+        <details><summary style="cursor:pointer;font-size:12.5px;font-weight:650">If they answer the opening question</summary><p style="margin:6px 0 4px;font-size:12.5px;line-height:1.5">${esc(q.safe||"")} Then ask: “${esc(q.follow||"")}” Do not explain Rankwise until they answer.</p></details>
+        <details><summary style="cursor:pointer;font-size:12.5px;font-weight:650">If they ask “So what do you want?”</summary><p style="margin:6px 0 4px;font-size:12.5px;line-height:1.5">“Fair question. I help local trades manage what homeowners see on Google. I noticed this one thing and wanted to see whether it mattered to you before pitching anything.”</p></details>
+        <details><summary style="cursor:pointer;font-size:12.5px;font-weight:650">If there is a real problem</summary><p style="margin:6px 0 4px;font-size:12.5px;line-height:1.5">Reflect one phrase they used. Then: “That is the kind of visibility layer I manage. If I pulled up the exact Google view and the two highest-impact fixes, would a fifteen-minute look be useful?”</p></details>
+        <details><summary style="cursor:pointer;font-size:12.5px;font-weight:650">If they say “Not interested”</summary><p style="margin:6px 0 4px;font-size:12.5px;line-height:1.5">“All good — thanks for being straight with me.” Stop. Do not rescue the pitch. Log <b>Not interested</b> and their words if they gave a reason.</p></details>
+      </div>
+      ${q.dont?`<div style="font-size:11.5px;color:var(--ink-3);margin-top:8px"><b>Don't:</b> ${esc(q.dont)}</div>`:""}
+    </div>
+
+    <div style="padding:10px 0;border-top:1px solid var(--edge-soft);display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${canCall?`<a class="nav-btn" href="tel:${escAttr(q.phone_digits)}" data-wr-tel>Call ${esc(q.phone)}</a>`
+               :`<button class="nav-btn" disabled title="${escAttr(idFault?"identity not verifiable: "+idFault:!gatesOk?"gates not cleared":!acked?"acknowledge the source and DNC state first":!win.open?win.why:"rehearsal — no calls")}">Call disabled</button>`}
+      <label style="font-size:12.5px"><input type="checkbox" data-wr-held ${WR_HELD.get(String(q.id))?"checked":""}> They stayed past the opener</label>
+      <label style="font-size:12.5px"><input type="checkbox" data-wr-conv ${WR_CONV.get(String(q.id))?"checked":""}> Real conversation happened</label>
+    </div>
+
+    <div style="padding:10px 0;border-top:1px solid var(--edge-soft)">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:6px">Outcome</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${WR_DISPOSITIONS.map(([v,l])=>`<button class="nav-btn" data-wr-disp="${escAttr(v)}" ${!WR_REHEARSAL&&(liveHeld||idFault||!gatesOk)?"disabled":""}>${esc(l)}</button>`).join("")}
+      </div>
+      ${!WR_REHEARSAL&&!gatesOk?`<p data-wr-outcome-held>Call outcomes are held with this prospect. A callback, late opt-out, or external call needs supervised reconciliation; do not invent a phone touch here.</p>`:""}
+      ${!WR_REHEARSAL&&liveHeld?`<p data-wr-pending>Call log held: ${esc(pending||"resume state unknown — refresh receipts before recording")}. No second submission.</p>`:""}
+      <textarea id="wr-note" maxlength="280" placeholder="What actually happened, in your words (one line, 280 characters)" style="width:100%;margin-top:8px;min-height:56px">${esc(WR_NOTES.get(String(q.id))||"")}</textarea>
+    </div>
+
+    <div class="decide-nav" style="display:flex;gap:8px;padding-top:10px">
+      <button class="nav-btn" data-wr-nav="prev">← Previous</button>
+      <button class="nav-btn" data-wr-nav="next">Skip →</button>
+    </div>
+    </div>
+  </div></div><div class="wr-shell">${wrDebrief()}</div>`;
+}
+
+function wrDebrief(){
+  return `<div class="state" style="margin-top:14px"><b>Block measurements</b>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12.5px">
+      <label>Activation before <input id="wr-act" type="number" min="1" max="5" value="${escAttr(WR_ACT)}" style="width:56px"></label>
+      <label>Energy after <input id="wr-energy" type="number" min="1" max="5" value="${escAttr(WR_ENERGY)}" style="width:56px"></label>
+    </div></div>`;
+}
+
+function wireWarRoom(p,updatedAt,srcNote){
+  const room=p.founder_call_room; if(!room)return;
+  const epoch=WR_EPOCH;
+  const re=()=>{if(epoch===WR_EPOCH&&LAST.p&&VIEW==="war_room")render(LAST.p,LAST.updatedAt,LAST.srcNote);};
+  if(WR_RESUME===undefined){                       // once per session, then render again
+    WR_RESUME=null;                                // provisional: unknown until the read lands
+    loadWarRoomReceipts(room.block_id).then(re);
+  }
+  const rows=wrRows(room);
+  const q=rows[WR_IDX];
+  const noteInput=$("#wr-note");
+  if(noteInput&&q)noteInput.oninput=()=>WR_NOTES.set(String(q.id),noteInput.value);
+  const refresh=document.querySelector("[data-wr-reconcile]");
+  if(refresh)refresh.onclick=()=>{WR_RESUME=null;loadWarRoomReceipts(room.block_id).then(re);re();};
+  const act=$("#wr-act"),en=$("#wr-energy");
+  if(act)act.onchange=()=>{WR_ACT=act.value;};
+  if(en)en.onchange=()=>{WR_ENERGY=en.value;};
+  document.querySelectorAll("[data-wr-voice]").forEach(b=>b.onclick=()=>{WR_MODE=b.dataset.wrVoice;re();});
+  const ack=document.querySelector("[data-wr-ack]");
+  if(ack&&q)ack.onchange=()=>{ack.checked?WR_ACK.add(String(q.id)):WR_ACK.delete(String(q.id));re();};
+  // The tel anchor only RENDERS when canCall is true, but the handler refuses independently:
+  // a tampered DOM, a stale render or a forged callable=true must not produce a live dial.
+  const tel=document.querySelector("[data-wr-tel]");
+  if(tel)tel.onclick=e=>{
+    if(epoch===WR_EPOCH&&q&&!WR_REHEARSAL&&q.callable===true&&!wrIdentityFault(room,q)
+      &&WR_ACK.has(String(q.id))&&wrWindowOpen(room).open
+      &&WR_RESUME instanceof Set&&!WR_RESUME.has(String(q.id))
+      &&!WR_PENDING.has(String(q.id))&&!WR_LOGGED.has(String(q.id)))return;
+    e.preventDefault();
+    toast("Not callable from here - identity or gates are not cleared.","err");
+  };
+  const held=document.querySelector("[data-wr-held]");
+  if(held&&q)held.onchange=()=>WR_HELD.set(String(q.id),held.checked);
+  const conv=document.querySelector("[data-wr-conv]");
+  if(conv&&q)conv.onchange=()=>WR_CONV.set(String(q.id),conv.checked);
+  const tog=document.querySelector("[data-wr-mode-toggle]");
+  if(tog)tog.onclick=()=>{
+    if(WR_REHEARSAL&&!confirm("Leave rehearsal? A live block writes real dispositions through the audited call log."))return;
+    WR_REHEARSAL=!WR_REHEARSAL;WR_IDX=0;WR_CURRENT=null;WR_RECEIPT=null;
+    [WR_PRACTICED,WR_ACK,WR_HELD,WR_CONV,WR_NOTES].forEach(x=>x.clear());re();
+  };
+  document.querySelectorAll("[data-wr-nav]").forEach(b=>b.onclick=()=>{
+    WR_IDX=b.dataset.wrNav==="prev"?Math.max(0,WR_IDX-1):Math.min(rows.length-1,WR_IDX+1);
+    WR_CURRENT=rows[WR_IDX]?String(rows[WR_IDX].id):null;re();
+  });
+  document.querySelectorAll("[data-wr-disp]").forEach(b=>b.onclick=async()=>{
+    if(!q||epoch!==WR_EPOCH)return;
+    const disposition=b.dataset.wrDisp;
+    const note=($("#wr-note")&&$("#wr-note").value)||"";
+    if(WR_REHEARSAL){
+      // Rehearsal writes NOTHING. It advances so the operator can walk the whole block,
+      // and says so, because a rehearsal that silently behaved like a live block would be
+      // the worst possible version of this screen.
+      WR_RECEIPT={id:q.id,label:`${q.name} — ${disposition} (rehearsal, not recorded)`,rehearsal:true};
+      WR_PRACTICED.add(String(q.id));WR_IDX=0;re();return;
+    }
+    // Identity is the FIRST live check, independent of the button's disabled state: a
+    // forged callable=true, a duplicated prospect id or a missing block id must not reach
+    // the queue, and the operator is told which one it was rather than seeing a no-op.
+    const fault=wrIdentityFault(room,q);
+    if(fault){toast("Identity not verifiable ("+fault+") - nothing was recorded.","err");return;}
+    // Every canonical disposition writes a PHONE touch, including opt-out/wrong-number.
+    // Do not use those as a bypass for a held prospect. Window expiry is different:
+    // a cleared prospect's completed call may still need its legitimate late outcome.
+    if(q.callable!==true){toast("Prospect held or blocked - no call outcome recorded from this room.","err");return;}
+    if(WR_PENDING.has(String(q.id))||WR_LOGGED.has(String(q.id))||!(WR_RESUME instanceof Set)||WR_RESUME.has(String(q.id)))return;
+    if(note.length>280||/[\x00-\x1f\x7f]/.test(note)){toast("Use a single-line note of at most 280 characters; your draft is retained.","err");return;}
+    const canon=WR_CANON[disposition];
+    if(!canon){toast("Outcome '"+disposition+"' has no canonical call-log disposition — not recorded","err");return;}
+    if(["do_not_contact","booked","declined","wrong_number"].includes(canon)&&!confirm("Confirm "+canon+" for "+q.name+"? This changes the prospect sequence."))return;
+    WR_PENDING.set(String(q.id),"submitting — receipt not yet confirmed");
+    document.querySelectorAll("[data-wr-disp]").forEach(x=>x.disabled=true);
+    try{
+      await enqueueAction("outreach.log_call",{
+        prospect:q.name,                      // the registry resolves by business name
+        disposition:canon, outcome_detail:disposition, notes:note,
+        prospect_id:q.id, block_id:room.block_id, phone:q.phone, voice_mode:WR_MODE,
+        opener_held:!!WR_HELD.get(String(q.id)), conversation:!!WR_CONV.get(String(q.id)),
+        activation_before:WR_ACT||null, energy_after:WR_ENERGY||null,
+        idempotency_key:`${room.block_id}:${q.id}:${disposition}`,
+      },(st,detail)=>{
+        if(epoch!==WR_EPOCH)return;
+        if(st==="done"){
+          // The card advances ONLY here — after the worker confirmed the canonical write.
+          WR_LOGGED.add(String(q.id));
+          WR_PENDING.delete(String(q.id));
+          WR_RECEIPT={id:q.id,label:`${q.name} — ${disposition}`};
+          WR_IDX=0;re();
+        }else if(st==="failed"){
+          WR_PENDING.set(String(q.id),"failed — review the canonical log before retry");
+          toast("Call-log worker failed. Partial effects are possible; review before retrying.","err");
+          re();
+        }else if(st==="still-queued"){
+          WR_PENDING.set(String(q.id),"queued — awaiting worker confirmation");
+          toast("Call log still queued — the card stays put until the worker confirms","err");re();
+        }
+      });
+    }catch(e){
+      if(epoch!==WR_EPOCH)return;
+      // 409 = the queue's uniqueness index refused a SECOND row for this attempt. That is
+      // proof an attempt EXISTS, not proof the call was recorded, so the row holds for
+      // reconciliation instead of claiming a receipt this page never saw. Anything else
+      // stays an unknown submission. Neither state is cleared by an empty receipt read.
+      const conflict=!!(e&&e.status===409);
+      WR_PENDING.set(String(q.id),conflict
+        ?"existing attempt detected — refresh/reconcile receipts"
+        :"submission unknown — reconcile before retry");
+      toast(conflict
+        ?"An attempt for this prospect already exists — refresh call receipts and reconcile before retrying."
+        :"Call-log submission not confirmed; refresh receipts before another attempt.","err");re();
+    }
+  });
+}
+
 function viewTickets(p){
-  const rows=Array.isArray(p.tickets)?p.tickets:null;
+  // This is a DECISION stack, not an executor-status archive. An approved row
+  // no longer needs the operator's word, and a decision confirmed during this
+  // tab session must leave immediately even before the cached snapshot refreshes.
+  const rows=Array.isArray(p.tickets)
+    ?p.tickets.filter(t=>!t.approved&&!TIX_RESOLVED.has(String(t.id)))
+    :null;
   const total=p.tickets_ranked_total;
-  const head=`<div class="status sub">Tickets<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${rows&&total?`showing ${rows.length} of ${esc(String(total))} ranked — the rest stays in fleet triage`:"night-shift backlog, value-ranked"}</small></div>`;
+  const receipt=TIX_RECEIPT?`<div class="state" data-ticket-receipt style="margin:12px 0;background:var(--ok-soft);border-color:var(--ok-soft-edge);color:var(--ok)"><b>${esc(TIX_RECEIPT.label)}</b> — ${esc(TIX_RECEIPT.id)} · verified by the action worker</div>`:"";
+  const exec=ticketExecutionStatus(p);
+  // Built BEFORE `head` and concatenated INTO it, never appended after. v3 wrote
+  // `head+=` against a `const`, which throws "Assignment to constant variable" on every
+  // degraded payload — so the panel rendered nothing at all in exactly the state the
+  // banner exists to explain, which is strictly worse than the silence it was fixing.
+  // Folded in so EVERY return path below carries it: with rows, without rows, and on the
+  // no-decisions path. Gating it on rows===null suppressed it exactly when the panel was
+  // showing partial results (PR #121 v2).
+  const degraded=p.tickets_degraded?`<div class="state state-error"><b>Ticket panel DEGRADED</b>This list may be incomplete — it is not a clean empty queue. Cause: ${esc(String(p.tickets_degraded))}</div>`:"";
+  const head=`<div class="status sub">Tickets<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${rows&&total?`showing ${rows.length} awaiting decision · ${esc(String(total))} ranked total`:"night-shift backlog, value-ranked"}</small></div>${receipt}${exec}${degraded}`;
   if(rows===null)return head+`<div class="empty">No tickets in this snapshot — the triage queue is empty, or the snapshot predates the tickets projection. Absent is not zero.</div>`;
-  if(!rows.length)return head+`<div class="empty">Ticket queue is empty.</div>`;
+  if(!rows.length)return head+`<div class="empty">No tickets are waiting for your decision.</div>`;
   if(TIX_IDX>rows.length)TIX_IDX=rows.length;
   if(TIX_IDX<0)TIX_IDX=0;
-  // r3 hygiene: the nav badge counts only open UNAPPROVED tickets (the ones
-  // needing a word), while the stack shows every projected row incl. the
-  // already-queued ones — say both numbers here so badge "3" next to 4 dots
-  // reads as designed, not as a bug. Same filter as the nav badge in render().
-  const needWord=rows.filter(t=>!t.approved&&t.status==="open").length;
+  const needWord=rows.filter(t=>t.status==="open").length;
   const top=`<div class="decide-top"><div style="font-size:13px;font-weight:750">Overnight tickets</div>
       <div class="decide-progress"><b>${Math.min(TIX_IDX+1,rows.length)}</b>/${rows.length}${needWord<rows.length?` · ${needWord} need your call`:""}</div></div>
     <div class="decide-dots">${rows.map((x,i)=>`<span class="dot ${i===TIX_IDX?"current":TIX_SKIPPED.has(x.id)?"skipped":""}"></span>`).join("")}</div>`;
@@ -2163,6 +2635,146 @@ function viewTickets(p){
     </div>`;
   }
   return head+`<div class="decide-shell" data-tickets-room>${top}${ticketCard(rows[TIX_IDX])}</div>`;
+}
+function ticketExecutionStatus(p){
+  const approved=Array.isArray(p.tickets)?p.tickets.filter(t=>t.approved):null;
+  if(approved===null)return "";
+  const cards=approved.map(t=>{
+    const known=t.executorEligible===true||t.executorEligible===false;
+    const cls=t.executorEligible===true?"badge-ok":t.executorEligible===false?"badge-bad":"badge-neutral";
+    const label=t.executorEligible===true?"eligible":t.executorEligible===false?"blocked":"eligibility unknown";
+    const why=known?(t.executorReason||"executor verdict unavailable"):
+      "this snapshot predates the execution-eligibility projection; approved does not mean scheduled";
+    return `<div data-ticket-execution-row style="padding:10px 0;border-top:1px solid var(--edge-soft)">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge ${cls}">${esc(label)}</span><b>${esc(t.title||t.id)}</b></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">#${esc(t.id)} · target tier ${esc(t.targetTier||"unknown")} · ${esc(why)}</div></div>`;
+  }).join("");
+  return `<div class="log" data-ticket-execution-status style="margin:12px 0"><b>Approved / execution status</b><br>
+    <small>Approval is authorization. Eligibility below is the deterministic Tier-A wall; actual execution still depends on the nightly runtime gates.</small>
+    ${cards||`<div class="empty">No approved tickets in this ranked snapshot.</div>`}</div>`;
+}
+
+// ── WORK / AGENTS room — read-only projection of the canonical work spine ───
+// Router submissions enter intake for supervised review, never direct execution.
+// Draft stays in memory only. A failed/uncertain request retains its packet/key.
+const ROUTER_DRAFT={text:"",packet:null,pending:false,rejected:false,message:"",epoch:0};
+function _routerPacket(text,key){
+  const objective=String(text).trim();
+  if(!objective||Array.from(objective).length>4000||/[\u0000-\u0008\u000b-\u001f]/u.test(objective)||!objective.isWellFormed())
+    throw new Error("Enter 1–4,000 characters without control characters. Do not paste credentials.");
+  return {schema:"rankwise.router-task.v1",idempotency_key:key,producer:"operator_portal",
+    source_ref:"portal2-work",task_type:"freeform",task_class:"interactive",execution_mode:"ai",
+    title:"Operator prompt: "+Array.from(objective.replace(/\s+/g," ")).slice(0,160).join(""),
+    objective,consumer:"operator",acceptance_test:"Return evidence, a result, next action, and blockers.",
+    priority:70,estimated_minutes:30,privacy_class:"operator_private",safety_class:"internal",
+    requires_operator:true,allowed_seats:["A","B"],allowed_providers:["claude"],minimum_quality:"standard",
+    max_cost_usd:0,context_refs:[],dependencies:[],required_capabilities:[],required_tools:[],
+    required_skills:[],required_connectors:[],worker_preference:"parent_session",
+    review_independence:"standard",client_impact:0,revenue_impact:0,outage_impact:0,
+    created_at:new Date().toISOString()};
+}
+function _routerForm(){
+  const blocked=DEV||ROUTER_READY!==true;
+  return `<div class="log" data-router-intake style="margin:12px 0"><b>Give the team one clear task</b>
+    <p>Describe the result you need. This queues a task for supervised review; it does not start Claude, spend money, or authorize a send. No credentials. Drafts last only while this page is open.</p>
+    <textarea id="router-prompt" aria-label="Task for the team" rows="3" style="width:100%;box-sizing:border-box" ${ROUTER_DRAFT.pending?"disabled":""} ${ROUTER_DRAFT.packet&&!ROUTER_DRAFT.rejected?"readonly":""}>${esc(ROUTER_DRAFT.text)}</textarea>
+    <button class="btn rec" id="router-submit" ${blocked||ROUTER_DRAFT.pending?"disabled":""}>${ROUTER_DRAFT.pending?"Recording…":"Queue for review"}</button>
+    <p data-router-status role="status">${esc(ROUTER_DRAFT.message||(DEV?"Preview only — no task will be sent.":blocked?"Router intake unavailable — migration or authenticated schema read needs verification. Your draft is not queued.":"Intake columns available; the RPC is verified on submission. Execution remains supervised; only a valid receipt confirms queueing."))}</p></div>`;
+}
+function wireRouterForm(){
+  const input=$("#router-prompt"),button=$("#router-submit");
+  if(!input||!button)return;
+  input.oninput=()=>{
+    // An uncertain request might already exist remotely. Editing must not mint a
+    // fresh identity behind the promised retry. Copy the draft if it needs review.
+    if(ROUTER_DRAFT.packet&&!ROUTER_DRAFT.rejected){input.value=ROUTER_DRAFT.text;return;}
+    ROUTER_DRAFT.text=input.value;ROUTER_DRAFT.packet=null;ROUTER_DRAFT.rejected=false;ROUTER_DRAFT.message="";
+  };
+  button.onclick=async()=>{
+    if(DEV||ROUTER_READY!==true||ROUTER_DRAFT.pending)return;
+    try{ROUTER_DRAFT.packet||= _routerPacket(ROUTER_DRAFT.text,"portal:"+crypto.randomUUID());}
+    catch(e){ROUTER_DRAFT.message=e.message;render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+    const epoch=ROUTER_DRAFT.epoch;
+    ROUTER_DRAFT.pending=true;render(LAST.p,LAST.updatedAt,LAST.srcNote);
+    try{
+      const r=await RWSession.authedFetch(SB+"/rest/v1/rpc/enqueue_routed_work",{
+        method:"POST",body:JSON.stringify({p_packet:ROUTER_DRAFT.packet,p_actor:"operator-portal"})});
+      if(epoch!==ROUTER_DRAFT.epoch)return;
+      if(r&&[400,409,413,422].includes(r.status)){
+        ROUTER_DRAFT.rejected=true;
+        ROUTER_DRAFT.message=`Request rejected (HTTP ${r.status}). Draft retained. Correct the request or ask the supervisor to resolve the constraint; identical retries will not help.`;
+        return;
+      }
+      if(r&&[401,403,404].includes(r.status)){
+        ROUTER_READY=false;
+        ROUTER_DRAFT.message=`Router intake unavailable (HTTP ${r.status}); check authenticated access and RPC migration. No receipt confirmed. Original packet retained.`;
+        return;
+      }
+      if(!r||!r.ok)throw new Error("not confirmed");
+      const receipt=await r.json();
+      if(epoch!==ROUTER_DRAFT.epoch)return;
+      if(!receipt||!Number.isSafeInteger(receipt.work_id)||receipt.work_id<1||
+        !["accepted","duplicate","provenance_merged","held"].includes(receipt.disposition))throw new Error("invalid receipt");
+      if(receipt.disposition==="held"){
+        ROUTER_DRAFT.message=`Task #${receipt.work_id} has a content conflict. Nothing new was queued; ask the supervisor to resolve it.`;
+      }else{
+        ROUTER_DRAFT.message=`Recorded as task #${receipt.work_id} (${receipt.disposition}). Not dispatched. See its owner and status below.`;
+        ROUTER_DRAFT.text="";ROUTER_DRAFT.packet=null;ROUTER_DRAFT.rejected=false;
+        await loadWork();
+      }
+    }catch{
+      if(epoch===ROUTER_DRAFT.epoch)ROUTER_DRAFT.message="Submission not confirmed. Draft retained; retry uses the same task key. Do not assume Claude received it.";
+    }finally{
+      if(epoch===ROUTER_DRAFT.epoch){ROUTER_DRAFT.pending=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}
+    }
+  };
+}
+const _WORK_TERMINAL=new Set(["closed","cancelled","accepted","rejected","decided"]);
+function _workTone(state){
+  if(state==="in_progress"||state==="verification")return "badge-info";
+  if(state==="blocked"||state==="failed_verification")return "badge-bad";
+  if(_WORK_TERMINAL.has(state))return "badge-ok";
+  return "badge-neutral";
+}
+function _workCard(w,eventByWork,verifyByWork){
+  const claim=w.wip_claim_owner?`${w.wip_claim_owner} · lease ${inTime(w.wip_claim_expires_at)}`:"unclaimed";
+  const ev=eventByWork.get(String(w.id));
+  const vr=verifyByWork.get(String(w.id));
+  const cost=w.cost_usd==null?"cost unledgered":`$${Number(w.cost_usd).toFixed(2)} USD`;
+  return `<div data-work-id="${escAttr(String(w.id))}" style="padding:12px 0;border-top:1px solid var(--edge-soft)">
+    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${_workTone(w.state)}">${esc(w.state||"unknown")}</span><span class="badge badge-neutral">${esc(w.type||"work")}</span><b style="min-width:0">#${esc(w.id)} · ${esc(w.title||"Untitled work")}</b></div>
+    <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">owner ${esc(w.owner||"unowned")} · model ${esc(w.model||"unrecorded")} · ${esc(cost)} · claim ${esc(claim)} · v${esc(w.version==null?"?":w.version)}</div>
+    ${w.consumer?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px">consumer: ${esc(w.consumer)}</div>`:""}
+    ${w.next_action?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px"><b>Next:</b> ${esc(firstLine(w.next_action))}</div>`:""}
+    ${w.outcome?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px"><b>Outcome:</b> ${esc(firstLine(w.outcome))}</div>`:""}
+    ${vr?`<div style="font-size:11.5px;color:${vr.verdict==="pass"?"var(--ok)":"var(--bad)"};margin-top:5px">verification ${esc(vr.verdict)} by ${esc(vr.verifier)} · ${esc(ago(vr.created_at))}</div>`:""}
+    ${ev?`<div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">latest event: ${esc(ev.event_type)} by ${esc(ev.actor)} · ${esc(ago(ev.created_at))}${ev.from_state||ev.to_state?` · ${esc(ev.from_state||"?")}→${esc(ev.to_state||"?")}`:""}</div>`:""}
+  </div>`;
+}
+function viewWork(){
+  const head=`<div class="status sub">Work / Agents<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">canonical spine · direct operator read</small></div>`+_routerForm();
+  if(WORK===undefined)return head+`<div class="empty">Loading work spine…</div>`;
+  if(WORK===null)return head+`<div class="state state-error"><b>Work spine read FAILED</b>Items, events, or verifications could not be read; this is not an empty queue.</div>`;
+  const items=WORK.items||[],events=WORK.events||[],vers=WORK.verifications||[];
+  const actions=Array.isArray(WORK.actions)?WORK.actions:null;
+  const eventByWork=new Map(),verifyByWork=new Map();
+  events.forEach(e=>{const k=String(e.work_id);if(!eventByWork.has(k))eventByWork.set(k,e)});
+  vers.forEach(v=>{const k=String(v.work_id);if(!verifyByWork.has(k))verifyByWork.set(k,v)});
+  const active=items.filter(w=>!_WORK_TERMINAL.has(w.state));
+  const groups=[
+    ["Running / verification",active.filter(w=>w.state==="in_progress"||w.state==="verification")],
+    ["Ready / intake",active.filter(w=>["intake","ready","reopened","returned"].includes(w.state))],
+    ["Blocked / failed verification",active.filter(w=>w.state==="blocked"||w.state==="failed_verification")],
+    ["Awaiting consumption",active.filter(w=>w.state==="awaiting_consumption")],
+    ["Recently finished",items.filter(w=>_WORK_TERMINAL.has(w.state)).slice(0,12)]
+  ];
+  const claimed=active.filter(w=>w.wip_claim_owner).length;
+  const owners=new Set(active.map(w=>w.wip_claim_owner||w.owner).filter(Boolean)).size;
+  const actionRows=actions&&actions.slice(0,20).map(a=>`<div data-action-receipt style="padding:10px 0;border-top:1px solid var(--edge-soft)"><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${a.status==="done"?"badge-ok":a.status==="failed"?"badge-bad":a.status==="processing"?"badge-info":"badge-neutral"}">${esc(a.status||"unknown")}</span><b>#${esc(a.id)} · ${esc(a.action||"unknown action")}</b></div><div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">requested ${esc(ago(a.created_at))}${a.processed_at?` · processed ${esc(ago(a.processed_at))}`:""}${a.result?` · ${esc(firstLine(a.result))}`:""}</div></div>`).join("");
+  return head+`<div class="state" style="margin:12px 0;background:var(--warn-soft);border-color:var(--warn-soft-edge)"><b>Supervised coordination — automatic dispatch is off.</b>The spine records owners, leases and results. Queued is not running: a supervisor must pick up the task. Repository file-path claims still live on the separate tab board and are not represented here.</div>
+    <div class="proof"><div class="pcard"><h4>Active</h4><div class="v">${active.length}</div><small>non-terminal work</small></div><div class="pcard"><h4>Claimed</h4><div class="v">${claimed}</div><small>live or stale leases</small></div><div class="pcard"><h4>Owners</h4><div class="v">${owners}</div><small>recorded active actors</small></div><div class="pcard"><h4>Verifications</h4><div class="v">${vers.length}</div><small>newest 100 read</small></div></div>
+    <div class="log" style="margin-top:14px"><b>Portal action receipts (${actions?actions.length:"?"})</b><br><small>Direct worker queue truth: requested, processing, done, or failed. This view has no retry button.</small>${actions===null?`<div class="state state-error"><b>Action receipt read FAILED</b>The work spine remains visible; receipt state is unknown, not empty.</div>`:actionRows||`<div class="empty">No action receipts found.</div>`}</div>
+    ${groups.map(([name,rows])=>`<div class="log" style="margin-top:14px"><b>${esc(name)} (${rows.length})</b><br>${rows.length?rows.map(w=>_workCard(w,eventByWork,verifyByWork)).join(""):`<div class="empty">None in the newest ${items.length} work items.</div>`}</div>`).join("")}`;
 }
 function wireTicketsNav(p,updatedAt,srcNote){
   const ta=$("#tix-note");
@@ -2183,7 +2795,7 @@ function wireTicketsNav(p,updatedAt,srcNote){
   }
   document.querySelectorAll("button[data-tix-nav]").forEach(b=>{
     b.onclick=()=>{
-      const rows=Array.isArray(p.tickets)?p.tickets:[];
+      const rows=Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&!TIX_RESOLVED.has(String(t.id))):[];
       if(b.dataset.tixNav==="prev")TIX_IDX=Math.max(0,TIX_IDX-1);
       else if(b.dataset.tixNav==="restart"){TIX_IDX=0;TIX_SKIPPED.clear();}
       else{const t=rows[TIX_IDX];if(t)TIX_SKIPPED.add(t.id);TIX_IDX=Math.min(rows.length,TIX_IDX+1);}
@@ -2547,12 +3159,48 @@ function ctosPulseText(p){
   return `ctOS — ${c.state} · ${c.reason}`;
 }
 
-// masthead: compact only on explicitly healthy ctOS evidence; manual toggle
-// wins and is remembered, but even a manually compacted mast stays truthful.
-function mastMode(p){
-  const manual=localStorage.getItem("rw_mast");
-  if(manual==="min"||manual==="max")return manual;
-  return ctosPulse(p).state==="healthy"?"min":"max";
+function _ctosValue(v){return typeof v==="number"&&Number.isFinite(v)?String(v):"—";}
+function viewCtos(p,updatedAt){
+  const pulse=ctosPulse(p);
+  const raw=p&&p.ctos_summary&&p.ctos_summary.schema_version===_CTOS_SCHEMA?p.ctos_summary:{};
+  const stats=[
+    ["Registry producers",raw.registry_nodes],
+    ["Jobs scanned",raw.scanned_jobs],
+    ["Runtime failures",raw.failed_nodes],
+    ["Runtime unknown",raw.unknown_runtime_nodes],
+    ["Unmapped live parts",raw.unmapped_components],
+    ["Missing paths",raw.missing_paths],
+    ["Cloud workflow failures",raw.failed_cloud_workflows],
+    ["Outcomes observed",raw.outcomes_observed],
+  ];
+  const audit=Array.isArray(p&&p.audit_trail)?p.audit_trail:[];
+  const verified=audit.filter(x=>String(x.status||"").toLowerCase()==="done").slice(0,6);
+  const exceptions=Array.isArray(pulse.top_exceptions)?pulse.top_exceptions:[];
+  const scanWhen=raw.scan_observed_at?ago(raw.scan_observed_at):"unavailable";
+  const reviewWhen=raw.semantic_reviewed_at
+    ?`${esc(raw.semantic_reviewed_at)}${typeof raw.semantic_age_days==="number"?` · ${esc(String(raw.semantic_age_days))}d ago`:""}`
+    :"unavailable";
+  return `<div class="status sub"><span class="dot" style="background:${ctosPulseColor(pulse.state)}"></span>ctOS
+      <small>${esc(pulse.state.toUpperCase())} · ${esc(pulse.reason)}</small></div>
+    <div class="ctos-grid">${stats.map(([label,value])=>`<div class="ctos-stat"><span class="section-note">${esc(label)}</span><b>${esc(_ctosValue(value))}</b></div>`).join("")}</div>
+    <h4 class="section-h">EVIDENCE FRESHNESS — operational timestamps</h4>
+    <div class="cards">
+      ${row("Runtime scan",`last genuine scan ${scanWhen}`)}
+      ${row("Registry review",`last semantic audit ${reviewWhen}`)}
+      ${row("Portal data refresh",updatedAt?`snapshot refreshed ${ago(updatedAt)}`:"snapshot refresh unavailable")}
+    </div>
+    <h4 class="section-h">TOP EXCEPTIONS — ${exceptions.length}</h4>
+    <div class="cards">${exceptions.length?exceptions.map(x=>row(
+      `${x.kind||"ctOS exception"} · ${x.count==null?"?":x.count}`,
+      x.label||"No detail recorded")).join(""):`<div class="empty">No ctOS exceptions in the current verified scan.</div>`}</div>
+    <h4 class="section-h">RECENT VERIFIED SYSTEM ACTIVITY</h4>
+    <div class="cards">${verified.length?verified.map(x=>row(
+      x.action||"system action",
+      `${x.processed_at||x.at?ago(x.processed_at||x.at):"time unavailable"} · ${firstLine(x.summary||x.result||"worker receipt recorded")}`)).join(""):
+      `<div class="empty">No completed worker receipts are present in this snapshot. This is not an invented activity feed.</div>`}</div>
+    <h4 class="section-h">SYSTEM ATLAS — live topology</h4>
+    ${DEV?`<div class="empty">The live system atlas mounts here after publish.</div>`:
+      `<iframe class="ctos-atlas" src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`}`;
 }
 // record_revenue is _FORM_ONLY_ACTIONS server-side (operator_action_worker.py)
 // — deliberately excluded from p.action_allowlist (that gate is for generic
@@ -2687,18 +3335,19 @@ function render(p, updatedAt, srcNote){
     ?{id:_ae.id,s:_ae.selectionStart,e:_ae.selectionEnd,tid:_ae.dataset.ticketId||null}:null;
   ACTS_REG = [];
   CUR_ALLOWLIST = Array.isArray(p.action_allowlist) ? p.action_allowlist : null;
-  const fc=findingsCounts(p);
   const ctos=ctosPulse(p);
   const convN=(p.due_calls||[]).length+(p.leads||[]).length;
-  const mm=mastMode(p);
   DEC_REG = [];
   const body = VIEW==="review"?viewReview(p)
     : VIEW==="content_review"?viewContentReview(p)
     : VIEW==="decisions"?viewDecisions(p)
     : VIEW==="tickets"?viewTickets(p)
+    : VIEW==="war_room"?viewWarRoom(p)
+    : VIEW==="work"?viewWork()
     : VIEW==="pipeline"?viewPipeline(p)
     : VIEW==="conversations"?viewConversations(p)
     : VIEW==="content"?viewContent(p)
+    : VIEW==="ctos"?viewCtos(p,updatedAt)
     : VIEW==="machine"?viewMachine(p,updatedAt)
     : VIEW==="business"?viewBusiness(p,updatedAt)
     : viewCommand(p,updatedAt);
@@ -2708,29 +3357,28 @@ function render(p, updatedAt, srcNote){
       const n=v==="conversations"?convN:(v==="review"&&ARTS?ARTS.filter(a=>a.status==="pending").length:
         (v==="decisions"&&Array.isArray(DECS)?DECS.length:
         (v==="tickets"&&Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&t.status==="open").length:
-        (v==="content_review"&&Array.isArray(CRI)?CRI.filter(r=>r.state!=="approved"&&r.state!=="posted").length:0))));
+        (v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:
+        (v==="content_review"&&Array.isArray(CRI)?CRI.filter(r=>r.state!=="approved"&&r.state!=="posted").length:0)))));
       return `<button class="navlink ${VIEW===v?"on":""}" data-v="${v}"${VIEW===v?' aria-current="page"':""}>${esc(label)} ${n?`<span class="n">${n}</span>`:""}</button>`}).join("")}
     <div class="foot">portal v2 · phase 7<br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
   <main>
-    <div class="mast" style="${mm==="min"?"height:88px;min-height:88px":""}">
-      ${mm==="min"
-        ?`<div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="height:100%;display:flex;align-items:center;gap:14px;padding:0 18px"><span style="width:9px;height:9px;border-radius:50%;background:${ctosPulseColor(ctos.state)}"></span><span style="color:var(--ink-3);font-size:13px">${esc(ctosPulseText(p))}</span></div>`
-        :(DEV?`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;letter-spacing:.05em">ctOS SYSTEM ATLAS — renders live (system/system-map.html)</div>`
-             :`<iframe src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`)}
-      ${mm==="max"?`<div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="position:absolute;left:14px;bottom:10px;max-width:min(60vw,620px);display:flex;align-items:center;gap:8px;background:var(--overlay);border:1px solid var(--edge);border-radius:7px;padding:5px 10px;color:var(--ink-2);font-size:11.5px;backdrop-filter:blur(4px)"><span style="width:8px;height:8px;border-radius:50%;background:${ctosPulseColor(ctos.state)};flex:none"></span><span>${esc(ctosPulseText(p))}</span></div>`:""}
-      <div class="hud">
-        <button class="pill" data-refresh title="refresh now">snapshot <b>${esc(ago(updatedAt))}</b> ⟳</button>
-        <div class="pill" data-ctos-state>ctOS <b style="color:${ctosPulseColor(ctos.state)}">${esc(ctos.state)}</b></div>
-        ${mm==="max"?`<div class="pill">findings <b style="color:${fc.total===0&&!findingsBroken(p)?"var(--ok)":"var(--warn)"}">${findingsBroken(p)?"?":fc.total}</b></div>`:""}
+    <div class="mast">
+      <div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="height:100%;display:flex;align-items:center;gap:10px;padding:0 18px;max-width:calc(100% - 260px)">
+        <span style="width:9px;height:9px;border-radius:50%;background:${ctosPulseColor(ctos.state)};flex:none"></span>
+        <b style="font-size:12px">ctOS ${esc(ctos.state.toUpperCase())}</b>
+        <span style="color:var(--ink-3);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ctos.reason)}</span>
       </div>
-      <button class="open-map" data-mast="${mm==="min"?"max":"min"}">${mm==="min"?"⌄ expand atlas":"⌃ collapse"}</button>
-      ${mm==="max"?`<a class="open-map" style="right:120px" href="/portal/system/system-map.html" target="_blank" rel="noopener">⤢ full atlas</a>`:""}
+      <div class="hud">
+        <button class="pill" data-refresh title="refresh portal data">refresh <b>${esc(ago(updatedAt))}</b> ⟳</button>
+        <button class="pill" data-goto="ctos">Open ctOS</button>
+      </div>
     </div>
     <div class="brief">${body}</div>
   </main>`;
   document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{VIEW=a.dataset.v;
     if(VIEW==="review"&&!ARTS)await loadArtifacts();
     if(VIEW==="decisions"&&!DECS)await loadDecisions();
+    if(VIEW==="work"&&WORK===undefined)await loadWork();
     if(VIEW==="content_review"&&CRI===undefined)await loadContentReview();
     render(p,updatedAt,srcNote);};});
   if(VIEW==="review"||VIEW==="content_review"||VIEW==="decisions")hydrateMedia();
@@ -2738,16 +3386,16 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="command")wireOpsBrief(p,updatedAt,srcNote);
   if(VIEW==="decisions")wireDecideNav(p,updatedAt,srcNote);
   if(VIEW==="tickets")wireTicketsNav(p,updatedAt,srcNote);
+  if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
   if(VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
   if(VIEW==="business")wireRevenueForm();
+  if(VIEW==="work")wireRouterForm();
   if(VIEW==="conversations")wireConversations(p,updatedAt,srcNote);
   document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
   const lo=document.querySelector("[data-logout]");
   if(lo)lo.onclick=async e=>{e.preventDefault();await RWSession.logout();boot();};
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
-  const mt=document.querySelector("[data-mast]");
-  if(mt)mt.onclick=e=>{e.preventDefault();localStorage.setItem("rw_mast",mt.dataset.mast);render(p,updatedAt,srcNote);};
   document.querySelectorAll("button[data-goto]").forEach(b=>{
     b.onclick=()=>{VIEW=b.dataset.goto;render(p,updatedAt,srcNote);};
   });
@@ -2837,7 +3485,20 @@ function render(p, updatedAt, srcNote){
             if(isCriNoteAction){const ta=$("#cri-note");if(ta)ta.value="";CRI_NOTE_DRAFT={id:null,text:""};}
             if(isTixNoteAction){const ta=$("#tix-note");if(ta)ta.value="";TIX_NOTE_DRAFT={id:null,text:""};}}
           else if(st==="processing")toast("Running…");
-          else if(st==="done"){toast("Done — recorded");ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);if(card)card.style.opacity=.45;}
+          else if(st==="done"){
+            toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
+            ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
+            if(reg.action.startsWith("ticket.")&&params.id){
+              // ONLY approve/reject resolve a ticket (security review F2). `revise` records
+              // a note and leaves the ticket OPEN and still awaiting the operator's word —
+              // but it was added to TIX_RESOLVED all the same, so the row vanished from the
+              // stack while the nav badge (which counts `p.tickets` server-side) still
+              // counted it. Badge and stack disagreed, and the disagreement pointed the
+              // wrong way: the one ticket you had just touched was the one you could no
+              // longer see. Reproduced in Chromium.
+              tixApplyActionResult(reg.action, params.id);
+            }else if(card)card.style.opacity=.45;
+          }
           else if(st==="failed"){toast("FAILED — "+(detail||"see Machine"),"err");ACTS_DONE.delete(key);ACTS_INFLIGHT.delete(key);b.disabled=false;}
           else if(st==="still-queued"){toast("Still queued — check back");}
         });
@@ -2894,6 +3555,7 @@ async function loadAndRender(reason){
     const row=Array.isArray(rows)&&rows[0];
     if(!row){render({},null,"snapshot table empty");return}
     LAST.p=row.payload||{};LAST.updatedAt=row.updated_at;LAST.srcNote="live · operator_portal_snapshot";
+    if(VIEW==="work")await loadWork();
     render(LAST.p,LAST.updatedAt,LAST.srcNote);
     if(reason==="manual")toast("Refreshed");
   }catch(e){
@@ -3012,7 +3674,10 @@ function renderLogin(msg){
   // revise note, sign out, log back in same tab, open Tickets → the note was restored). The
   // draft vars are the sensitive ones; the rest is a clean-slate so nothing carries over.
   TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};REV_DRAFT=null;REV_PENDING=false;
-  ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();CRI_SEL=null;CRI_FILTER="all";VIEW="command";
+  Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
+  resetWarRoom();
+  ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
+  CRI_SEL=null;CRI_FILTER="all";WORK=undefined;VIEW="command";
   $("#app").innerHTML=`<div></div><main><div class="login"><h2>Rankwise Command</h2>
    <label for="em">Email</label>
    <input id="em" type="email" placeholder="you@rankwise.ca" autocomplete="username" spellcheck="false">
@@ -3040,4 +3705,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: aec2666bde50 -->
+<!-- rankwise-portal2-version: 9808af8a228d -->
