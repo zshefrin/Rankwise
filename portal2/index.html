@@ -228,6 +228,11 @@ main{padding:0 0 60px;min-width:0}
 .pipe-card-sub{color:var(--ink-2);font-size:11.5px;margin-top:3px}
 .pipe-card-meta{color:var(--ink-3);font-size:10.5px;margin-top:4px}
 .pipe-more{color:var(--ink-3);font-size:11px;padding:2px 4px}
+.work-detail-grid{display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:8px 14px;font-size:12.5px}
+.work-detail-grid dt{color:var(--ink-3);font-weight:650}
+.work-detail-grid dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.work-detail-grid .missing{color:var(--ink-3);font-style:italic}
+@media (max-width:520px){.work-detail-grid{grid-template-columns:1fr;gap:3px 0}.work-detail-grid dd{margin-bottom:7px}}
 #toast{display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ok-soft);
   color:var(--ok);border:1px solid var(--ok-soft-edge);border-radius:var(--radius);padding:9px 18px;font-size:13px;
   z-index:var(--z-toast);box-shadow:var(--shadow)}
@@ -297,10 +302,10 @@ main{padding:0 0 60px;min-width:0}
  * retry/error behavior... This is a security and operability regression.
  * Extract the v1 session layer rather than reimplementing a subset."
  *
- * Every network/token/retry/error-contract code path below is v1's own logic,
- * carried over verbatim (same endpoints, same single-flight collapsing, same
- * localStorage keys, same JWT-shape validation on an OAuth/recovery redirect).
- * The ONE deliberate change from v1: this file is DOM-AGNOSTIC. v1's
+ * Initially carried over from v1 (same endpoints, localStorage keys and
+ * JWT-shape validation). The September 6 hardening adds session-bound async
+ * continuations, immediate local logout and cross-tab change notifications.
+ * This file is DOM-AGNOSTIC. v1's
  * login()/forgotPw()/setNewPassword() read and wrote specific #em/#pw/#err
  * DOM nodes inline; here every function takes plain arguments and returns a
  * value or throws an Error (with a `.kind` discriminator matching v1's own
@@ -327,11 +332,10 @@ main{padding:0 0 60px;min-width:0}
  * different keys and silently disagree about whether a session exists. See
  * this session's build-lane report for the proposed index.html diff.
  *
- * MANUAL TEST PLAN — the fetch/OAuth/recovery flows need a live (or
- * network-mocked) Supabase project and a real browser session, so they are
- * NOT covered by session.test.mjs (which only exercises the pure,
- * network-free functions: role(), userEmail(), consumeAuthRedirect()'s token
- * validation, requireRole()). Before this file replaces v1's inline auth in
+ * MANUAL TEST PLAN — session.test.mjs covers pure logic; the dependency-free
+ * session.network.test.mjs covers mocked login/logout/refresh/fetch races.
+ * Neither proves live Supabase revocation, OAuth or account role wiring.
+ * Before this file replaces v1's inline auth in
  * any deployed portal, manually verify:
  *   1. Sign in with a real operator account, a real seller account, and a
  *      real client account -> role routing lands each on the right surface;
@@ -374,14 +378,81 @@ main{padding:0 0 60px;min-width:0}
     return { apikey: KEY, Authorization: "Bearer " + tok(), "Content-Type": "application/json" };
   }
 
+  // Async auth work must never be allowed to finish into a replacement
+  // account.  The access token itself is deliberately not exposed as an
+  // identity: normal refresh rotates it.  Supabase's `sub` + `session_id`
+  // pair plus the server-controlled role is stable for an auth session and
+  // authorization boundary; a role change must reset the portal too. The
+  // malformed-token fallback is exact in-memory identity only (never logged).
+  var _authOp = 0;
+  var _identityListeners = [];
+  var _lastIdentity;
+  var _refreshing = null;
+
+  function _identityFor(access, refresh) {
+    if (!access) return null;
+    var p = _decodeJwt(access);
+    if (p && typeof p.sub === "string" && p.sub && typeof p.session_id === "string" && p.session_id) {
+      var role = p.app_metadata && typeof p.app_metadata.role === "string" ? p.app_metadata.role : "";
+      return JSON.stringify(["sub", p.sub, "session", typeof p.session_id === "string" ? p.session_id : "", "role", role]);
+    }
+    return "access:" + access;
+  }
+
+  function sessionIdentity() {
+    return _identityFor(global.localStorage.getItem("rw_tok") || "", global.localStorage.getItem("rw_rtok") || "");
+  }
+
+  function _notifyIdentity(before, after) {
+    if (before === after) return;
+    for (var i = 0; i < _identityListeners.length; i++) {
+      try { _identityListeners[i](after, before); } catch (e) { /* observer must not break auth */ }
+    }
+  }
+
+  function onSessionChange(fn) {
+    if (typeof fn !== "function") return function () {};
+    _identityListeners.push(fn);
+    return function () {
+      var i = _identityListeners.indexOf(fn);
+      if (i >= 0) _identityListeners.splice(i, 1);
+    };
+  }
+
+  function _state() {
+    return { access: global.localStorage.getItem("rw_tok") || "", refresh: global.localStorage.getItem("rw_rtok") || "" };
+  }
+  function _sameState(a, b) { return !!a && !!b && a.access === b.access && a.refresh === b.refresh; }
+  function _sameIdentity(a, b) { return _identityFor(a && a.access, a && a.refresh) === _identityFor(b && b.access, b && b.refresh); }
+
+  function _adoptTokens(access, refresh) {
+    var before = sessionIdentity();
+    global.localStorage.setItem("rw_tok", access);
+    if (refresh) global.localStorage.setItem("rw_rtok", refresh);
+    else global.localStorage.removeItem("rw_rtok");
+    var after = sessionIdentity();
+    if (before !== after) {
+      _authOp++;
+      _refreshing = null;
+      _notifyIdentity(before, after);
+    }
+    _lastIdentity = after;
+  }
+
   // Pass V-d (v1): purge role-gated cached payloads on every session teardown
   // so a shared device never retains the previous login's data.
   function clearTokens() {
+    var before = sessionIdentity();
     global.localStorage.removeItem("rw_tok");
     global.localStorage.removeItem("rw_rtok");
     global.localStorage.removeItem("rw_mmap_payload");
     global.localStorage.removeItem("rw_mmap_ver");
     global.localStorage.removeItem("rw_seller_milestones");
+    _authOp++;
+    _refreshing = null;
+    var after = sessionIdentity();
+    _lastIdentity = after;
+    _notifyIdentity(before, after);
   }
 
   function _decodeJwt(t) {
@@ -442,8 +513,7 @@ main{padding:0 0 60px;min-width:0}
       hadAuth = true;
       var at = h.get("access_token");
       if (_isProjectAuthToken(at)) {
-        global.localStorage.setItem("rw_tok", at);
-        if (h.get("refresh_token")) global.localStorage.setItem("rw_rtok", h.get("refresh_token"));
+        _adoptTokens(at, h.get("refresh_token") || "");
         if (h.get("type") === "recovery" || h.get("type") === "invite") out.recovery = true;
       } else {
         out.error = "Sign-in link could not be verified — request a fresh one.";
@@ -462,6 +532,7 @@ main{padding:0 0 60px;min-width:0}
   // user's fault and v1 deliberately never marked fields aria-invalid for
   // them — the caller can reproduce that distinction from .kind).
   async function login(email, password) {
+    var op = ++_authOp, start = _state();
     var r;
     try {
       r = await fetch(SB + "/auth/v1/token?grant_type=password", {
@@ -487,8 +558,11 @@ main{padding:0 0 60px;min-width:0}
       credErr.kind = "credentials";
       throw credErr;
     }
-    global.localStorage.setItem("rw_tok", d.access_token);
-    if (d.refresh_token) global.localStorage.setItem("rw_rtok", d.refresh_token);
+    // A delayed response belongs to the login attempt that created it.  If a
+    // newer login/logout or a cross-tab storage mutation happened meanwhile,
+    // leave the current session untouched.
+    if (op !== _authOp || !_sameState(start, _state())) return false;
+    _adoptTokens(d.access_token, d.refresh_token || "");
   }
 
   function googleLoginUrl() {
@@ -539,31 +613,49 @@ main{padding:0 0 60px;min-width:0}
 
   // Pass V-a (v1): explicit logout must end the session server-side, not
   // just drop the local copy — otherwise a captured refresh token stays
-  // usable. Revoke first (best-effort: a dead/offline token must still log
-  // out locally), then clear.
+  // usable. Clear locally immediately, then revoke the captured old token
+  // best-effort; a dead/offline token must still log out locally.
   async function logout() {
+    ++_authOp;
+    var start = _state();
+    // Tear down locally before the best-effort revoke. No pending refresh or
+    // UI read may continue using these credentials during the await.
+    if (start.access || start.refresh) clearTokens();
     try {
-      if (tok()) await fetch(SB + "/auth/v1/logout?scope=global", { method: "POST", headers: hdr() });
+      if (start.access) await fetch(SB + "/auth/v1/logout?scope=global", {
+        method: "POST",
+        headers: { apikey: KEY, Authorization: "Bearer " + start.access, "Content-Type": "application/json" },
+      });
     } catch (e) {
       // offline / already-expired: fall through to local teardown
     }
-    clearTokens();
+    // Never mutate the current session after the revoke completes: another
+    // login may have replaced it while the request was in flight.
   }
 
   // Single-flight the session give-up (v1 finding 11): a burst of concurrent
   // 401s must clear tokens exactly once, not once per caller.
-  function _abandonSession() {
+  function _abandonSession(expectedState, expectedOp) {
+    if (expectedState && (!_sameState(expectedState, _state()) || (expectedOp != null && expectedOp !== _authOp))) return null;
     if (!tok()) return null; // already given up by an earlier 401 in this burst
     clearTokens();
     return null;
   }
 
-  var _refreshing = null; // collapse concurrent 401s onto ONE refresh round-trip
-  function refreshSession() {
-    if (_refreshing) return _refreshing;
-    var rt = global.localStorage.getItem("rw_rtok");
+  // Collapse concurrent 401s onto ONE refresh round-trip, but only for the
+  // same auth operation/session. A replacement account never joins the old
+  // flight and an old flight cannot install its result into the new account.
+  function refreshSession(expectedState, expectedOp) {
+    var current = _state();
+    if (expectedState && (!_sameIdentity(expectedState, current) || (expectedOp != null && expectedOp !== _authOp))) return Promise.resolve(false);
+    if (_refreshing) {
+      if (_sameIdentity(_refreshing.state, current) && _refreshing.op === _authOp) return _refreshing.promise;
+      return Promise.resolve(false);
+    }
+    var rt = current.refresh;
     if (!rt) return Promise.resolve(false);
-    _refreshing = (async function () {
+    var flight = { state: current, op: _authOp, promise: null };
+    flight.promise = (async function () {
       try {
         var r = await fetch(SB + "/auth/v1/token?grant_type=refresh_token", {
           method: "POST",
@@ -571,18 +663,18 @@ main{padding:0 0 60px;min-width:0}
           body: JSON.stringify({ refresh_token: rt }),
         });
         var d = await r.json();
-        if (r.ok && d.access_token) {
-          global.localStorage.setItem("rw_tok", d.access_token);
-          if (d.refresh_token) global.localStorage.setItem("rw_rtok", d.refresh_token);
-          return true;
+        if (r.ok && d.access_token && flight.op === _authOp && _sameState(flight.state, _state())) {
+          _adoptTokens(d.access_token, d.refresh_token || flight.state.refresh);
+          return _sameIdentity(flight.state, _state());
         }
       } catch (e) {
         // fall through — treat as failed refresh
       }
       return false;
     })();
-    _refreshing.finally(function () { _refreshing = null; });
-    return _refreshing;
+    _refreshing = flight;
+    flight.promise.then(function () { if (_refreshing === flight) _refreshing = null; }, function () { if (_refreshing === flight) _refreshing = null; });
+    return flight.promise;
   }
 
   // Every authenticated call goes through here. Returns a Response, or null
@@ -590,22 +682,39 @@ main{padding:0 0 60px;min-width:0}
   // own callers all check `=== null` and bail without re-rendering an error,
   // since abandonSession already tore the session down).
   async function authedFetch(url, opts) {
-    function build() {
+    var start = _state(), op = _authOp;
+    if (!start.access) return null;
+    function build(state) {
       var o = Object.assign({}, opts);
       var h = Object.assign({}, (opts && opts.headers) || {});
       h.apikey = KEY;
-      h.Authorization = "Bearer " + tok(); // re-read each attempt: retry needs the NEW token
+      h.Authorization = "Bearer " + state.access;
       // JSON only for string bodies — never force a Content-Type onto a raw
       // file upload (Storage needs the browser to set it from the Blob).
       if (typeof o.body === "string" && !h["Content-Type"]) h["Content-Type"] = "application/json";
       o.headers = h;
       return o;
     }
-    var r = await fetch(url, build());
+    var r = await fetch(url, build(start));
+    // A completed response is not safe to hand to a replacement account.
+    if (!_sameIdentity(start, _state()) || op !== _authOp) return null;
     if (r.status === 401) {
-      if (await refreshSession()) r = await fetch(url, build()); // retry once with the fresh token
-      else return _abandonSession();
-      if (r.status === 401) return _abandonSession();
+      // A 401 from a request started as account A must not refresh or replay
+      // as account B. Same-identity token rotation remains eligible.
+      // Another same-session request may already have rotated the token. Use
+      // that current token directly instead of launching a redundant flight.
+      if (_sameState(start, _state()) && !await refreshSession(start, op)) {
+        if (!_sameIdentity(start, _state()) || op !== _authOp) return null;
+        // A sibling may have rotated successfully while our flight failed.
+        // Retry with that newer access token; do not return a dead-session
+        // sentinel for a live replacement within the same session.
+        if (_state().access === start.access) return _abandonSession(start, op);
+      }
+      if (!_sameIdentity(start, _state()) || op !== _authOp) return null;
+      var retryState = _state();
+      r = await fetch(url, build(retryState));
+      if (!_sameIdentity(start, _state()) || op !== _authOp) return null;
+      if (r.status === 401) return _abandonSession(retryState, op);
     }
     return r;
   }
@@ -619,6 +728,7 @@ main{padding:0 0 60px;min-width:0}
     return !!(v && v.__error);
   }
   async function rest(path) {
+    var identityAtStart = sessionIdentity();
     var r;
     try {
       r = await authedFetch(SB + "/rest/v1/" + path, {});
@@ -626,12 +736,33 @@ main{padding:0 0 60px;min-width:0}
       return { __error: "network" };
     }
     if (r === null) return null; // session dead; caller should treat as logged out
+    if (identityAtStart !== sessionIdentity()) return null;
     if (!r.ok) return { __error: r.status };
     try {
-      return await r.json();
+      var body = await r.json();
+      return identityAtStart === sessionIdentity() ? body : null;
     } catch (e) {
       return { __error: "parse" };
     }
+  }
+
+  // A second portal tab can replace or clear credentials without this module
+  // executing its own login/logout functions. Fence all pending continuations
+  // on that signal. Token rotation within the same stable identity deliberately
+  // does not notify UI listeners, avoiding a refresh-induced logout flash.
+  if (typeof global.addEventListener === "function") {
+    _lastIdentity = sessionIdentity();
+    global.addEventListener("storage", function (e) {
+      if (e && e.storageArea && e.storageArea !== global.localStorage) return;
+      if (e && e.key !== null && ["rw_tok", "rw_rtok"].indexOf(e.key) < 0) return;
+      var before = _lastIdentity;
+      var after = sessionIdentity();
+      if (before !== after) {_authOp++;_refreshing = null;}
+      _lastIdentity = after;
+      _notifyIdentity(before, after);
+    });
+  } else {
+    _lastIdentity = sessionIdentity();
   }
 
   global.RWSession = {
@@ -639,6 +770,8 @@ main{padding:0 0 60px;min-width:0}
     tok: tok,
     hdr: hdr,
     clearTokens: clearTokens,
+    sessionIdentity: sessionIdentity,
+    onSessionChange: onSessionChange,
     role: role,
     userEmail: userEmail,
     requireRole: requireRole,
@@ -690,15 +823,19 @@ function inTime(iso){if(!iso)return "—";const m=(new Date(iso)-Date.now())/600
 // ── action queue: the PROVEN v1 contract — {action, params}, then a receipt watch.
 // Optimistic fading is not proof work happened (old page, watchQueuedAction).
 async function enqueueAction(action, params, onstate){
+  const epoch=PORTAL_EPOCH;
+  const current=()=>_portalReadCurrent(epoch);
   const r=await RWSession.authedFetch(SB+"/rest/v1/operator_action_queue",{method:"POST",
     headers:{Prefer:"return=representation"},
     body:JSON.stringify({action, params: params||{}})});
+  if(!current())return; // submitted effects may exist; never follow them as another session
   if(r===null)throw new Error("session-expired");   // authedFetch already tore the session down
   // The numeric status rides ON the error: a 409 from the queue's uniqueness index means
   // "an attempt already exists", which is not the same claim as "it was recorded", and only
   // the caller can reconcile that. Everything else stays an unknown submission.
   if(!r.ok){const err=new Error("enqueue "+r.status);err.status=r.status;throw err;}
   const rows=await r.json(); const id=rows&&rows[0]&&rows[0].id;
+  if(!current())return;
   if(id==null){onstate&&onstate("queued");return}
   onstate&&onstate("queued");
   // The worker is scheduled every two minutes. Watch beyond one full worker
@@ -706,13 +843,15 @@ async function enqueueAction(action, params, onstate){
   // state seconds before its authoritative receipt arrives.
   for(let i=0;i<90;i++){
     await new Promise(res=>setTimeout(res,1500));
+    if(!current())return;
     let row; try{row=await rest("operator_action_queue?id=eq."+encodeURIComponent(String(id))+"&select=id,status,result")}catch{break}
+    if(!current())return;
     const st=row&&row[0]&&String(row[0].status||"");
     if(st==="processing"){onstate&&onstate("processing");}
     if(st==="done"){onstate&&onstate("done");return}
     if(st==="failed"){onstate&&onstate("failed",row[0].result);return}
   }
-  onstate&&onstate("still-queued");
+  if(current())onstate&&onstate("still-queued");
 }
 
 // ── payload → view models. Shapes verified against the LIVE snapshot 2026-08-26:
@@ -828,11 +967,13 @@ const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"]
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
 let ARTS = null;
 async function loadArtifacts(){
+  const current=_auxReadGuard("artifacts");
   if(DEV){ARTS=DEMO_ARTS;return ARTS}
   try{
     const r=await rest("operator_artifacts?select=*&order=created_at.desc&limit=60");
+    if(!current())return ARTS;
     ARTS=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
-  }catch{ARTS=null}
+  }catch{if(current())ARTS=null}
   return ARTS;
 }
 // Decision Queue (Operating Model v2 §5 Day-2, Pillar 2 build item ①): direct RLS
@@ -845,14 +986,16 @@ async function loadArtifacts(){
 // decisions yet to sort by).
 let DECS = null;
 async function loadDecisions(){
+  const current=_auxReadGuard("decisions");
   if(DEV){DECS=DEMO.decisions_open;return DECS}
   try{
     // phase 2: embed the parent work_item (decisions.work_id FK, 076) so the
     // DECIDE card can show where the question came from — PostgREST resolves
     // the to-one embed off the FK; rows arrive with a nested `work_items` object.
     const r=await rest("decisions?select=*,work_items(title,state,owner,type)&state=eq.open&order=created_at.desc&limit=5");
+    if(!current())return DECS;
     DECS=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
-  }catch{DECS=null}
+  }catch{if(current())DECS=null}
   return DECS;
 }
 // Content Review room (Phase 1 steps 3+5, PHASE1-CONTENT-REVIEW-PLAN.md §6) --
@@ -870,21 +1013,25 @@ let CRI_FILTER = "all";
 // allowlist gate; this reason only shows if the live allowlist drops them.
 const _CRI_NOT_LIVE_REASON = "not in the live action allowlist";
 async function loadContentReview(){
+  const current=_auxReadGuard("content");
   if(DEV){CRI=DEMO.content_review_items;return CRI}
   try{
     const r=await rest("content_review_items?select=*&order=pushed_at.desc&limit=200");
+    if(!current())return CRI;
     CRI=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
-  }catch{CRI=null}
+  }catch{if(current())CRI=null}
   return CRI;
 }
 // work_items in_progress, grouped by owner -- Daily Brief "In progress" (plan §5).
 let WIP = undefined;
 async function loadWip(){
+  const current=_auxReadGuard("wip");
   if(DEV){WIP=DEMO.spine_work_items.filter(w=>w.state==="in_progress");return WIP}
   try{
     const r=await rest("work_items?select=id,type,title,state,owner,created_at&state=eq.in_progress&order=created_at.desc&limit=30");
+    if(!current())return WIP;
     WIP=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
-  }catch{WIP=null}
+  }catch{if(current())WIP=null}
   return WIP;
 }
 // Work / Agents is the read-only operating surface over the canonical spine. It reads
@@ -893,24 +1040,85 @@ async function loadWip(){
 // dispatcher remain separately gated/dormant.
 let WORK = undefined;
 let ROUTER_READY = undefined;
+// The selected work id is UI state only. It survives snapshot refreshes while
+// the row still exists, but is cleared by renderLogin() so one operator's
+// private task context cannot appear after auth teardown.
+let WORK_SELECTED = null;
+let WORK_FOCUS_DETAIL = false;
+let PORTAL_EPOCH=0, PORTAL_READ_SEQ=0, WORK_READ_SEQ=0, WORK_DETAIL_SEQ=0;
+let PORTAL_AUTH_ID=RWSession.sessionIdentity(), AUTH_REDIRECT_SETTLING=false;
+const AUX_READ_SEQ={};
+function _auxReadGuard(name){
+  const epoch=PORTAL_EPOCH,seq=(AUX_READ_SEQ[name]||0)+1;AUX_READ_SEQ[name]=seq;
+  return ()=>epoch===PORTAL_EPOCH&&seq===AUX_READ_SEQ[name]&&_portalReadCurrent(epoch);
+}
+function _loadAuxAndRender(loader){
+  const epoch=PORTAL_EPOCH;
+  return loader().then(()=>{if(epoch===PORTAL_EPOCH&&LAST.p&&_portalReadCurrent(epoch))render(LAST.p,LAST.updatedAt,LAST.srcNote);});
+}
+let WORK_DETAIL=null;
+const _workColumns="id,type,title,state,priority,owner,consumer,wip_claim_owner,wip_claim_expires_at,model,cost_usd,outcome,acceptance_test,next_action,due_at,created_at,closed_at,version,task_packet";
+function _portalReadCurrent(epoch){
+  if(epoch!==PORTAL_EPOCH)return false;
+  // A subsidiary REST read can expire the session after the snapshot succeeded.
+  // Teardown must happen here too, not only on the next snapshot timer.
+  if(!DEV&&!tok()){
+    if(!document.getElementById("em"))renderLogin("Session expired — sign in again.");
+    return false;
+  }
+  if(!DEV&&PORTAL_AUTH_ID!==RWSession.sessionIdentity()){boot();return false;}
+  if(!DEV&&!RWSession.requireRole(["operator"])){
+    _resetPortalState();renderNoAccess();return false;
+  }
+  return true;
+}
+function _workId(value){const s=String(value);return /^[1-9][0-9]*$/.test(s)&&Number.isSafeInteger(Number(s))?s:null;}
 async function loadWork(){
+  const epoch=PORTAL_EPOCH, seq=++WORK_READ_SEQ;
   if(DEV){ROUTER_READY=false;WORK={items:DEMO.spine_work_items,events:DEMO.spine_events,verifications:DEMO.spine_verifications,actions:DEMO.spine_actions};return WORK}
   try{
     const settled=await Promise.allSettled([
-      rest("work_items?select=id,type,title,state,priority,owner,consumer,wip_claim_owner,wip_claim_expires_at,model,cost_usd,outcome,next_action,due_at,created_at,closed_at,version&order=created_at.desc&limit=100"),
+      // task_packet is read only to expose its safe, already-validated
+      // objective. Never render the raw packet: it may contain private refs.
+      rest("work_items?select="+_workColumns+"&order=created_at.desc,id.desc&limit=100"),
       rest("events?select=id,work_id,event_type,actor,from_state,to_state,created_at&order=created_at.desc&limit=200"),
       rest("verifications?select=id,work_id,verifier,verdict,created_at&order=created_at.desc&limit=100"),
       rest("operator_action_queue?select=id,action,status,result,created_at,processed_at&order=created_at.desc&limit=50"),
       rest("work_items?select=idempotency_key,task_packet&limit=0")
     ]);
+    if(!_portalReadCurrent(epoch)||seq!==WORK_READ_SEQ)return WORK;
     const value=i=>settled[i].status==="fulfilled"&&Array.isArray(settled[i].value)&&!(RWSession.bad&&RWSession.bad(settled[i].value))?settled[i].value:null;
     const items=value(0),events=value(1),verifications=value(2),actions=value(3);
     ROUTER_READY=value(4)!==null;
     // Core lifecycle reads are one contract. Action receipts are a useful but separate
     // queue: their outage must not blank ownership/lease visibility for the whole room.
     WORK=[items,events,verifications].some(x=>x===null)?null:{items,events,verifications,actions};
-  }catch{WORK=null;ROUTER_READY=false}
+  }catch{if(_portalReadCurrent(epoch)&&seq===WORK_READ_SEQ){WORK=null;ROUTER_READY=false}}
   return WORK;
+}
+// The overview is a bounded window, not a complete history. Inspect by exact id
+// so newer unrelated traffic cannot hide this task or its latest evidence.
+async function loadWorkDetail(value){
+  const id=_workId(value);if(!id)return;
+  const epoch=PORTAL_EPOCH,seq=++WORK_DETAIL_SEQ;
+  WORK_SELECTED=id;WORK_DETAIL={id,state:"loading"};
+  const current=()=>_portalReadCurrent(epoch)&&seq===WORK_DETAIL_SEQ&&WORK_SELECTED===id;
+  try{
+    const rows=DEV?[
+      DEMO.spine_work_items.filter(w=>String(w.id)===id),
+      DEMO.spine_events.filter(e=>String(e.work_id)===id).slice(0,1),
+      DEMO.spine_verifications.filter(v=>String(v.work_id)===id).slice(0,1)
+    ]:await Promise.all([
+      rest("work_items?select="+_workColumns+"&id=eq."+id+"&limit=1"),
+      rest("events?select=id,work_id,event_type,actor,from_state,to_state,created_at&work_id=eq."+id+"&order=created_at.desc,id.desc&limit=1"),
+      rest("verifications?select=id,work_id,verifier,verdict,created_at&work_id=eq."+id+"&order=created_at.desc,id.desc&limit=1")
+    ]);
+    if(!current())return;
+    if(rows.some(r=>!Array.isArray(r)||r.length>1))throw new Error("unreadable detail");
+    const [items,events,verifications]=rows;
+    if(items.some(w=>!w||String(w.id)!==id)||events.some(e=>!e||String(e.work_id)!==id)||verifications.some(v=>!v||String(v.work_id)!==id))throw new Error("wrong task");
+    WORK_DETAIL={id,state:items.length?"ready":"missing",item:items[0],events,verifications};
+  }catch{if(current())WORK_DETAIL={id,state:"failed"};}
 }
 // A failed re-render leaves a *.FAILED-QC.mp4 sibling next to a good render (plan
 // §2) -- that is NOT the same thing as this item's recorded qc.verdict being fail.
@@ -1402,6 +1610,7 @@ function _classifyExceptions(items, decisions) {
   return { items, decisions, pastDue, stalledClaim, expiredDecision, orphaned, decidedOpenParent };
 }
 async function loadExceptions() {
+  const current=_auxReadGuard("exceptions");
   try {
     // security review F3: DEV branch moved inside the try -- if DEMO's spine
     // fixtures were ever renamed/removed this throws same as a real fetch failure,
@@ -1416,10 +1625,11 @@ async function loadExceptions() {
       rest("work_items?select=id,type,title,state,owner,consumer,due_at,wip_claim_owner,wip_claim_expires_at,created_at&order=created_at.desc&limit=30"),
       rest("decisions?select=id,work_id,question,state,default_class,default_action,expires_at,decided_choice,created_at&order=created_at.desc&limit=30"),
     ]);
+    if(!current())return EXC;
     if ((RWSession.bad && (RWSession.bad(items) || RWSession.bad(decisions)))
         || !Array.isArray(items) || !Array.isArray(decisions)) { EXC = null; return EXC; }
     EXC = _classifyExceptions(items, decisions);
-  } catch { EXC = null; }
+  } catch { if(current())EXC = null; }
   return EXC;
 }
 function exceptionsSection() {
@@ -1472,6 +1682,8 @@ function _mediaPathOk(path){
 const SIGN_TTL_S=3600, SIGN_MARGIN_S=300;
 const SIGNED_URL_CACHE=new Map(); // storage path -> {url, exp (ms epoch)}
 async function signedUrl(path){
+  const epoch=PORTAL_EPOCH;
+  if(!_portalReadCurrent(epoch))return null;
   if(!_mediaPathOk(path))return null;
   const hit=SIGNED_URL_CACHE.get(path);
   if(hit&&hit.exp>Date.now())return hit.url;
@@ -1485,6 +1697,7 @@ async function signedUrl(path){
     {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({expiresIn:SIGN_TTL_S})});
   if(!r||!r.ok)return null;
   const d=await r.json();
+  if(!_portalReadCurrent(epoch))return null;
   if(!d||!d.signedURL)return null;
   const u=SB+"/storage/v1"+d.signedURL;
   SIGNED_URL_CACHE.set(path,{url:u,exp:Date.now()+(SIGN_TTL_S-SIGN_MARGIN_S)*1000});
@@ -1984,9 +2197,11 @@ function _mediaPlaying(){
   return [...document.querySelectorAll(".artmedia video")].some(v=>!v.paused&&!v.ended);
 }
 async function _hydrateOne(el,m){
+  const epoch=PORTAL_EPOCH;
   if(!m){el.textContent="media unavailable";return}
   if(!_mediaPathOk(m.path)){el.textContent="bad media path";return} // F5: no request
   const u=await signedUrl(m.path);
+  if(!_portalReadCurrent(epoch)||!el.isConnected)return;
   if(!u){el.textContent="media unavailable";return}
   // F6: element construction via DOM APIs, never URL-in-innerHTML
   const node=document.createElement(m.img?"img":"video");
@@ -2637,20 +2852,30 @@ function viewTickets(p){
   return head+`<div class="decide-shell" data-tickets-room>${top}${ticketCard(rows[TIX_IDX])}</div>`;
 }
 function ticketExecutionStatus(p){
-  const approved=Array.isArray(p.tickets)?p.tickets.filter(t=>t.approved):null;
+  // Approval is a persisted boolean decision, not truthiness. Malformed
+  // projection values must never look like operator authorization.
+  const approved=Array.isArray(p.tickets)?p.tickets.filter(t=>t.approved===true):null;
   if(approved===null)return "";
   const cards=approved.map(t=>{
     const known=t.executorEligible===true||t.executorEligible===false;
     const cls=t.executorEligible===true?"badge-ok":t.executorEligible===false?"badge-bad":"badge-neutral";
     const label=t.executorEligible===true?"eligible":t.executorEligible===false?"blocked":"eligibility unknown";
-    const why=known?(t.executorReason||"executor verdict unavailable"):
-      "this snapshot predates the execution-eligibility projection; approved does not mean scheduled";
+    const why=t.executorReason||(
+      known?"executor verdict unavailable":
+      "eligibility evidence unavailable this push; approval does not mean scheduled");
+    const next= t.executorEligible===false
+      ? "No re-approval needed for the same scope — resolve the named execution gate; ask the operator again only if scope or safety changes."
+      : t.executorEligible===true
+        ? "Eligible does not mean running — the separate nightly runtime gates still apply."
+        : "Do not treat this as ready — eligibility evidence unavailable this push.";
     return `<div data-ticket-execution-row style="padding:10px 0;border-top:1px solid var(--edge-soft)">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge ${cls}">${esc(label)}</span><b>${esc(t.title||t.id)}</b></div>
-      <div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">#${esc(t.id)} · target tier ${esc(t.targetTier||"unknown")} · ${esc(why)}</div></div>`;
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(t.title||t.id)}</b><span class="badge badge-info">approval recorded</span></div>
+      <div style="font-size:11.5px;color:var(--ink-2);margin-top:5px"><b>Execution readiness:</b> <span class="badge ${cls}">${esc(label)}</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">#${esc(t.id)} · target tier ${esc(t.targetTier||"unknown")} · ${esc(why)}</div>
+      <div style="font-size:11.5px;color:var(--ink-2);margin-top:5px">${esc(next)}</div></div>`;
   }).join("");
-  return `<div class="log" data-ticket-execution-status style="margin:12px 0"><b>Approved / execution status</b><br>
-    <small>Approval is authorization. Eligibility below is the deterministic Tier-A wall; actual execution still depends on the nightly runtime gates.</small>
+  return `<div class="log" data-ticket-execution-status style="margin:12px 0"><b>Approval recorded / execution readiness</b><br>
+    <small>Approval is authorization, not proof of execution. Eligibility below is the deterministic Tier-A wall; actual execution still depends on the nightly runtime gates.</small>
     ${cards||`<div class="empty">No approved tickets in this ranked snapshot.</div>`}</div>`;
 }
 
@@ -2675,8 +2900,8 @@ function _routerPacket(text,key){
 }
 function _routerForm(){
   const blocked=DEV||ROUTER_READY!==true;
-  return `<div class="log" data-router-intake style="margin:12px 0"><b>Give the team one clear task</b>
-    <p>Describe the result you need. This queues a task for supervised review; it does not start Claude, spend money, or authorize a send. No credentials. Drafts last only while this page is open.</p>
+  return `<div class="log" data-router-intake style="margin:12px 0"><b>Start supervised work</b>
+    <p>Describe the result you need. This records a task for supervised review; it does not start Claude, provide a chat reply, spend money, or authorize a send. No credentials. Drafts last only while this page is open.</p>
     <textarea id="router-prompt" aria-label="Task for the team" rows="3" style="width:100%;box-sizing:border-box" ${ROUTER_DRAFT.pending?"disabled":""} ${ROUTER_DRAFT.packet&&!ROUTER_DRAFT.rejected?"readonly":""}>${esc(ROUTER_DRAFT.text)}</textarea>
     <button class="btn rec" id="router-submit" ${blocked||ROUTER_DRAFT.pending?"disabled":""}>${ROUTER_DRAFT.pending?"Recording…":"Queue for review"}</button>
     <p data-router-status role="status">${esc(ROUTER_DRAFT.message||(DEV?"Preview only — no task will be sent.":blocked?"Router intake unavailable — migration or authenticated schema read needs verification. Your draft is not queued.":"Intake columns available; the RPC is verified on submission. Execution remains supervised; only a valid receipt confirms queueing."))}</p></div>`;
@@ -2700,7 +2925,7 @@ function wireRouterForm(){
       const r=await RWSession.authedFetch(SB+"/rest/v1/rpc/enqueue_routed_work",{
         method:"POST",body:JSON.stringify({p_packet:ROUTER_DRAFT.packet,p_actor:"operator-portal"})});
       if(epoch!==ROUTER_DRAFT.epoch)return;
-      if(r&&[400,409,413,422].includes(r.status)){
+      if(r&&[400,413,422].includes(r.status)){
         ROUTER_DRAFT.rejected=true;
         ROUTER_DRAFT.message=`Request rejected (HTTP ${r.status}). Draft retained. Correct the request or ask the supervisor to resolve the constraint; identical retries will not help.`;
         return;
@@ -2720,6 +2945,8 @@ function wireRouterForm(){
       }else{
         ROUTER_DRAFT.message=`Recorded as task #${receipt.work_id} (${receipt.disposition}). Not dispatched. See its owner and status below.`;
         ROUTER_DRAFT.text="";ROUTER_DRAFT.packet=null;ROUTER_DRAFT.rejected=false;
+        await loadWorkDetail(receipt.work_id);
+        if(epoch!==ROUTER_DRAFT.epoch)return;
         await loadWork();
       }
     }catch{
@@ -2728,6 +2955,25 @@ function wireRouterForm(){
       if(epoch===ROUTER_DRAFT.epoch){ROUTER_DRAFT.pending=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}
     }
   };
+}
+function wireWorkSelection(){
+  const inspect=async id=>{
+    if(!_workId(id))return;
+    const epoch=PORTAL_EPOCH;
+    const pending=loadWorkDetail(id);WORK_FOCUS_DETAIL=true;
+    if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+    await pending;
+    if(_portalReadCurrent(epoch)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+  };
+  document.querySelectorAll("[data-work-select]").forEach(b=>{
+    b.onclick=()=>inspect(b.dataset.workSelect);
+  });
+  const lookup=$("#work-lookup");
+  if(lookup)lookup.onsubmit=e=>{e.preventDefault();const input=$("#work-lookup-id");
+    if(!_workId(input.value)){input.setCustomValidity("Enter a positive numeric task ID.");input.reportValidity();return;}
+    inspect(input.value);
+  };
+  const input=$("#work-lookup-id");if(input)input.oninput=()=>input.setCustomValidity("");
 }
 const _WORK_TERMINAL=new Set(["closed","cancelled","accepted","rejected","decided"]);
 function _workTone(state){
@@ -2741,7 +2987,8 @@ function _workCard(w,eventByWork,verifyByWork){
   const ev=eventByWork.get(String(w.id));
   const vr=verifyByWork.get(String(w.id));
   const cost=w.cost_usd==null?"cost unledgered":`$${Number(w.cost_usd).toFixed(2)} USD`;
-  return `<div data-work-id="${escAttr(String(w.id))}" style="padding:12px 0;border-top:1px solid var(--edge-soft)">
+  const selected=String(WORK_SELECTED)===String(w.id);
+  return `<div data-work-id="${escAttr(String(w.id))}" style="padding:12px 0;border-top:1px solid var(--edge-soft);${selected?"background:var(--acc-soft);border-radius:var(--radius);padding-left:10px;padding-right:10px":""}">
     <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${_workTone(w.state)}">${esc(w.state||"unknown")}</span><span class="badge badge-neutral">${esc(w.type||"work")}</span><b style="min-width:0">#${esc(w.id)} · ${esc(w.title||"Untitled work")}</b></div>
     <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">owner ${esc(w.owner||"unowned")} · model ${esc(w.model||"unrecorded")} · ${esc(cost)} · claim ${esc(claim)} · v${esc(w.version==null?"?":w.version)}</div>
     ${w.consumer?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px">consumer: ${esc(w.consumer)}</div>`:""}
@@ -2749,12 +2996,48 @@ function _workCard(w,eventByWork,verifyByWork){
     ${w.outcome?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px"><b>Outcome:</b> ${esc(firstLine(w.outcome))}</div>`:""}
     ${vr?`<div style="font-size:11.5px;color:${vr.verdict==="pass"?"var(--ok)":"var(--bad)"};margin-top:5px">verification ${esc(vr.verdict)} by ${esc(vr.verifier)} · ${esc(ago(vr.created_at))}</div>`:""}
     ${ev?`<div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">latest event: ${esc(ev.event_type)} by ${esc(ev.actor)} · ${esc(ago(ev.created_at))}${ev.from_state||ev.to_state?` · ${esc(ev.from_state||"?")}→${esc(ev.to_state||"?")}`:""}</div>`:""}
+    <button class="btn" type="button" data-work-select="${escAttr(String(w.id))}" aria-pressed="${selected?"true":"false"}" style="margin-top:8px">${selected?"Selected":"Inspect task"}</button>
   </div>`;
 }
+function _workSafeObjective(w){
+  const packet=w&&w.task_packet;
+  return packet&&typeof packet==="object"&&typeof packet.objective==="string"?packet.objective:"";
+}
+function _workDetail(w,eventByWork,verifyByWork,exact=false){
+  if(!w)return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><b>Task detail</b><div class="empty">Select a task to inspect its request and evidence.</div></div>`;
+  const objective=_workSafeObjective(w), acceptance=typeof w.acceptance_test==="string"?w.acceptance_test:"";
+  const ev=eventByWork.get(String(w.id)), vr=verifyByWork.get(String(w.id));
+  const claim=w.wip_claim_owner?`${w.wip_claim_owner} · lease ${inTime(w.wip_claim_expires_at)}`:"unclaimed";
+  return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><b>Task detail · #${esc(w.id)}</b><span class="badge ${_workTone(w.state)}">${esc(w.state||"unknown")}</span></div>
+    <div style="margin-top:10px"><b>${esc(w.title||"Untitled work")}</b></div>
+    <div class="section-note" style="margin-top:8px">This is evidence from the canonical work row. A queued row is not a worker reply.</div>
+    <dl class="work-detail-grid" style="margin:12px 0 0">
+      <dt>Original request</dt><dd>${objective?esc(objective):`<span class="missing">not recorded in the readable task packet</span>`}</dd>
+      <dt>Acceptance test</dt><dd>${acceptance?esc(acceptance):`<span class="missing">not recorded</span>`}</dd>
+      <dt>Outcome</dt><dd>${w.outcome?esc(w.outcome):`<span class="missing">no outcome receipt recorded</span>`}</dd>
+      <dt>Next action</dt><dd>${w.next_action?esc(w.next_action):`<span class="missing">no next action recorded</span>`}</dd>
+      <dt>Owner / claim</dt><dd>${esc(w.owner||"unowned")} · ${esc(claim)}</dd>
+      <dt>Verification</dt><dd>${vr?`${esc(vr.verdict||"unknown")} by ${esc(vr.verifier||"unrecorded")} · ${esc(ago(vr.created_at))}`:`<span class="missing">${exact?"no verification returned for this task":"not present in the bounded overview; inspect this task to check"}</span>`}</dd>
+      <dt>Latest event</dt><dd>${ev?`${esc(ev.event_type||"unknown")} by ${esc(ev.actor||"unrecorded")} · ${esc(ago(ev.created_at))}`:`<span class="missing">${exact?"no event returned for this task":"not present in the bounded overview; inspect this task to check"}</span>`}</dd>
+    </dl>
+    <div class="section-note" style="margin-top:10px">Latest recorded review only, not a full history. A legacy PASS does not establish that this outcome or artifact was independently verified.</div>
+    <div class="state" style="margin-top:12px">Follow-up chat is not connected yet. The portal will not claim that a worker replied until a backend thread and receipt contract exist.</div>
+  </div>`;
+}
+function _workSelectedDetail(items,eventByWork,verifyByWork){
+  if(WORK_DETAIL&&String(WORK_SELECTED)===WORK_DETAIL.id){
+    const d=WORK_DETAIL;
+    if(d.state==="ready")return _workDetail(d.item,new Map(d.events.map(e=>[String(e.work_id),e])),new Map(d.verifications.map(v=>[String(v.work_id),v])),true);
+    const message=d.state==="loading"?"Loading exact task and latest evidence…":d.state==="missing"?"Task not returned for this account. It may be unavailable or outside your access; this is not proof it was deleted.":"Task detail read FAILED — evidence is unavailable, not absent. Inspect the task again to retry.";
+    return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><b>Task detail · #${esc(d.id)}</b><div class="${d.state==="failed"?"state state-error":"empty"}">${esc(message)}</div></div>`;
+  }
+  return _workDetail(items.find(w=>String(w.id)===String(WORK_SELECTED)),eventByWork,verifyByWork);
+}
 function viewWork(){
-  const head=`<div class="status sub">Work / Agents<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">canonical spine · direct operator read</small></div>`+_routerForm();
+  const head=`<div class="status sub">Work / Agents<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">canonical spine · direct operator read</small></div>`+_routerForm()+
+    `<form id="work-lookup" class="log" style="margin:12px 0"><label for="work-lookup-id">Inspect a task by its receipt ID</label><div style="display:flex;gap:8px;margin-top:8px"><input id="work-lookup-id" aria-label="Task ID" inputmode="numeric" pattern="[1-9][0-9]*" required style="min-width:0;flex:1" placeholder="Task number"><button class="btn" type="submit">Inspect</button></div><small>The overview shows only the newest 100 tasks. An older task can still be inspected by ID; no private draft is stored in your browser.</small></form>`;
   if(WORK===undefined)return head+`<div class="empty">Loading work spine…</div>`;
-  if(WORK===null)return head+`<div class="state state-error"><b>Work spine read FAILED</b>Items, events, or verifications could not be read; this is not an empty queue.</div>`;
+  if(WORK===null)return head+`<div class="state state-error"><b>Work spine read FAILED</b>Items, events, or verifications could not be read; this is not an empty queue.</div>`+_workSelectedDetail([],new Map(),new Map());
   const items=WORK.items||[],events=WORK.events||[],vers=WORK.verifications||[];
   const actions=Array.isArray(WORK.actions)?WORK.actions:null;
   const eventByWork=new Map(),verifyByWork=new Map();
@@ -2773,8 +3056,10 @@ function viewWork(){
   const actionRows=actions&&actions.slice(0,20).map(a=>`<div data-action-receipt style="padding:10px 0;border-top:1px solid var(--edge-soft)"><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${a.status==="done"?"badge-ok":a.status==="failed"?"badge-bad":a.status==="processing"?"badge-info":"badge-neutral"}">${esc(a.status||"unknown")}</span><b>#${esc(a.id)} · ${esc(a.action||"unknown action")}</b></div><div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">requested ${esc(ago(a.created_at))}${a.processed_at?` · processed ${esc(ago(a.processed_at))}`:""}${a.result?` · ${esc(firstLine(a.result))}`:""}</div></div>`).join("");
   return head+`<div class="state" style="margin:12px 0;background:var(--warn-soft);border-color:var(--warn-soft-edge)"><b>Supervised coordination — automatic dispatch is off.</b>The spine records owners, leases and results. Queued is not running: a supervisor must pick up the task. Repository file-path claims still live on the separate tab board and are not represented here.</div>
     <div class="proof"><div class="pcard"><h4>Active</h4><div class="v">${active.length}</div><small>non-terminal work</small></div><div class="pcard"><h4>Claimed</h4><div class="v">${claimed}</div><small>live or stale leases</small></div><div class="pcard"><h4>Owners</h4><div class="v">${owners}</div><small>recorded active actors</small></div><div class="pcard"><h4>Verifications</h4><div class="v">${vers.length}</div><small>newest 100 read</small></div></div>
+    ${_workSelectedDetail(items,eventByWork,verifyByWork)}
     <div class="log" style="margin-top:14px"><b>Portal action receipts (${actions?actions.length:"?"})</b><br><small>Direct worker queue truth: requested, processing, done, or failed. This view has no retry button.</small>${actions===null?`<div class="state state-error"><b>Action receipt read FAILED</b>The work spine remains visible; receipt state is unknown, not empty.</div>`:actionRows||`<div class="empty">No action receipts found.</div>`}</div>
-    ${groups.map(([name,rows])=>`<div class="log" style="margin-top:14px"><b>${esc(name)} (${rows.length})</b><br>${rows.length?rows.map(w=>_workCard(w,eventByWork,verifyByWork)).join(""):`<div class="empty">None in the newest ${items.length} work items.</div>`}</div>`).join("")}`;
+    ${groups.map(([name,rows])=>`<div class="log" style="margin-top:14px"><b>${esc(name)} (${rows.length})</b><br>${rows.length?rows.map(w=>_workCard(w,eventByWork,verifyByWork)).join(""):`<div class="empty">None in the newest ${items.length} work items.</div>`}</div>`).join("")}
+    `;
 }
 function wireTicketsNav(p,updatedAt,srcNote){
   const ta=$("#tix-note");
@@ -2845,6 +3130,7 @@ function _holdRoomButtons(b){
 function wireDecisions(p,updatedAt,srcNote){
   document.querySelectorAll("button[data-dec-i]").forEach(b=>{
     b.onclick=async()=>{
+      const epoch=PORTAL_EPOCH;
       const reg=DEC_REG[+b.dataset.decI];
       if(!reg){toast("Stale button — refresh","err");return}
       if(DEV){toast("DEV preview — decision not sent");return}
@@ -2853,6 +3139,7 @@ function wireDecisions(p,updatedAt,srcNote){
         const r=await RWSession.authedFetch(SB+"/rest/v1/rpc/decide_decision",{method:"POST",
           body:JSON.stringify({p_decision_id:reg.id,p_choice:reg.choice,
             p_actor:RWSession.userEmail()||"operator",p_expected_version:reg.version})});
+        if(!_portalReadCurrent(epoch))return;
         if(r===null)return; // session torn down — authedFetch already handled it
         if(!r.ok){
           toast("Could not record ("+r.status+")","err");
@@ -2865,10 +3152,13 @@ function wireDecisions(p,updatedAt,srcNote){
         // zero rows, confirmed live by hq's own service-role smoke test) — `row.id==
         // null` catches both shapes; verified against both directly (2026-08-28).
         const row=await r.json().catch(()=>null);
+        if(!_portalReadCurrent(epoch))return;
         if(!row||row.id==null){toast("Already decided elsewhere — refreshing","err");}
         else{toast("Recorded: "+reg.choice);}
-        DECS=null;await loadDecisions();await loadExceptions();render(LAST.p,LAST.updatedAt,LAST.srcNote);
+        DECS=null;await loadDecisions();if(!_portalReadCurrent(epoch))return;
+        await loadExceptions();if(_portalReadCurrent(epoch))render(LAST.p,LAST.updatedAt,LAST.srcNote);
       }catch{
+        if(!_portalReadCurrent(epoch))return;
         toast("Could not record — retry","err");
         release();
       }
@@ -3286,8 +3576,10 @@ function wireRevenueForm(){
     if(v.clientId.trim())params.client_id=v.clientId.trim();
     if(v.note.trim())params.note=v.note.trim();
     REV_PENDING=true;
+    const epoch=PORTAL_EPOCH;
     try{
       await enqueueAction("record_revenue",{...params,at:new Date().toISOString()},(st,detail)=>{
+        if(!_portalReadCurrent(epoch))return;
         // Re-query #rev-submit LIVE on every callback — a render() rebuild
         // may have run mid-flight (the tick doesn't know or care that this
         // form has an outstanding request), so the closed-over `btn` above
@@ -3314,6 +3606,7 @@ function wireRevenueForm(){
         else if(st==="still-queued"){toast("Still queued — check back");}
       });
     }catch{
+      if(!_portalReadCurrent(epoch))return;
       toast("Could not enqueue — retry","err");
       REV_PENDING=false;
       const liveBtn=$("#rev-submit"); if(liveBtn){liveBtn.disabled=false;liveBtn.textContent="Record Revenue";}
@@ -3321,6 +3614,9 @@ function wireRevenueForm(){
   };
 }
 function render(p, updatedAt, srcNote){
+  // Async callers may finish after teardown. Never paint an operator surface
+  // with a cleared snapshot or a missing session.
+  if(!p||!_portalReadCurrent(PORTAL_EPOCH))return;
   _revCaptureDraft();  // before the innerHTML rebuild below can wipe it — see wireRevenueForm's C-1 comment
   _criCaptureNoteDraft();  // same rebuild-survival for the content-review note textarea
   _tixCaptureNoteDraft();  // and the tickets-room revise note
@@ -3375,12 +3671,15 @@ function render(p, updatedAt, srcNote){
     </div>
     <div class="brief">${body}</div>
   </main>`;
-  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{VIEW=a.dataset.v;
+  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ;VIEW=a.dataset.v;
     if(VIEW==="review"&&!ARTS)await loadArtifacts();
     if(VIEW==="decisions"&&!DECS)await loadDecisions();
     if(VIEW==="work"&&WORK===undefined)await loadWork();
     if(VIEW==="content_review"&&CRI===undefined)await loadContentReview();
-    render(p,updatedAt,srcNote);};});
+    if(_portalReadCurrent(epoch)){
+      if(seq===PORTAL_READ_SEQ||!LAST.p)render(p,updatedAt,srcNote);
+      else render(LAST.p,LAST.updatedAt,LAST.srcNote);
+    }};});
   if(VIEW==="review"||VIEW==="content_review"||VIEW==="decisions")hydrateMedia();
   if(VIEW==="decisions"||VIEW==="command")wireDecisions(p,updatedAt,srcNote);
   if(VIEW==="command")wireOpsBrief(p,updatedAt,srcNote);
@@ -3389,11 +3688,20 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
   if(VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
   if(VIEW==="business")wireRevenueForm();
-  if(VIEW==="work")wireRouterForm();
+  if(VIEW==="work"){
+    wireRouterForm();wireWorkSelection();
+    // Only an explicit Inspect click requests focus. Periodic/manual refreshes
+    // preserve selection but must not yank the operator's viewport.
+    if(WORK_FOCUS_DETAIL){
+      const detail=document.querySelector("[data-work-detail]");
+      WORK_FOCUS_DETAIL=false;
+      if(detail){detail.scrollIntoView({block:"nearest"});detail.focus({preventScroll:true});}
+    }
+  }
   if(VIEW==="conversations")wireConversations(p,updatedAt,srcNote);
   document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
   const lo=document.querySelector("[data-logout]");
-  if(lo)lo.onclick=async e=>{e.preventDefault();await RWSession.logout();boot();};
+  if(lo)lo.onclick=e=>{e.preventDefault();portalLogout();};
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
   document.querySelectorAll("button[data-goto]").forEach(b=>{
@@ -3470,8 +3778,10 @@ function render(p, updatedAt, srcNote){
       // the render tick. Cleared the moment the row exists ("queued"), on
       // failure, and when the awaited call settles (leak-proof either way).
       ACTS_INFLIGHT.add(key);
+      const epoch=PORTAL_EPOCH;
       try{
         await enqueueAction(reg.action,{...params,at:new Date().toISOString()},(st,detail)=>{
+          if(!_portalReadCurrent(epoch))return;
           // ACTS_DONE arms on "queued", not "done" (F-a residual, post-fix re-review):
           // the enqueue watch loop only polls ~12s, but the worker drain cron runs
           // every 2 minutes — most taps land as "still-queued" long before "done"
@@ -3502,8 +3812,8 @@ function render(p, updatedAt, srcNote){
           else if(st==="failed"){toast("FAILED — "+(detail||"see Machine"),"err");ACTS_DONE.delete(key);ACTS_INFLIGHT.delete(key);b.disabled=false;}
           else if(st==="still-queued"){toast("Still queued — check back");}
         });
-        ACTS_INFLIGHT.delete(key);  // settled — whatever the callback saw, the POST is down
-      }catch{toast("Could not enqueue — retry","err");ACTS_INFLIGHT.delete(key);b.disabled=false;}
+        if(_portalReadCurrent(epoch))ACTS_INFLIGHT.delete(key);
+      }catch{if(!_portalReadCurrent(epoch))return;toast("Could not enqueue — retry","err");ACTS_INFLIGHT.delete(key);b.disabled=false;}
     };
   });
   // R2 focus restore — runs LAST, after the per-view wiring above has already
@@ -3528,8 +3838,11 @@ function render(p, updatedAt, srcNote){
 const LAST={p:null,updatedAt:null,srcNote:"",fetchedAt:0};
 let _timersOn=false;
 async function loadAndRender(reason){
+  const epoch=PORTAL_EPOCH,seq=++PORTAL_READ_SEQ;
+  const current=()=>_portalReadCurrent(epoch)&&seq===PORTAL_READ_SEQ;
   if(DEV){LAST.p=DEMO;LAST.updatedAt=new Date().toISOString();LAST.srcNote="DEV preview · illustrative data";
     render(LAST.p,LAST.updatedAt,LAST.srcNote);return}
+  if(tok()&&!RWSession.requireRole(["operator"]))return;
   if(!tok()){
     // F-C (publish review #2): when we're ALREADY on the login screen (#em present), the 120s
     // timer and the window-focus refetch must NOT rebuild it — renderLogin() re-creates the
@@ -3540,6 +3853,7 @@ async function loadAndRender(reason){
   }
   try{
     const rows=await rest("operator_portal_snapshot?select=payload,updated_at&id=eq.1");
+    if(!current())return;
     LAST.fetchedAt=Date.now();
     // F1 (publish review, silent-expiry half): a 401 → refresh-401 → _abandonSession clears
     // the token DURING this fetch, so a session that was live at the top guard is dead now.
@@ -3547,18 +3861,24 @@ async function loadAndRender(reason){
     // a dead session (the ~120s window the two-change fix left open). A LIVE outage keeps its
     // token (tok() stays truthy), so the F7 "show last-known during a blip" path is untouched.
     if(!tok())return renderLogin("Session expired — sign in again.");
-    if(RWSession.bad&&RWSession.bad(rows)){  // F7: outage is never "empty"
+    if(rows===null||(RWSession.bad&&RWSession.bad(rows))){  // unavailable is never "empty"
       if(LAST.p){toast("Snapshot read FAILED — showing data from "+ago(LAST.updatedAt),"err");render(LAST.p,LAST.updatedAt,LAST.srcNote);}
-      else{render({},null,"snapshot read FAILED — not an empty state");toast("Could not load snapshot","err");}
+      else{render({action_allowlist:[]},null,"snapshot read FAILED — not an empty state");toast("Could not load snapshot","err");}
       return;
     }
     const row=Array.isArray(rows)&&rows[0];
     if(!row){render({},null,"snapshot table empty");return}
     LAST.p=row.payload||{};LAST.updatedAt=row.updated_at;LAST.srcNote="live · operator_portal_snapshot";
-    if(VIEW==="work")await loadWork();
+    if(VIEW==="work"){
+      await loadWork();
+      if(!current())return;
+      if(WORK_SELECTED!=null)await loadWorkDetail(WORK_SELECTED);
+    }
+    if(!current())return;
     render(LAST.p,LAST.updatedAt,LAST.srcNote);
     if(reason==="manual")toast("Refreshed");
   }catch(e){
+    if(!current())return;
     if(String(e.message)==="auth")return renderLogin("Session expired — sign in again.");
     if(LAST.p){toast("Refresh failed — showing data from "+ago(LAST.updatedAt),"err");}
     else{render({},null,"snapshot read failed — showing empty state");toast("Could not load snapshot","err");}
@@ -3586,7 +3906,7 @@ function _cosmeticTick(){
   // F1 (publish review): a dead session (signed out / expired → no token) must not
   // repaint the stale snapshot over the login screen every 30s. Belt-and-suspenders
   // with renderLogin nulling LAST.p — this stops the tick before it even reads LAST.p.
-  if(!DEV&&!tok())return;
+  if(!_portalReadCurrent(PORTAL_EPOCH))return;
   _reclassifyExceptions();
   // 2026-09-01 security review MED: the age-pill tick's innerHTML rebuild +
   // hydrateMedia tears down and re-signs every mounted <video> — a reel being
@@ -3598,7 +3918,7 @@ function _cosmeticTick(){
 }
 function startTimers(){
   if(_timersOn)return;_timersOn=true;
-  setInterval(()=>{loadAndRender("timer");loadExceptions().then(()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote)});},120000);
+  setInterval(()=>{loadAndRender("timer");if(DEV||(tok()&&RWSession.requireRole(["operator"])))_loadAuxAndRender(loadExceptions);},120000);
   setInterval(_cosmeticTick,30000);
   window.addEventListener("focus",()=>{if(Date.now()-LAST.fetchedAt>30000)loadAndRender("focus")});
 }
@@ -3610,33 +3930,43 @@ function renderSetNewPassword(msg){
    <input id="np2" type="password" placeholder="repeat the password above…" autocomplete="new-password" spellcheck="false">
    <button id="npgo" class="btn-full">Save Password</button><div class="err" role="alert">${esc(msg||"")}</div></div></main>`;
   $("#npgo").onclick=async()=>{
+    const epoch=PORTAL_EPOCH;
     if($("#np").value!==$("#np2").value)return renderSetNewPassword("Passwords don't match.");
     if($("#np").value.length<8)return renderSetNewPassword("8 characters minimum.");
     const b=$("#npgo"); b.disabled=true; b.textContent="Saving…";
-    try{ await RWSession.setNewPassword($("#np").value); toast("Password updated"); boot(); }
-    catch(e){ renderSetNewPassword(e.message||"Couldn't update — retry."); }
+    try{ await RWSession.setNewPassword($("#np").value); if(epoch!==PORTAL_EPOCH)return;toast("Password updated"); boot(); }
+    catch(e){ if(epoch===PORTAL_EPOCH)renderSetNewPassword(e.message||"Couldn't update — retry."); }
   };
 }
 function renderNoAccess(){
   $("#app").innerHTML=`<div></div><main><div class="login"><h2>No Access</h2>
    <div class="login-desc">This account has no operator role. This is the operator command surface — client and seller surfaces live on the current portal.</div>
    <button id="lo" class="btn-full">Sign Out</button></div></main>`;
-  $("#lo").onclick=async()=>{await RWSession.logout();boot();};
+  $("#lo").onclick=()=>portalLogout();
+}
+function portalLogout(){
+  // Clear the UI now; a slow server revocation must not retain private state
+  // or let its eventual completion reset a newer login.
+  const pending=RWSession.logout();renderLogin();return pending;
 }
 async function boot(){
+  _resetPortalState();
   renderBootSkeleton();
   if(!DEV){  // F8: settle auth state before ANY authed fetch can 401 a fresh hash token
-    const ar=RWSession.consumeAuthRedirect();
+    let ar;AUTH_REDIRECT_SETTLING=true;
+    try{ar=RWSession.consumeAuthRedirect();}finally{AUTH_REDIRECT_SETTLING=false;}
+    PORTAL_AUTH_ID=RWSession.sessionIdentity();
     if(ar.recovery)return renderSetNewPassword();
     if(ar.error)return renderLogin(ar.error);
     if(RWSession.tok()&&!RWSession.requireRole(["operator"]))return renderNoAccess();
+    if(!tok())return renderLogin();
   }
-  loadArtifacts().then(()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote)});
-  loadExceptions().then(()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote)});
+  _loadAuxAndRender(loadArtifacts);
+  _loadAuxAndRender(loadExceptions);
   // eager: Command's Daily Brief block needs both on first paint, same pattern
   // as loadArtifacts()/loadExceptions() above (unlike the nav-lazy CRI load).
-  loadDecisions().then(()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote)});
-  loadWip().then(()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote)});
+  _loadAuxAndRender(loadDecisions);
+  _loadAuxAndRender(loadWip);
   await loadAndRender("boot");startTimers();
 }
 // First-paint skeleton — boot() is async (auth settle + first fetch), and #app
@@ -3656,7 +3986,13 @@ function renderBootSkeleton(){
     </div>
   </main>`;
 }
-function renderLogin(msg){
+function _resetPortalState(){
+  ++PORTAL_EPOCH;++PORTAL_READ_SEQ;++WORK_READ_SEQ;++WORK_DETAIL_SEQ;
+  PORTAL_AUTH_ID=RWSession.sessionIdentity();
+  SIGNED_URL_CACHE.clear();MEDIA_REG=[];ACTS_REG=[];DEC_REG=[];CUR_ALLOWLIST=null;
+  if(_tt){clearTimeout(_tt);_tt=null;}
+  const t=$("#toast");if(t){t.textContent="";t.style.display="none";}
+  WORK_DETAIL=null;
   // F1 (publish review, PUBLISH BLOCKER — session death leaves a stale snapshot):
   // sign-out and expiry both land here, but boot()'s load*().then(()=>render) continuations,
   // the 120s refetch's loadExceptions().then(render), and _cosmeticTick all gate their paint
@@ -3665,7 +4001,9 @@ function renderLogin(msg){
   // role-gated caches on the way in. ARTS/DECS reset to null (their initial, boot re-eager-loads
   // + nav re-checks !ARTS); CRI/WIP/EXC reset to `undefined` (their NOT-LOADED sentinel) so a
   // re-login re-triggers their loads instead of rendering a false "read FAILED".
-  LAST.p=null;LAST.updatedAt=null;LAST.srcNote="";
+  LAST.p=null;LAST.updatedAt=null;LAST.srcNote="";LAST.fetchedAt=0;
+  DEC_IDX=0;DEC_SKIPPED.clear();
+  CONVO_KIND="sms";SELECTED_SMS=null;SELECTED_CALL=null;SELECTED_VM=null;
   ARTS=null;DECS=null;CRI=undefined;WIP=undefined;EXC=undefined;
   // F-A (publish review #2, same class as F1 which missed it): the sign-out link is
   // logout()+boot() with NO page reload, so every tab-scoped operator-state module var
@@ -3677,7 +4015,10 @@ function renderLogin(msg){
   Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="all";WORK=undefined;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="all";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
+}
+function renderLogin(msg){
+  _resetPortalState();
   $("#app").innerHTML=`<div></div><main><div class="login"><h2>Rankwise Command</h2>
    <label for="em">Email</label>
    <input id="em" type="email" placeholder="you@rankwise.ca" autocomplete="username" spellcheck="false">
@@ -3688,21 +4029,29 @@ function renderLogin(msg){
    <a id="fp" href="#" class="login-link">Forgot password?</a>
    <div class="err" role="alert">${esc(msg||"")}</div></div></main>`;
   $("#go").onclick=async()=>{
+    const epoch=PORTAL_EPOCH;
     const b=$("#go"); b.disabled=true; b.textContent="Signing In…";
-    try{ await RWSession.login($("#em").value.trim(), $("#pw").value); boot(); }
-    catch(e){ renderLogin(e.message||"Sign-in failed"); }
+    try{ await RWSession.login($("#em").value.trim(), $("#pw").value); if(epoch===PORTAL_EPOCH)boot(); }
+    catch(e){ if(epoch===PORTAL_EPOCH)renderLogin(e.message||"Sign-in failed"); }
   };
   $("#fp").onclick=async(e)=>{e.preventDefault();
+    const epoch=PORTAL_EPOCH;
     const em=$("#em").value.trim(); if(!em){renderLogin("Enter your email first, then tap the reset link.");return}
-    try{ await RWSession.forgotPassword(em); toast("Reset link sent if that account exists"); }
-    catch{ toast("Couldn't request a reset right now.","err"); }
+    try{ await RWSession.forgotPassword(em); if(epoch===PORTAL_EPOCH)toast("Reset link sent if that account exists"); }
+    catch{ if(epoch===PORTAL_EPOCH)toast("Couldn't request a reset right now.","err"); }
   };
   $("#gg").onclick=()=>RWSession.googleLogin();
 }
 
 const DEMO={}, DEMO_ARTS=[];  // fixture stripped at publish (F5)
+RWSession.onSessionChange(()=>{
+  if(DEV||AUTH_REDIRECT_SETTLING)return;
+  if(PORTAL_AUTH_ID===RWSession.sessionIdentity())return;
+  if(!tok())renderLogin("Session ended — sign in again.");
+  else boot(); // resets caches synchronously and repeats the operator role gate
+});
 boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 9808af8a228d -->
+<!-- rankwise-portal2-version: 7ed0e009f3c1 -->
