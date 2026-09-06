@@ -946,9 +946,9 @@ function proofPoints(p,updatedAt){
     {h:"Exceptions",src:findingsBroken(p)?"findings · FAILED":freshness(p,"findings",updatedAt),
      v:findingsBroken(p)?"?":String(fc.total),
      s:findingsBroken(p)?"feed build FAILED — not a real zero":(f[0]?firstLine(f[0].title):"none open")},
-    {h:"Spend "+(sp.month||""),src:freshness(p,"spend",sp.asOf,"—"),
-     v:sp.legs.length?sp.legs.map(([k,v])=>k+" $"+Math.round(v)).join(" · "):"—",
-     s:sp.legs.length?"legs unsummed on purpose — different currencies, different sources":"not in snapshot"},
+    {h:"Commitment estimate "+(sp.month||""),src:freshness(p,"spend",sp.asOf,"—"),
+     v:sp.legs.length?sp.legs.map(([k,v])=>k+" $"+v.toFixed(2)).join(" · "):"—",
+     s:sp.legs.length?"Estimates, not reconciled payments. CAD and USD stay separate.":"not in snapshot"},
     {h:"Latest learning",src:ceBroken?"content experiments · FAILED":lr?"content experiments · "+ago(lr.latest_date):"content experiments",
      v:ceBroken?"?":lr?fmtCount(lr.avg_views)+" views":"—",
      s:ceBroken?"feed build FAILED — not a real empty state":lr?`"${firstLine(lr.hypothesis)}" · ${lr.post_count} post${lr.post_count===1?"":"s"}`:"no joined posts yet"},
@@ -3333,6 +3333,51 @@ function viewPipeline(p){
       ${_pipeCol("Onboarding + Active", s78?.count ?? "?", s78Html, clientsBroken)}
     </div>`;
 }
+// Financial evidence arrives as exact decimal STRINGS. Do not convert through
+// Number, round whole dollars, blend FX, or substitute missing values with zero.
+function financeMoney(value,currency){
+  if(typeof value!=="string"||!/^[-]?\d{1,12}\.\d{2}$/.test(value))return "Amount unknown";
+  const parts=value.split("."), whole=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  return (currency==="CAD"||currency==="USD"?currency:"Currency unverified")+" "+whole+"."+parts[1];
+}
+function estimateMoney(value,prefix="$"){
+  return typeof value==="number"&&Number.isFinite(value)?prefix+value.toFixed(2):"?";
+}
+function financeTotals(totals,empty){
+  if(!totals||typeof totals!=="object"||Array.isArray(totals))return "Unavailable";
+  const entries=Object.entries(totals);
+  if(!entries.length)return empty;
+  return entries.map(([c,v])=>financeMoney(v,c)).join(" · ");
+}
+function viewFinance(p){
+  const f=p.finance;
+  if(p.finance_build_ok!==true||!f||f.schema!=="finance.v1")return `<section data-finance><h4 class="section-h">FINANCIAL EVIDENCE</h4><div class="state state-error">Financial evidence unavailable — not zero spending. Refresh the snapshot after collection; older snapshots do not contain this feed.</div></section>`;
+  const ledger=f.ledger||{}, pending=f.pending||{}, collection=f.collection||{};
+  const collectionAge=Date.now()-Date.parse(collection.checked_at||"");
+  const fresh=collection.fresh===true&&Number.isFinite(collectionAge)&&collectionAge>=0&&collectionAge<=26*3600000;
+  const ready=collection.available===true&&fresh&&collection.collection_ok===true&&collection.all_sources_configured===true&&collection.mode==="local_review_first";
+  const collectionNote=collection.available!==true?"Collection status unavailable":[
+    fresh?"Latest collection status":"Collection status stale or clock inconsistent",
+    collection.collection_ok===true?"configured-source scan completed":"collection incomplete or failed",
+    collection.all_sources_configured===true?"both sources configured":"personal mailbox connection incomplete",
+    collection.mode==="local_review_first"?"review-first intake":collection.mode==="receipts_only"?"receipt-only scan — not full scheduled coverage":"usage-only scan — no invoice collection"
+  ].join(" · ");
+  const rows=Array.isArray(pending.rows)?pending.rows:[];
+  return `<section data-finance>
+    <h4 class="section-h">FINANCIAL EVIDENCE — ${esc(f.month||"period unknown")}</h4>
+    <div class="state ${ready?"":"state-error"}"><b>Spend not reconciled</b><br>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</div>
+    <div class="proof" style="margin-top:12px">
+      <div class="pcard"><h4>Reviewed records · this month</h4><div class="v" style="font-size:18px">${esc(ledger.available===true?financeTotals(ledger.reviewed_month_totals,"No reviewed records this month"):"Ledger unavailable")}</div><small>Reviewed invoice/charge records only — not bank-reconciled cash spend.</small></div>
+      <div class="pcard"><h4>Reviewed records · all recorded periods</h4><div class="v" style="font-size:18px">${esc(ledger.available===true?financeTotals(ledger.reviewed_totals,"No reviewed records recorded"):"Ledger unavailable")}</div><small>${ledger.available===true?esc(String(ledger.reviewed_count))+" records":"Unknown record count"}. Not a full-year spend total. API funding included: ${esc(ledger.available===true?financeTotals(ledger.funding_totals_included,"none recorded"):"unavailable")} — do not add again.</small></div>
+      <div class="pcard"><h4>Pending evidence · NOT approved</h4><div class="v" style="font-size:18px">${esc(pending.available===true?financeTotals(pending.totals_by_currency,"No currency-qualified pending total"):"Pending store unavailable")}</div><small>${pending.available===true?`${esc(String(pending.count))} candidates · ${esc(String(pending.currency_unknown_count))} currency unknown · ${esc(String(pending.unpriced_count))} amount unknown`:"Unknown pending count"}. Incomplete subtotal; may include duplicate evidence. Never add this to reviewed totals.</small></div>
+    </div>
+    <p class="section-note">${esc(f.reconciliation?.note||"Original bank statements and complete coverage are required.")} API credit funding is a purchase of credit, not proof of consumed API usage. Unknown currency is never guessed from a dollar symbol.</p>
+    ${pending.available===true&&pending.cleanup_pending_count>0?`<p class="state state-error">${esc(String(pending.cleanup_pending_count))} already-recorded candidates need cleanup retry. Excluded from pending counts and totals; do not confirm them as new expenses.</p>`:""}
+    ${pending.available===true&&rows.length?`<h4 class="section-h">REVIEW NEEDED — showing ${esc(String(pending.shown_count))} of ${esc(String(pending.count))}</h4><div class="cards">${rows.map(r=>row(
+      `${r.vendor||"Unclassified"} · ${financeMoney(r.amount,r.currency)}`,
+      [r.evidence_type==="api_credit_funding"?"API credit funding confirmation":"Invoice candidate",r.date?"document date "+r.date:r.received?"email date "+r.received+" (charge date unverified)":"date unverified",...(Array.isArray(r.review_reasons)?r.review_reasons.map(x=>String(x).replaceAll("_"," ")):[])].join(" · "))).join("")}</div><p class="section-note">Inspect original evidence locally before approval. No automatic confirmation, guessed currency, or ID-only approval of incomplete records.</p>`:""}
+  </section>`;
+}
 function viewBusiness(p, updatedAt){
   const sp=spendLegs(p), rev=p.revenue||{}, gl=p.go_live||{};
   const sf=p.spend_feed||null;                      // spend-feed.json via the snapshot seam
@@ -3341,12 +3386,13 @@ function viewBusiness(p, updatedAt){
   const lanes=sf?laneRollup(fs,met):[];
   return `
     <div class="status sub">Business</div>
+    ${viewFinance(p)}
     ${sfBroken?`<div class="state state-error" style="margin-top:14px"><b>Spend feed FAILED to build this push</b>Figures below may be stale — error state, not a clean read.</div>`:""}
     <div class="proof" style="margin-top:16px">
       <div class="pcard"><h4>Revenue</h4><div class="v">${rev.mrr!=null?esc("$"+rev.mrr):"$0"}</div><small>${rev.mrr?"MRR":"pre-revenue — first client is the mission"}</small></div>
-      <div class="pcard"><h4>Fixed subs / mo <span class="src">${esc(fs.asOf||(sp.asOf?ago(sp.asOf):"—"))}</span></h4>
-        <div class="v">${fs.totalKnownCadMonth!=null?esc("CA$"+Math.round(fs.totalKnownCadMonth)):(sp.legs.length?sp.legs.map(([k,v])=>esc(k+" $"+v.toFixed(0))).join(" · "):"—")}</div>
-        <small>${fs.totalKnownCadMonth!=null?"CSV-verified where marked; legs stay per-currency below":"snapshot legs (feed not in snapshot yet)"}</small></div>
+      <div class="pcard"><h4>Commitment estimate / mo <span class="src">${esc(fs.asOf||(sp.asOf?ago(sp.asOf):"—"))}</span></h4>
+        <div class="v">${fs.totalKnownCadMonth!=null?esc(estimateMoney(fs.totalKnownCadMonth,"CA$")):(sp.legs.length?sp.legs.map(([k,v])=>esc(k+" $"+v.toFixed(2))).join(" · "):"—")}</div>
+        <small>Estimated commitments, not actual payments. Any CAD conversion is an estimate.</small></div>
       <div class="pcard"><h4>Go-live</h4><div class="v" style="font-size:15px">${esc(gl.state||gl.status||"gated")}</div><small>outreach sends blocked · nothing auto-sends</small></div>
     </div>
     <h4 class="section-h">RECORD A CLOSED DEAL</h4>
@@ -3365,14 +3411,14 @@ function viewBusiness(p, updatedAt){
     </div>
     ${lanes.length?`<h4 class="section-h">SPEND BY LANE — approximate, provider→lane is a maintained guess</h4>
     <div class="cards">${lanes.map(l=>row(
-      `${l.label} · ${l.known?"$"+Math.round(l.total):"?"}`,
+      `${l.label} · ${l.known?"$"+l.total.toFixed(2):"?"}`,
       l.items.join(" · "))).join("")}</div>`:""}
     ${(fs.rows||[]).length?`<h4 class="section-h">SUBSCRIPTIONS — ${fs.rows.length}</h4>
     <div class="log" style="border-top:0;padding-top:0">${fs.rows.map(r=>
-      `<span class="t" style="min-width:70px;display:inline-block">${esc(r.cad_month!=null?("$"+r.cad_month.toFixed(0)):"?")}</span>${esc(r.name)}${r.needsConfirm?` <span class="badge badge-warn">unconfirmed</span>`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(r.source||"")}</span><br>`).join("")}</div>`:""}
+      `<span class="t" style="min-width:70px;display:inline-block">${esc(estimateMoney(r.cad_month))}</span>${esc(r.name)}${r.needsConfirm?` <span class="badge badge-warn">unconfirmed</span>`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(r.source||"")}</span><br>`).join("")}</div>`:""}
     ${Object.keys(met).length?`<h4 class="section-h">METERED (scripted calls only — undercounts interactive)</h4>
     <div class="log" style="border-top:0;padding-top:0">${Object.entries(met).map(([k,v])=>
-      `<span class="t" style="min-width:70px;display:inline-block">${esc(v.monthCad!=null?("$"+v.monthCad.toFixed(0)):"?")}</span>${esc(k)} · wk $${esc(String(v.weekCad??"?"))}${v.consoleUsdMonth!=null?` · console US$${esc(String(v.consoleUsdMonth))}`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(v.asOf||"")}</span><br>`).join("")}</div>`:""}
+      `<span class="t" style="min-width:70px;display:inline-block">${esc(estimateMoney(v.monthCad))}</span>${esc(k)} · wk $${esc(String(v.weekCad??"?"))}${v.consoleUsdMonth!=null?` · console US$${esc(String(v.consoleUsdMonth))}`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(v.asOf||"")}</span><br>`).join("")}</div>`:""}
     ${bal.length?`<h4 class="section-h">BALANCES (last-known events, never invented)</h4>
     <div class="cards">${bal.map(b=>row(b.provider||"?", (b.state==="unknown"?"balance unknown — ":"")+firstLine(b.lastKnownEvent||""))).join("")}</div>`:""}`;
 }
@@ -4054,4 +4100,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 7ed0e009f3c1 -->
+<!-- rankwise-portal2-version: d22dc5aa42b8 -->
