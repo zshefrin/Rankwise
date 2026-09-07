@@ -3353,6 +3353,8 @@ function viewFinance(p){
   const f=p.finance;
   if(p.finance_build_ok!==true||!f||f.schema!=="finance.v1")return `<section data-finance><h4 class="section-h">FINANCIAL EVIDENCE</h4><div class="state state-error">Financial evidence unavailable — not zero spending. Refresh the snapshot after collection; older snapshots do not contain this feed.</div></section>`;
   const ledger=f.ledger||{}, pending=f.pending||{}, collection=f.collection||{};
+  const failedStores=[ledger,pending].filter(s=>s.available!==true);
+  const repairNote=failedStores.some(s=>s.reason==="repair_required")?"Finance records require local repair. Review actions and totals are held; no records were changed by this check.":failedStores.some(s=>s.reason==="store_error")?"Finance store could not be read. Review actions and totals are held; inspect locally before retrying.":"";
   const collectionAge=Date.now()-Date.parse(collection.checked_at||"");
   const fresh=collection.fresh===true&&Number.isFinite(collectionAge)&&collectionAge>=0&&collectionAge<=26*3600000;
   const ready=collection.available===true&&fresh&&collection.collection_ok===true&&collection.all_sources_configured===true&&collection.mode==="local_review_first";
@@ -3365,6 +3367,7 @@ function viewFinance(p){
   const rows=Array.isArray(pending.rows)?pending.rows:[];
   return `<section data-finance>
     <h4 class="section-h">FINANCIAL EVIDENCE — ${esc(f.month||"period unknown")}</h4>
+    ${repairNote?`<div class="state state-error" role="alert">${esc(repairNote)}</div>`:""}
     <div class="state ${ready?"":"state-error"}"><b>Spend not reconciled</b><br>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</div>
     <div class="proof" style="margin-top:12px">
       <div class="pcard"><h4>Reviewed records · this month</h4><div class="v" style="font-size:18px">${esc(ledger.available===true?financeTotals(ledger.reviewed_month_totals,"No reviewed records this month"):"Ledger unavailable")}</div><small>Reviewed invoice/charge records only — not bank-reconciled cash spend.</small></div>
@@ -4100,4 +4103,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: d22dc5aa42b8 -->
+<!-- rankwise-portal2-version: 614847752ef6 -->
