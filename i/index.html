@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Internal traffic tag</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1115;color:#e7e9ee;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
+  .card{max-width:420px;text-align:center}
+  .status{font-size:2.2rem;margin-bottom:12px}
+  h1{font-size:1.15rem;margin:0 0 8px}
+  p{color:#9aa1ad;font-size:.95rem;line-height:1.5;margin:0 0 20px}
+  a{color:#6ea8fe;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="status" id="icon">…</div>
+  <h1 id="msg">Tagging this browser…</h1>
+  <p id="detail"></p>
+  <a href="#" id="untag" style="display:none">Remove the tag from this browser</a>
+</div>
+<script>
+(function(){
+  function tagged(){return document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});}
+  function render(){
+    var ok=tagged();
+    document.getElementById('icon').textContent=ok?'✅':'❌';
+    document.getElementById('msg').textContent=ok?'This browser is tagged as internal traffic':'Tag failed — cookies may be blocked';
+    document.getElementById('detail').textContent=ok?'Your visits to rankwise.ca from this browser are now excluded from analytics. You can close this page.':'Enable cookies for rankwise.ca and reload this page.';
+    document.getElementById('untag').style.display=ok?'inline':'none';
+  }
+  document.cookie='internal_traffic=true; path=/; max-age=31536000; SameSite=Lax';
+  render();
+  document.getElementById('untag').addEventListener('click',function(e){
+    e.preventDefault();
+    document.cookie='internal_traffic=; path=/; max-age=0; SameSite=Lax';
+    document.getElementById('icon').textContent='⭕';
+    document.getElementById('msg').textContent='Tag removed';
+    document.getElementById('detail').textContent='This browser will be counted as normal traffic again. Reload this page to re-tag.';
+    document.getElementById('untag').style.display='none';
+  });
+})();
+</script>
+</body>
+</html>

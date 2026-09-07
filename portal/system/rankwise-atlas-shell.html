@@ -95,6 +95,19 @@
   #scrub { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; touch-action: none; }
   .scrubwrap:has(#scrub:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .clock { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); width: 52px; text-align: center; font-variant-numeric: tabular-nums; }
+  .clock[data-skip="1"]::after { content: '≫'; color: var(--ink-dim); font-size: 10px; margin-left: 3px; }
+  /* playback event ticker (week-play feed) */
+  #ticker { position: absolute; left: 10px; bottom: 44px; z-index: 11; display: none; max-width: min(46vw, 430px);
+    font-family: var(--mono); font-size: 10px; line-height: 1.5; color: var(--ink-mut);
+    background: rgba(11,17,23,.82); border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; pointer-events: auto; }
+  #ticker .tk { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ticker .tk:nth-last-child(n+4) { opacity: .45; }
+  #ticker .tk .t { color: var(--accent); }
+  #ticker .tk .w { color: var(--ink-dim); }
+  #ticker .tk button { background: none; border: 0; color: var(--ink); font: inherit; cursor: pointer; padding: 0; }
+  #ticker .tk button:hover { color: var(--accent); }
+  #ticker .tkday { display: block; color: var(--accent); letter-spacing: .18em; font-weight: 700; margin: 2px 0; opacity: .85; }
+  @media (max-width: 720px) { #ticker { max-width: 72vw; font-size: 9px; } }
   .nowchip { font-family: var(--mono); font-size: 10px; color: var(--ink-mut); letter-spacing: .04em; max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nowchip button { background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; padding: 2px 0; }
   .nowchip .idle { color: var(--ink-dim); }
@@ -213,12 +226,14 @@
 
     <aside class="attn" id="attnPanel" aria-label="Gap register and doc drift"></aside>
     <aside class="inspector" id="inspector" aria-label="Node inspector"></aside>
+    <div id="ticker" aria-label="Playback event feed"></div>
   </div>
 
   <div class="dock">
     <div class="days" id="days" role="group" aria-label="Day of week"></div>
-    <button id="playBtn" aria-label="Play or pause the cron day">▶</button>
+    <button id="playBtn" aria-label="Play or pause the cron week">▶</button>
     <button id="nowBtn" style="font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--accent);cursor:pointer;border-radius:2px" title="Jump to the real current day and time">NOW</button>
+    <button id="modeBtn" style="display:none;font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--ink-mut);cursor:pointer;border-radius:2px">SCHED</button>
     <span class="clock" id="clock">06:00</span>
     <span id="nowChip" class="nowchip" aria-live="polite"></span>
     <span class="scrubwrap">
@@ -259,7 +274,7 @@ const nodeById = new Map(nodes.map((n) => [n.id, n]));
 const DISTRICT_TINT = {
   'intake': '46,125,158', 'intelligence': '125,111,184', 'content': '184,125,160',
   'outreach': '184,135,94', 'portal': '94,143,184', 'infra': '110,125,142',
-  'trading-boundary': '184,94,94',
+  'trading-boundary': '184,94,94', 'substrate': '128,128,140',
 };
 const PITCH = 1.9; /* intra-district grid pitch (was 1.35 — crammed at zoom) */
 const _PS = PITCH / 1.35;
@@ -271,6 +286,7 @@ const DISTRICT_PLAN = {
   'outreach':         { ax: 12 * _PS, ay: 5 * _PS,  cols: 6 },
   'infra':            { ax: 22 * _PS, ay: 3 * _PS,  cols: 5 },
   'trading-boundary': { ax: 31 * _PS, ay: -4 * _PS, cols: 3 },
+  'substrate':        { ax: 30 * _PS, ay: 9 * _PS,  cols: 5 },
 };
 const CADENCE_H = (n) => {
   const f = n.fires || [];
@@ -365,6 +381,119 @@ const visible = (n) => {
   }
   return true;
 };
+
+/* ══ week playback: flow events + ticker + smart-skip ══
+   Play traverses the WEEK in day order (midnight advances the day chip), every
+   firing job emits traveling pulses along its real downstream arcs plus a ticker
+   line (time · job → targets · what) — flow you can watch, not just lit windows. */
+const DAY_FULL = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+const flow = { events: [], skip: false, nextGapAt: -1, mode: 'sched' };  /* 'sched' | 'real' (yesterday's logged runs) */
+const FLOW_MS = 1400, FLOW_CAP = 24, TICK_CAP = 6;
+
+function pushTick(html, isDay) {
+  const tk = $('ticker');
+  if (!tk) return;
+  tk.style.display = 'block';
+  const row = document.createElement('span');
+  row.className = isDay ? 'tkday' : 'tk';
+  row.innerHTML = html;
+  tk.appendChild(row);
+  while (tk.children.length > TICK_CAP) tk.removeChild(tk.firstChild);
+  if (!tk._wired) {
+    tk._wired = true;
+    tk.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-goto]');
+      if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); }
+    });
+  }
+}
+const fmtHM = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(Math.floor(m) % 60).padStart(2, '0')}`;
+const whatBrief = (n) => {
+  const s = String(n.what || '').split(/(?<=[.!?])\s/)[0];
+  return s.length > 72 ? s.slice(0, 69) + '…' : s;
+};
+
+function emitFire(n, minute, real) {
+  const targets = (n.downstream || []).filter((d) => nodeById.has(d)).slice(0, 6);
+  if (!REDUCED) { /* reviewer note: under reduced-motion, undrained events kept rAF hot forever */
+    flow.events.push({ id: n.id, targets, born: performance.now() });
+    while (flow.events.length > FLOW_CAP) flow.events.shift();
+  }
+  pushTick(`<span class="t">${real ? '●' : ''}[${fmtHM(minute)}]</span> <button data-goto="${esc(n.id)}">${esc(n.id)}</button>`
+    + (targets.length ? ` → ${targets.slice(0, 3).map((t2) => `<button data-goto="${esc(t2)}">${esc(t2)}</button>`).join(', ')}${targets.length > 3 ? ` +${targets.length - 3}` : ''}` : '')
+    + ` <span class="w">· ${esc(whatBrief(n))}</span>`);
+}
+
+function spawnFires(a, b) { /* fires with minute in (a, b] — schedule, or yesterday's logged runs */
+  if (flow.mode === 'real') {
+    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
+      if (e.minute <= a || e.minute > b) continue;
+      const n = nodeById.get(e.id);
+      if (n && visible(n)) emitFire(n, e.minute, true);
+    }
+    return;
+  }
+  for (const n of nodes) {
+    if (!RUNS(n) || !visible(n)) continue;
+    for (const f of firesToday(n)) {
+      if (f.minute == null || f.minute <= a || f.minute > b) continue;
+      emitFire(n, f.minute, false);
+    }
+  }
+}
+
+function advanceDay() {
+  setDay(state.day + 1);
+  pushTick(`── ${DAY_FULL[state.day]} ──`, true);
+}
+
+function nextFireGap(from) { /* sim-minutes until the next fire today (or to midnight) */
+  let best = 1440 - from;
+  if (flow.mode === 'real') {
+    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
+      if (e.minute > from) { best = Math.min(best, e.minute - from); break; }  /* sorted */
+    }
+    return best;
+  }
+  for (const n of nodes) {
+    if (!RUNS(n) || !visible(n)) continue;
+    for (const f of firesToday(n)) {
+      if (f.minute != null && f.minute > from) best = Math.min(best, f.minute - from);
+    }
+  }
+  return best;
+}
+
+function drawFlow(now) {
+  if (REDUCED) return;
+  for (const ev of flow.events) {
+    const u = (now - ev.born) / FLOW_MS;
+    if (u >= 1) continue;
+    const src = nodeById.get(ev.id);
+    if (!src || src._sx == null) continue;
+    /* source flash ring */
+    if (u < 0.4) {
+      ctx.strokeStyle = `rgba(53,199,232,${(0.55 * (1 - u / 0.4)).toFixed(3)})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(src._sx, src._top, 4 + u * 34 * cam.z, 0, 7); ctx.stroke();
+    }
+    const q = (a, b, c, t2) => (1 - t2) * (1 - t2) * a + 2 * (1 - t2) * t2 * b + t2 * t2 * c;
+    for (const tid of ev.targets) {
+      const tn = nodeById.get(tid);
+      if (!tn || tn._sx == null) continue;
+      const mx = (src._sx + tn._sx) / 2, my = Math.min(src._top, tn._top) - 40 * cam.z;
+      ctx.strokeStyle = `rgba(53,199,232,${(0.26 * (1 - u)).toFixed(3)})`;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(src._sx, src._top); ctx.quadraticCurveTo(mx, my, tn._sx, tn._top); ctx.stroke();
+      for (let k = 0; k < 3; k++) { /* traveling dot + short comet tail */
+        const tu = Math.max(0, u - k * 0.055);
+        ctx.fillStyle = `rgba(53,199,232,${((0.95 - 0.28 * k) * (1 - u * 0.35)).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(q(src._sx, mx, tn._sx, tu), q(src._top, my, tn._top, tu), 2.5 - 0.6 * k, 0, 7); ctx.fill();
+      }
+    }
+  }
+  flow.events = flow.events.filter((ev) => (now - ev.born) < FLOW_MS);
+}
 
 /* ══ hatch pattern for FROZEN ══ */
 const hatchCanvas = document.createElement('canvas');
@@ -680,6 +809,7 @@ function draw() {
   draw._ordered.forEach((n) => drawBuilding(n, t));
   syncDistrictLabels();
   drawEdges();
+  drawFlow(performance.now());
 
   /* city-wake moment: 05:55-06:05 — a soft ring expands from the wake source (infra district) */
   if (!REDUCED && state.minute >= 355 && state.minute <= 365) {
@@ -738,8 +868,10 @@ function tourGlide(now) {
     animateCam(wx, wy, cam.z, 1200);
   }
 }
-function loop() {
+function loop(ts) {
   frame++;
+  const dt = Math.min(0.1, ((ts || performance.now()) - (loop._t || ts || 0)) / 1000);
+  loop._t = ts || performance.now();
   tourGlide(performance.now());
   const camMoving = stepCamAnim(performance.now());
   const sweepActive = !REDUCED && (performance.now() % 16000) < 2600;
@@ -747,9 +879,33 @@ function loop() {
     loop._pulseCheckAt = frame;
     loop._anyPulse = !REDUCED && nodes.some((n) => pulseAt(n, state.minute));
   }
-  const animating = camMoving || sweepActive || state.playing || (!REDUCED && (state.sel || loop._anyPulse));
+  const animating = camMoving || sweepActive || state.playing || flow.events.length || (!REDUCED && (state.sel || loop._anyPulse));
   if (state.playing) {
-    state.minute = (state.minute + 1.2) % 1440;
+    /* smart-skip: fast-forward the quiet stretches so the week stays a show.
+       While skipping, recompute EVERY frame and clamp the step to decelerate INTO
+       the next burst (a 20-frame recheck at skip speed leapt whole bursts). */
+    if (flow.skip || frame - (loop._gapAt || -99) > 20) {
+      loop._gapAt = frame;
+      loop._gap = nextFireGap(state.minute);
+      flow.skip = loop._gap > 25 && !flow.events.length;
+      $('clock').dataset.skip = flow.skip ? '1' : '0';
+    }
+    const prev = state.minute;
+    /* TIME-based pace (frame-rate independent — 120Hz displays ran 2× before):
+       active 30 sim-min/s (busy hour ≈ 2s of watching); skip 540 sim-min/s,
+       clamped to decelerate INTO the next burst, never overshoot it. */
+    let step = (flow.skip ? 540 : 30) * dt;
+    if (flow.skip) step = Math.min(step, Math.max(30 * dt, loop._gap - 6));
+    let nm = prev + step;
+    spawnFires(prev, Math.min(nm, 1439.999));
+    if (nm >= 1440) {          /* midnight: week advances in day order; replay loops its one day */
+      if (flow.mode === 'real') pushTick(`── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} restarts ──`, true);
+      else advanceDay();
+      nm -= 1440;
+      spawnFires(-0.001, nm);  /* early fires of the NEW day (post-advance) */
+      loop._gapAt = -99;
+    }
+    state.minute = nm;
     $('scrub').value = Math.floor(state.minute);
     syncClock();
   }
@@ -959,7 +1115,14 @@ function renderInspector(n) {
     </div>
     <div class="isec"><span class="spill" style="background:${st.c}">${st.label}</span>
       ${n.status_conflict ? ` <span style="font-family:var(--mono);font-size:10px;color:var(--unknown)">≠ ${esc(n.status_conflict)}</span>` : ''}</div>
-    ${n.scan_disagrees ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
+    ${n._zombie ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--dead, #E85C5C);font-weight:700">⛔ MAP IS LYING — the map says ${esc(n._zombie.registry_status)} but the cron is firing LIVE${n._zombie.evidence ? ` (${esc(n._zombie.evidence)})` : ''}. Reconcile the registry — run /sysmap-truth-audit.</p></div>` : ''}
+    ${n.scan_disagrees && !n._zombie ? `<div class="isec"><p style="font-family:var(--mono);font-size:11px;color:var(--armed)">⚠ ${esc(n.scan_disagrees)}</p></div>` : ''}
+    ${n._outcome ? `<div class="isec"><p class="lbl">LAST OUTPUT</p><p style="font-family:var(--mono);font-size:11px;color:${n._outcome.status === 'FAIL' ? 'var(--dead, #E85C5C)' : n._outcome.status === 'WARN' ? 'var(--armed)' : 'var(--ink-mut)'}">${esc(n._outcome.status)} — ${esc(n._outcome.detail)}</p></div>` : ''}
+    ${n._cloud ? `<div class="isec"><p class="lbl">CLOUD ACTION</p><p style="font-family:var(--mono);font-size:11px;color:${(!n._cloud.enabled || ['failure','cancelled','timed_out','startup_failure','action_required'].includes(n._cloud.last_conclusion)) ? 'var(--dead, #E85C5C)' : 'var(--ink-mut)'}">${n._cloud.enabled ? 'enabled' : 'DISABLED'} · last ${esc(n._cloud.last_conclusion || '—')}${n._cloud.last_age_h != null ? ` ${Number(n._cloud.last_age_h)}h ago` : ''}</p></div>` : ''}
+    ${n._queue ? `<div class="isec"><p class="lbl">QUEUE</p><p style="font-family:var(--mono);font-size:11px;color:${n._queue.count > 50 ? 'var(--armed)' : 'var(--ink-mut)'}">${Number(n._queue.count)} ${esc(n._queue.label)}</p></div>` : ''}
+    ${n._rel ? `<div class="isec"><p class="lbl">RELIABILITY (14d)</p><p style="font-family:var(--mono);font-size:11px;color:${n._rel.fired < n._rel.expected * 0.7 ? 'var(--armed)' : 'var(--ink-mut)'}">fired ${Number(n._rel.fired)}× of ${Number(n._rel.expected)} expected — young/renamed jobs read low by design</p></div>` : ''}
+    ${n.blast_cls ? `<div class="isec"><p class="lbl">BLAST RADIUS</p><p style="font-family:var(--mono);font-size:11px"><span style="color:${['outward-send','money-spend','deploy-live'].includes(n.blast_cls) ? 'var(--dead, #E85C5C)' : ['repo-write','cloud-state-write'].includes(n.blast_cls) ? 'var(--armed)' : 'var(--ink-mut)'};font-weight:700">${esc(n.blast_cls)}</span> — ${esc(n.worst_case || '')}</p>${(n.checkpoints || []).length ? `<p style="font-family:var(--mono);font-size:11px;color:var(--ink-mut);margin-top:4px">HUMAN GATES: ${(n.checkpoints || []).map(esc).join(' → ')}</p>` : ''}</div>` : ''}
+    ${n.cost_cls || n.serves ? `<div class="isec"><p style="font-family:var(--mono);font-size:10px;color:var(--ink-dim)">${n.cost_cls ? 'COST: ' + esc(n.cost_cls) : ''}${n.cost_cls && n.serves ? ' · ' : ''}${n.serves ? 'SERVES: ' + esc(n.serves) : ''}</p></div>` : ''}
     ${sec('At current time', `<p class="nowline">${nowLine(n)}</p>${fireStrip(n)}`)}
     ${sec('Function', `<p>${esc(n.what)}</p>`)}
     ${sec('Trigger', `<p style="font-family:var(--mono);font-size:11.5px">${esc(n.trigger || '')}</p>`)}
@@ -1158,7 +1321,7 @@ function toggleHelp() {
       lines: <b>solid</b> = downstream (code-verified) · <b>dashed</b> = upstream · <b>dotted</b> = curated/asserted<br>
       tap district (zoomed out) — dive in · <b>f</b> — fit world<br>
       <b>/</b> — search · <b>g</b> — cycle through gap nodes<br>
-      <b>space</b> — play the cron day · <b>d</b> — next day<br>
+      <b>space</b> — play the WEEK (days advance at midnight; pulses ride the edges; quiet hours fast-forward ≫) · <b>d</b> — next day<br>
       ▲ Attention — gap register + 🙋 Needs-Zack filter<br>
       <span style="color:var(--ink-dim)">beams/lit windows = scheduled activity at the scrub time — never status, never success. Statuses read from shape + texture + label.</span>
       <div style="margin-top:10px;color:var(--ink-dim)">tap anywhere or ESC to close</div></div>`;
@@ -1173,12 +1336,13 @@ function toggleHelp() {
 /* ══ dock: days + scrubber ══ */
 const DAY_LBL = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 $('days').innerHTML = DAY_LBL.map((l, i) => `<button class="day${i === state.day ? ' on' : ''}" data-d="${i}" aria-label="${DOW_LANES[i]}" aria-pressed="${i === state.day}">${l}</button>`).join('');
-$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => {
-  state.day = Number(el.dataset.d);
-  $('days').querySelectorAll('.day').forEach((x) => { x.classList.toggle('on', x === el); x.setAttribute('aria-pressed', String(x === el)); });
+function setDay(d) {
+  state.day = ((d % 7) + 7) % 7;
+  $('days').querySelectorAll('.day').forEach((x) => { const on = Number(x.dataset.d) === state.day; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
   drawScrub(); needsDraw = true;
   if (state.sel) renderInspector(nodeById.get(state.sel));
-}));
+}
+$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => setDay(Number(el.dataset.d))));
 
 $('scrub').value = Math.floor(state.minute);
 const scrubC = $('scrubCanvas'), scrubX = scrubC.getContext('2d');
@@ -1242,12 +1406,10 @@ $('scrub').addEventListener('input', (e) => {
 });
 $('nowBtn').addEventListener('click', () => {
   const d = new Date();
-  state.day = d.getDay();
   state.minute = d.getHours() * 60 + d.getMinutes();
-  $('days').querySelectorAll('.day').forEach((x) => { const on = Number(x.dataset.d) === state.day; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+  setDay(d.getDay());
   $('scrub').value = Math.floor(state.minute);
-  syncClock(); needsDraw = true;
-  if (state.sel) renderInspector(nodeById.get(state.sel));
+  syncClock();
 });
 function togglePlay() {
   state.playing = !state.playing;
@@ -1255,11 +1417,114 @@ function togglePlay() {
 }
 $('playBtn').addEventListener('click', togglePlay);
 if (REDUCED) $('playBtn').style.display = 'none';
+$('modeBtn').addEventListener('click', () => {
+  flow.mode = flow.mode === 'sched' ? 'real' : 'sched';
+  const mb = $('modeBtn');
+  mb.textContent = flow.mode === 'real' ? 'REAL' : 'SCHED';
+  mb.style.color = flow.mode === 'real' ? 'var(--accent)' : 'var(--ink-mut)';
+  pushTick(flow.mode === 'real'
+    ? `── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} (actual logged runs) ──`
+    : '── SCHEDULE MODE ──', true);
+  loop._gapAt = -99; needsDraw = true;
+});
 
 /* ══ live-scan seam: registry (embedded) + scan (fetched) ══
    The scanner (vault/_system/system_map_scan.py) recomputes schedule/freshness/gates.
    Merge policy: scan may push a node to FROZEN or DEAD(-by-staleness) and confirms LIVE
    freshness; ARMED/DORMANT/CUT are curation semantics the scan never flips. */
+/* ══ truth strip: the map's own trustworthiness, visible (batch-5 item 1) ══
+   semantics age from the baked meta (renders even with the scan offline);
+   coverage verdict + what-changed chip when the live scan is present. */
+function renderTruthStrip(scan) {
+  let el = $('truthChip');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'truthChip';
+    el.style.cssText = 'font-family:var(--mono);font-size:10px;letter-spacing:.05em;display:inline-flex;align-items:center;gap:8px';
+    $('freshPill').insertAdjacentElement('afterend', el);
+  }
+  const bits = [];
+  const dates = String(((M && M.meta) || {}).surveyed || '').match(/\d{4}-\d{2}-\d{2}/g);
+  if (dates) {
+    const age = Math.max(0, Math.floor((Date.now() - new Date(dates[dates.length - 1] + 'T00:00:00')) / 86400000));
+    const col = age > 14 ? 'var(--dead, #E85C5C)' : age > 7 ? 'var(--armed)' : 'var(--live, #46D68C)';
+    bits.push(`<span style="color:${col}" title="days since the last semantic truth audit — >7d amber, >14d run /sysmap-truth-audit">SEMANTICS ${age}d</span>`);
+  }
+  const cov = scan && scan.coverage;
+  if (cov && cov.available) {
+    const dirty = (cov.unmapped_jobs || []).length + (cov.vanished_cron_nodes || []).length + (cov.missing_paths || []).length;
+    bits.push(dirty
+      ? `<span style="color:var(--dead, #E85C5C)" title="the coverage sentinel found map lies — see banner">COVERAGE ✗${dirty}</span>`
+      : '<span style="color:var(--live, #46D68C)" title="no unmapped jobs, vanished schedules or missing paths">COVERAGE ✓</span>');
+  }
+  /* contradictions (2026-07-24): zombies = registry says OFF but the cron is firing LIVE
+     — the same class of hard lie as a coverage miss, so they join the banner. stale_data
+     = a LIVE node whose produced data is WARN/FAIL — softer, an amber chip, not the banner. */
+  const con = scan && scan.contradictions;
+  const zombies = (con && con.available && con.zombies) || [];
+  const staleData = (con && con.available && con.stale_data) || [];
+  if (zombies.length)
+    bits.push(`<span style="color:var(--dead, #E85C5C)" title="registry says OFF but the cron is firing LIVE — see banner">ZOMBIE ✗${zombies.length}</span>`);
+  if (staleData.length)
+    bits.push(`<span style="color:var(--armed)" title="${esc(staleData.map((s) => s.node + '(' + s.data_status + ')').join(' · '))} — LIVE nodes with WARN/FAIL data; verify (some are known/tracked)">DATA-STALE ⚠${staleData.length}</span>`);
+  /* one banner for every hard lie: coverage misses AND zombies */
+  const lies = [
+    ...(cov && cov.available ? [
+      ...(cov.unmapped_jobs || []).map((j) => `unmapped job ${j}`),
+      ...(cov.vanished_cron_nodes || []).map((n2) => `vanished schedule ${n2}`),
+      ...(cov.missing_paths || []).map((m2) => `missing path ${m2.id}`)] : []),
+    ...zombies.map((z) => `${z.node} is ${z.registry_status} on the map but FIRING`),
+  ];
+  let bn = $('truthBanner');
+  if (lies.length) {
+    if (!bn) {
+      bn = document.createElement('div');
+      bn.id = 'truthBanner';
+      bn.style.cssText = 'position:absolute;top:0;left:0;right:0;z-index:14;background:rgba(60,12,12,.94);border-bottom:1px solid var(--dead, #E85C5C);color:#F0B6B6;font-family:var(--mono);font-size:11px;padding:7px 14px';
+      $('stage').appendChild(bn);
+    }
+    bn.innerHTML = '⛔ MAP IS LYING: ' + lies.slice(0, 6).map(esc).join(' · ') + (lies.length > 6 ? ` · +${lies.length - 6} more` : '') + ' — run /sysmap-truth-audit';
+  } else if (bn) bn.remove();
+  /* cloud tier (2026-07-24): GA4/GSC Actions the on-box scan otherwise can't see.
+     ✓ = both enabled + last run healthy; ✗ = any disabled or bad-conclusion. Per-workflow
+     state + age on hover, so a stale-but-"success" workflow (e.g. GSC 99h) is visible. */
+  const cloud = scan && scan.cloud;
+  if (cloud && cloud.available) {
+    const wfs = Object.entries(cloud.workflows || {});
+    const badSet = ['failure', 'cancelled', 'timed_out', 'startup_failure', 'action_required'];
+    const bad = wfs.filter(([, w]) => !w.enabled || badSet.includes(w.last_conclusion));
+    const detail = wfs.map(([n2, w]) => `${n2}: ${w.enabled ? 'on' : 'OFF'} · last ${w.last_conclusion || '—'}${w.last_age_h != null ? ' ' + w.last_age_h + 'h ago' : ''}`).join('  |  ');
+    bits.push(bad.length
+      ? `<span style="color:var(--dead, #E85C5C)" title="${esc(detail)}">CLOUD ✗${bad.length}</span>`
+      : `<span style="color:var(--live, #46D68C)" title="${esc(detail)}">CLOUD ✓</span>`);
+  } else if (cloud && cloud.reason && cloud.reason !== 'not probed') {
+    /* make a DEGRADED probe visible instead of silently absent (review #2) — a gh
+       auth/offline failure would otherwise look identical to "feature not built". */
+    bits.push(`<span style="color:var(--ink-dim)" title="cloud probe unavailable: ${esc(cloud.reason)}">CLOUD ?</span>`);
+  }
+  const ch = (scan && scan.changes) || [];
+  if (ch.length) {
+    const adds = ch.filter((e) => e.kind === 'added').length, flips = ch.filter((e) => e.kind === 'status').length, gone = ch.filter((e) => e.kind === 'removed').length;
+    bits.push(`<button id="chgChip" style="background:none;border:1px solid var(--line);border-radius:3px;color:var(--accent);font:inherit;cursor:pointer;padding:2px 7px" title="registry changes, last 14 days — click for the list">Δ14d ${adds ? '+' + adds : ''}${flips ? ' ~' + flips : ''}${gone ? ' −' + gone : ''}</button>`);
+  }
+  el.innerHTML = bits.join(' ');
+  const chip = $('chgChip');
+  if (chip) chip.addEventListener('click', () => {
+    let p = $('chgPanel');
+    if (p) { p.remove(); return; }
+    p = document.createElement('div');
+    p.id = 'chgPanel';
+    p.style.cssText = 'position:absolute;top:6px;right:10px;z-index:15;max-width:min(70vw,420px);max-height:50vh;overflow:auto;background:rgba(11,17,23,.95);border:1px solid var(--line);border-radius:3px;padding:9px 12px;font-family:var(--mono);font-size:10px;line-height:1.6;color:var(--ink-mut)';
+    p.innerHTML = '<b style="color:var(--accent)">REGISTRY Δ — last 14 days</b><br>' + ch.slice(-40).reverse().map((e) =>
+      `<span style="white-space:nowrap">${esc(e.date)} ${e.kind === 'added' ? '+' : e.kind === 'removed' ? '−' : '~'} <button data-goto="${esc(e.id)}" style="background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:0">${esc(e.id)}</button>${e.kind === 'status' ? ' ' + esc(e.from || '') + '→' + esc(e.to || '') : e.to ? ' (' + esc(e.to) + ')' : ''}</span>`).join('<br>');
+    p.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-goto]');
+      if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); p.remove(); }
+    });
+    $('stage').appendChild(p);
+  });
+}
+
 async function applyLiveScan() {
   let scan;
   if (window.__RW_SCAN__) { scan = window.__RW_SCAN__; }
@@ -1281,7 +1546,14 @@ async function applyLiveScan() {
     if (j.last_log) n.last_activity = j.last_log;
     const cur = n.status;
     if (j.computed_status === 'FROZEN' && cur !== 'FROZEN' && cur !== 'DEAD') { n.status = 'FROZEN'; changed++; }
-    else if (j.computed_status === 'DEAD' && cur !== 'DEAD') { n.status = 'DEAD'; changed++; }
+    else if (j.computed_status === 'DEAD' && (cur === 'LIVE' || cur === 'FROZEN' || cur === 'UNKNOWN')) { n.status = 'DEAD'; changed++; }
+    else if (j.computed_status === 'DEAD' && cur !== 'DEAD') {
+      /* ARMED/DORMANT/CUT are curation-adjudicated (e.g. unfrozen-awaiting-first-run) —
+         per the stated merge policy the scan must not flip them; surface, don't demote.
+         (FROZEN/UNKNOWN above DO demote — reviewer note 2026-07-23: they are not
+         curation-adjudicated states and a stale-dead read should win there.) */
+      n.scan_disagrees = `scan: ${j.evidence} — status stays ${cur} (curation-adjudicated, not demoted)`;
+    }
     else if (j.computed_status === 'LIVE' && cur === 'DEAD') {
       n.scan_disagrees = `scan says LIVE (${j.evidence}) but curation says DEAD — investigate`;
     }
@@ -1290,6 +1562,40 @@ async function applyLiveScan() {
     }
   }
   const t = scan.scanned_at.replace('T', ' ').slice(5, 16);
+  /* outcome layer: per-node artifact verdict ("it ran" vs "it PRODUCED") */
+  for (const [nid, o] of Object.entries(scan.outcomes || {})) {
+    const on = nodeById.get(nid);
+    if (on) on._outcome = o;
+  }
+  for (const [nid, q] of Object.entries(scan.queue_depths || {})) {
+    const qn = nodeById.get(nid);
+    if (qn) qn._queue = q;
+  }
+  for (const [nid, rr] of Object.entries(scan.reliability || {})) {
+    const rn = nodeById.get(nid);
+    if (rn) rn._rel = rr;
+  }
+  /* contradiction + cloud layers (2026-07-24): attach to the node so its inspector
+     shows the lie too, not only the fleet-view truth strip. Zombie = registry says OFF
+     but firing LIVE; stale_data is already covered by LAST OUTPUT (the raw verdict). */
+  const con2 = scan.contradictions;
+  if (con2 && con2.available) {
+    for (const z of con2.zombies || []) { const zn = nodeById.get(z.node); if (zn) zn._zombie = z; }
+  }
+  if (scan.cloud && scan.cloud.available) {
+    const CLOUD_NODE = { 'GA4 Fetch': 'fetch_ga4', 'GSC Fetch': 'fetch_gsc' };
+    for (const [wf, w] of Object.entries(scan.cloud.workflows || {})) {
+      const cn = nodeById.get(CLOUD_NODE[wf]);
+      if (cn) cn._cloud = w;
+    }
+  }
+  /* replay layer: yesterday's ACTUAL runs — reveal the REAL toggle when present */
+  if (scan.history && (scan.history.events || []).length) {
+    window.__RW_HIST__ = scan.history;
+    const mb = $('modeBtn');
+    if (mb) { mb.style.display = ''; mb.title = 'Replay the ACTUAL runs of ' + scan.history.date + ' (parsed from cron logs) instead of the schedule'; }
+  }
+  renderTruthStrip(scan);
   $('stamp').textContent += ` · SCAN LIVE ${t}${scan.killswitch_engaged ? ' · ⛔ KILLSWITCH ENGAGED' : ''}`;
   $('freshDot').style.background = scan.killswitch_engaged ? 'var(--dead)' : 'var(--live)';
   $('freshTxt').textContent = (scan.killswitch_engaged ? '⛔ KILLSWITCH · ' : 'LIVE ') + t + (typeof changed === 'number' && changed ? ' · Δ' + changed : '');
@@ -1305,6 +1611,7 @@ async function applyLiveScan() {
     setTimeout(() => toast.remove(), 5000);
   }
 }
+renderTruthStrip(null);  /* semantics age renders even before/without the scan */
 applyLiveScan();
 
 /* ══ session persistence: reopen where the operator left off ══ */

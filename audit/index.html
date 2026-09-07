@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Local Marketing Audit · Lower Mainland, BC — Rankwise</title>
-<meta name="description" content="Book a free 15-minute local search audit. See where you rank on Google Maps, which competitors your customers find first, and the first moves to win more calls — Lower Mainland, BC.">
+<title>Free Local Marketing Audit for Lower Mainland, BC — Rankwise</title>
+<meta name="description" content="See where you rank on Google Maps, which competitors show up first, and your next 3 moves. Free 15-minute audit for Lower Mainland businesses.">
 <link rel="canonical" href="https://rankwise.ca/audit/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rankwise.ca/audit/">
-<meta property="og:title" content="Free Local Marketing Audit · Lower Mainland, BC — Rankwise">
-<meta property="og:description" content="Book a free 15-minute local search audit. See where you rank on Google Maps, which competitors your customers find first, and the first moves to win more calls — Lower Mainland, BC.">
+<meta property="og:title" content="Free Local Marketing Audit for Lower Mainland, BC — Rankwise">
+<meta property="og:description" content="See where you rank on Google Maps, which competitors show up first, and your next 3 moves. Free 15-minute audit for Lower Mainland businesses.">
 <meta property="og:locale" content="en_CA">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Free Local Marketing Audit · Lower Mainland, BC — Rankwise">
-<meta name="twitter:description" content="Book a free 15-minute local search audit. See where you rank on Google Maps, which competitors your customers find first, and the first moves to win more calls — Lower Mainland, BC.">
+<meta name="twitter:title" content="Free Local Marketing Audit for Lower Mainland, BC — Rankwise">
+<meta name="twitter:description" content="See where you rank on Google Maps, which competitors show up first, and your next 3 moves. Free 15-minute audit for Lower Mainland businesses.">
 
 <script type="application/ld+json">
 {
@@ -21,8 +21,8 @@
   "@type": "WebPage",
   "@id": "https://rankwise.ca/audit/#webpage",
   "url": "https://rankwise.ca/audit/",
-  "name": "Free Local Marketing Audit · Lower Mainland, BC — Rankwise",
-  "description": "Book a free 15-minute local search audit. See where you rank on Google Maps, which competitors your customers find first, and the first moves to win more calls — Lower Mainland, BC.",
+  "name": "Free Local Marketing Audit for Lower Mainland, BC — Rankwise",
+  "description": "See where you rank on Google Maps, which competitors show up first, and your next 3 moves. Free 15-minute audit for Lower Mainland businesses.",
   "isPartOf": { "@id": "https://rankwise.ca/#website" },
   "about": { "@id": "https://rankwise.ca/#organization" },
   "inLanguage": "en-CA",
@@ -40,8 +40,11 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());var _rwInt=document.cookie.split(';').some(function(c){return c.trim()==='internal_traffic=true';});gtag('config','G-LRX309H9CH',_rwInt?{traffic_type:'internal'}:{});</script>
 
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+<!-- Fonts self-hosted 2026-08-17: the Fontshare multi-family request never delivered a Switzer face
+     (body text fell back to system sans) and its third-party CSS was render-blocking on this page. -->
+<link rel="preload" href="/assets/fonts/cabinet-grotesk-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/switzer-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-500.woff2) format('woff2')}@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-700.woff2) format('woff2')}@font-face{font-family:'Cabinet Grotesk';font-style:normal;font-weight:800;font-display:swap;src:url(/assets/fonts/cabinet-grotesk-800.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/switzer-400.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/switzer-500.woff2) format('woff2')}@font-face{font-family:'Switzer';font-style:normal;font-weight:600;font-display:swap;src:url(/assets/fonts/switzer-600.woff2) format('woff2')}</style>
 <link rel="preconnect" href="https://app.cal.com" crossorigin>
 
 <style>
@@ -618,10 +621,12 @@ html.js .reveal.in{opacity:1;transform:none}
       <a href="/#faq">FAQ</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Rankwise Lab</a>
+      <a href="/audits/">Audit examples</a>
       <a href="/about/">About</a>
       <a href="/portal/">Log in</a>
       <a href="/terms/">Terms</a>
       <a href="/privacy/">Privacy</a>
+      <a href="/data-deletion/">Data Deletion</a>
     </div>
     <div class="footer-copy">2026 Rankwise · Local service marketing · Lower Mainland, BC</div>
   </div>
@@ -656,6 +661,22 @@ document.addEventListener('click', function(event){
   var link = event.target.closest('a');
   if (!link || typeof gtag !== 'function') return;
   var href = link.getAttribute('href') || '';
+  if (href.indexOf('tel:') === 0) {
+    gtag('event', 'phone_click', {
+      page_path: window.location.pathname,
+      cta_text: (link.textContent || '').replace(/\s+/g,' ').trim().slice(0,80),
+      link_url: link.href
+    });
+    return;
+  }
+  if (href.indexOf('mailto:') === 0) {
+    gtag('event', 'email_click', {
+      page_path: window.location.pathname,
+      cta_text: (link.textContent || '').replace(/\s+/g,' ').trim().slice(0,80),
+      link_url: link.href
+    });
+    return;
+  }
   var isCal = href.indexOf('cal.com') !== -1;
   var isBookAnchor = href.indexOf('#book') !== -1;
   if (!isCal && !isBookAnchor) return;

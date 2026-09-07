@@ -3,7 +3,8 @@
 Regenerate sitemap.xml from the live blog directory.
 
 Uses git log for lastmod dates so they reflect real content changes,
-not filesystem timestamps. Falls back to today for uncommitted files.
+not filesystem timestamps. Uncommitted edits keep the last commit date
+(never today) — see git_lastmod.
 
 Usage:
     python3 generate_sitemap.py          # regenerate and print path
@@ -20,14 +21,15 @@ BASE = "https://rankwise.ca"
 
 
 def git_lastmod(rel_path: str) -> str:
-    """Return YYYY-MM-DD of the last commit that touched this path, or today."""
-    dirty = subprocess.run(
-        ["git", "status", "--porcelain", "--", rel_path],
-        capture_output=True, text=True, cwd=ROOT,
-    )
-    if dirty.stdout.strip():
-        return date.today().isoformat()
+    """Return YYYY-MM-DD of the last commit that touched this path.
 
+    NEVER "today" (fixed 2026-08-17): the old rule returned today for any file
+    with uncommitted changes, so a lane's parked WIP (69 uncommitted files on
+    2026-08-17) made 67 of 86 URLs claim lastmod=today on every automated
+    publish — an untruthful sitemap trains Google to ignore lastmod entirely.
+    Fallback order: last commit date → file mtime (a real timestamp) → today
+    only if the file does not exist at all.
+    """
     result = subprocess.run(
         ["git", "log", "-1", "--format=%aI", "--", rel_path],
         capture_output=True, text=True, cwd=ROOT,
@@ -35,7 +37,10 @@ def git_lastmod(rel_path: str) -> str:
     raw = result.stdout.strip()
     if raw:
         return raw[:10]  # YYYY-MM-DD from ISO timestamp
-    return date.today().isoformat()
+    try:
+        return date.fromtimestamp((ROOT / rel_path).stat().st_mtime).isoformat()
+    except OSError:
+        return date.today().isoformat()
 
 
 def build_sitemap() -> str:
@@ -73,6 +78,10 @@ def build_sitemap() -> str:
     if (ROOT / privacy_html).exists():
         urls.append((f"{BASE}/privacy/", git_lastmod(privacy_html), "yearly", "0.3"))
 
+    data_deletion_html = "data-deletion/index.html"
+    if (ROOT / data_deletion_html).exists():
+        urls.append((f"{BASE}/data-deletion/", git_lastmod(data_deletion_html), "yearly", "0.3"))
+
     # Decision/comparison pages — explicit list (not auto-discovered)
     for comp_slug in ("hvac-marketing-options-compared",):
         comp_html = f"{comp_slug}/index.html"
@@ -84,6 +93,34 @@ def build_sitemap() -> str:
         trade_html = f"{trade_slug}/index.html"
         if (ROOT / trade_html).exists():
             urls.append((f"{BASE}/{trade_slug}/", git_lastmod(trade_html), "monthly", "0.8"))
+
+    # Category hub pages — /<category>-marketing/ (added 2026-08-19, 11 hubs)
+    HUBS = ("plumber", "roofing", "landscaping", "electrician", "auto-repair", "hvac",
+            "law-firm", "dental", "chiropractor", "med-spa", "veterinary")
+    for hub in HUBS:
+        hub_html = f"{hub}-marketing/index.html"
+        if (ROOT / hub_html).exists():
+            urls.append((f"{BASE}/{hub}-marketing/", git_lastmod(hub_html), "monthly", "0.8"))
+
+    # Directory rankings -- /best/<trade>/<city>/ pages (citation-flywheel
+    # pilot, added 2026-08-25). Explicit list, not auto-discovered: the
+    # pilot is deliberately capped at 3 markets (indexing-capacity gate,
+    # directory-verdict.md section 6) -- auto-globbing best/ would silently
+    # include a future market the moment its directory is BUILT, before its
+    # own publish gate (data re-sweep + collision check) has cleared.
+    best_hub_html = "best/index.html"
+    if (ROOT / best_hub_html).exists():
+        urls.append((f"{BASE}/best/", git_lastmod(best_hub_html), "weekly", "0.8"))
+    best_methodology_html = "best/methodology/index.html"
+    if (ROOT / best_methodology_html).exists():
+        urls.append((f"{BASE}/best/methodology/", git_lastmod(best_methodology_html),
+                    "monthly", "0.6"))
+    for trade_slug, city_slug in (("hvac", "vancouver"), ("hvac", "burnaby"),
+                                  ("plumber", "coquitlam")):
+        best_page_html = f"best/{trade_slug}/{city_slug}/index.html"
+        if (ROOT / best_page_html).exists():
+            urls.append((f"{BASE}/best/{trade_slug}/{city_slug}/",
+                        git_lastmod(best_page_html), "weekly", "0.7"))
 
     # City landing pages — any top-level directory ending in -<trade>-marketing
     for slug_dir in sorted(ROOT.iterdir()):

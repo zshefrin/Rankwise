@@ -1,0 +1,72 @@
+name: deploy-sanity
+
+# DETECT-AFTER, not a gate: GitHub Pages builds and serves whatever lands on
+# origin/main regardless of this workflow's pass/fail status — CI here can't
+# stop a bad push from going live, it can only surface one after the fact.
+# The local pre-push hook (scripts/git-hooks/pre-push) is the only layer that
+# can actually block a push before it reaches origin, and it lives in
+# .git/hooks, which is NOT version-controlled — a fresh clone or a
+# replacement machine has no gate at all until the hook is reinstalled by
+# hand. This workflow is the cross-machine visibility net for that gap: it
+# runs the same checks regardless, on every push and PR, using only the
+# stdlib (no external action beyond checkout/setup-python — same rationale as
+# secret-scan.yml: avoid unpinned-action supply-chain exposure).
+#
+# Scoped to files CHANGED by the push/PR, not the whole tree: the live site
+# already carries some pre-existing debt on non-standard pages (audit report
+# pages, portal system-map fragments) that a whole-tree gate would trip on
+# every run. See scripts/deploy_sanity_check.py's module docstring.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve diff base
+        id: base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RAW_BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            RAW_BASE="${{ github.event.before }}"
+          fi
+          # Fall back to HEAD~1 if the event gave us no usable base commit (new
+          # branch, before=all-zeros) or a force-push made it unreachable in
+          # this checkout. Safe direction: HEAD~1 always exists on a repo with
+          # real history and understates scope (one extra commit in range)
+          # rather than silently checking nothing.
+          if [ -z "$RAW_BASE" ] || [ "$RAW_BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$RAW_BASE^{commit}" 2>/dev/null; then
+            RAW_BASE="$(git rev-parse HEAD~1 2>/dev/null || true)"
+          fi
+          BASE="$RAW_BASE"
+          # Use the merge-base, not RAW_BASE directly (the three-dot-diff
+          # equivalent): a pull_request checkout can be a synthetic merge of
+          # PR-head + base, whose tree differs from base.sha by BOTH the PR's
+          # own changes AND any base-branch commits merged in since the PR
+          # branched. A direct two-dot diff against base.sha would wrongly
+          # pull those base-side commits' files into "changed by this PR".
+          if [ -n "$RAW_BASE" ]; then
+            MB="$(git merge-base "$RAW_BASE" HEAD 2>/dev/null || true)"
+            [ -n "$MB" ] && BASE="$MB"
+          fi
+          echo "ref=$BASE" >> "$GITHUB_OUTPUT"
+      - name: Deploy sanity check (dead paths, HTML spot-check, link integrity — changed files only)
+        run: |
+          if [ -n "${{ steps.base.outputs.ref }}" ]; then
+            python3 scripts/deploy_sanity_check.py --base "${{ steps.base.outputs.ref }}"
+          else
+            python3 scripts/deploy_sanity_check.py --all
+          fi
