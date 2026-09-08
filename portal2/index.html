@@ -209,7 +209,12 @@ main{padding:0 0 60px;min-width:0}
 .convo-msg-asst{background:var(--acc-soft);margin-left:auto}
 .convo-msg-role{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 .convo-msg-meta{color:var(--ink-3);font-size:10.5px;margin-top:4px}
+.review-watch{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;align-items:start}
+.review-watch>div{min-width:0}
+.watch-feedback textarea{display:block;margin-top:6px}
 @media (max-width:760px){
+  .review-watch{grid-template-columns:1fr;gap:10px}
+  .review-watch .artmedia{width:min(100%,180px,18svh);max-height:32svh}
   .convo-shell{grid-template-columns:1fr;height:auto}
   .convo-list{border-right:0;border-bottom:1px solid var(--edge);max-height:240px}
   .convo-detail{max-height:420px}
@@ -1135,6 +1140,9 @@ function _criFilterRows(rows, filter){
   if(filter==="blocked")return rows.filter(r=>r.state==="blocked");
   return rows;
 }
+// Display-only alias: the stored brand channel is Rankwise's own content.
+// Keep raw channel values for filtering, action payloads and source identity.
+function contentChannelLabel(channel){return channel==="brand"?"Rankwise":String(channel||"");}
 function _criViews(it){
   const n=it&&it.metrics_48h&&it.metrics_48h.views;
   return typeof n==="number"&&Number.isFinite(n)&&n>=0?n:null;
@@ -1148,7 +1156,7 @@ function _criVisibleRows(rows){
       if(x===null||y===null)return x===y?tie():x===null?1:-1;
       return (CRI_SORT==="views-high"?y-x:x-y)||tie();
     }
-    if(CRI_SORT==="channel")return String(a.channel||"unknown").localeCompare(String(b.channel||"unknown"))||tie();
+    if(CRI_SORT==="channel")return contentChannelLabel(a.channel||"unknown").localeCompare(contentChannelLabel(b.channel||"unknown"))||tie();
     if(CRI_SORT==="title")return tie();
     if(CRI_SORT==="attention"){
       const rank=it=>_criQcFailed(it)||it.state==="blocked"?0:it.state==="draft"?1:it.state==="approved"||it.state==="posted"?3:2;
@@ -1221,16 +1229,31 @@ function _criDetail(it){
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
       <div>
         <div style="font-size:17px;font-weight:700">${esc(it.script_id)}</div>
-        <div style="color:var(--ink-3);font-size:11px;font-family:ui-monospace,Menlo,monospace;margin-top:2px">${esc(it.channel||"")}${it.wave?" · "+esc(it.wave):""}</div>
+        <div style="color:var(--ink-3);font-size:11px;font-family:ui-monospace,Menlo,monospace;margin-top:2px">${esc(contentChannelLabel(it.channel))}${it.wave?" · "+esc(it.wave):""}</div>
       </div>
       <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${_criStateBadge(it)}
         ${(it.platform_targets||[]).length?`<span class="badge badge-info">${esc((it.platform_targets||[]).join(" · "))}</span>`:""}</div>
     </div>
-    <div class="dcard" style="margin-bottom:10px">
+    <div class="dcard review-watch" style="margin-bottom:10px">
+    <div class="watch-media">
       <div class="section-h" style="margin:0 0 8px">Render <span style="margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-3)">${esc(dur)}</span></div>
       ${mediaId!=null
         ?`<div class="artmedia" data-mi="${mediaId}" style="background:#000;border-radius:8px;max-width:260px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`
         :`<div class="empty">Render not uploaded yet.</div>`}
+    </div>
+    <div class="watch-feedback">
+      <div class="section-h" style="margin:0 0 8px">Feedback & revisions</div>
+      <label for="cri-note">What should change, or why reject it?</label>
+      <textarea id="cri-note" rows="2" data-script-id="${escAttr(String(it.script_id))}" placeholder="Why — required for Request changes / Reject"
+        style="width:100%;background:var(--bg);border:1px solid var(--edge);border-radius:var(--radius-sm);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+      <div class="empty">Sent with Request changes or Reject · 280 characters. Typing alone does not save or change approval.</div>
+      ${_criFeedback(it)}
+    <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
+      ${actBtn("content_review.approve",{script_id:it.script_id,platforms:it.platform_targets||[]},"Approve","rec",_CRI_NOT_LIVE_REASON)}
+      ${actBtn("content_review.request_changes",{script_id:it.script_id},"Request changes","",_CRI_NOT_LIVE_REASON)}
+      ${actBtn("content_review.reject",{script_id:it.script_id},"Reject","",_CRI_NOT_LIVE_REASON)}
+      ${actBtn("content_review.watched",{script_id:it.script_id},"Watched","",_CRI_NOT_LIVE_REASON)}
+    </div></div>
     </div>
     <div class="dcard" style="margin-bottom:10px">
       <div class="section-h" style="margin:0 0 8px">QC</div>
@@ -1263,20 +1286,7 @@ function _criDetail(it){
       <div class="section-h" style="margin:0 0 8px">Provenance</div>
       <div style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-2);word-break:break-all">${esc(it.provenance||"—")}</div>
     </div>
-    <div class="dcard" style="margin-bottom:10px">
-      <div class="section-h" style="margin:0 0 8px">Feedback & revisions</div>
-      ${_criFeedback(it)}
-      <label for="cri-note">What should change, or why reject it?</label>
-      <textarea id="cri-note" rows="2" data-script-id="${escAttr(String(it.script_id))}" placeholder="Why — required for Request changes / Reject"
-        style="width:100%;background:var(--bg);border:1px solid var(--edge);border-radius:var(--radius-sm);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
-      <div class="empty">Sent with Request changes or Reject · 280 characters. Typing alone does not save or change approval.</div>
-    </div>
-    <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
-      ${actBtn("content_review.approve",{script_id:it.script_id,platforms:it.platform_targets||[]},"Approve","rec",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.request_changes",{script_id:it.script_id},"Request changes","",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.reject",{script_id:it.script_id},"Reject","",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.watched",{script_id:it.script_id},"Watched","",_CRI_NOT_LIVE_REASON)}
-    </div>`;
+`;
 }
 function viewContentReview(p){
   MEDIA_REG=[];
@@ -1290,11 +1300,11 @@ function viewContentReview(p){
   if(!filtered.some(r=>r.script_id===CRI_SEL)) CRI_SEL = filtered[0] ? filtered[0].script_id : null;
   const selItem=filtered.find(r=>r.script_id===CRI_SEL);
   const filters=[["all","All"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected (recorded)"]];
-  const channels=[...new Set(rows.map(it=>it.channel||"unknown"))].sort();
+  const channels=[...new Set(rows.map(it=>it.channel||"unknown"))].sort((a,b)=>contentChannelLabel(a).localeCompare(contentChannelLabel(b)));
   const sortOptions=[["recent","Recently synced"],["oldest","Oldest sync first"],["attention","Needs attention"],["channel","Channel A–Z"],["title","Item A–Z"],["views-high","Most views (48h)"],["views-low","Fewest views (48h)"]];
   const filterBar=`<div class="acts" style="margin-bottom:12px;flex-wrap:wrap">${filters.map(([k,label])=>
     `<button class="btn ${CRI_FILTER===k?"rec":""}" data-cri-filter="${escAttr(k)}">${esc(label)} · ${counts[k]}</button>`).join("")}</div>`;
-  const sortBar=`<div class="acts" style="flex-wrap:wrap;margin-bottom:12px"><label>Channel <select id="cri-channel" class="btn"><option value="all">All channels</option>${channels.map(c=>`<option value="${escAttr(c)}" ${CRI_CHANNEL===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>Sort <select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div><div class="empty">${rows.some(it=>_criViews(it)!==null)?"View rankings use recorded 48h counts; unknown values sort last. Views are not a quality score.":"Performance not collected — no best/worst performance ranking yet."} Sorting covers the loaded items only.</div>`;
+  const sortBar=`<div class="acts" style="flex-wrap:wrap;margin-bottom:12px"><label>Channel <select id="cri-channel" class="btn"><option value="all">All channels</option>${channels.map(c=>`<option value="${escAttr(c)}" ${CRI_CHANNEL===c?"selected":""}>${esc(contentChannelLabel(c))}</option>`).join("")}</select></label><label>Sort <select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div><div class="empty">${rows.some(it=>_criViews(it)!==null)?"View rankings use recorded 48h counts; unknown values sort last. Views are not a quality score.":"Performance not collected — no best/worst performance ranking yet."} Sorting covers the loaded items only.</div>`;
   const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   if(phone){
     const idx=filtered.findIndex(r=>r.script_id===CRI_SEL);
@@ -1314,7 +1324,7 @@ function viewContentReview(p){
       <div>${filtered.map(it=>`
         <button class="btn" data-cri-sel="${escAttr(it.script_id)}" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;${it.script_id===CRI_SEL?"background:var(--acc-soft);border-color:var(--acc-soft-edge)":""}">
           <div style="font-weight:650;font-size:13px">${esc(it.script_id)}</div>
-          <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${_criStateBadge(it)}<span style="color:var(--ink-3);font-size:10.5px">${esc(it.channel||"")}</span></div>
+          <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${_criStateBadge(it)}<span style="color:var(--ink-3);font-size:10.5px">${esc(contentChannelLabel(it.channel))}</span></div>
         </button>`).join("")||`<div class="empty">No items match this filter.</div>`}</div>
       <div>${selItem?_criDetail(selItem):`<div class="empty">Select an item.</div>`}</div>
     </div>`;
@@ -2264,11 +2274,14 @@ function viewReview(p){
     const dur=a.meta&&a.meta.durationSeconds?` · ${a.meta.durationSeconds}s`:"";
     return `<div class="dcard" data-art="${escAttr(a.id)}">
       <div class="q">${esc(a.title)}<span style="color:var(--ink-3);font-weight:400;font-size:11.5px"> · ${esc(a.kind)}${esc(dur)} · ${esc(ago(a.created_at))}</span></div>
+      <div class="${a.storage_path&&(a.kind==='reel'||a.kind==='image')?'review-watch':''}"><div class="watch-media">
       ${a.kind==="reel"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,revision:a.content_sha||(a.meta&&a.meta.render_sha)||a.created_at||"",img:false,title:a.title})-1}" style="margin:10px 0;background:#000;border-radius:8px;max-width:280px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`:""}
       ${a.kind==="image"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,img:true,title:a.title})-1}" style="margin:10px 0;aspect-ratio:16/9;max-width:400px;background:var(--surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">loading…</div>`:""}
+      </div><div class="watch-feedback">
       ${a.status==="pending"
         ?`<div style="margin:12px 0"><label for="review-note-${escAttr(a.id)}">Feedback & revisions — what should change, or why reject?</label><textarea id="review-note-${escAttr(a.id)}" data-review-note="${escAttr(a.id)}" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional feedback · sent with your decision"></textarea><div class="empty">Up to 1,000 characters. Typing alone does not save; submitting records this decision, not a publishing approval.</div></div><div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
         :`<div class="why">Decision: ${esc(a.decision&&a.decision.choice||"not recorded")}</div><div style="white-space:pre-wrap">${a.decision&&a.decision.note?`<b>Feedback:</b> ${esc(a.decision.note)}`:`<span class="empty">No feedback recorded.</span>`}</div>`}
+      </div></div>
     </div>`;};
   return `
     <div class="status sub">Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">artifact decisions · production videos are in Content Review</small></div>
@@ -4215,4 +4228,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: b91f599aa477 -->
+<!-- rankwise-portal2-version: b74e94a3f6fa -->
