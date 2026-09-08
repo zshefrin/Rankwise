@@ -1008,6 +1008,7 @@ async function loadDecisions(){
 let CRI = undefined;
 let CRI_SEL = null;     // selected script_id
 let CRI_FILTER = "all";
+let CRI_CHANNEL = "all", CRI_SORT = "recent";
 // content_review.* is LIVE (migration 082 applied 2026-09-02 + the four
 // operator_action_worker handlers shipped) — buttons enable through the normal
 // allowlist gate; this reason only shows if the live allowlist drops them.
@@ -1127,11 +1128,50 @@ function _criQcFailed(it){
   return !!(it && it.qc && String(it.qc.verdict||"").toLowerCase()==="fail");
 }
 function _criFilterRows(rows, filter){
+  if(filter==="rejected")return rows.filter(r=>{const f=_criSavedFeedback(r);return f&&f.status==="Rejected";});
   if(filter==="draft")return rows.filter(r=>r.state==="draft");
   if(filter==="critiqued")return rows.filter(r=>r.state==="critiqued");
   if(filter==="qcfail")return rows.filter(_criQcFailed);
   if(filter==="blocked")return rows.filter(r=>r.state==="blocked");
   return rows;
+}
+function _criViews(it){
+  const n=it&&it.metrics_48h&&it.metrics_48h.views;
+  return typeof n==="number"&&Number.isFinite(n)&&n>=0?n:null;
+}
+function _criVisibleRows(rows){
+  const selected=_criFilterRows(rows,CRI_FILTER).filter(it=>CRI_CHANNEL==="all"||(it.channel||"unknown")===CRI_CHANNEL);
+  return selected.slice().sort((a,b)=>{
+    const tie=()=>String(a.script_id).localeCompare(String(b.script_id));
+    if(CRI_SORT==="views-high"||CRI_SORT==="views-low"){
+      const x=_criViews(a),y=_criViews(b);
+      if(x===null||y===null)return x===y?tie():x===null?1:-1;
+      return (CRI_SORT==="views-high"?y-x:x-y)||tie();
+    }
+    if(CRI_SORT==="channel")return String(a.channel||"unknown").localeCompare(String(b.channel||"unknown"))||tie();
+    if(CRI_SORT==="title")return tie();
+    if(CRI_SORT==="attention"){
+      const rank=it=>_criQcFailed(it)||it.state==="blocked"?0:it.state==="draft"?1:it.state==="approved"||it.state==="posted"?3:2;
+      return rank(a)-rank(b)||tie();
+    }
+    const stamp=it=>{const t=Date.parse(it.pushed_at||"");return Number.isFinite(t)?t:0;};
+    return (CRI_SORT==="oldest"?stamp(a)-stamp(b):stamp(b)-stamp(a))||tie();
+  });
+}
+function _criSavedFeedback(it){
+  const feed=LAST.p&&LAST.p.content_review_feedback;
+  if(!feed||!Array.isArray(feed.items))return null;
+  const matches=feed.items.filter(f=>f&&typeof f==="object"&&f.script_id===it.script_id&&f.source_dir===it.source_dir);
+  return matches.length===1?matches[0]:null;
+}
+function _criFeedback(it){
+  const feed=LAST.p&&LAST.p.content_review_feedback;
+  if(!feed||!Array.isArray(feed.items))return `<div class="empty">Saved feedback is not available in this snapshot.</div>`;
+  const f=_criSavedFeedback(it);
+  if(!f)return `<div class="empty">${feed.available===false?"Feedback read incomplete — absence is not confirmed.":"No saved feedback in this snapshot."}</div>`;
+  return `<div class="empty">Saved feedback · snapshot readback, not a new decision</div>`+
+    (f.rejected_reason?`<div style="white-space:pre-wrap"><b>Rejection reason:</b> ${esc(f.rejected_reason)}</div>`:"")+
+    (f.revision_note?`<div style="white-space:pre-wrap"><b>Revision instructions:</b> ${esc(f.revision_note)}</div>`:"");
 }
 const _CRI_STATE_BADGE={draft:"badge-neutral",critiqued:"badge-warn",qc:"badge-info",approved:"badge-ok",posted:"badge-ok",blocked:"badge-bad"};
 // QC badge = verdict AND provenance together (2026-09-01, pusher's own armed-run
@@ -1175,7 +1215,7 @@ function _criDetail(it){
   const capRows=capKeys.filter(([k])=>captions[k]).map(([k,label])=>
     `<div style="margin-bottom:8px"><b style="font-size:11px;color:var(--ink-3);text-transform:uppercase">${esc(label)}</b><div style="font-size:13px;color:var(--ink-2);white-space:pre-wrap">${esc(captions[k])}</div></div>`).join("");
   const mediaId=it.artifact_id!=null
-    ? MEDIA_REG.push({path:`reels/${it.script_id}.mp4`,img:false,title:it.script_id})-1
+    ? MEDIA_REG.push({path:`reels/${it.script_id}.mp4`,revision:it.render_sha||"",img:false,title:it.script_id})-1
     : null;
   return `
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
@@ -1224,9 +1264,12 @@ function _criDetail(it){
       <div style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-2);word-break:break-all">${esc(it.provenance||"—")}</div>
     </div>
     <div class="dcard" style="margin-bottom:10px">
-      <div class="section-h" style="margin:0 0 8px">Decision note</div>
+      <div class="section-h" style="margin:0 0 8px">Feedback & revisions</div>
+      ${_criFeedback(it)}
+      <label for="cri-note">What should change, or why reject it?</label>
       <textarea id="cri-note" rows="2" data-script-id="${escAttr(String(it.script_id))}" placeholder="Why — required for Request changes / Reject"
         style="width:100%;background:var(--bg);border:1px solid var(--edge);border-radius:var(--radius-sm);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
+      <div class="empty">Sent with Request changes or Reject · 280 characters. Typing alone does not save or change approval.</div>
     </div>
     <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
       ${actBtn("content_review.approve",{script_id:it.script_id,platforms:it.platform_targets||[]},"Approve","rec",_CRI_NOT_LIVE_REASON)}
@@ -1242,19 +1285,22 @@ function viewContentReview(p){
   if(rows===null)return `<div class="status sub">Content Review</div><div class="state state-error"><b>Content review read FAILED</b>Not an empty queue — the read itself failed.</div>`;
   if(!rows.length)return `<div class="status sub">Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">videos and drafts awaiting a decision before they can post</small></div><div class="empty">Nothing in the review queue yet — the pusher hasn't run, or wave1 has no scripts.</div>`;
   const counts={all:rows.length,draft:rows.filter(r=>r.state==="draft").length,critiqued:rows.filter(r=>r.state==="critiqued").length,
-    qcfail:rows.filter(_criQcFailed).length,blocked:rows.filter(r=>r.state==="blocked").length};
-  const filtered=_criFilterRows(rows, CRI_FILTER);
+    qcfail:rows.filter(_criQcFailed).length,blocked:rows.filter(r=>r.state==="blocked").length,rejected:_criFilterRows(rows,"rejected").length};
+  const filtered=_criVisibleRows(rows);
   if(!filtered.some(r=>r.script_id===CRI_SEL)) CRI_SEL = filtered[0] ? filtered[0].script_id : null;
   const selItem=filtered.find(r=>r.script_id===CRI_SEL);
-  const filters=[["all","All"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"]];
+  const filters=[["all","All"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected (recorded)"]];
+  const channels=[...new Set(rows.map(it=>it.channel||"unknown"))].sort();
+  const sortOptions=[["recent","Recently synced"],["oldest","Oldest sync first"],["attention","Needs attention"],["channel","Channel A–Z"],["title","Item A–Z"],["views-high","Most views (48h)"],["views-low","Fewest views (48h)"]];
   const filterBar=`<div class="acts" style="margin-bottom:12px;flex-wrap:wrap">${filters.map(([k,label])=>
     `<button class="btn ${CRI_FILTER===k?"rec":""}" data-cri-filter="${escAttr(k)}">${esc(label)} · ${counts[k]}</button>`).join("")}</div>`;
+  const sortBar=`<div class="acts" style="flex-wrap:wrap;margin-bottom:12px"><label>Channel <select id="cri-channel" class="btn"><option value="all">All channels</option>${channels.map(c=>`<option value="${escAttr(c)}" ${CRI_CHANNEL===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>Sort <select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div><div class="empty">${rows.some(it=>_criViews(it)!==null)?"View rankings use recorded 48h counts; unknown values sort last. Views are not a quality score.":"Performance not collected — no best/worst performance ranking yet."} Sorting covers the loaded items only.</div>`;
   const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   if(phone){
     const idx=filtered.findIndex(r=>r.script_id===CRI_SEL);
     return `
       <div class="status sub" data-cri-room>Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${filtered.length?idx+1:0} of ${filtered.length}</small></div>
-      ${filterBar}
+      ${filterBar}${sortBar}
       ${selItem?_criDetail(selItem):`<div class="empty">No items match this filter.</div>`}
       <div class="acts" style="margin-top:4px">
         <button class="btn" data-cri-nav="prev">← Prev</button>
@@ -1263,7 +1309,7 @@ function viewContentReview(p){
   }
   return `
     <div class="status sub" data-cri-room>Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${filtered.length} waiting</small></div>
-    ${filterBar}
+    ${filterBar}${sortBar}
     <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start">
       <div>${filtered.map(it=>`
         <button class="btn" data-cri-sel="${escAttr(it.script_id)}" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;${it.script_id===CRI_SEL?"background:var(--acc-soft);border-color:var(--acc-soft-edge)":""}">
@@ -1282,22 +1328,27 @@ function viewContentReview(p){
 // under the cursor after a refetch reorders/drops it, and this makes render()'s
 // "wireContentReview id-keyed draft restore" comment true (it was previously false).
 let CRI_NOTE_DRAFT={id:null,text:""};
-function _criCaptureNoteDraft(){const ta=$("#cri-note");if(ta)CRI_NOTE_DRAFT={id:ta.dataset.scriptId||null,text:ta.value};}
+const CRI_NOTE_DRAFTS=new Map();
+function _criCaptureNoteDraft(){const ta=$("#cri-note");if(ta){CRI_NOTE_DRAFT={id:ta.dataset.scriptId||null,text:ta.value};if(CRI_NOTE_DRAFT.id)CRI_NOTE_DRAFTS.set(CRI_NOTE_DRAFT.id,ta.value);}}
 function wireContentReview(p,updatedAt,srcNote){
   const ta=$("#cri-note");
-  if(ta)ta.value=(CRI_NOTE_DRAFT.id&&CRI_NOTE_DRAFT.id===ta.dataset.scriptId)?CRI_NOTE_DRAFT.text:"";
+  if(ta){ta.value=CRI_NOTE_DRAFTS.get(ta.dataset.scriptId)||"";CRI_NOTE_DRAFT={id:ta.dataset.scriptId,text:ta.value};}
+  for(const [id,set] of [["cri-channel",v=>CRI_CHANNEL=v],["cri-sort",v=>CRI_SORT=v]]){
+    const el=document.getElementById(id);if(el)el.onchange=()=>{_criCaptureNoteDraft();set(el.value);render(p,updatedAt,srcNote);};
+  }
   document.querySelectorAll("button[data-cri-filter]").forEach(b=>{
-    b.onclick=()=>{CRI_FILTER=b.dataset.criFilter;const ta=$("#cri-note");if(ta)ta.value="";CRI_NOTE_DRAFT={id:null,text:""};render(p,updatedAt,srcNote);};
+    b.onclick=()=>{_criCaptureNoteDraft();CRI_FILTER=b.dataset.criFilter;render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-cri-sel]").forEach(b=>{
-    b.onclick=()=>{CRI_SEL=b.dataset.criSel;const ta=$("#cri-note");if(ta)ta.value="";CRI_NOTE_DRAFT={id:null,text:""};render(p,updatedAt,srcNote);};
+    b.onclick=()=>{_criCaptureNoteDraft();CRI_SEL=b.dataset.criSel;render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-cri-nav]").forEach(b=>{
     b.onclick=()=>{
-      const rows=_criFilterRows(CRI||[],CRI_FILTER);
+      _criCaptureNoteDraft();
+      const rows=_criVisibleRows(CRI||[]);
       const idx=rows.findIndex(r=>r.script_id===CRI_SEL);
       const next=rows[b.dataset.criNav==="next"?idx+1:idx-1];
-      if(next){CRI_SEL=next.script_id;const ta=$("#cri-note");if(ta)ta.value="";CRI_NOTE_DRAFT={id:null,text:""};}
+      if(next)CRI_SEL=next.script_id;
       render(p,updatedAt,srcNote);
     };
   });
@@ -1315,7 +1366,7 @@ document.addEventListener("keydown", e=>{
   // (isComposing / legacy "Process") are text entry, never shortcuts.
   if(e.isComposing||e.key==="Process")return;
   const tag=(e.target&&e.target.tagName)||"";
-  if(tag==="INPUT"||tag==="TEXTAREA")return;
+  if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(e.target&&e.target.isContentEditable))return;
   const byLabel=(re)=>[...document.querySelectorAll(".acts button.btn")].find(b=>re.test(b.textContent.trim()));
   // F2 (publish review): preventDefault whenever a shortcut key is consumed. R/X on an
   // empty note toast + ta.focus() INSIDE this keydown handler; without preventDefault the
@@ -2165,6 +2216,44 @@ function viewMachine(p, updatedAt){
       :`<div class="empty">Source status not in this snapshot.</div>`}`;
 }
 let MEDIA_REG = [];
+const REVIEW_NOTE_DRAFTS=new Map();
+function _reviewCaptureDrafts(){
+  document.querySelectorAll("textarea[data-review-note]").forEach(el=>REVIEW_NOTE_DRAFTS.set(el.dataset.reviewNote,el.value));
+}
+function _reviewRestoreDrafts(){
+  document.querySelectorAll("textarea[data-review-note]").forEach(el=>{el.value=REVIEW_NOTE_DRAFTS.get(el.dataset.reviewNote)||"";});
+}
+function _clearConfirmedReviewDraft(action,params,submittedRaw){
+  const media=action==="content_review.request_changes"||action==="content_review.reject";
+  if(!media&&action!=="artifact.decide")return;
+  const id=String(media?params.script_id:params.artifact_id);
+  const drafts=media?CRI_NOTE_DRAFTS:REVIEW_NOTE_DRAFTS;
+  const el=media?$("#cri-note"):document.querySelector(`textarea[data-review-note="${CSS.escape(id)}"]`);
+  const sameItem=el&&(media?el.dataset.scriptId===id:el.dataset.reviewNote===id);
+  if(sameItem){if(el.value!==submittedRaw)return;el.value="";}
+  if(!drafts.has(id)||drafts.get(id)===submittedRaw)drafts.delete(id);
+  if(media&&CRI_NOTE_DRAFT.id===id&&CRI_NOTE_DRAFT.text===submittedRaw)CRI_NOTE_DRAFT={id:null,text:""};
+}
+function _reviewMediaKey(m){return m&&!m.img?JSON.stringify([m.path,m.revision||""]):null;}
+function _reviewCaptureMedia(){
+  const saved=new Map();
+  document.querySelectorAll(".artmedia[data-mi]").forEach(el=>{
+    const video=el.querySelector("video"),key=_reviewMediaKey(MEDIA_REG[+el.dataset.mi]);
+    if(video&&key)saved.set(key,{video,playing:!video.paused&&!video.ended,time:video.currentTime});
+  });
+  return saved;
+}
+function _reviewRestoreMedia(saved){
+  document.querySelectorAll(".artmedia[data-mi]").forEach(el=>{
+    const key=_reviewMediaKey(MEDIA_REG[+el.dataset.mi]),old=key&&saved.get(key);
+    if(!old)return;
+    saved.delete(key);el.replaceChildren(old.video);
+    // Keep the original element/source/buffer and controls. Removal can pause
+    // playback in some browsers; resume only if it was playing before refresh.
+    if(Number.isFinite(old.time)&&old.video.currentTime!==old.time){try{old.video.currentTime=old.time;}catch{}}
+    if(old.playing&&old.video.paused){const attempt=old.video.play();if(attempt&&attempt.catch)attempt.catch(()=>{});}
+  });
+}
 function viewReview(p){
   MEDIA_REG = [];
   const rows=ARTS;
@@ -2175,14 +2264,14 @@ function viewReview(p){
     const dur=a.meta&&a.meta.durationSeconds?` · ${a.meta.durationSeconds}s`:"";
     return `<div class="dcard" data-art="${escAttr(a.id)}">
       <div class="q">${esc(a.title)}<span style="color:var(--ink-3);font-weight:400;font-size:11.5px"> · ${esc(a.kind)}${esc(dur)} · ${esc(ago(a.created_at))}</span></div>
-      ${a.kind==="reel"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,img:false,title:a.title})-1}" style="margin:10px 0;background:#000;border-radius:8px;max-width:280px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`:""}
+      ${a.kind==="reel"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,revision:a.content_sha||(a.meta&&a.meta.render_sha)||a.created_at||"",img:false,title:a.title})-1}" style="margin:10px 0;background:#000;border-radius:8px;max-width:280px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`:""}
       ${a.kind==="image"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,img:true,title:a.title})-1}" style="margin:10px 0;aspect-ratio:16/9;max-width:400px;background:var(--surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">loading…</div>`:""}
       ${a.status==="pending"
-        ?`<div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
-        :`<div class="why">decided: ${esc(JSON.stringify(a.decision||{}).slice(0,80))}</div>`}
+        ?`<div style="margin:12px 0"><label for="review-note-${escAttr(a.id)}">Feedback & revisions — what should change, or why reject?</label><textarea id="review-note-${escAttr(a.id)}" data-review-note="${escAttr(a.id)}" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional feedback · sent with your decision"></textarea><div class="empty">Up to 1,000 characters. Typing alone does not save; submitting records this decision, not a publishing approval.</div></div><div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
+        :`<div class="why">Decision: ${esc(a.decision&&a.decision.choice||"not recorded")}</div><div style="white-space:pre-wrap">${a.decision&&a.decision.note?`<b>Feedback:</b> ${esc(a.decision.note)}`:`<span class="empty">No feedback recorded.</span>`}</div>`}
     </div>`;};
   return `
-    <div class="status sub">Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">everything lands here — no other tabs</small></div>
+    <div class="status sub">Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">artifact decisions · production videos are in Content Review</small></div>
     ${rows===null?`<div class="empty">Shelf read failed — not an empty shelf.</div>`:""}
     <h4 class="section-h">WAITING ON YOU — ${pend.length}</h4>
     <div class="cards">${pend.length?pend.map(card).join(""):`<div class="empty">Nothing waiting for review.</div>`}</div>
@@ -2199,9 +2288,10 @@ function _mediaPlaying(){
 async function _hydrateOne(el,m){
   const epoch=PORTAL_EPOCH;
   if(!m){el.textContent="media unavailable";return}
+  if(el.querySelector("video"))return; // restored same-revision player
   if(!_mediaPathOk(m.path)){el.textContent="bad media path";return} // F5: no request
   const u=await signedUrl(m.path);
-  if(!_portalReadCurrent(epoch)||!el.isConnected)return;
+  if(!_portalReadCurrent(epoch)||!el.isConnected||el.querySelector("video"))return;
   if(!u){el.textContent="media unavailable";return}
   // F6: element construction via DOM APIs, never URL-in-innerHTML
   const node=document.createElement(m.img?"img":"video");
@@ -2943,10 +3033,11 @@ function wireRouterForm(){
       if(receipt.disposition==="held"){
         ROUTER_DRAFT.message=`Task #${receipt.work_id} has a content conflict. Nothing new was queued; ask the supervisor to resolve it.`;
       }else{
-        ROUTER_DRAFT.message=`Recorded as task #${receipt.work_id} (${receipt.disposition}). Not dispatched. See its owner and status below.`;
+        ROUTER_DRAFT.message=`Recorded as task #${receipt.work_id} (${receipt.disposition}). Not dispatched by this submission; worker pickup and a reply are not confirmed.`;
         ROUTER_DRAFT.text="";ROUTER_DRAFT.packet=null;ROUTER_DRAFT.rejected=false;
         await loadWorkDetail(receipt.work_id);
         if(epoch!==ROUTER_DRAFT.epoch)return;
+        if(!WORK_DETAIL||WORK_DETAIL.state!=="ready")ROUTER_DRAFT.message+=` Task details could not be read. Keep receipt #${receipt.work_id} and use Inspect to retry the read; do not resubmit the task.`;
         await loadWork();
       }
     }catch{
@@ -3666,6 +3757,8 @@ function render(p, updatedAt, srcNote){
   // Async callers may finish after teardown. Never paint an operator surface
   // with a cleared snapshot or a missing session.
   if(!p||!_portalReadCurrent(PORTAL_EPOCH))return;
+  const mediaSnapshot=_reviewCaptureMedia();
+  _reviewCaptureDrafts();
   _revCaptureDraft();  // before the innerHTML rebuild below can wipe it — see wireRevenueForm's C-1 comment
   _criCaptureNoteDraft();  // same rebuild-survival for the content-review note textarea
   _tixCaptureNoteDraft();  // and the tickets-room revise note
@@ -3676,8 +3769,8 @@ function render(p, updatedAt, srcNote){
   // focus+caret here and restore at the end of render(), so a keystroke that
   // straddles a rebuild lands back in the textarea, never on the shortcut layer.
   const _ae=document.activeElement;
-  const _focusSnap=(_ae&&(_ae.tagName==="INPUT"||_ae.tagName==="TEXTAREA")&&_ae.id&&_ae.closest("#app"))
-    ?{id:_ae.id,s:_ae.selectionStart,e:_ae.selectionEnd,tid:_ae.dataset.ticketId||null}:null;
+  const _focusSnap=(_ae&&["INPUT","TEXTAREA","SELECT"].includes(_ae.tagName)&&_ae.id&&_ae.closest("#app"))
+    ?{id:_ae.id,s:_ae.selectionStart,e:_ae.selectionEnd,tid:_ae.dataset.ticketId||null,sid:_ae.dataset.scriptId||null,aid:_ae.dataset.reviewNote||null}:null;
   ACTS_REG = [];
   CUR_ALLOWLIST = Array.isArray(p.action_allowlist) ? p.action_allowlist : null;
   const ctos=ctosPulse(p);
@@ -3729,6 +3822,8 @@ function render(p, updatedAt, srcNote){
       if(seq===PORTAL_READ_SEQ||!LAST.p)render(p,updatedAt,srcNote);
       else render(LAST.p,LAST.updatedAt,LAST.srcNote);
     }};});
+  _reviewRestoreMedia(mediaSnapshot);
+  _reviewRestoreDrafts();
   if(VIEW==="review"||VIEW==="content_review"||VIEW==="decisions")hydrateMedia();
   if(VIEW==="decisions"||VIEW==="command")wireDecisions(p,updatedAt,srcNote);
   if(VIEW==="command")wireOpsBrief(p,updatedAt,srcNote);
@@ -3761,6 +3856,16 @@ function render(p, updatedAt, srcNote){
       const reg=ACTS_REG[+b.dataset.i];
       if(!reg){toast("Stale button — refresh","err");return}
       let params=reg.params||{};
+      let reviewSubmittedRaw=null;
+      if(reg.action==="artifact.decide"){
+        const ta=document.querySelector(`textarea[data-review-note="${CSS.escape(String(params.artifact_id))}"]`);
+        const note=ta?ta.value:"";
+        reviewSubmittedRaw=note;
+        if(Array.from(note).length>1000||/[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/.test(note)){
+          toast("Feedback must be at most 1,000 characters, with no control characters except newlines/tabs","err");if(ta)ta.focus();return;
+        }
+        if(note.trim())params=Object.assign({},params,{note});
+      }
       // 2026-09-01 security review HIGH: the worker REQUIRES a non-empty `note`
       // (request_changes) / `reason` (reject) — a bare {script_id} row enqueues
       // and then fails on drain, a dead tap. Read the inline textarea at CLICK
@@ -3771,6 +3876,7 @@ function render(p, updatedAt, srcNote){
       const isCriNoteAction=reg.action==="content_review.request_changes"||reg.action==="content_review.reject";
       if(isCriNoteAction){
         const ta=$("#cri-note");
+        reviewSubmittedRaw=ta?ta.value:"";
         // Sanitize to what _review_note_ok will actually ACCEPT (single line,
         // no control chars, no backslash, <=280) — a pasted tab or a Windows
         // path must not enqueue a row that only fails 2 minutes later on drain.
@@ -3841,12 +3947,14 @@ function render(p, updatedAt, srcNote){
           // point regardless of drain state. Deleted on "failed" so a genuinely
           // failed action stays retryable — the "done" add is now a harmless no-op.
           if(st==="queued"){toast("Queued…");ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
-            if(isCriNoteAction){const ta=$("#cri-note");if(ta)ta.value="";CRI_NOTE_DRAFT={id:null,text:""};}
+            // Keep feedback until confirmed processing; queued is not saved.
             if(isTixNoteAction){const ta=$("#tix-note");if(ta)ta.value="";TIX_NOTE_DRAFT={id:null,text:""};}}
           else if(st==="processing")toast("Running…");
           else if(st==="done"){
             toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
             ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
+            if(isCriNoteAction){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(loadContentReview);}
+            if(reg.action==="artifact.decide"){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(loadArtifacts);}
             if(reg.action.startsWith("ticket.")&&params.id){
               // ONLY approve/reject resolve a ticket (security review F2). `revise` records
               // a note and leaves the ticket OPEN and still awaiting the operator's word —
@@ -3875,7 +3983,9 @@ function render(p, updatedAt, srcNote){
     // or dropped the row under the operator), do NOT move focus into the other ticket's note
     // — continuing keystrokes would silently become that ticket's revise note. Non-ticket
     // fields (no data-ticket-id) restore unconditionally, as before.
-    if(el && (!_focusSnap.tid || el.dataset.ticketId===_focusSnap.tid)){
+    if(el && (!_focusSnap.tid || el.dataset.ticketId===_focusSnap.tid)
+       && (!_focusSnap.sid || el.dataset.scriptId===_focusSnap.sid)
+       && (!_focusSnap.aid || el.dataset.reviewNote===_focusSnap.aid)){
       el.focus({preventScroll:true});try{el.setSelectionRange(_focusSnap.s,_focusSnap.e);}catch{}
     }
   }
@@ -3923,6 +4033,8 @@ async function loadAndRender(reason){
       if(!current())return;
       if(WORK_SELECTED!=null)await loadWorkDetail(WORK_SELECTED);
     }
+    if(VIEW==="review")await loadArtifacts();
+    if(VIEW==="content_review")await loadContentReview();
     if(!current())return;
     render(LAST.p,LAST.updatedAt,LAST.srcNote);
     if(reason==="manual")toast("Refreshed");
@@ -3949,7 +4061,7 @@ function _reclassifyExceptions(){
 // (fresh data beats the age pill, and render()'s focus snapshot covers it).
 function _typingActive(){
   const el=document.activeElement;
-  return !!(el&&(el.tagName==="INPUT"||el.tagName==="TEXTAREA")&&el.closest("#app"));
+  return !!(el&&(["INPUT","TEXTAREA","SELECT"].includes(el.tagName)||el.isContentEditable)&&el.closest("#app"));
 }
 function _cosmeticTick(){
   // F1 (publish review): a dead session (signed out / expired → no token) must not
@@ -4060,11 +4172,11 @@ function _resetPortalState(){
   // operator's half-typed drafts/selection/view leak into the next session (repro: type a
   // revise note, sign out, log back in same tab, open Tickets → the note was restored). The
   // draft vars are the sensitive ones; the rest is a clean-slate so nothing carries over.
-  TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};REV_DRAFT=null;REV_PENDING=false;
+  TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFTS.clear();REVIEW_NOTE_DRAFTS.clear();REV_DRAFT=null;REV_PENDING=false;
   Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="all";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="all";CRI_CHANNEL="all";CRI_SORT="recent";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -4103,4 +4215,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 614847752ef6 -->
+<!-- rankwise-portal2-version: b91f599aa477 -->
