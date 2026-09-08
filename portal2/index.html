@@ -841,8 +841,8 @@ async function enqueueAction(action, params, onstate){
   if(!r.ok){const err=new Error("enqueue "+r.status);err.status=r.status;throw err;}
   const rows=await r.json(); const id=rows&&rows[0]&&rows[0].id;
   if(!current())return;
-  if(id==null){onstate&&onstate("queued");return}
-  onstate&&onstate("queued");
+  if(id==null){onstate&&onstate("queued",null,null);return}
+  onstate&&onstate("queued",null,id);
   // The worker is scheduled every two minutes. Watch beyond one full worker
   // interval so a normal action does not fall into a false "still queued"
   // state seconds before its authoritative receipt arrives.
@@ -852,11 +852,11 @@ async function enqueueAction(action, params, onstate){
     let row; try{row=await rest("operator_action_queue?id=eq."+encodeURIComponent(String(id))+"&select=id,status,result")}catch{break}
     if(!current())return;
     const st=row&&row[0]&&String(row[0].status||"");
-    if(st==="processing"){onstate&&onstate("processing");}
-    if(st==="done"){onstate&&onstate("done");return}
-    if(st==="failed"){onstate&&onstate("failed",row[0].result);return}
+    if(st==="processing"){onstate&&onstate("processing",null,id);}
+    if(st==="done"){onstate&&onstate("done",null,id);return}
+    if(st==="failed"){onstate&&onstate("failed",row[0].result,id);return}
   }
-  if(current())onstate&&onstate("still-queued");
+  if(current())onstate&&onstate("still-queued",null,id);
 }
 
 // ── payload → view models. Shapes verified against the LIVE snapshot 2026-08-26:
@@ -1181,6 +1181,214 @@ function _criFeedback(it){
     (f.rejected_reason?`<div style="white-space:pre-wrap"><b>Rejection reason:</b> ${esc(f.rejected_reason)}</div>`:"")+
     (f.revision_note?`<div style="white-space:pre-wrap"><b>Revision instructions:</b> ${esc(f.revision_note)}</div>`:"");
 }
+// Saved revision notes are a separate, versioned record.  They are never a
+// decision reason and remain local drafts until snapshot history proves a save.
+const REVIEW_SAVED_NOTE_DRAFTS=new Map(), REVIEW_SAVED_NOTE_PENDING=new Map();
+let REVIEW_NOTES_SNAPSHOT=null;
+function _savedNoteTarget(kind,it){
+  return kind==="media"?{kind:"media",id:typeof it.script_id==="string"?it.script_id:"",source_dir:String(it.source_dir||"")}:{kind:"artifact",id:String(it.id)};
+}
+function _savedNoteKey(target){
+  if(!target||typeof target.id!=="string")return "";
+  if(target.kind==="artifact"&&/^[1-9][0-9]*$/.test(target.id))
+    return JSON.stringify(["artifact",target.id]);
+  if(target.kind==="media"&&/^[a-z0-9][a-z0-9-]{0,80}$/.test(target.id)&&
+     typeof target.source_dir==="string"&&/^vault\/Clients\/Rankwise\/Content\/Scripts\/[^\\]+$/.test(target.source_dir)&&
+     !/[\u0000-\u001f\u007f-\u009f]/.test(target.source_dir)&&
+     !target.source_dir.split("/").some(x=>!x||x==="."||x===".."))
+    return JSON.stringify(["media",target.id,target.source_dir]);
+  return "";
+}
+function _savedNoteFromKey(key){
+  try{const a=JSON.parse(key),t=a[0]==="media"&&a.length===3?{kind:"media",id:a[1],source_dir:a[2]}:
+    a[0]==="artifact"&&a.length===2?{kind:"artifact",id:a[1]}:null;return _savedNoteKey(t)===key?t:null;}catch{return null;}
+}
+function _savedNoteRevision(kind,it){return kind==="media"?(it.render_sha||null):(it.content_sha||it.created_at||null);}
+function _savedCurrentRevision(target){
+  const rows=target.kind==="media"?CRI:ARTS;
+  const found=(rows||[]).filter(x=>x&&(target.kind==="media"?
+    String(x.script_id)===target.id&&String(x.source_dir)===target.source_dir:String(x.id)===target.id));
+  return found.length===1?_savedNoteRevision(target.kind,found[0]):undefined;
+}
+function _savedNoteTextValid(text){
+  return typeof text==="string"&&Array.from(text).length<=1000&&
+    !Array.from(text).some(c=>{const n=c.codePointAt(0);return (n<32&&n!==9&&n!==10)||(n>=127&&n<=159)||(n>=0xd800&&n<=0xdfff);});
+}
+function _savedNoteValid(target,item){
+  if(!item||!_savedNoteKey(target)||_savedNoteKey(item.target)!==_savedNoteKey(target)||
+     !Number.isSafeInteger(item.version)||item.version<1||item.version>100||
+     !_savedNoteTextValid(item.note)||!(item.content_revision===null||typeof item.content_revision==="string")||
+     !Array.isArray(item.history)||item.history.length!==item.version)return false;
+  const ids=new Set();
+  if(!item.history.every((h,i)=>{
+    if(!h||h.version!==i+1||!_savedNoteTextValid(h.note)||
+       !(h.content_revision===null||typeof h.content_revision==="string")||
+       !Number.isSafeInteger(h.request_id)||h.request_id<=0||ids.has(h.request_id)||
+       typeof h.author_id!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(h.author_id)||
+       typeof h.time!=="string"||!Number.isFinite(Date.parse(h.time)))return false;
+    ids.add(h.request_id);return true;
+  }))return false;
+  const last=item.history[item.history.length-1];
+  return last.note===item.note&&last.content_revision===item.content_revision;
+}
+function _savedNoteLookup(target){
+  const f=REVIEW_NOTES_SNAPSHOT,key=_savedNoteKey(target);
+  if(!key||!f||f.available!==true||f.truncated!==false||
+     !(f.errors===0||(Array.isArray(f.errors)&&f.errors.length===0))||!Array.isArray(f.items))
+    return {available:false,item:null};
+  const seen=new Set();let item=null;
+  for(const x of f.items){
+    const k=x&&_savedNoteKey(x.target);
+    if(!k||seen.has(k)||!_savedNoteValid(x.target,x))return {available:false,item:null};
+    seen.add(k);if(k===key)item=x;
+  }
+  return {available:true,item};
+}
+function _savedNoteItem(target){return _savedNoteLookup(target).item;}
+function _savedNoteReady(target,revision){return revision!==undefined&&_savedNoteLookup(target).available;}
+function _savedNoteEnabled(target){
+  const action=target.kind==="media"?"content_review.save_notes":"artifact.save_notes";
+  return !DEV&&Array.isArray(CUR_ALLOWLIST)&&CUR_ALLOWLIST.includes(action)&&!!RWSession.sessionIdentity();
+}
+function _savedNoteDraft(target,revision){
+  const key=_savedNoteKey(target),read=_savedNoteLookup(target),item=read.item;
+  let d=REVIEW_SAVED_NOTE_DRAFTS.get(key);
+  if(!d){
+    d={text:item?item.note:"",baseText:item?item.note:"",baseVersion:read.available?(item?item.version:0):null,
+       revision,dirty:false,state:"idle"};
+    REVIEW_SAVED_NOTE_DRAFTS.set(key,d);
+  }else if(!d.dirty&&!REVIEW_SAVED_NOTE_PENDING.has(key)&&read.available&&d.state!=="conflict"){
+    d.text=item?item.note:"";d.baseText=d.text;d.baseVersion=item?item.version:0;d.revision=revision;
+  }
+  return d;
+}
+function _savedNoteCapture(){
+  document.querySelectorAll("textarea[data-saved-note-key]").forEach(el=>{
+    const d=REVIEW_SAVED_NOTE_DRAFTS.get(el.dataset.savedNoteKey);
+    if(d){d.text=el.value;d.dirty=d.text!==d.baseText;}
+  });
+}
+function _savedNoteReadback(target,pending){
+  const item=_savedNoteItem(target);
+  return !!(item&&pending.queueId&&item.history.some(h=>h.request_id===pending.queueId&&
+    h.note===pending.note&&h.content_revision===pending.revision&&h.version===pending.version));
+}
+function _savedNoteReconcile(){
+  for(const [key,pending] of REVIEW_SAVED_NOTE_PENDING){
+    const item=_savedNoteItem(pending.target),d=REVIEW_SAVED_NOTE_DRAFTS.get(key);
+    if(!_savedNoteReadback(pending.target,pending))continue;
+    REVIEW_SAVED_NOTE_PENDING.delete(key);
+    if(!d)continue;
+    if(item.version===pending.version){
+      d.baseVersion=item.version;d.baseText=item.note;d.dirty=d.text!==item.note;d.state="idle";
+      toast(d.dirty?"Earlier note saved; your newer draft is retained.":"Saved revision note confirmed.");
+    }else{
+      d.dirty=true;d.state="conflict";
+      toast("Earlier note saved; a newer saved version also exists. Your draft is retained.");
+    }
+  }
+}
+function _savedNoteState(target,d){
+  const key=_savedNoteKey(target),pending=REVIEW_SAVED_NOTE_PENDING.get(key),read=_savedNoteLookup(target);
+  const revision=_savedCurrentRevision(target),version=read.item?read.item.version:0;
+  const conflict=d.state==="conflict"||d.revision!==revision||(read.available&&d.baseVersion!==version);
+  let status;
+  if(pending)status=pending.state==="Unknown outcome"?
+    "Submission outcome unknown. Draft retained; inspect the action queue before retrying.":
+    pending.state+" — not saved until exact history readback.";
+  else if(!read.available)status="Saved notes are unavailable or incomplete in this snapshot.";
+  else if(conflict)status="Conflict: content or saved notes changed. Your draft is retained; use Reload latest to discard it deliberately.";
+  else if(d.state==="failed")status="Save failed. Draft retained; you can retry.";
+  else if(d.dirty)status="Unsaved draft — not saved.";
+  else status=read.item?"Saved v"+version+" · history below.":"No saved revision note yet.";
+  if(d.baseVersion>=100)status+=" History limit reached; saving is held without pruning old edits.";
+  if(!_savedNoteEnabled(target)&&!pending)status+=" Notes-only saving is not enabled.";
+  return {status,canSave:_savedNoteEnabled(target)&&read.available&&!conflict&&!pending&&
+    Number.isSafeInteger(d.baseVersion)&&d.baseVersion>=0&&d.baseVersion<100};
+}
+function _savedNotePanel(kind,it){
+  const target=_savedNoteTarget(kind,it),key=_savedNoteKey(target),revision=_savedNoteRevision(kind,it);
+  if(!key)return '<div class="empty">Saved notes unavailable: item identity is invalid.</div>';
+  const d=_savedNoteDraft(target,revision),state=_savedNoteState(target,d),item=_savedNoteItem(target);
+  const history=item?'<details><summary>History · '+item.history.length+' version(s)</summary>'+
+    item.history.slice().reverse().map(h=>'<div style="white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0">v'+esc(h.version)+
+      ' · '+esc(h.time)+' · Operator '+esc(h.author_id)+'<br>'+esc(h.note||"(cleared)")+'</div>').join("")+'</details>':"";
+  return '<div class="saved-revision-notes" style="border-top:1px solid var(--edge);margin-top:12px;padding-top:12px">'+
+    '<div class="section-h" style="margin:0 0 6px">Saved revision notes</div>'+
+    '<label for="saved-note-'+escAttr(key)+'">Notes only — does not submit a decision or request a revision</label>'+
+    '<textarea id="saved-note-'+escAttr(key)+'" data-saved-note-key="'+escAttr(key)+'" rows="2" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional private notes"></textarea>'+
+    '<div class="empty" data-saved-note-status role="status">'+esc(state.status)+'</div>'+
+    '<div class="empty">Up to 1,000 characters. An empty save clears the note and retains history. Unsaved text stays in this tab only.</div>'+
+    '<div class="acts"><button class="btn" data-saved-note-save="'+escAttr(key)+'" '+(state.canSave?"":"disabled")+'>Save notes</button>'+
+    '<button class="btn" data-saved-note-reload="'+escAttr(key)+'">Reload latest</button></div>'+history+'</div>';
+}
+function _savedNotePaint(el,target,d){
+  const state=_savedNoteState(target,d),panel=el.closest(".saved-revision-notes");
+  if(!panel)return;
+  panel.querySelector("[data-saved-note-status]").textContent=state.status;
+  panel.querySelector("[data-saved-note-save]").disabled=!state.canSave;
+}
+function _wireSavedNotes(){
+  document.querySelectorAll("textarea[data-saved-note-key]").forEach(el=>{
+    const key=el.dataset.savedNoteKey,d=REVIEW_SAVED_NOTE_DRAFTS.get(key),target=_savedNoteFromKey(key);
+    if(!d||!target)return;
+    el.value=d.text;
+    el.oninput=()=>{d.text=el.value;d.dirty=d.text!==d.baseText;_savedNotePaint(el,target,d);};
+  });
+  document.querySelectorAll("button[data-saved-note-reload]").forEach(b=>b.onclick=()=>{
+    _savedNoteCapture();
+    const key=b.dataset.savedNoteReload,target=_savedNoteFromKey(key),d=REVIEW_SAVED_NOTE_DRAFTS.get(key);
+    if(!target||!d)return;
+    if(REVIEW_SAVED_NOTE_PENDING.has(key))return toast("A save is unresolved. Refresh saved state or inspect the action queue; no duplicate request was sent.","err");
+    const read=_savedNoteLookup(target),revision=_savedCurrentRevision(target);
+    if(!read.available||revision===undefined)return toast("Latest saved notes are unavailable; refresh the portal first.","err");
+    if(d.dirty&&!confirm("Discard this unsaved revision-note draft and load the latest snapshot version?"))return;
+    const item=read.item;
+    Object.assign(d,{text:item?item.note:"",baseText:item?item.note:"",baseVersion:item?item.version:0,revision,dirty:false,state:"idle"});
+    const el=b.closest(".saved-revision-notes").querySelector("textarea");el.value=d.text;
+    render(LAST.p,LAST.updatedAt,LAST.srcNote);
+  });
+  document.querySelectorAll("button[data-saved-note-save]").forEach(b=>b.onclick=async()=>{
+    _savedNoteCapture();
+    const key=b.dataset.savedNoteSave,target=_savedNoteFromKey(key),d=REVIEW_SAVED_NOTE_DRAFTS.get(key);
+    if(!target||!d||!_savedNoteState(target,d).canSave)return;
+    if(!_savedNoteTextValid(d.text))return toast("Notes need at most 1,000 characters with no invalid control characters.","err");
+    const action=target.kind==="media"?"content_review.save_notes":"artifact.save_notes";
+    const params=target.kind==="media"?
+      {script_id:target.id,source_dir:target.source_dir,content_revision:d.revision,note:d.text,expected_version:d.baseVersion}:
+      {artifact_id:Number(target.id),content_revision:d.revision,note:d.text,expected_version:d.baseVersion};
+    // Capture BEFORE awaiting POST. User input and redraws can continue meanwhile.
+    const pending={target,note:params.note,revision:params.content_revision,version:params.expected_version+1,queueId:null,state:"Submitting"};
+    const epoch=PORTAL_EPOCH;
+    REVIEW_SAVED_NOTE_PENDING.set(key,pending);
+    render(LAST.p,LAST.updatedAt,LAST.srcNote);
+    const current=()=>_portalReadCurrent(epoch)&&REVIEW_SAVED_NOTE_PENDING.get(key)===pending;
+    try{
+      await enqueueAction(action,params,(st,detail,queueId)=>{
+        if(!current())return;
+        if(Number.isSafeInteger(queueId)&&queueId>0)pending.queueId=queueId;
+        if(st==="failed"){
+          REVIEW_SAVED_NOTE_PENDING.delete(key);
+          d.state=/conflict/i.test(String(detail||""))?"conflict":"failed";
+          toast("Save failed — draft retained.","err");
+        }else if(st==="done"){
+          pending.state="Done — verifying";
+          // Queue finalization precedes the batched snapshot push. Later refresh
+          // can confirm; failure to fetch now must never erase the pending state.
+          loadAndRender("notes-readback").catch(()=>{});
+        }else{
+          pending.state=st==="queued"?(pending.queueId?"Queued":"Unknown outcome"):
+            st==="processing"?"Processing":st==="still-queued"?"Still queued":"Unknown outcome";
+          if(st==="queued")toast("Queued — not saved until snapshot readback.");
+        }
+        render(LAST.p,LAST.updatedAt,LAST.srcNote);
+      });
+      if(current()&&!pending.queueId){pending.state="Unknown outcome";render(LAST.p,LAST.updatedAt,LAST.srcNote);}
+    }catch{
+      if(current()){pending.state="Unknown outcome";render(LAST.p,LAST.updatedAt,LAST.srcNote);}
+    }
+  });
+}
 const _CRI_STATE_BADGE={draft:"badge-neutral",critiqued:"badge-warn",qc:"badge-info",approved:"badge-ok",posted:"badge-ok",blocked:"badge-bad"};
 // QC badge = verdict AND provenance together (2026-09-01, pusher's own armed-run
 // warning: every wave-1 row is verdict=pass/source=inferred — filename shape,
@@ -1253,7 +1461,9 @@ function _criDetail(it){
       ${actBtn("content_review.request_changes",{script_id:it.script_id},"Request changes","",_CRI_NOT_LIVE_REASON)}
       ${actBtn("content_review.reject",{script_id:it.script_id},"Reject","",_CRI_NOT_LIVE_REASON)}
       ${actBtn("content_review.watched",{script_id:it.script_id},"Watched","",_CRI_NOT_LIVE_REASON)}
-    </div></div>
+    </div>
+      ${_savedNotePanel("media",it)}
+    </div>
     </div>
     <div class="dcard" style="margin-bottom:10px">
       <div class="section-h" style="margin:0 0 8px">QC</div>
@@ -2281,6 +2491,7 @@ function viewReview(p){
       ${a.status==="pending"
         ?`<div style="margin:12px 0"><label for="review-note-${escAttr(a.id)}">Feedback & revisions — what should change, or why reject?</label><textarea id="review-note-${escAttr(a.id)}" data-review-note="${escAttr(a.id)}" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional feedback · sent with your decision"></textarea><div class="empty">Up to 1,000 characters. Typing alone does not save; submitting records this decision, not a publishing approval.</div></div><div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
         :`<div class="why">Decision: ${esc(a.decision&&a.decision.choice||"not recorded")}</div><div style="white-space:pre-wrap">${a.decision&&a.decision.note?`<b>Feedback:</b> ${esc(a.decision.note)}`:`<span class="empty">No feedback recorded.</span>`}</div>`}
+      ${_savedNotePanel("artifact",a)}
       </div></div>
     </div>`;};
   return `
@@ -3772,6 +3983,9 @@ function render(p, updatedAt, srcNote){
   if(!p||!_portalReadCurrent(PORTAL_EPOCH))return;
   const mediaSnapshot=_reviewCaptureMedia();
   _reviewCaptureDrafts();
+  _savedNoteCapture();
+  REVIEW_NOTES_SNAPSHOT=p.review_notes||null;
+  _savedNoteReconcile();
   _revCaptureDraft();  // before the innerHTML rebuild below can wipe it — see wireRevenueForm's C-1 comment
   _criCaptureNoteDraft();  // same rebuild-survival for the content-review note textarea
   _tixCaptureNoteDraft();  // and the tickets-room revise note
@@ -3783,7 +3997,7 @@ function render(p, updatedAt, srcNote){
   // straddles a rebuild lands back in the textarea, never on the shortcut layer.
   const _ae=document.activeElement;
   const _focusSnap=(_ae&&["INPUT","TEXTAREA","SELECT"].includes(_ae.tagName)&&_ae.id&&_ae.closest("#app"))
-    ?{id:_ae.id,s:_ae.selectionStart,e:_ae.selectionEnd,tid:_ae.dataset.ticketId||null,sid:_ae.dataset.scriptId||null,aid:_ae.dataset.reviewNote||null}:null;
+    ?{id:_ae.id,s:_ae.selectionStart,e:_ae.selectionEnd,tid:_ae.dataset.ticketId||null,sid:_ae.dataset.scriptId||null,aid:_ae.dataset.reviewNote||null,nid:_ae.dataset.savedNoteKey||null}:null;
   ACTS_REG = [];
   CUR_ALLOWLIST = Array.isArray(p.action_allowlist) ? p.action_allowlist : null;
   const ctos=ctosPulse(p);
@@ -3844,6 +4058,7 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="tickets")wireTicketsNav(p,updatedAt,srcNote);
   if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
   if(VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
+  if(VIEW==="review"||VIEW==="content_review")_wireSavedNotes();
   if(VIEW==="business")wireRevenueForm();
   if(VIEW==="work"){
     wireRouterForm();wireWorkSelection();
@@ -3998,7 +4213,8 @@ function render(p, updatedAt, srcNote){
     // fields (no data-ticket-id) restore unconditionally, as before.
     if(el && (!_focusSnap.tid || el.dataset.ticketId===_focusSnap.tid)
        && (!_focusSnap.sid || el.dataset.scriptId===_focusSnap.sid)
-       && (!_focusSnap.aid || el.dataset.reviewNote===_focusSnap.aid)){
+       && (!_focusSnap.aid || el.dataset.reviewNote===_focusSnap.aid)
+       && (!_focusSnap.nid || el.dataset.savedNoteKey===_focusSnap.nid)){
       el.focus({preventScroll:true});try{el.setSelectionRange(_focusSnap.s,_focusSnap.e);}catch{}
     }
   }
@@ -4185,7 +4401,7 @@ function _resetPortalState(){
   // operator's half-typed drafts/selection/view leak into the next session (repro: type a
   // revise note, sign out, log back in same tab, open Tickets → the note was restored). The
   // draft vars are the sensitive ones; the rest is a clean-slate so nothing carries over.
-  TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFTS.clear();REVIEW_NOTE_DRAFTS.clear();REV_DRAFT=null;REV_PENDING=false;
+  TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFTS.clear();REVIEW_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_PENDING.clear();REVIEW_NOTES_SNAPSHOT=null;REV_DRAFT=null;REV_PENDING=false;
   Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
@@ -4228,4 +4444,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: b74e94a3f6fa -->
+<!-- rankwise-portal2-version: 20bfba7b1cca -->
