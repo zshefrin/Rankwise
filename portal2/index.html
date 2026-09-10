@@ -2352,6 +2352,35 @@ function _smsEnquiryValidMessage(t){
 function _smsEnquiryAllowed(action){
   return Array.isArray(CUR_ALLOWLIST)&&CUR_ALLOWLIST.includes(action);
 }
+function _smsDisplaySubject(){
+  const exact=_currentOperatorSubject();
+  if(exact)return exact;
+  // Display-only fallback for an identity transition. Never use a decoded token
+  // to authorize preview: only sessionIdentity's exact sub/session/role tuple can.
+  try{
+    const part=String(RWSession.tok()||'').split('.')[1];
+    const raw=atob(part.replace(/-/g,'+').replace(/_/g,'/'));
+    const value=JSON.parse(raw);
+    return value&&_routerUuid(value.sub)&&value.app_metadata?.role==='operator'?value.sub:null;
+  }catch{return null}
+}
+function _smsProjectedAssignment(t,m){
+  if(t?.assignment_mode!=='solo_owner'||!m)return null;
+  const a=t.assignment,actor=_currentOperatorSubject();
+  return a&&a.state==='assigned'&&_routerUuid(a.owner)&&Number.isSafeInteger(a.work_id)&&a.work_id>0&&a.owner===actor
+    ?{work_id:a.work_id,owner:a.owner,projected:true}:null;
+}
+function _smsEnquiryAssignment(t,m){
+  return t?.assignment_mode==='solo_owner'?_smsProjectedAssignment(t,m):(m&&SMS_ENQUIRY_ASSIGNMENTS.get(m.id));
+}
+function _smsSoloAssignmentLabel(t){
+  const a=t?.assignment;
+  if(a&&a.state==='assigned'&&_routerUuid(a.owner)&&Number.isSafeInteger(a.work_id)&&a.work_id>0){
+    return `Follow-up #${esc(a.work_id)} — assigned to ${a.owner===_smsDisplaySubject()?'you':'another operator'}.`;
+  }
+  if(a&&(a.state==='pending'||a.state==='held'))return 'Automatic assignment awaiting refresh.';
+  return 'Assignment could not be verified — awaiting refresh.';
+}
 function _smsReplyComposer(t){
   return `<form id="sms-reply-form" style="margin:16px 0">
     <label for="sms-reply-body">Draft a business reply</label>
@@ -2359,11 +2388,14 @@ function _smsReplyComposer(t){
     <p>${t.optout?'This number has opted out. Replies are blocked.':'Review the recipient and full message before sending.'}</p>
     <button type="submit" ${t.optout?'disabled':''}>Preview reply</button>
     <div id="sms-reply-preview" role="status">${esc(SMS_REPLY_RECEIPTS.get(t.from_number)||'')}</div>
-    ${(()=>{const m=_smsEnquiryValidMessage(t),a=m&&SMS_ENQUIRY_ASSIGNMENTS.get(m.id),saved=m&&SMS_ENQUIRY_PREVIEWS.get(m.id),busy=m&&SMS_ENQUIRY_BUSY.has(m.id);
-      const v=saved&&saved.sender===m.to_number&&saved.recipient===t.from_number&&saved.fullbody===(SMS_DRAFTS.get(t.from_number)||'').trim()+'\nReply STOP to opt out. Rankwise, rankwise.ca'?saved:null;
-      return !m||!_smsEnquiryAllowed('business_sms.assign')?'':`<div id="sms-enquiry-tools" style="margin-top:14px">
-      <button type="button" id="sms-enquiry-assign" ${a||busy?'disabled':''}>${a?'Follow-up assigned':'Assign to me / recover follow-up'}</button>
-      <span id="sms-enquiry-assignment">${a?`Follow-up #${esc(a.work_id)} — assigned to you.`:busy?'Assignment pending — not yet confirmed.':'Explicit assignment required before a verified draft.'}</span>
+    ${(()=>{const m=_smsEnquiryValidMessage(t),solo=t.assignment_mode==='solo_owner',a=_smsEnquiryAssignment(t,m),busy=m&&SMS_ENQUIRY_BUSY.has(m.id);
+      for(const [id,old] of SMS_ENQUIRY_PREVIEWS)if(old?.recipient===t.from_number&&id!==m?.id)SMS_ENQUIRY_PREVIEWS.delete(id);
+      const saved=m&&SMS_ENQUIRY_PREVIEWS.get(m.id);
+      const v=saved&&a&&saved.work_id===a.work_id&&saved.sender===m.to_number&&saved.recipient===t.from_number&&saved.fullbody===(SMS_DRAFTS.get(t.from_number)||'').trim()+'\nReply STOP to opt out. Rankwise, rankwise.ca'?saved:null;
+      if(saved&&!v)SMS_ENQUIRY_PREVIEWS.delete(m.id);
+      return !m||(!solo&&!_smsEnquiryAllowed('business_sms.assign'))?'':`<div id="sms-enquiry-tools" style="margin-top:14px">
+      ${solo?'':`<button type="button" id="sms-enquiry-assign" ${a||busy?'disabled':''}>${a?'Follow-up assigned':'Assign to me / recover follow-up'}</button>`}
+      <span id="sms-enquiry-assignment">${solo?_smsSoloAssignmentLabel(t):a?`Follow-up #${esc(a.work_id)} — assigned to you.`:busy?'Assignment pending — not yet confirmed.':'Explicit assignment required before a verified draft.'}</span>
       <button type="button" id="sms-enquiry-preview" ${a&&_smsEnquiryAllowed('business_sms.preview')&&!busy&&!t.optout?'':'disabled'}>${v?'Verified draft ready':'Verify saved draft'}</button>
       ${v?`<div id="sms-enquiry-verified"><p>To: ${esc(v.recipient)}</p><p>From: ${esc(m.to_number)}</p><div style="white-space:pre-wrap">${esc(v.fullbody)}</div><button type="button" disabled>Send</button></div>`:''}
       <div id="sms-enquiry-notice">Verified draft only — sending disabled; consent/spending not approved. Preview requests are saved privately; nothing is sent.</div>
@@ -2595,14 +2627,15 @@ function wireConversations(p, updatedAt, srcNote){
   if(previewButton){
     previewButton.onclick=async()=>{
       const msg=enquiryMessage(),thread=(p.conversations_sms_threads?.threads||[]).find(x=>x.from_number===SELECTED_SMS),recipient=SELECTED_SMS,epoch=PORTAL_EPOCH,input=document.getElementById('sms-reply-body');
-      const assignment=msg&&SMS_ENQUIRY_ASSIGNMENTS.get(msg.id),originalBody=input?.value||'',body=originalBody.trim();
+      const assignment=_smsEnquiryAssignment(thread,msg),originalBody=input?.value||'',body=originalBody.trim();
       if(!msg||!assignment||SMS_ENQUIRY_BUSY.has(msg.id)||!input||input.disabled||!_smsEnquiryAllowed('business_sms.preview')||thread?.optout||!/^\+[1-9]\d{7,14}$/.test(recipient)||!/^\+[1-9]\d{7,14}$/.test(msg.to_number)||!body||Array.from(body).length>500||!enquiryCurrent(epoch))return;
       SMS_DRAFTS.set(recipient,originalBody);
       SMS_ENQUIRY_PREVIEWS.delete(msg.id);
       const draftCurrent=()=>{
         const currentThread=(LAST.p?.conversations_sms_threads?.threads||[]).find(t=>t.from_number===recipient);
         const currentMessage=currentThread&&_smsEnquiryValidMessage(currentThread);
-        return enquiryCurrent(epoch)&&SMS_DRAFTS.get(recipient)===originalBody&&currentMessage?.id===msg.id&&currentMessage?.to_number===msg.to_number&&!currentThread?.optout;
+        const currentAssignment=_smsEnquiryAssignment(currentThread,currentMessage);
+        return enquiryCurrent(epoch)&&SMS_DRAFTS.get(recipient)===originalBody&&currentMessage?.id===msg.id&&currentMessage?.to_number===msg.to_number&&currentAssignment?.work_id===assignment.work_id&&!currentThread?.optout;
       };
       SMS_ENQUIRY_BUSY.add(msg.id);
       previewButton.disabled=true;
@@ -5304,4 +5337,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 2c97f7657699 -->
+<!-- rankwise-portal2-version: 6d810c518415 -->
