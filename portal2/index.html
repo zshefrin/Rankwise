@@ -1079,6 +1079,232 @@ function _portalReadCurrent(epoch){
   return true;
 }
 function _workId(value){const s=String(value);return /^[1-9][0-9]*$/.test(s)&&Number.isSafeInteger(Number(s))?s:null;}
+const _ROUTER_PHASES=new Set(["ready","running","awaiting_verification","checking","awaiting_acceptance","accepted","changes_needed","blocked_unknown","cancelled"]);
+const _ROUTER_HASH=/^[0-9a-f]{64}$/;
+const _ROUTER_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+function _routerHash(value){return typeof value==="string"&&_ROUTER_HASH.test(value)}
+function _routerUuid(value){return typeof value==="string"&&_ROUTER_UUID.test(value)}
+function _exactObject(value,keys){
+  return !!value&&typeof value==="object"&&!Array.isArray(value)&&Object.keys(value).sort().join("\u0000")===keys.slice().sort().join("\u0000");
+}
+function _boundedText(value,min,max){
+  return typeof value==="string"&&value.isWellFormed()&&(()=>{try{const n=new TextEncoder().encode(value).length;return n>=min&&n<=max}catch{return false}})();
+}
+function _routerTimestamp(value){
+  return typeof value==="string"&&/(?:Z|[+-][0-9]{2}:[0-9]{2})$/.test(value)&&Number.isFinite(Date.parse(value));
+}
+function _decodeRouterResult(raw,id){
+  const bad=()=>{throw new Error("malformed router result")};
+  if(!_exactObject(raw,["schema","work_id","work_version","phase","compiled_hash","source","output","verification","acceptance"])||
+    raw.schema!=="rankwise.router-result.v1"||!Number.isSafeInteger(raw.work_id)||String(raw.work_id)!==String(id)||
+    !Number.isSafeInteger(raw.work_version)||raw.work_version<1||!_ROUTER_PHASES.has(raw.phase)||!_routerHash(raw.compiled_hash))bad();
+  const source=raw.source;
+  if(!_exactObject(source,["status","attestation_id","attestation_hash","checked_at","valid_until","acceptance_eligible"])||
+    !["fresh","stale","unavailable"].includes(source.status)||typeof source.acceptance_eligible!=="boolean")bad();
+  if((source.checked_at===null)!==(source.valid_until===null))bad();
+  if(source.checked_at===null){
+    if(source.status!=="unavailable"||source.attestation_id!==null||source.attestation_hash!==null)bad();
+  }else if(!_routerTimestamp(source.checked_at)||!_routerTimestamp(source.valid_until)||
+    !_routerUuid(source.attestation_id)||!_routerHash(source.attestation_hash))bad();
+  if(source.acceptance_eligible&&(source.status!=="fresh"||raw.phase!=="awaiting_acceptance"))bad();
+  let output=raw.output;
+  if(output!==null&&(!_exactObject(output,["output_id","output_hash","result","created_at"])||
+    !_routerUuid(output.output_id)||!_routerHash(output.output_hash)||!_routerTimestamp(output.created_at)||
+    !_boundedText(output.result,1,16384)))bad();
+  let verification=raw.verification;
+  if(verification!==null){
+    if(output===null||!_exactObject(verification,["verification_id","verification_hash","output_id","output_hash","created_at","verdict","independence_label","findings","checks"])||
+      !_routerUuid(verification.verification_id)||!_routerHash(verification.verification_hash)||
+      verification.output_id!==output.output_id||verification.output_hash!==output.output_hash||!_routerTimestamp(verification.created_at)||
+      !["pass","fail"].includes(verification.verdict)||verification.independence_label!=="supervisor_observed"||
+      !Array.isArray(verification.findings)||verification.findings.length>16||verification.findings.some(x=>!_boundedText(x,1,1000))||
+      !Array.isArray(verification.checks)||verification.checks.length<1||verification.checks.length>32)bad();
+    verification.checks.forEach(c=>{if(!_exactObject(c,["criterion","status","evidence"])||!["pass","fail"].includes(c.status)||
+      !_boundedText(c.criterion,1,256)||!_boundedText(c.evidence,1,2000))bad()});
+    if((verification.verdict==="pass")!==verification.checks.every(c=>c.status==="pass"))bad();
+  }
+  const acceptance=raw.acceptance;
+  if(acceptance!==null){
+    if(verification===null||verification.verdict!=="pass"||!_exactObject(acceptance,["consumption_id","decision","reason","operator_subject","created_at"])||
+      !["accept","request_revision"].includes(acceptance.decision)||!_routerUuid(acceptance.operator_subject)||!_routerTimestamp(acceptance.created_at))bad();
+    if(acceptance.decision==="accept"){
+      if(!_routerUuid(acceptance.consumption_id)||acceptance.reason!==null||raw.phase!=="accepted")bad();
+    }else if(acceptance.consumption_id!==null||!_boundedText(acceptance.reason,1,2000)||!["changes_needed","blocked_unknown","cancelled"].includes(raw.phase))bad();
+  }
+  if(raw.phase==="accepted"&&(acceptance===null||acceptance.decision!=="accept"))bad();
+  if(raw.phase==="awaiting_acceptance"&&(verification===null||verification.verdict!=="pass"||acceptance!==null))bad();
+  if(source.acceptance_eligible&&(verification===null||verification.verdict!=="pass"))bad();
+  if(["ready","running"].includes(raw.phase)&&[output,verification,acceptance].some(x=>x!==null))bad();
+  if(["awaiting_verification","checking"].includes(raw.phase)&&(output===null||verification!==null||acceptance!==null))bad();
+  if(raw.phase==="changes_needed"&&(verification===null||(verification.verdict==="pass"&&(acceptance===null||acceptance.decision!=="request_revision"))))bad();
+  // Freshness can expire while this atomic server projection crosses the wire.
+  // The browser may only demote it; it never upgrades evidence or authorizes a write.
+  if(source.status==="fresh"&&Date.parse(source.valid_until)<=Date.now()){
+    return {...raw,source:{...source,status:"stale",acceptance_eligible:false}};
+  }
+  return raw;
+}
+const _FOLLOWUP_PHASES=new Set(["awaiting_acceptance","accepted","changes_needed"]);
+const _FOLLOWUP_DEFINITIVE_REJECTION=new Set([400,401,403,404,405,409,422]);
+const _FOLLOWUP_WRITE_TIMEOUT_MS=15000;
+const _FOLLOWUP_EDGE_WHITESPACE=new Set(Array.from(
+  " \t\n\r\v\f\x1c\x1d\x1e\x1f\x85\xa0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"));
+const ROUTER_FOLLOWUP_DRAFTS=new Map();
+let ROUTER_FOLLOWUP_GENERATION=0;
+const _DECISION_DEFINITIVE_REJECTION=new Set([400,401,403,404,405,409,422]);
+const ROUTER_DECISION_DRAFTS=new Map();
+let ROUTER_DECISION_GENERATION=0;
+function _positiveRouterInt(value,max=Number.MAX_SAFE_INTEGER){
+  return typeof value==="number"&&Number.isSafeInteger(value)&&value>=1&&value<=max;
+}
+function _followupObjectiveValid(value){
+  if(typeof value!=="string"||!value.isWellFormed())return false;
+  const chars=Array.from(value);
+  if(!chars.length||_FOLLOWUP_EDGE_WHITESPACE.has(chars[0])||_FOLLOWUP_EDGE_WHITESPACE.has(chars[chars.length-1]))return false;
+  for(const c of chars){const n=c.codePointAt(0);if(n<32||n===127||n===133||n>=0xd800&&n<=0xdfff)return false;}
+  try{const n=new TextEncoder().encode(value).length;return n>=1&&n<=4000}catch{return false}
+}
+function _currentOperatorSubject(identity=RWSession.sessionIdentity()){
+  try{
+    const v=JSON.parse(identity);
+    return Array.isArray(v)&&v.length===6&&v[0]==="sub"&&_routerUuid(v[1])&&
+      v[2]==="session"&&typeof v[3]==="string"&&v[3]&&v[4]==="role"&&v[5]==="operator"?v[1]:null;
+  }catch{return null}
+}
+function _newFollowupDraft(){
+  return {generation:++ROUTER_FOLLOWUP_GENERATION,text:"",wire:null,operationId:null,
+    identity:null,status:"draft",receipt:null,linkRead:null,priorReceipts:[],message:""};
+}
+function _followupDraft(id){
+  let draft=ROUTER_FOLLOWUP_DRAFTS.get(String(id));
+  if(!draft){draft=_newFollowupDraft();ROUTER_FOLLOWUP_DRAFTS.set(String(id),draft)}
+  return draft;
+}
+function _decisionReasonValid(value){
+  return _boundedText(value,1,2000)&&!value.includes("\u0000");
+}
+function _newDecisionDraft(){
+  return {generation:++ROUTER_DECISION_GENERATION,text:"",wire:null,operationId:null,
+    choice:null,identity:null,status:"draft",receipt:null,readback:null,message:""};
+}
+function _decisionDraft(id){
+  let draft=ROUTER_DECISION_DRAFTS.get(String(id));
+  if(!draft){draft=_newDecisionDraft();ROUTER_DECISION_DRAFTS.set(String(id),draft)}
+  return draft;
+}
+function _decodeRouterDecisionReceipt(raw,params,subject){
+  const bad=()=>{throw new Error("malformed operator-decision receipt")};
+  if(!_exactObject(raw,["schema","operation_kind","operation_id","work_id","work_version","phase","compiled_hash","replayed","decision"])||
+    raw.schema!=="rankwise.router-operation-receipt.v1"||raw.operation_kind!=="operator_decided"||
+    raw.operation_id!==params.p_operation_id||raw.work_id!==params.p_work_id||
+    raw.work_version!==params.p_expected_work_version+1||raw.compiled_hash!==params.p_compiled_hash||
+    !_positiveRouterInt(raw.work_id)||!_positiveRouterInt(raw.work_version,2147483647)||
+    typeof raw.replayed!=="boolean")bad();
+  const requested=params.p_decision,d=raw.decision;
+  if(!_exactObject(requested,["schema","decision","reason"])||requested.schema!=="rankwise.router-decision.v1"||
+    !["accept","request_revision"].includes(requested.decision)||
+    !_exactObject(d,["output_id","output_hash","verification_id","verification_hash","decision","reason","consumption_id","operator_subject","created_at"])||
+    d.output_id!==params.p_output_id||d.output_hash!==params.p_output_hash||
+    d.verification_id!==params.p_verification_id||d.verification_hash!==params.p_verification_hash||
+    d.decision!==requested.decision||d.reason!==requested.reason||d.operator_subject!==subject||
+    !_routerUuid(d.output_id)||!_routerHash(d.output_hash)||!_routerUuid(d.verification_id)||
+    !_routerHash(d.verification_hash)||!_routerUuid(d.operator_subject)||!_routerTimestamp(d.created_at))bad();
+  if(d.decision==="accept"){
+    if(raw.phase!=="accepted"||d.reason!==null||!_routerUuid(d.consumption_id))bad();
+  }else if(raw.phase!=="changes_needed"||d.consumption_id!==null||!_decisionReasonValid(d.reason))bad();
+  return raw;
+}
+function _decisionEligible(lifecycle){
+  const r=lifecycle&&lifecycle.state==="ready"&&lifecycle.result;
+  return !!(r&&r.phase==="awaiting_acceptance"&&r.output&&r.verification&&
+    r.verification.verdict==="pass"&&r.acceptance===null&&r.source.status==="fresh"&&
+    r.source.acceptance_eligible===true&&Date.parse(r.source.valid_until)>Date.now());
+}
+function _decisionMatchesResult(lifecycle,receipt){
+  const r=lifecycle&&lifecycle.state==="ready"&&lifecycle.result,d=receipt&&receipt.decision;
+  return !!(r&&d&&r.work_id===receipt.work_id&&r.work_version===receipt.work_version&&
+    r.phase===receipt.phase&&r.compiled_hash===receipt.compiled_hash&&r.output&&r.verification&&r.acceptance&&
+    r.output.output_id===d.output_id&&r.output.output_hash===d.output_hash&&
+    r.verification.verification_id===d.verification_id&&r.verification.verification_hash===d.verification_hash&&
+    r.verification.output_id===d.output_id&&r.verification.output_hash===d.output_hash&&
+    r.acceptance.decision===d.decision&&r.acceptance.reason===d.reason&&
+    r.acceptance.consumption_id===d.consumption_id&&r.acceptance.operator_subject===d.operator_subject&&
+    r.acceptance.created_at===d.created_at);
+}
+function _decodeRouterFollowupReceipt(raw,params,subject){
+  const bad=()=>{throw new Error("malformed follow-up receipt")};
+  if(!_exactObject(raw,["schema","operation_kind","operation_id","work_id","work_version","phase","compiled_hash","replayed","followup"])||
+    raw.schema!=="rankwise.router-operation-receipt.v1"||raw.operation_kind!=="followup_created"||
+    raw.operation_id!==params.p_operation_id||raw.work_id!==params.p_parent_work_id||
+    raw.work_version!==params.p_expected_parent_version||raw.compiled_hash!==params.p_parent_compiled_hash||
+    !_positiveRouterInt(raw.work_id)||!_positiveRouterInt(raw.work_version,2147483647)||
+    !_FOLLOWUP_PHASES.has(raw.phase)||typeof raw.replayed!=="boolean")bad();
+  const d=raw.followup;
+  if(!_exactObject(d,["child_work_id","child_idempotency_key","child_packet_hash","root_work_id","parent_work_id","parent_work_version","parent_compiled_hash","parent_output_id","parent_output_hash","turn_number","depth","request_hash","operator_subject","created_at"])||
+    !_positiveRouterInt(d.child_work_id)||!_positiveRouterInt(d.root_work_id)||!_positiveRouterInt(d.parent_work_id)||
+    d.child_work_id===d.root_work_id||d.child_work_id===d.parent_work_id||d.parent_work_id!==params.p_parent_work_id||
+    !_positiveRouterInt(d.parent_work_version,2147483647)||d.parent_work_version!==params.p_expected_parent_version||
+    d.parent_compiled_hash!==params.p_parent_compiled_hash||d.parent_output_id!==params.p_output_id||
+    d.parent_output_hash!==params.p_output_hash||d.child_idempotency_key!=="portal-followup:"+params.p_operation_id||
+    !_routerHash(d.child_packet_hash)||!_routerHash(d.request_hash)||d.operator_subject!==subject||!_routerUuid(d.operator_subject)||
+    typeof d.turn_number!=="number"||!Number.isInteger(d.turn_number)||d.turn_number<2||d.turn_number>32||
+    typeof d.depth!=="number"||!Number.isInteger(d.depth)||d.depth<1||d.depth>31||d.depth>=d.turn_number||
+    ((d.depth===1)!==(d.root_work_id===d.parent_work_id))||!_routerTimestamp(d.created_at))bad();
+  return raw;
+}
+function _decodeRouterFollowupLink(raw,id){
+  const bad=()=>{throw new Error("malformed follow-up link")};
+  const expected=_workId(id);if(expected===null)bad();
+  if(!_exactObject(raw,["schema","work_id","operation_id","root_work_id","parent_work_id","parent_work_version","parent_compiled_hash","parent_output_id","parent_output_hash","turn_number","depth","request_hash","followup_request","child_idempotency_key","child_packet_hash","created_at"])||
+    raw.schema!=="rankwise.router-followup-link.v1"||raw.work_id!==Number(expected)||!_positiveRouterInt(raw.work_id)||
+    !_routerUuid(raw.operation_id)||!_positiveRouterInt(raw.root_work_id)||!_positiveRouterInt(raw.parent_work_id)||
+    raw.work_id===raw.root_work_id||raw.work_id===raw.parent_work_id||!_positiveRouterInt(raw.parent_work_version,2147483647)||
+    !_routerHash(raw.parent_compiled_hash)||!_routerUuid(raw.parent_output_id)||!_routerHash(raw.parent_output_hash)||
+    typeof raw.turn_number!=="number"||!Number.isInteger(raw.turn_number)||raw.turn_number<2||raw.turn_number>32||
+    typeof raw.depth!=="number"||!Number.isInteger(raw.depth)||raw.depth<1||raw.depth>31||raw.depth>=raw.turn_number||
+    ((raw.depth===1)!==(raw.root_work_id===raw.parent_work_id))||!_routerHash(raw.request_hash)||
+    raw.child_idempotency_key!=="portal-followup:"+raw.operation_id||!_routerHash(raw.child_packet_hash)||!_routerTimestamp(raw.created_at)||
+    !_exactObject(raw.followup_request,["schema","objective"])||raw.followup_request.schema!=="rankwise.router-followup-request.v1"||
+    !_followupObjectiveValid(raw.followup_request.objective))bad();
+  return raw;
+}
+function _followupLinkMatchesReceipt(link,receipt){
+  const d=receipt.followup;
+  return link.work_id===d.child_work_id&&link.operation_id===receipt.operation_id&&
+    link.root_work_id===d.root_work_id&&link.parent_work_id===d.parent_work_id&&
+    link.parent_work_version===d.parent_work_version&&link.parent_compiled_hash===d.parent_compiled_hash&&
+    link.parent_output_id===d.parent_output_id&&link.parent_output_hash===d.parent_output_hash&&
+    link.turn_number===d.turn_number&&link.depth===d.depth&&link.request_hash===d.request_hash&&
+    link.child_idempotency_key===d.child_idempotency_key&&link.child_packet_hash===d.child_packet_hash&&
+    link.created_at===d.created_at;
+}
+async function _loadRouterFollowupLink(id){
+  if(DEV)return {state:"absent",link:null};
+  let response;
+  try{response=await RWSession.authedFetch(SB+"/rest/v1/rpc/router_read_followup_link",{
+    method:"POST",body:JSON.stringify({p_work_id:Number(id)})})}catch{return {state:"error",link:null}}
+  if(response===null)return {state:"error",link:null};
+  if([401,403,404].includes(response.status))return {state:"unavailable",link:null};
+  if(!response.ok)return {state:"error",link:null};
+  let raw;try{raw=await response.json()}catch{return {state:"malformed",link:null}}
+  if(raw===null)return {state:"absent",link:null};
+  try{return {state:"ready",link:_decodeRouterFollowupLink(raw,id)}}catch{return {state:"malformed",link:null}}
+}
+async function _loadRouterLifecycle(id){
+  if(DEV)return {state:"legacy",result:null};
+  let response;
+  try{
+    response=await RWSession.authedFetch(SB+"/rest/v1/rpc/router_read_result",{
+      method:"POST",body:JSON.stringify({p_work_id:Number(id)})});
+  }catch{return {state:"error",result:null}}
+  if(response===null)return {state:"error",result:null};
+  if([401,403,404].includes(response.status))return {state:"unavailable",result:null};
+  if(!response.ok)return {state:"error",result:null};
+  let raw;
+  try{raw=await response.json()}catch{return {state:"malformed",result:null}}
+  if(raw===null)return {state:"legacy",result:null};
+  try{return {state:"ready",result:_decodeRouterResult(raw,id)}}catch{return {state:"malformed",result:null}}
+}
 async function loadWork(){
   const epoch=PORTAL_EPOCH, seq=++WORK_READ_SEQ;
   if(DEV){ROUTER_READY=false;WORK={items:DEMO.spine_work_items,events:DEMO.spine_events,verifications:DEMO.spine_verifications,actions:DEMO.spine_actions};return WORK}
@@ -1107,24 +1333,34 @@ async function loadWork(){
 async function loadWorkDetail(value){
   const id=_workId(value);if(!id)return;
   const epoch=PORTAL_EPOCH,seq=++WORK_DETAIL_SEQ;
-  WORK_SELECTED=id;WORK_DETAIL={id,state:"loading"};
+  WORK_SELECTED=id;WORK_DETAIL={id,state:"loading",lifecycle:{state:"loading",result:null},link:{state:"loading",link:null}};
   const current=()=>_portalReadCurrent(epoch)&&seq===WORK_DETAIL_SEQ&&WORK_SELECTED===id;
   try{
     const rows=DEV?[
       DEMO.spine_work_items.filter(w=>String(w.id)===id),
       DEMO.spine_events.filter(e=>String(e.work_id)===id).slice(0,1),
-      DEMO.spine_verifications.filter(v=>String(v.work_id)===id).slice(0,1)
+      DEMO.spine_verifications.filter(v=>String(v.work_id)===id).slice(0,1),
+      {state:"legacy",result:null}
     ]:await Promise.all([
       rest("work_items?select="+_workColumns+"&id=eq."+id+"&limit=1"),
       rest("events?select=id,work_id,event_type,actor,from_state,to_state,created_at&work_id=eq."+id+"&order=created_at.desc,id.desc&limit=1"),
-      rest("verifications?select=id,work_id,verifier,verdict,created_at&work_id=eq."+id+"&order=created_at.desc,id.desc&limit=1")
+      rest("verifications?select=id,work_id,verifier,verdict,created_at&work_id=eq."+id+"&order=created_at.desc,id.desc&limit=1"),
+      _loadRouterLifecycle(id)
     ]);
     if(!current())return;
-    if(rows.some(r=>!Array.isArray(r)||r.length>1))throw new Error("unreadable detail");
-    const [items,events,verifications]=rows;
+    const [items,events,verifications,lifecycle]=rows;
+    if([items,events,verifications].some(r=>!Array.isArray(r)||r.length>1))throw new Error("unreadable detail");
     if(items.some(w=>!w||String(w.id)!==id)||events.some(e=>!e||String(e.work_id)!==id)||verifications.some(v=>!v||String(v.work_id)!==id))throw new Error("wrong task");
-    WORK_DETAIL={id,state:items.length?"ready":"missing",item:items[0],events,verifications};
-  }catch{if(current())WORK_DETAIL={id,state:"failed"};}
+    WORK_DETAIL={id,state:items.length?"ready":"missing",item:items[0],events,verifications,lifecycle,
+      link:DEV?{state:"absent",link:null}:{state:"loading",link:null}};
+    if(!DEV){
+      _loadRouterFollowupLink(id).then(link=>{
+        if(!current()||!WORK_DETAIL||WORK_DETAIL.id!==id)return;
+        WORK_DETAIL.link=link;
+        if(VIEW==="work"&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+      });
+    }
+  }catch{if(current())WORK_DETAIL={id,state:"failed",lifecycle:{state:"error",result:null},link:{state:"error",link:null}};}
 }
 // A failed re-render leaves a *.FAILED-QC.mp4 sibling next to a good render (plan
 // §2) -- that is NOT the same thing as this item's recorded qc.verdict being fail.
@@ -2098,26 +2334,98 @@ function viewCommand(p, updatedAt){
 // belongs outside the DOM it's about to replace" lesson, applied at its
 // simplest.
 let CONVO_KIND="sms", SELECTED_SMS=null, SELECTED_CALL=null, SELECTED_VM=null;
+// Dormant business reply composer. Production has no sender adapter until the
+// existing operator queue's database/auth gates have been accepted. Drafts stay
+// in this tab only and are discarded on sign-out; never localStorage.
+const SMS_DRAFTS=new Map();
+const SMS_ENQUIRY_ASSIGNMENTS=new Map();
+const SMS_ENQUIRY_PREVIEWS=new Map();
+const SMS_ENQUIRY_BUSY=new Set();
+// Test-only in-process adapter: ignored on a published page (DEV=false).
+// No production capability flag or queue registration exists yet.
+let SMS_REPLY_LOCAL_ADAPTER=null;
+const SMS_REPLY_RECEIPTS=new Map();
+function _smsEnquiryValidMessage(t){
+  const m=(t.messages||[])[0]||{};
+  return _routerUuid(m.id)&&typeof m.to_number==='string'&&/^\+[1-9]\d{7,14}$/.test(m.to_number)?m:null;
+}
+function _smsEnquiryAllowed(action){
+  return Array.isArray(CUR_ALLOWLIST)&&CUR_ALLOWLIST.includes(action);
+}
+function _smsReplyComposer(t){
+  return `<form id="sms-reply-form" style="margin:16px 0">
+    <label for="sms-reply-body">Draft a business reply</label>
+    <textarea id="sms-reply-body" maxlength="500" rows="4" style="width:100%" ${t.optout?'disabled':''}>${esc(SMS_DRAFTS.get(t.from_number)||'')}</textarea>
+    <p>${t.optout?'This number has opted out. Replies are blocked.':'Review the recipient and full message before sending.'}</p>
+    <button type="submit" ${t.optout?'disabled':''}>Preview reply</button>
+    <div id="sms-reply-preview" role="status">${esc(SMS_REPLY_RECEIPTS.get(t.from_number)||'')}</div>
+    ${(()=>{const m=_smsEnquiryValidMessage(t),a=m&&SMS_ENQUIRY_ASSIGNMENTS.get(m.id),saved=m&&SMS_ENQUIRY_PREVIEWS.get(m.id),busy=m&&SMS_ENQUIRY_BUSY.has(m.id);
+      const v=saved&&saved.sender===m.to_number&&saved.recipient===t.from_number&&saved.fullbody===(SMS_DRAFTS.get(t.from_number)||'').trim()+'\nReply STOP to opt out. Rankwise, rankwise.ca'?saved:null;
+      return !m||!_smsEnquiryAllowed('business_sms.assign')?'':`<div id="sms-enquiry-tools" style="margin-top:14px">
+      <button type="button" id="sms-enquiry-assign" ${a||busy?'disabled':''}>${a?'Follow-up assigned':'Assign to me / recover follow-up'}</button>
+      <span id="sms-enquiry-assignment">${a?`Follow-up #${esc(a.work_id)} — assigned to you.`:busy?'Assignment pending — not yet confirmed.':'Explicit assignment required before a verified draft.'}</span>
+      <button type="button" id="sms-enquiry-preview" ${a&&_smsEnquiryAllowed('business_sms.preview')&&!busy&&!t.optout?'':'disabled'}>${v?'Verified draft ready':'Verify saved draft'}</button>
+      ${v?`<div id="sms-enquiry-verified"><p>To: ${esc(v.recipient)}</p><p>From: ${esc(m.to_number)}</p><div style="white-space:pre-wrap">${esc(v.fullbody)}</div><button type="button" disabled>Send</button></div>`:''}
+      <div id="sms-enquiry-notice">Verified draft only — sending disabled; consent/spending not approved. Preview requests are saved privately; nothing is sent.</div>
+    </div>`})()}
+  </form>`;
+}
 
 function _fmtPhone(n){
   if(!n)return "(unknown number)";
   const m=String(n).replace(/^\+?1/,"").match(/^(\d{3})(\d{3})(\d{4})$/);
   return m?`(${m[1]}) ${m[2]}-${m[3]}`:String(n);
 }
-function _convoEmptyDetail(label, broken, reason){
-  if(broken)return `<div class="state state-error"><b>${esc(label)} feed FAILED to build this push</b>Whatever's showing may be stale or wrong — this is an error state, not a clean empty inbox.</div>`;
-  return `<div class="state">No ${esc(label.toLowerCase())} yet — ${esc(reason)}. This pane lights up the moment real rows start arriving; nothing here is faked to look populated.</div>`;
+function _convoFeed(p,key,field,validRow){
+  const data=p[key], flag=p[key+"_build_ok"];
+  const valid=!!data && Array.isArray(data[field]) && data[field].every(validRow);
+  // Legacy snapshots with a valid collection remain readable, but do not
+  // claim verified health when the producer omitted its build-status field.
+  return {rows:valid?data[field]:[],state:flag===false?"failed":!valid?"unavailable":flag===true?"ready":"unverified"};
 }
-function _smsThreadDetail(t){
+function _convoFeedNotice(label,state){
+  if(state==="ready")return "";
+  const text=state==="failed"?`${label} data could not be refreshed. Last available data may be stale.`
+    :state==="unavailable"?`${label} data is unavailable in this snapshot.`
+    :`${label} refresh status is unverified. Showing available snapshot data.`;
+  return `<div class="state ${state==="failed"?"state-error":""}" data-convo-health="${state}" role="status">${esc(text)}</div>`;
+}
+function _convoEmptyDetail(label){
+  return `<div class="state">No ${esc(label.toLowerCase())} in the available snapshot.</div>`;
+}
+function _smsReplyHistory(t,p){
+  const feed=p?.business_sms_replies;
+  if(!feed||feed.state==='not_configured')return '<div class="state">Business reply history is not connected.</div>';
+  if(feed.state!=='ready'||!Array.isArray(feed.receipts))return '<div class="state state-error">Reply history unavailable. Do not resend an uncertain reply.</div>';
+  // inbound_sms.id is UUID; work/queue identities remain positive integers.
+  if(!feed.receipts.every(r=>r&&_routerUuid(r.inbound_id)&&Number.isSafeInteger(r.work_id)&&r.work_id>0))return '<div class="state state-error">Reply history unavailable: receipt identity could not be verified.</div>';
+  const ids=new Set((t.messages||[]).map(m=>m.id).filter(_routerUuid));
+  const rows=feed.receipts.filter(r=>r&&ids.has(r.inbound_id));
+  const known=['queued','sending','sent','delivered','undelivered','failed','unknown','held'];
+  const age=Date.now()-Date.parse(feed.checked_at);
+  const stale=!Number.isFinite(age)||age>15*60000||age < -60000;
+  return `<section data-sms-reply-history><b>Business replies</b>
+    <p>${stale?'Snapshot stale or unverified. ':''}Saved delivery status only; provider not checked by this refresh.</p>
+    ${rows.map(r=>{
+      const state=known.includes(r.state)?r.state:'unknown';
+      const warn=['sending','unknown','held','failed','undelivered'].includes(state);
+      return `<div class="state ${warn?'state-error':''}"><b>${esc(state)}</b> · follow-up #${esc(r.work_id)}
+        ${r.error_code?` · provider error ${esc(r.error_code)}`:''}
+        <div>${warn?'Needs attention. Reconcile this attempt before any new send.':'Delivery is separate from resolving the enquiry.'}</div></div>`;
+    }).join('')||'<p>No reply receipts linked to the messages shown.</p>'}
+    ${feed.truncated?'<p>Recent receipts only; older attempts may be outside this window.</p>':''}
+    </section>`;
+}
+function _smsThreadDetail(t,p){
   const msgs=(t.messages||[]).slice().reverse(); // oldest→newest for reading order
   return `
     <div class="convo-detail-head">${esc(_fmtPhone(t.from_number))}</div>
-    <div class="convo-detail-sub">${t.optout?`<span class="badge badge-warn">opted out (STOP)</span>`:""}<span>${esc(t.message_count)} message${t.message_count===1?"":"s"} in this thread · inbound only, no reply path live yet</span></div>
+    <div class="convo-detail-sub">${t.optout?`<span class="badge badge-warn">opted out (STOP)</span>`:""}<span>Showing ${msgs.length} recent message${msgs.length===1?"":"s"}${Number.isInteger(t.message_count)&&t.message_count>msgs.length?` of ${esc(t.message_count)} in the fetched window`:""} · not complete history · inbound only, no reply path live yet</span></div>
     ${msgs.map(m=>`
       <div class="convo-msg">
         <div>${esc(m.body||"(no text)")}</div>
         <div class="convo-msg-meta">${esc(new Date(m.received_at).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}))}${Number(m.num_media)>0?` · ${esc(m.num_media)} attachment${Number(m.num_media)===1?"":"s"}`:""}</div>
-      </div>`).join("")}`;
+      </div>`).join("")}${_smsReplyHistory(t,p)}${_smsReplyComposer(t)}`;
 }
 function _callDetail(c){
   const cap=c.capture||null;
@@ -2154,26 +2462,25 @@ function _voicemailDetail(v){
 }
 function viewConversations(p){
   const calls0=p.due_calls||[], leads=p.leads||[];
-  const smsOk=p.conversations_sms_threads_build_ok!==false;
-  // L5 (security review, 2026-08-27): default `.threads` itself, not just the
-  // whole conversations_sms_threads key -- a key-present-but-threads-missing
-  // payload (a malformed service-role write; unreachable from today's
-  // builder, but not guaranteed by this file) would otherwise throw on
-  // `.length` below and take down the entire render.
-  const threads=(p.conversations_sms_threads||{}).threads||[];
-  const smsWindow=(p.conversations_sms_threads||{}).thread_count_in_window||0;
-  const callsOk=p.conversations_calls_build_ok!==false;
-  const vcalls=(p.conversations_calls||{calls:[]}).calls||[];
-  const vmOk=p.conversations_voicemail_transcripts_build_ok!==false;
-  const vmData=p.conversations_voicemail_transcripts||{voicemails:[],total_count:0};
-  const vms=vmData.voicemails||[];
-  const vmTotal=vmData.total_count??vms.length; // ??-fallback: older payload shape had no total_count
+  const object=r=>r!==null&&typeof r==="object"&&!Array.isArray(r);
+  const sms=_convoFeed(p,"conversations_sms_threads","threads",r=>object(r)&&typeof r.from_number==="string"&&Array.isArray(r.messages)&&r.messages.every(object));
+  const calls=_convoFeed(p,"conversations_calls","calls",r=>object(r)&&typeof r.call_sid==="string"&&(r.history==null||(Array.isArray(r.history)&&r.history.every(object))));
+  const vm=_convoFeed(p,"conversations_voicemail_transcripts","voicemails",r=>object(r)&&typeof r.recording_sid==="string");
+  const threads=sms.rows, vcalls=calls.rows, vms=vm.rows;
+  const smsOk=sms.state==="ready"||sms.state==="unverified";
+  const callsOk=calls.state==="ready"||calls.state==="unverified";
+  const vmOk=vm.state==="ready"||vm.state==="unverified";
+  const rawTotal=p.conversations_voicemail_transcripts?.total_count;
+  const vmTotal=Number.isInteger(rawTotal)&&rawTotal>=vms.length?rawTotal:vms.length;
 
   if(threads.length && !threads.find(t=>t.from_number===SELECTED_SMS))SELECTED_SMS=threads[0].from_number;
   if(vcalls.length && !vcalls.find(c=>c.call_sid===SELECTED_CALL))SELECTED_CALL=vcalls[0].call_sid;
   if(vms.length && !vms.find(v=>v.recording_sid===SELECTED_VM))SELECTED_VM=vms[0].recording_sid;
 
   const kind=CONVO_KIND;
+  const feed=kind==="sms"?sms:kind==="calls"?calls:vm;
+  const label=kind==="sms"?"Texts":kind==="calls"?"Calls":"Voicemails";
+  const notice=_convoFeedNotice(label,feed.state);
   const listHtml = kind==="sms"
     ? (!smsOk ? `<div class="state state-error" style="margin:14px"><b>Texts feed FAILED to build this push</b>Whatever's showing may be stale or wrong.</div>`
       : threads.length ? threads.map(t=>`
@@ -2196,13 +2503,13 @@ function viewConversations(p){
         </button>`).join("") + (vmTotal>vms.length?`<div class="pipe-more" style="padding:6px 14px">+${esc(vmTotal-vms.length)} older, not shown</div>`:"")
         : `<div class="empty" style="padding:14px">No voicemails yet.</div>`);
   const detailHtml = kind==="sms"
-    ? (threads.length ? _smsThreadDetail(threads.find(t=>t.from_number===SELECTED_SMS)||threads[0]) : _convoEmptyDetail("Texts", !smsOk, "the Twilio webhook tap for inbound_sms isn't wired in yet (operator do-block, build.GOAL.md)"))
+    ? (threads.length ? _smsThreadDetail(threads.find(t=>t.from_number===SELECTED_SMS)||threads[0],p) : _convoEmptyDetail("Texts"))
     : kind==="calls"
-    ? (vcalls.length ? _callDetail(vcalls.find(c=>c.call_sid===SELECTED_CALL)||vcalls[0]) : _convoEmptyDetail("Calls", !callsOk, "the Twilio webhook tap for receptionist_calls isn't wired in yet (operator do-block, build.GOAL.md)"))
-    : (vms.length ? _voicemailDetail(vms.find(v=>v.recording_sid===SELECTED_VM)||vms[0]) : _convoEmptyDetail("Voicemails", !vmOk, "the local pull_recordings pipeline hasn't landed a real voicemail yet (or Twilio creds aren't set)"));
+    ? (vcalls.length ? _callDetail(vcalls.find(c=>c.call_sid===SELECTED_CALL)||vcalls[0]) : _convoEmptyDetail("Calls"))
+    : (vms.length ? _voicemailDetail(vms.find(v=>v.recording_sid===SELECTED_VM)||vms[0]) : _convoEmptyDetail("Voicemails"));
 
-  return `
-    <div class="status sub">Conversations</div>
+  const outbound = `
+    <h3 class="section-h">OUTBOUND &amp; FOLLOW-UP</h3>
     <h4 class="section-h">CALLS DUE — ${calls0.length}</h4>
     <div class="cards">${calls0.length?calls0.map((c,i)=>row(
       (c.overdue?"OVERDUE · ":"")+(c.name||"Call"),
@@ -2224,22 +2531,142 @@ function viewConversations(p){
         actBtn("lead.approve",{lead_id:l.id},"Approve","rec")+
         actBtn("lead.reject",{lead_id:l.id},"Reject","")
       ):"")).join("")
-      :`<div class="empty">No leads awaiting review.</div>`}</div>
+      :`<div class="empty">No leads awaiting review.</div>`}</div>`;
+  return `
+    <div class="status sub">Conversations</div>
     <h4 class="section-h">INBOX</h4>
-    <div class="section-note">Real texts to the business line + the AI receptionist's call transcripts + business-line voicemails — operator view only, never shown to sellers or clients. Separate from CALLS DUE above (your outbound dial queue).</div>
+    <div class="section-note">Business texts, call transcripts and voicemails · operator only. Counts show loaded records, not unread messages or complete history. Outbound follow-up is below.</div>
+    ${notice}
     <div class="convo-shell">
       <div class="convo-list">
         <div class="convo-tabs">
-          <button class="convo-tab ${kind==="sms"?"on":""}" data-convo-kind="sms">Texts <span class="n">${smsOk?esc(smsWindow):"!"}</span></button>
+          <button class="convo-tab ${kind==="sms"?"on":""}" data-convo-kind="sms">Texts <span class="n">${smsOk?esc(threads.length):"?"}</span></button>
           <button class="convo-tab ${kind==="calls"?"on":""}" data-convo-kind="calls">Calls <span class="n">${callsOk?esc(vcalls.length):"!"}</span></button>
-          <button class="convo-tab ${kind==="voicemails"?"on":""}" data-convo-kind="voicemails">Voicemails <span class="n">${vmOk?esc(vmTotal):"!"}</span></button>
+          <button class="convo-tab ${kind==="voicemails"?"on":""}" data-convo-kind="voicemails">Voicemails <span class="n">${vmOk?esc(vms.length):"?"}</span></button>
         </div>
-        ${listHtml}
+        ${feed.state==="unavailable"?notice:listHtml}
       </div>
-      <div class="convo-detail">${detailHtml}</div>
-    </div>`;
+      <div class="convo-detail">${notice}${feed.state==="unavailable"?"":detailHtml}</div>
+    </div>${outbound}`;
 }
 function wireConversations(p, updatedAt, srcNote){
+  const form=document.getElementById("sms-reply-form");
+  const enquiryMessage=()=>{
+    const thread=(p.conversations_sms_threads?.threads||[]).find(x=>x.from_number===SELECTED_SMS);
+    return thread&&_smsEnquiryValidMessage(thread);
+  };
+  // Queue work outlives the 30s render tick. Session identity, not DOM-node
+  // identity, owns the request; each receipt stays bound to its saved source.
+  const enquiryCurrent=(epoch)=>_portalReadCurrent(epoch);
+  const enquiryVisible=(epoch,recipient)=>enquiryCurrent(epoch)&&VIEW==='conversations'&&SELECTED_SMS===recipient;
+  async function enquiryQueue(action,params,epoch,recipient,form0){
+    let queueId=null, done=false;
+    await enqueueAction(action,params,(st,detail,id)=>{
+      if(!enquiryCurrent(epoch,recipient,form0))return;
+      if(st==='queued')queueId=id;
+      if(st==='done'){queueId=id;done=true;}
+      if(st==='failed')throw new Error('action-failed');
+    });
+    if(!done||!Number.isSafeInteger(queueId)||queueId<=0)throw new Error('action-unconfirmed');
+    const rows=await rest('operator_action_queue?id=eq.'+encodeURIComponent(String(queueId))+'&select=id,action,status,result');
+    if(!enquiryCurrent(epoch)||!Array.isArray(rows)||rows.length!==1||rows[0]?.id!==queueId)throw new Error('stale-action');
+    return rows&&rows[0];
+  }
+  const assignButton=document.getElementById('sms-enquiry-assign');
+  if(assignButton){
+    assignButton.onclick=async()=>{
+      const msg=enquiryMessage(), recipient=SELECTED_SMS, epoch=PORTAL_EPOCH;
+      if(!msg||!_smsEnquiryAllowed('business_sms.assign')||SMS_ENQUIRY_ASSIGNMENTS.has(msg.id)||SMS_ENQUIRY_BUSY.has(msg.id)||!enquiryCurrent(epoch))return;
+      SMS_ENQUIRY_BUSY.add(msg.id);
+      assignButton.disabled=true;
+      try{
+        const params={inbound_id:msg.id,explicit_assign:true};
+        const row=await enquiryQueue('business_sms.assign',params,epoch,recipient,form);
+        let result=row&&row.result;if(typeof result==='string')result=JSON.parse(result);
+        if(!row||!Number.isSafeInteger(row.id)||row.action!=='business_sms.assign'||row.status!=='done'||
+           !result||result.state!=='assigned'||result.inbound_id!==msg.id||!Number.isSafeInteger(result.work_id)||result.work_id<=0)
+          throw new Error('assignment-unverified');
+        SMS_ENQUIRY_ASSIGNMENTS.set(msg.id,{work_id:result.work_id,queue_id:row.id});
+      }catch(e){if(enquiryVisible(epoch,recipient))toast('Assignment not verified — use recover to check the existing follow-up','err');}
+      finally{if(enquiryCurrent(epoch)){SMS_ENQUIRY_BUSY.delete(msg.id);if(enquiryVisible(epoch,recipient)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}}
+    };
+  }
+  const previewButton=document.getElementById('sms-enquiry-preview');
+  if(previewButton){
+    previewButton.onclick=async()=>{
+      const msg=enquiryMessage(),thread=(p.conversations_sms_threads?.threads||[]).find(x=>x.from_number===SELECTED_SMS),recipient=SELECTED_SMS,epoch=PORTAL_EPOCH,input=document.getElementById('sms-reply-body');
+      const assignment=msg&&SMS_ENQUIRY_ASSIGNMENTS.get(msg.id),originalBody=input?.value||'',body=originalBody.trim();
+      if(!msg||!assignment||SMS_ENQUIRY_BUSY.has(msg.id)||!input||input.disabled||!_smsEnquiryAllowed('business_sms.preview')||thread?.optout||!/^\+[1-9]\d{7,14}$/.test(recipient)||!/^\+[1-9]\d{7,14}$/.test(msg.to_number)||!body||Array.from(body).length>500||!enquiryCurrent(epoch))return;
+      SMS_DRAFTS.set(recipient,originalBody);
+      SMS_ENQUIRY_PREVIEWS.delete(msg.id);
+      const draftCurrent=()=>{
+        const currentThread=(LAST.p?.conversations_sms_threads?.threads||[]).find(t=>t.from_number===recipient);
+        const currentMessage=currentThread&&_smsEnquiryValidMessage(currentThread);
+        return enquiryCurrent(epoch)&&SMS_DRAFTS.get(recipient)===originalBody&&currentMessage?.id===msg.id&&currentMessage?.to_number===msg.to_number&&!currentThread?.optout;
+      };
+      SMS_ENQUIRY_BUSY.add(msg.id);
+      previewButton.disabled=true;
+      try{
+        const params={inbound_id:msg.id,work_id:assignment.work_id,body};
+        const row=await enquiryQueue('business_sms.preview',params,epoch,recipient,form);
+        let result=row&&row.result;if(typeof result==='string')result=JSON.parse(result);
+        if(!draftCurrent())throw new Error('stale-draft');
+        const full=body+'\nReply STOP to opt out. Rankwise, rankwise.ca';
+        const bytes=new TextEncoder().encode(JSON.stringify([msg.id,assignment.work_id,recipient,msg.to_number,full]));
+        const hash=await crypto.subtle.digest('SHA-256',bytes);
+        if(!draftCurrent())throw new Error('stale-draft');
+        const digest=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,'0')).join('');
+        if(!row||row.action!=='business_sms.preview'||row.status!=='done'||!result||result.state!=='previewed'||
+           result.inbound_id!==msg.id||result.work_id!==assignment.work_id||!/^[0-9a-f]{64}$/.test(result.digest)||result.digest!==digest||result.sending_enabled!==false)
+          throw new Error('preview-unverified');
+        SMS_ENQUIRY_PREVIEWS.set(msg.id,{...result,recipient,sender:msg.to_number,fullbody:full});
+      }catch(e){if(enquiryVisible(epoch,recipient))toast('Verified draft unavailable — sending remains disabled','err');}
+      finally{if(enquiryCurrent(epoch)){SMS_ENQUIRY_BUSY.delete(msg.id);if(enquiryVisible(epoch,recipient)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}}
+    };
+  }
+  if(form){
+    const recipient=SELECTED_SMS;
+    const input=document.getElementById("sms-reply-body");
+    input.oninput=()=>{SMS_DRAFTS.set(recipient,input.value);const m=enquiryMessage();if(m)SMS_ENQUIRY_PREVIEWS.delete(m.id);document.getElementById("sms-reply-preview").textContent="";const verified=document.getElementById('sms-enquiry-verified');if(verified)verified.remove();if(previewButton)previewButton.textContent='Verify saved draft';};
+    form.onsubmit=async e=>{
+      e.preventDefault();
+      if(input.disabled||!input.value.trim())return;
+      SMS_DRAFTS.set(recipient,input.value);
+      const adapter=DEV?SMS_REPLY_LOCAL_ADAPTER:null;
+      if(adapter){
+        const epoch=PORTAL_EPOCH, original=input.value;
+        const current=()=>epoch===PORTAL_EPOCH&&SELECTED_SMS===recipient&&document.getElementById('sms-reply-form')===form;
+        let approved;
+        try{approved=await adapter.preview(recipient,original.trim());}
+        catch{if(current())document.getElementById('sms-reply-preview').textContent='Reply held: source, consent or owner could not be verified.';return;}
+        if(!current()||input.value!==original)return;
+        const panel=document.getElementById('sms-reply-preview');
+        panel.innerHTML=`<p>LOCAL TEST — no real text will be sent</p><p>To: ${esc(approved.to)}</p><p>From: ${esc(approved.from)}</p>
+          <div style="white-space:pre-wrap">${esc(approved.body)}</div><button type="button" id="sms-explicit-send">Send</button>`;
+        const operation=crypto.randomUUID();
+        document.getElementById('sms-explicit-send').onclick=async event=>{
+          if(!current()||input.value!==original||event.currentTarget.disabled)return;
+          event.currentTarget.disabled=true;input.disabled=true;
+          form.querySelector('[type="submit"]').disabled=true;
+          let message;
+          try{
+            const receipt=await adapter.send(operation,approved);
+            const known=['queued','sending','sent','delivered','undelivered','failed','unknown','held'];
+            const state=known.includes(receipt.state)?receipt.state:'unknown';
+            message=`Local test reply: ${state}. Follow-up ${receipt.work_id} remains a separate work item. No automatic retry.`;
+          }catch{message='Local test reply: outcome unknown. Do not resend; reconcile the existing attempt.';}
+          if(epoch!==PORTAL_EPOCH)return;
+          SMS_REPLY_RECEIPTS.set(recipient,message);
+          if(current())panel.textContent=message;
+        };
+        return;
+      }
+      document.getElementById("sms-reply-preview").innerHTML=`<p>To: ${esc(_fmtPhone(recipient))}</p><p>From: business number — verification pending</p>
+        <div style="white-space:pre-wrap">${esc(input.value.trim()+"\nReply STOP to opt out. Rankwise, rankwise.ca")}</div>
+        <p>${_smsEnquiryAllowed('business_sms.preview')?'Draft display only. Verify saved draft records a private request; it does not send.':'Saved in this tab only. Sending is unavailable until the business reply service is verified.'}</p>
+        <button type="button" disabled>Send</button>`;
+    };
+  }
   document.querySelectorAll("[data-convo-vm]").forEach(b=>{
     b.onclick=()=>{SELECTED_VM=b.dataset.convoVm;render(p,updatedAt,srcNote);};
   });
@@ -3208,14 +3635,14 @@ function _routerPacket(text,key){
     priority:70,estimated_minutes:30,privacy_class:"operator_private",safety_class:"internal",
     requires_operator:true,allowed_seats:["A","B"],allowed_providers:["claude"],minimum_quality:"standard",
     max_cost_usd:0,context_refs:[],dependencies:[],required_capabilities:[],required_tools:[],
-    required_skills:[],required_connectors:[],worker_preference:"parent_session",
+    required_skills:[],required_connectors:[],worker_preference:"auto",
     review_independence:"standard",client_impact:0,revenue_impact:0,outage_impact:0,
     created_at:new Date().toISOString()};
 }
 function _routerForm(){
   const blocked=DEV||ROUTER_READY!==true;
   return `<div class="log" data-router-intake style="margin:12px 0"><b>Start supervised work</b>
-    <p>Describe the result you need. This records a task for supervised review; it does not start Claude, provide a chat reply, spend money, or authorize a send. No credentials. Drafts last only while this page is open.</p>
+    <p>Describe the result you need. This records a task for supervisor compilation; it does not start Claude, provide a chat reply, spend money, or authorize a send. New requests prefer a fresh isolated worker. Historical parent-session requests remain preserved and are never resumed by this form. No credentials. Drafts last only while this page is open.</p>
     <textarea id="router-prompt" aria-label="Task for the team" rows="3" style="width:100%;box-sizing:border-box" ${ROUTER_DRAFT.pending?"disabled":""} ${ROUTER_DRAFT.packet&&!ROUTER_DRAFT.rejected?"readonly":""}>${esc(ROUTER_DRAFT.text)}</textarea>
     <button class="btn rec" id="router-submit" ${blocked||ROUTER_DRAFT.pending?"disabled":""}>${ROUTER_DRAFT.pending?"Recording…":"Queue for review"}</button>
     <p data-router-status role="status">${esc(ROUTER_DRAFT.message||(DEV?"Preview only — no task will be sent.":blocked?"Router intake unavailable — migration or authenticated schema read needs verification. Your draft is not queued.":"Intake columns available; the RPC is verified on submission. Execution remains supervised; only a valid receipt confirms queueing."))}</p></div>`;
@@ -3290,6 +3717,311 @@ function wireWorkSelection(){
   };
   const input=$("#work-lookup-id");if(input)input.oninput=()=>input.setCustomValidity("");
 }
+function _followupRenderIfCurrent(epoch,identity,parent,draft,generation){
+  if(epoch===PORTAL_EPOCH&&identity===RWSession.sessionIdentity()&&
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)===draft&&draft.generation===generation&&
+    VIEW==="work"&&String(WORK_SELECTED)===parent&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+}
+function _followupWithDeadline(promise,controller){
+  let timer;
+  const timeout=new Promise((resolve,reject)=>{timer=setTimeout(()=>{
+    controller.abort();reject(new Error("follow-up write deadline"));
+  },_FOLLOWUP_WRITE_TIMEOUT_MS)});
+  return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
+}
+function _freezeRouterFollowup(parent,draft,lifecycle,identity){
+  if(!_followupEligible(lifecycle)||!_followupObjectiveValid(draft.text))return false;
+  const subject=_currentOperatorSubject(identity);if(!subject||!globalThis.crypto||typeof crypto.randomUUID!=="function")return false;
+  const r=lifecycle.result,operationId=crypto.randomUUID().toLowerCase();
+  if(!_routerUuid(operationId))return false;
+  const params={p_parent_work_id:Number(parent),p_expected_parent_version:r.work_version,
+    p_parent_compiled_hash:r.compiled_hash,p_output_id:r.output.output_id,
+    p_output_hash:r.output.output_hash,p_operation_id:operationId,
+    p_followup_request:{schema:"rankwise.router-followup-request.v1",objective:draft.text}};
+  draft.wire=JSON.stringify(params);draft.operationId=operationId;draft.identity=identity;
+  draft.receipt=null;draft.linkRead=null;
+  draft.generation=++ROUTER_FOLLOWUP_GENERATION;
+  return true;
+}
+async function _sendRouterFollowup(parent,draft,retry=false){
+  if(DEV||draft.status==="pending"||ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft)return;
+  const entryEpoch=PORTAL_EPOCH;
+  if(!_portalReadCurrent(entryEpoch))return;
+  const detail=WORK_DETAIL&&WORK_DETAIL.id===parent&&WORK_DETAIL.state==="ready"?WORK_DETAIL:null;
+  const identity=RWSession.sessionIdentity(),subject=_currentOperatorSubject(identity);
+  if(!subject||identity!==PORTAL_AUTH_ID)return;
+  if(!retry){
+    if(draft.status!=="draft"||!detail||!_freezeRouterFollowup(parent,draft,detail.lifecycle,identity)){
+      draft.message=_followupObjectiveValid(draft.text)?"Current exact reply is not eligible for a new follow-up.":"Enter exact text within the stated byte and character rules.";
+      if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;
+    }
+  }else if(draft.status!=="unknown"||typeof draft.wire!=="string"||draft.identity!==identity)return;
+  const wasUnknown=retry;
+  let params;try{params=JSON.parse(draft.wire)}catch{return}
+  const epoch=PORTAL_EPOCH,generation=draft.generation;
+  draft.status="pending";draft.message=wasUnknown?"Retrying the exact frozen request…":"Recording the linked follow-up…";
+  _followupRenderIfCurrent(epoch,identity,parent,draft,generation);
+  if(!_portalReadCurrent(epoch)||identity!==RWSession.sessionIdentity()||identity!==PORTAL_AUTH_ID||
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.generation!==generation)return;
+  let response,raw;
+  try{
+    const controller=new AbortController();
+    const transport=(async()=>{
+      const value=await RWSession.authedFetch(SB+"/rest/v1/rpc/router_create_followup",{
+        method:"POST",body:draft.wire,signal:controller.signal});
+      return {response:value,raw:value&&value.ok?await value.json():undefined};
+    })();
+    ({response,raw}=await _followupWithDeadline(transport,controller));
+  }catch{
+    if(epoch===PORTAL_EPOCH&&identity===RWSession.sessionIdentity()&&
+      ROUTER_FOLLOWUP_DRAFTS.get(parent)===draft&&draft.generation===generation){
+      draft.status="unknown";draft.message=`Submission outcome unknown. Keep this page open and retry the exact request; operation ${draft.operationId}.`;
+      _followupRenderIfCurrent(epoch,identity,parent,draft,generation);
+    }
+    return;
+  }
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.generation!==generation)return;
+  if(!response||typeof response.ok!=="boolean"||!Number.isInteger(response.status)){
+    draft.status="unknown";draft.message=`Submission outcome unknown. Keep this page open if the session remains active; operation ${draft.operationId}.`;
+    _followupRenderIfCurrent(epoch,identity,parent,draft,generation);return;
+  }
+  if(!response.ok){
+    if(wasUnknown||!_FOLLOWUP_DEFINITIVE_REJECTION.has(response.status)){
+      draft.status="unknown";draft.message=`The exact retry was rejected, but the earlier outcome remains unknown. Do not create another request; operation ${draft.operationId}.`;
+      if(!wasUnknown)draft.message=`Submission outcome unknown after HTTP ${response.status}. Do not create another request; retry only operation ${draft.operationId}.`;
+    }else{
+      draft.status="rejected";draft.message=`The server rejected this request (HTTP ${response.status}). Nothing is confirmed; refresh exact parent evidence before editing.`;
+    }
+    _followupRenderIfCurrent(epoch,identity,parent,draft,generation);return;
+  }
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.generation!==generation)return;
+  try{draft.receipt=_decodeRouterFollowupReceipt(raw,params,subject)}catch{
+    draft.status="unknown";draft.message=`Response was not a valid exact receipt. Outcome unknown; retry only operation ${draft.operationId}.`;
+    _followupRenderIfCurrent(epoch,identity,parent,draft,generation);return;
+  }
+  draft.status="recorded";
+  draft.message=`Child #${draft.receipt.followup.child_work_id} recorded in the supervised queue, not dispatched.`;
+  _followupRenderIfCurrent(epoch,identity,parent,draft,generation);
+  const childId=String(draft.receipt.followup.child_work_id);
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.generation!==generation)return;
+  const linkRead=await _loadRouterFollowupLink(childId);
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.generation!==generation)return;
+  draft.linkRead=linkRead;
+  if(linkRead.state==="ready"){
+    const sameRequest=linkRead.link.followup_request.schema===params.p_followup_request.schema&&
+      linkRead.link.followup_request.objective===params.p_followup_request.objective;
+    if(!_followupLinkMatchesReceipt(linkRead.link,draft.receipt)||!sameRequest){
+      draft.status="conflict";
+      draft.message=`Child #${childId} is receipt-confirmed, but its linked metadata conflicts. Do not resend; inspect the child and escalate the receipt.`;
+    }
+  }else{
+    draft.message+=` Linked metadata could not be confirmed (${linkRead.state}); keep receipt child #${childId} and do not resubmit.`;
+  }
+  _followupRenderIfCurrent(epoch,identity,parent,draft,generation);
+}
+function wireRouterFollowup(){
+  const panel=document.querySelector("[data-router-followup-panel]");if(!panel)return;
+  const parent=panel.dataset.routerFollowupPanel,draft=_followupDraft(parent);
+  const input=panel.querySelector("[data-router-followup-draft]");
+  if(input){input.value=draft.text;input.oninput=()=>{if(draft.status!=="draft")return;draft.text=input.value;draft.message="";};}
+  const submit=panel.querySelector("[data-router-followup]");
+  if(submit)submit.onclick=()=>{if(input&&draft.status==="draft")draft.text=input.value;_sendRouterFollowup(parent,draft,false);};
+  const retry=panel.querySelector("[data-router-followup-retry]");if(retry)retry.onclick=()=>_sendRouterFollowup(parent,draft,true);
+  panel.querySelectorAll("[data-router-followup-child]").forEach(child=>{child.onclick=async()=>{
+      const id=child.dataset.routerFollowupChild;if(!_workId(id))return;
+      const epoch=PORTAL_EPOCH;WORK_FOCUS_DETAIL=true;const pending=loadWorkDetail(id);
+      if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+      await pending;if(_portalReadCurrent(epoch)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+    };
+  });
+  const reset=panel.querySelector("[data-router-followup-reset]");if(reset)reset.onclick=async()=>{
+    if(draft.status!=="rejected")return;
+    const epoch=PORTAL_EPOCH,identity=RWSession.sessionIdentity(),generation=draft.generation;
+    await loadWorkDetail(parent);
+    if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||draft.generation!==generation||
+      !WORK_DETAIL||WORK_DETAIL.id!==parent||WORK_DETAIL.state!=="ready"||!_followupEligible(WORK_DETAIL.lifecycle))return;
+    draft.status="draft";draft.wire=null;draft.operationId=null;draft.identity=null;draft.receipt=null;draft.linkRead=null;
+    draft.generation=++ROUTER_FOLLOWUP_GENERATION;draft.message="Parent evidence refreshed. Review or edit the retained text, then explicitly queue a new request.";
+    if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+  };
+  const another=panel.querySelector("[data-router-followup-another]");if(another)another.onclick=async()=>{
+    if(draft.status!=="recorded"||!draft.receipt)return;
+    const epoch=PORTAL_EPOCH,identity=RWSession.sessionIdentity(),generation=draft.generation;
+    const completed=draft.receipt;
+    await loadWorkDetail(parent);
+    if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||draft.generation!==generation||
+      ROUTER_FOLLOWUP_DRAFTS.get(parent)!==draft||draft.status!=="recorded"||draft.receipt!==completed||
+      !WORK_DETAIL||WORK_DETAIL.id!==parent||WORK_DETAIL.state!=="ready"||!_followupEligible(WORK_DETAIL.lifecycle))return;
+    draft.priorReceipts.push({receipt:completed,linkRead:draft.linkRead});
+    draft.status="draft";draft.text="";draft.wire=null;draft.operationId=null;draft.identity=null;draft.receipt=null;draft.linkRead=null;
+    draft.generation=++ROUTER_FOLLOWUP_GENERATION;draft.message="Parent evidence refreshed. Enter and explicitly queue another follow-up.";
+    if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+  };
+}
+function _workFollowupCapture(){
+  const panel=document.querySelector("[data-router-followup-panel]");
+  const input=panel&&panel.querySelector("[data-router-followup-draft]");
+  if(!input)return;
+  const draft=ROUTER_FOLLOWUP_DRAFTS.get(panel.dataset.routerFollowupPanel);
+  if(draft&&draft.status==="draft")draft.text=input.value;
+}
+function _decisionRenderIfCurrent(epoch,identity,work,draft,generation){
+  if(epoch===PORTAL_EPOCH&&identity===RWSession.sessionIdentity()&&
+    ROUTER_DECISION_DRAFTS.get(work)===draft&&draft.generation===generation&&
+    VIEW==="work"&&String(WORK_SELECTED)===work&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+}
+function _freezeRouterDecision(work,draft,lifecycle,identity,choice){
+  if(!_decisionEligible(lifecycle)||!["accept","request_revision"].includes(choice))return false;
+  if(choice==="request_revision"&&!_decisionReasonValid(draft.text))return false;
+  const subject=_currentOperatorSubject(identity);if(!subject||!globalThis.crypto||typeof crypto.randomUUID!=="function")return false;
+  const r=lifecycle.result,operationId=crypto.randomUUID().toLowerCase();
+  if(!_routerUuid(operationId))return false;
+  const params={p_work_id:Number(work),p_expected_work_version:r.work_version,
+    p_compiled_hash:r.compiled_hash,p_operation_id:operationId,
+    p_output_id:r.output.output_id,p_output_hash:r.output.output_hash,
+    p_verification_id:r.verification.verification_id,
+    p_verification_hash:r.verification.verification_hash,
+    p_decision:{schema:"rankwise.router-decision.v1",decision:choice,
+      reason:choice==="accept"?null:draft.text}};
+  draft.wire=JSON.stringify(params);draft.operationId=operationId;draft.choice=choice;
+  draft.identity=identity;
+  draft.receipt=null;draft.readback=null;draft.generation=++ROUTER_DECISION_GENERATION;
+  return true;
+}
+async function _sendRouterDecision(work,draft,choice,retry=false){
+  if(DEV||draft.status==="pending"||ROUTER_DECISION_DRAFTS.get(work)!==draft)return;
+  const entryEpoch=PORTAL_EPOCH;
+  if(!_portalReadCurrent(entryEpoch))return;
+  const detail=WORK_DETAIL&&WORK_DETAIL.id===work&&WORK_DETAIL.state==="ready"?WORK_DETAIL:null;
+  const identity=RWSession.sessionIdentity(),subject=_currentOperatorSubject(identity);
+  if(!subject||identity!==PORTAL_AUTH_ID)return;
+  if(!retry){
+    if(draft.status!=="draft"||!detail||!_freezeRouterDecision(work,draft,detail.lifecycle,identity,choice)){
+      draft.message=choice==="request_revision"&&!_decisionReasonValid(draft.text)
+        ?"Revision feedback must be exact text between 1 and 2,000 UTF-8 bytes; it is not trimmed or rewritten."
+        :"Current exact result is not eligible for an operator decision.";
+      if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;
+    }
+  }else if(draft.status!=="unknown"||typeof draft.wire!=="string"||draft.identity!==identity)return;
+  const wasUnknown=retry;
+  let params;try{params=JSON.parse(draft.wire)}catch{return}
+  const epoch=PORTAL_EPOCH,generation=draft.generation;
+  draft.status="pending";draft.message=wasUnknown?"Retrying the exact frozen decision…":"Recording the operator decision…";
+  _decisionRenderIfCurrent(epoch,identity,work,draft,generation);
+  if(!_portalReadCurrent(epoch)||identity!==RWSession.sessionIdentity()||identity!==PORTAL_AUTH_ID||
+    ROUTER_DECISION_DRAFTS.get(work)!==draft||draft.generation!==generation)return;
+  let response,raw;
+  try{
+    const controller=new AbortController();
+    const transport=(async()=>{
+      const value=await RWSession.authedFetch(SB+"/rest/v1/rpc/router_operator_decide",{
+        method:"POST",body:draft.wire,signal:controller.signal});
+      return {response:value,raw:value&&value.ok?await value.json():undefined};
+    })();
+    ({response,raw}=await _followupWithDeadline(transport,controller));
+  }catch{
+    if(epoch===PORTAL_EPOCH&&identity===RWSession.sessionIdentity()&&
+      ROUTER_DECISION_DRAFTS.get(work)===draft&&draft.generation===generation){
+      draft.status="unknown";draft.message=`Decision outcome unknown. Keep this page open and retry the exact request; operation ${draft.operationId}.`;
+      _decisionRenderIfCurrent(epoch,identity,work,draft,generation);
+    }
+    return;
+  }
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_DECISION_DRAFTS.get(work)!==draft||draft.generation!==generation)return;
+  if(!response||typeof response.ok!=="boolean"||!Number.isInteger(response.status)){
+    draft.status="unknown";draft.message=`Decision outcome unknown. Keep this page open if the session remains active; operation ${draft.operationId}.`;
+    _decisionRenderIfCurrent(epoch,identity,work,draft,generation);return;
+  }
+  if(!response.ok){
+    if(wasUnknown||!_DECISION_DEFINITIVE_REJECTION.has(response.status)){
+      draft.status="unknown";
+      draft.message=wasUnknown
+        ?`The exact retry was rejected, but the earlier decision outcome remains unknown. Do not start another decision; operation ${draft.operationId}.`
+        :`Decision outcome unknown after HTTP ${response.status}. Retry only operation ${draft.operationId}.`;
+    }else{
+      draft.status="rejected";draft.message=`The server rejected this decision (HTTP ${response.status}). Nothing is confirmed; explicitly refresh exact eligible evidence before editing.`;
+    }
+    _decisionRenderIfCurrent(epoch,identity,work,draft,generation);return;
+  }
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_DECISION_DRAFTS.get(work)!==draft||draft.generation!==generation)return;
+  try{draft.receipt=_decodeRouterDecisionReceipt(raw,params,subject)}catch{
+    draft.status="unknown";draft.message=`Response was not a valid exact decision receipt. Outcome unknown; retry only operation ${draft.operationId}.`;
+    _decisionRenderIfCurrent(epoch,identity,work,draft,generation);return;
+  }
+  draft.status="recorded";draft.readback={state:"loading"};
+  draft.message=draft.choice==="accept"
+    ?`Exact result accepted and consumption ${draft.receipt.decision.consumption_id} recorded.`
+    :"Revision request recorded against the exact result.";
+  _decisionRenderIfCurrent(epoch,identity,work,draft,generation);
+  if(VIEW!=="work"||String(WORK_SELECTED)!==work)return;
+  await loadWorkDetail(work);
+  if(epoch!==PORTAL_EPOCH||identity!==RWSession.sessionIdentity()||
+    ROUTER_DECISION_DRAFTS.get(work)!==draft||draft.generation!==generation||
+    VIEW!=="work"||String(WORK_SELECTED)!==work)return;
+  const lifecycle=WORK_DETAIL&&WORK_DETAIL.id===work&&WORK_DETAIL.state==="ready"
+    ?WORK_DETAIL.lifecycle:null;
+  if(lifecycle&&lifecycle.state==="ready"){
+    draft.readback={state:"ready",lifecycle};
+    if(_decisionMatchesResult(lifecycle,draft.receipt))draft.message+=" Current lifecycle readback confirms it.";
+    else{
+      draft.status="conflict";
+      draft.message="The decision receipt is valid, but current lifecycle metadata conflicts. Do not resend; retain the operation ID and escalate.";
+    }
+  }else{
+    draft.readback={state:lifecycle&&lifecycle.state||"error"};
+    draft.message+=" Current lifecycle readback could not confirm it; the valid receipt remains authoritative. Do not resend.";
+  }
+  _decisionRenderIfCurrent(epoch,identity,work,draft,generation);
+}
+function wireRouterDecision(){
+  const panel=document.querySelector("[data-router-decision-panel]");if(!panel)return;
+  const work=panel.dataset.routerDecisionPanel,draft=_decisionDraft(work);
+  const input=panel.querySelector("[data-router-decision-reason]");
+  if(input){input.value=draft.text;input.oninput=()=>{
+    if(draft.status!=="draft")return;
+    draft.text=input.value;draft.message="";
+    const lifecycle=WORK_DETAIL&&WORK_DETAIL.id===work&&WORK_DETAIL.state==="ready"?WORK_DETAIL.lifecycle:null;
+    const identity=RWSession.sessionIdentity();
+    if(revise)revise.disabled=!(_portalReadCurrent(PORTAL_EPOCH)&&identity===PORTAL_AUTH_ID&&
+      _currentOperatorSubject(identity)&&_decisionEligible(lifecycle)&&_decisionReasonValid(draft.text));
+  };}
+  const accept=panel.querySelector("[data-router-decision-accept]");
+  if(accept)accept.onclick=()=>_sendRouterDecision(work,draft,"accept",false);
+  const revise=panel.querySelector("[data-router-decision-revise]");
+  if(revise)revise.onclick=()=>{if(input&&draft.status==="draft")draft.text=input.value;_sendRouterDecision(work,draft,"request_revision",false);};
+  const retry=panel.querySelector("[data-router-decision-retry]");
+  if(retry)retry.onclick=()=>_sendRouterDecision(work,draft,draft.choice,true);
+  const reset=panel.querySelector("[data-router-decision-reset]");if(reset)reset.onclick=async()=>{
+    if(draft.status!=="rejected")return;
+    const epoch=PORTAL_EPOCH;if(!_portalReadCurrent(epoch))return;
+    const identity=RWSession.sessionIdentity(),generation=draft.generation;
+    if(identity!==PORTAL_AUTH_ID)return;
+    await loadWorkDetail(work);
+    if(!_portalReadCurrent(epoch)||identity!==PORTAL_AUTH_ID||identity!==RWSession.sessionIdentity()||draft.generation!==generation||
+      ROUTER_DECISION_DRAFTS.get(work)!==draft||draft.status!=="rejected")return;
+    if(!WORK_DETAIL||WORK_DETAIL.id!==work||WORK_DETAIL.state!=="ready"||!_decisionEligible(WORK_DETAIL.lifecycle)){
+      draft.message="Fresh exact decision eligibility was not confirmed. The rejected request remains locked.";
+      if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;
+    }
+    draft.status="draft";draft.wire=null;draft.operationId=null;draft.choice=null;draft.identity=null;
+    draft.receipt=null;draft.readback=null;draft.generation=++ROUTER_DECISION_GENERATION;
+    draft.message="Fresh eligible evidence confirmed. Review the retained feedback, then make an explicit decision.";
+    if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
+  };
+}
+function _workDecisionCapture(){
+  const panel=document.querySelector("[data-router-decision-panel]");
+  const input=panel&&panel.querySelector("[data-router-decision-reason]");
+  if(!input)return;
+  const draft=ROUTER_DECISION_DRAFTS.get(panel.dataset.routerDecisionPanel);
+  if(draft&&draft.status==="draft")draft.text=input.value;
+}
 const _WORK_TERMINAL=new Set(["closed","cancelled","accepted","rejected","decided"]);
 function _workTone(state){
   if(state==="in_progress"||state==="verification")return "badge-info";
@@ -3318,7 +4050,120 @@ function _workSafeObjective(w){
   const packet=w&&w.task_packet;
   return packet&&typeof packet==="object"&&typeof packet.objective==="string"?packet.objective:"";
 }
-function _workDetail(w,eventByWork,verifyByWork,exact=false){
+const _ROUTER_PHASE_LABEL={
+  ready:"Ready for supervised grant",
+  running:"Worker running",
+  awaiting_verification:"Awaiting independent review",
+  checking:"Independent review running",
+  awaiting_acceptance:"Ready for operator decision",
+  accepted:"Accepted and consumed",
+  changes_needed:"Changes requested",
+  blocked_unknown:"Held — outcome unknown",
+  cancelled:"Cancelled"
+};
+function _routerPhaseLabel(phase){return _ROUTER_PHASE_LABEL[phase]||"Lifecycle state unavailable"}
+function _routerLifecycleDetail(lifecycle,linkRead){
+  const state=lifecycle&&lifecycle.state;
+  if(state!=="ready"){
+    const copy=state==="loading"
+      ?["Lifecycle loading","Waiting for the atomic compiled-result read."]
+      :state==="legacy"
+        ?linkRead&&linkRead.state==="ready"
+          ?["Linked intake awaiting supervisor compilation","This follow-up is recorded in the queue but has no compiled lifecycle. It is not running or dispatched."]
+          :["No compiled lifecycle returned","The lifecycle RPC returned null. Linked metadata is read separately, so this alone does not establish whether the task is legacy or linked."]
+        :state==="unavailable"
+          ?["Lifecycle read unavailable","This account or deployment cannot access the compiled-result projection. That is not proof that no lifecycle exists."]
+          :state==="malformed"
+            ?["Lifecycle result malformed","The server returned a value that did not match the exact typed result contract. No reply or review is shown from it."]
+            :["Lifecycle read FAILED","The atomic compiled-result read failed. Lifecycle evidence is unknown, not absent."];
+    return `<div class="state ${state==="legacy"||state==="loading"?"":"state-error"}" data-router-lifecycle-state="${escAttr(state||"error")}" style="margin-top:12px"><b>${esc(copy[0])}</b>${esc(copy[1])}</div>`;
+  }
+  const r=lifecycle.result,source=r.source,output=r.output,verification=r.verification,acceptance=r.acceptance;
+  const sourceTone=source.status==="fresh"?"badge-ok":source.status==="stale"?"badge-warn":"badge-bad";
+  const sourceDetail=source.checked_at===null
+    ?`No source attestation is available.`
+    :`attestation ${esc(source.attestation_id)} · hash ${esc(source.attestation_hash)} · checked ${esc(new Date(source.checked_at).toLocaleString())} · valid until ${esc(new Date(source.valid_until).toLocaleString())}`;
+  const outputDetail=output?`<div data-router-output style="margin-top:14px">
+      <div class="sec-h">Exact worker reply</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:7px;overflow-wrap:anywhere">output ${esc(output.output_id)} · hash ${esc(output.output_hash)} · ${esc(new Date(output.created_at).toLocaleString())}</div>
+      <div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(output.result)}</div>
+    </div>`:`<div class="empty" data-router-output style="margin-top:12px">No immutable worker output is present for this phase.</div>`;
+  const verificationDetail=verification?`<div data-router-verification style="margin-top:14px">
+      <div class="sec-h">Independent review</div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${verification.verdict==="pass"?"badge-ok":"badge-bad"}">${esc(verification.verdict)}</span><span>${esc(verification.independence_label)}</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px;overflow-wrap:anywhere">verification ${esc(verification.verification_id)} · hash ${esc(verification.verification_hash)} · exact output ${esc(verification.output_id)} / ${esc(verification.output_hash)} · ${esc(new Date(verification.created_at).toLocaleString())}</div>
+      ${verification.findings.length?`<div style="margin-top:8px"><b>Findings</b><ul>${verification.findings.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:`<div class="empty" style="margin-top:8px">No review findings recorded.</div>`}
+      <div style="margin-top:8px"><b>Checks</b><ul>${verification.checks.map(x=>`<li><span class="badge ${x.status==="pass"?"badge-ok":"badge-bad"}">${esc(x.status)}</span> ${esc(x.criterion)} — ${esc(x.evidence)}</li>`).join("")}</ul></div>
+    </div>`:`<div class="empty" data-router-verification style="margin-top:12px">No independent verification is present for this phase.</div>`;
+  const acceptanceDetail=acceptance?`<div data-router-acceptance style="margin-top:14px">
+      <div class="sec-h">Operator decision</div>
+      <div><span class="badge ${acceptance.decision==="accept"?"badge-ok":"badge-warn"}">${esc(acceptance.decision==="accept"?"accepted":"revision requested")}</span>${acceptance.reason?` <span style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(acceptance.reason)}</span>`:""}</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px;overflow-wrap:anywhere">operator ${esc(acceptance.operator_subject)}${acceptance.consumption_id?` · consumption ${esc(acceptance.consumption_id)}`:""} · ${esc(new Date(acceptance.created_at).toLocaleString())}</div>
+    </div>`:`<div class="empty" data-router-acceptance style="margin-top:12px">No operator acceptance or revision decision is recorded.</div>`;
+  return `<div data-router-lifecycle data-router-lifecycle-state="ready" style="margin-top:14px;border-top:1px solid var(--edge);padding-top:12px">
+    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><b>Compiled lifecycle</b><span class="badge badge-info">${esc(_routerPhaseLabel(r.phase))}</span></div>
+    <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px;overflow-wrap:anywhere">phase ${esc(r.phase)} · work v${esc(r.work_version)} · compiled hash ${esc(r.compiled_hash)}</div>
+    <div data-router-source style="margin-top:12px"><div class="sec-h">Source attestation</div><span class="badge ${sourceTone}">${esc(source.status)}</span> <span>${source.acceptance_eligible?"eligible for exact acceptance":"not eligible for acceptance"}</span><div style="font-size:11.5px;color:var(--ink-3);margin-top:5px;overflow-wrap:anywhere">${sourceDetail}</div></div>
+    ${outputDetail}${verificationDetail}${acceptanceDetail}
+    <div class="section-note" style="margin-top:12px">Viewing this atomic projection never records acceptance or changes task state.</div>
+  </div>`;
+}
+function _routerFollowupLinkDetail(linkRead){
+  const state=linkRead&&linkRead.state||"error";
+  if(state==="ready"){
+    const x=linkRead.link;
+    return `<div class="state" data-router-followup-link-state="ready" style="margin-top:12px"><b>Linked follow-up · turn ${esc(x.turn_number)}</b>Parent #${esc(x.parent_work_id)} · depth ${esc(x.depth)}. Request: <span style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(x.followup_request.objective)}</span></div>`;
+  }
+  const copy=state==="loading"?"Linked metadata loading…":state==="absent"?"No owner-visible linked metadata was returned. This does not prove the task is unlinked.":state==="unavailable"?"Linked metadata is unavailable for this account or deployment.":state==="malformed"?"Linked metadata was malformed and is not shown.":"Linked metadata read failed; its status is unknown.";
+  return `<div class="${state==="absent"||state==="loading"?"empty":"state state-error"}" data-router-followup-link-state="${escAttr(state)}" style="margin-top:12px">${esc(copy)}</div>`;
+}
+function _followupEligible(lifecycle){
+  const r=lifecycle&&lifecycle.state==="ready"&&lifecycle.result;
+  return !!(r&&_FOLLOWUP_PHASES.has(r.phase)&&r.output&&r.verification);
+}
+function _routerFollowupPanel(w,lifecycle,allowNew=true){
+  const id=String(w.id),draft=_followupDraft(id),eligible=allowNew&&_followupEligible(lifecycle);
+  const locked=["pending","unknown","rejected","recorded","conflict"].includes(draft.status);
+  const canQueue=eligible&&draft.status==="draft"&&!DEV&&!!_currentOperatorSubject();
+  const reason=draft.message||(DEV?"Preview only — no follow-up will be sent.":
+    eligible?"Queue a new supervised task pinned to this exact reply. Recorded is not dispatched.":
+      "Follow-up needs an exact compiled reply and verification in an allowed phase.");
+  const retry=draft.status==="unknown"?`<button class="btn" type="button" data-router-followup-retry>Retry exact request</button>`:"";
+  const reset=draft.status==="rejected"?`<button class="btn" type="button" data-router-followup-reset>Refresh evidence to edit</button>`:"";
+  const another=draft.status==="recorded"?`<button class="btn" type="button" data-router-followup-another>Another follow-up</button>`:"";
+  const child=draft.receipt?`<button class="btn" type="button" data-router-followup-child="${escAttr(String(draft.receipt.followup.child_work_id))}">Inspect child #${esc(draft.receipt.followup.child_work_id)}</button>`:"";
+  const prior=draft.priorReceipts.map(x=>`<button class="btn" type="button" data-router-followup-child="${escAttr(String(x.receipt.followup.child_work_id))}">Inspect prior child #${esc(x.receipt.followup.child_work_id)}</button>`).join("");
+  return `<fieldset style="margin-top:14px;border:1px solid var(--edge);border-radius:var(--radius);padding:12px" data-router-followup-panel="${escAttr(id)}">
+    <legend><b>Follow-up</b></legend>
+    <label for="router-followup-${escAttr(id)}">What should happen next?</label>
+    <textarea id="router-followup-${escAttr(id)}" data-router-followup-draft rows="3" aria-label="Follow-up to this task" style="width:100%;box-sizing:border-box" placeholder="Describe the next bounded task" ${locked?"readonly":""}></textarea>
+    <div class="acts" style="margin-top:8px"><button class="btn rec" type="button" data-router-followup ${canQueue?"":"disabled"}>${draft.status==="pending"?"Recording…":"Queue follow-up"}</button>${retry}${reset}${another}${child}${prior}</div>
+    <p data-router-followup-status="${escAttr(draft.status)}" data-router-followup-reason class="section-note">${esc(reason)} Text must be 1–4,000 UTF-8 bytes with no leading/trailing whitespace, newlines, or control characters.</p>
+  </fieldset>`;
+}
+function _routerDecisionPanel(w,lifecycle,allowNew=true){
+  const id=String(w.id),existing=ROUTER_DECISION_DRAFTS.get(id);
+  const eligible=allowNew&&_decisionEligible(lifecycle);
+  if(!existing&&!eligible)return "";
+  const draft=existing||_decisionDraft(id);
+  const locked=["pending","unknown","rejected","recorded","conflict"].includes(draft.status);
+  const canAccept=eligible&&draft.status==="draft"&&!DEV&&!!_currentOperatorSubject();
+  const canRevise=canAccept&&_decisionReasonValid(draft.text);
+  const reason=draft.message||(DEV?"Preview only — no operator decision will be sent.":
+    eligible?"Choose explicitly. Accept closes this exact result; revision preserves feedback without consumption.":
+      "A new decision requires an exact PASS result with current source eligibility.");
+  const retry=draft.status==="unknown"?`<button class="btn" type="button" data-router-decision-retry>Retry exact decision</button>`:"";
+  const reset=draft.status==="rejected"?`<button class="btn" type="button" data-router-decision-reset>Refresh eligibility to edit</button>`:"";
+  const operation=draft.operationId?`<div style="font-size:11.5px;color:var(--ink-3);margin-top:6px;overflow-wrap:anywhere">operation ${esc(draft.operationId)}</div>`:"";
+  return `<fieldset style="margin-top:14px;border:1px solid var(--edge);border-radius:var(--radius);padding:12px" data-router-decision-panel="${escAttr(id)}">
+    <legend><b>Operator decision</b></legend>
+    <label for="router-decision-${escAttr(id)}">Revision feedback</label>
+    <textarea id="router-decision-${escAttr(id)}" data-router-decision-reason rows="3" aria-label="Revision feedback for this exact result" style="width:100%;box-sizing:border-box" placeholder="Required only when requesting a revision" ${locked?"readonly":""}></textarea>
+    <div class="acts" style="margin-top:8px"><button class="btn rec" type="button" data-router-decision-accept ${canAccept?"":"disabled"}>${draft.status==="pending"&&draft.choice==="accept"?"Recording…":"Accept exact result"}</button><button class="btn" type="button" data-router-decision-revise ${canRevise?"":"disabled"}>${draft.status==="pending"&&draft.choice==="request_revision"?"Recording…":"Request revision"}</button>${retry}${reset}</div>
+    <p data-router-decision-status="${escAttr(draft.status)}" class="section-note">${esc(reason)} Revision feedback is preserved exactly and must be 1–2,000 UTF-8 bytes; whitespace and newlines are allowed.</p>${operation}
+  </fieldset>`;
+}
+function _workDetail(w,eventByWork,verifyByWork,exact=false,lifecycle=null,link=null){
   if(!w)return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><b>Task detail</b><div class="empty">Select a task to inspect its request and evidence.</div></div>`;
   const objective=_workSafeObjective(w), acceptance=typeof w.acceptance_test==="string"?w.acceptance_test:"";
   const ev=eventByWork.get(String(w.id)), vr=verifyByWork.get(String(w.id));
@@ -3336,15 +4181,20 @@ function _workDetail(w,eventByWork,verifyByWork,exact=false){
       <dt>Latest event</dt><dd>${ev?`${esc(ev.event_type||"unknown")} by ${esc(ev.actor||"unrecorded")} · ${esc(ago(ev.created_at))}`:`<span class="missing">${exact?"no event returned for this task":"not present in the bounded overview; inspect this task to check"}</span>`}</dd>
     </dl>
     <div class="section-note" style="margin-top:10px">Latest recorded review only, not a full history. A legacy PASS does not establish that this outcome or artifact was independently verified.</div>
-    <div class="state" style="margin-top:12px">Follow-up chat is not connected yet. The portal will not claim that a worker replied until a backend thread and receipt contract exist.</div>
+    ${exact?_routerFollowupLinkDetail(link):""}
+    ${exact?_routerLifecycleDetail(lifecycle,link):""}
+    ${exact?_routerDecisionPanel(w,lifecycle):""}
+    ${exact?_routerFollowupPanel(w,lifecycle):`<div class="state" style="margin-top:12px">Inspect this task for its atomic compiled lifecycle and linked metadata.</div>`}
   </div>`;
 }
 function _workSelectedDetail(items,eventByWork,verifyByWork){
   if(WORK_DETAIL&&String(WORK_SELECTED)===WORK_DETAIL.id){
     const d=WORK_DETAIL;
-    if(d.state==="ready")return _workDetail(d.item,new Map(d.events.map(e=>[String(e.work_id),e])),new Map(d.verifications.map(v=>[String(v.work_id),v])),true);
+    if(d.state==="ready")return _workDetail(d.item,new Map(d.events.map(e=>[String(e.work_id),e])),new Map(d.verifications.map(v=>[String(v.work_id),v])),true,d.lifecycle,d.link);
     const message=d.state==="loading"?"Loading exact task and latest evidence…":d.state==="missing"?"Task not returned for this account. It may be unavailable or outside your access; this is not proof it was deleted.":"Task detail read FAILED — evidence is unavailable, not absent. Inspect the task again to retry.";
-    return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><b>Task detail · #${esc(d.id)}</b><div class="${d.state==="failed"?"state state-error":"empty"}">${esc(message)}</div></div>`;
+    const retained=(ROUTER_DECISION_DRAFTS.has(d.id)?_routerDecisionPanel({id:d.id},d.lifecycle,false):"")+
+      (ROUTER_FOLLOWUP_DRAFTS.has(d.id)?_routerFollowupPanel({id:d.id},d.lifecycle,false):"");
+    return `<div class="log" data-work-detail tabindex="-1" style="margin-top:14px"><b>Task detail · #${esc(d.id)}</b><div class="${d.state==="failed"?"state state-error":"empty"}">${esc(message)}</div>${retained}</div>`;
   }
   return _workDetail(items.find(w=>String(w.id)===String(WORK_SELECTED)),eventByWork,verifyByWork);
 }
@@ -3989,6 +4839,8 @@ function render(p, updatedAt, srcNote){
   _revCaptureDraft();  // before the innerHTML rebuild below can wipe it — see wireRevenueForm's C-1 comment
   _criCaptureNoteDraft();  // same rebuild-survival for the content-review note textarea
   _tixCaptureNoteDraft();  // and the tickets-room revise note
+  _workFollowupCapture();  // exact per-parent text before the Work detail node is rebuilt
+  _workDecisionCapture();  // exact revision feedback before the same Work detail rebuild
   // R2 (security review #3, HIGH): every innerHTML rebuild below DESTROYS the
   // focused element — after a 120s data refresh mid-sentence, focus fell to
   // <body> and the operator's next plain keystroke hit the room keydown
@@ -4001,7 +4853,8 @@ function render(p, updatedAt, srcNote){
   ACTS_REG = [];
   CUR_ALLOWLIST = Array.isArray(p.action_allowlist) ? p.action_allowlist : null;
   const ctos=ctosPulse(p);
-  const convN=(p.due_calls||[]).length+(p.leads||[]).length;
+  // No unread/needs-reply contract exists; outbound totals are not inbox badges.
+  const convN=0;
   DEC_REG = [];
   const body = VIEW==="review"?viewReview(p)
     : VIEW==="content_review"?viewContentReview(p)
@@ -4061,7 +4914,7 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="review"||VIEW==="content_review")_wireSavedNotes();
   if(VIEW==="business")wireRevenueForm();
   if(VIEW==="work"){
-    wireRouterForm();wireWorkSelection();
+    wireRouterForm();wireWorkSelection();wireRouterDecision();wireRouterFollowup();
     // Only an explicit Inspect click requests focus. Periodic/manual refreshes
     // preserve selection but must not yank the operator's viewport.
     if(WORK_FOCUS_DETAIL){
@@ -4394,6 +5247,11 @@ function _resetPortalState(){
   LAST.p=null;LAST.updatedAt=null;LAST.srcNote="";LAST.fetchedAt=0;
   DEC_IDX=0;DEC_SKIPPED.clear();
   CONVO_KIND="sms";SELECTED_SMS=null;SELECTED_CALL=null;SELECTED_VM=null;
+  SMS_DRAFTS.clear();
+  SMS_ENQUIRY_ASSIGNMENTS.clear();
+  SMS_ENQUIRY_PREVIEWS.clear();
+  SMS_ENQUIRY_BUSY.clear();
+  SMS_REPLY_RECEIPTS.clear();SMS_REPLY_LOCAL_ADAPTER=null;
   ARTS=null;DECS=null;CRI=undefined;WIP=undefined;EXC=undefined;
   // F-A (publish review #2, same class as F1 which missed it): the sign-out link is
   // logout()+boot() with NO page reload, so every tab-scoped operator-state module var
@@ -4403,6 +5261,8 @@ function _resetPortalState(){
   // draft vars are the sensitive ones; the rest is a clean-slate so nothing carries over.
   TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFTS.clear();REVIEW_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_PENDING.clear();REVIEW_NOTES_SNAPSHOT=null;REV_DRAFT=null;REV_PENDING=false;
   Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
+  ROUTER_FOLLOWUP_DRAFTS.clear();++ROUTER_FOLLOWUP_GENERATION;
+  ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
   CRI_SEL=null;CRI_FILTER="all";CRI_CHANNEL="all";CRI_SORT="recent";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
@@ -4444,4 +5304,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 20bfba7b1cca -->
+<!-- rankwise-portal2-version: 2c97f7657699 -->
