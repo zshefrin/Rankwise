@@ -212,9 +212,28 @@ main{padding:0 0 60px;min-width:0}
 .review-watch{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;align-items:start}
 .review-watch>div{min-width:0}
 .watch-feedback textarea{display:block;margin-top:6px}
+.review-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.review-summary .pcard{padding:10px 12px}
+.review-summary .v{font-size:18px}
+.review-toolbar{display:flex;gap:9px;align-items:end;flex-wrap:wrap;margin:12px 0 6px}
+.review-toolbar label{display:grid;gap:4px;color:var(--ink-3);font-size:11px;font-weight:650}
+.review-toolbar select{min-width:150px;text-align:left}
+.review-shell{display:grid;grid-template-columns:minmax(280px,320px) minmax(0,1fr);gap:16px;align-items:start;margin-top:14px}
+.review-list{position:sticky;top:14px;max-height:calc(100vh - 112px);overflow-y:auto;padding-right:3px;scrollbar-width:thin}
+.review-list-item{display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:7px}
+.review-list-item.on{background:var(--acc-soft);border-color:var(--acc-soft-edge)}
+.review-list-title{font-weight:650;font-size:13px;overflow-wrap:anywhere}
+.review-list-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;color:var(--ink-3);font-size:10.5px}
+.review-list-score{margin-left:auto;color:var(--acc);font-variant-numeric:tabular-nums;font-weight:700}
+.review-source-warning{margin:8px 0 0}
 @media (max-width:760px){
   .review-watch{grid-template-columns:1fr;gap:10px}
   .review-watch .artmedia{width:min(100%,180px,18svh);max-height:32svh}
+  .review-summary{grid-template-columns:1fr 1fr}
+  .review-shell{display:block}
+  .review-list{position:static;max-height:none;padding-right:0}
+  .review-toolbar label{flex:1 1 145px}
+  .review-toolbar select{width:100%;min-width:0}
   .convo-shell{grid-template-columns:1fr;height:auto}
   .convo-list{border-right:0;border-bottom:1px solid var(--edge);max-height:240px}
   .convo-detail{max-height:420px}
@@ -967,7 +986,6 @@ function changeLog(p){
 // ── views ────────────────────────────────────────────────────────────────
 let VIEW = "command";
 const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"],["war_room","War room"],["work","Work / Agents"],["pipeline","Pipeline"],["ctos","ctOS"],["review","Review"],
-              ["content_review","Content Review"],
               ["conversations","Conversations"],["content","Content"],["machine","Machine"],["business","Business"]];
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
 let ARTS = null;
@@ -1011,9 +1029,9 @@ async function loadDecisions(){
 // today. undefined=not attempted, null=read FAILED (not an empty queue), []=truly
 // empty (honest -- the pusher may not have run yet), [...]=loaded rows.
 let CRI = undefined;
-let CRI_SEL = null;     // selected script_id
+let CRI_SEL = null;     // selected script_id or "artifact:<id>" in the unified room
 let CRI_FILTER = "all";
-let CRI_CHANNEL = "all", CRI_SORT = "recent";
+let CRI_CHANNEL = "all", CRI_SORT = "created-newest";
 // content_review.* is LIVE (migration 082 applied 2026-09-02 + the four
 // operator_action_worker handlers shipped) — buttons enable through the normal
 // allowlist gate; this reason only shows if the live allowlist drops them.
@@ -1022,11 +1040,21 @@ async function loadContentReview(){
   const current=_auxReadGuard("content");
   if(DEV){CRI=DEMO.content_review_items;return CRI}
   try{
-    const r=await rest("content_review_items?select=*&order=pushed_at.desc&limit=200");
+    const r=await rest("content_review_items?select=*&order=created_at.desc,id.desc&limit=200");
     if(!current())return CRI;
     CRI=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
   }catch{if(current())CRI=null}
   return CRI;
+}
+// One visible Review room is backed by two established sources. Read them
+// together on entry/refresh and after a decision so the combined queue cannot
+// unnecessarily show one source's new state beside the other's stale state.
+async function loadReviewData(force=false){
+  const pending=[];
+  if(force||!Array.isArray(ARTS))pending.push(loadArtifacts());
+  if(force||!Array.isArray(CRI))pending.push(loadContentReview());
+  await Promise.all(pending);
+  return {artifacts:ARTS,content:CRI};
 }
 // work_items in_progress, grouped by owner -- Daily Brief "In progress" (plan §5).
 let WIP = undefined;
@@ -1383,24 +1411,104 @@ function _criViews(it){
   const n=it&&it.metrics_48h&&it.metrics_48h.views;
   return typeof n==="number"&&Number.isFinite(n)&&n>=0?n:null;
 }
-function _criVisibleRows(rows){
-  const selected=_criFilterRows(rows,CRI_FILTER).filter(it=>CRI_CHANNEL==="all"||(it.channel||"unknown")===CRI_CHANNEL);
-  return selected.slice().sort((a,b)=>{
-    const tie=()=>String(a.script_id).localeCompare(String(b.script_id));
-    if(CRI_SORT==="views-high"||CRI_SORT==="views-low"){
-      const x=_criViews(a),y=_criViews(b);
-      if(x===null||y===null)return x===y?tie():x===null?1:-1;
-      return (CRI_SORT==="views-high"?y-x:x-y)||tie();
+function _reviewArtifactKey(id){return `artifact:${String(id)}`;}
+function _reviewSourceLabel(row){
+  return row.kind==="content"?contentChannelLabel(row.item.channel||"unknown"):
+    `Artifact · ${String(row.item.kind||"other").replaceAll("_"," ")}`;
+}
+function _reviewSourceKey(row){return row.kind==="content"?(row.item.channel||"unknown"):`artifact:${row.item.kind||"other"}`;}
+function _reviewCritiquePayload(row){
+  if(row.kind==="content")return row.item.critic_verdict;
+  const meta=row.item&&row.item.meta;
+  return meta&&(meta.critic_verdict||meta.critique||meta.review)||null;
+}
+function _reviewHasCritique(row){
+  const value=_reviewCritiquePayload(row);
+  return typeof value==="string"?!!value.trim():!!(value&&typeof value==="object"&&Object.keys(value).length);
+}
+// Structured critic producers have used both score and rating vocabulary. Keep
+// the original scale visible while normalizing only for comparison; absent or
+// malformed values stay unknown and always sort last.
+function _reviewCritiqueScore(row){
+  const value=_reviewCritiquePayload(row);
+  if(!value||typeof value!=="object")return null;
+  const hint=Number(value.out_of??value.max_score??value.max??value.scale);
+  for(const [key,raw] of [["score",value.score],["rating",value.rating],["overall_score",value.overall_score],["quality_score",value.quality_score]]){
+    if(raw==null)continue;
+    const m=String(raw).trim().match(/^([0-9]+(?:\.[0-9]+)?)\s*(?:\/\s*([0-9]+(?:\.[0-9]+)?))?$/);
+    if(!m)continue;
+    const n=Number(m[1]);
+    let max=Number(m[2]);
+    if(!Number.isFinite(max)||max<=0)max=Number.isFinite(hint)&&hint>0?hint:(key==="rating"&&n<=5?5:n<=10?10:100);
+    if(!Number.isFinite(n)||n<0||n>max)return null;
+    return {normalized:n/max,label:`${n}/${max}`};
+  }
+  return null;
+}
+function _reviewRows(){
+  const artifactRows=Array.isArray(ARTS)?ARTS.filter(Boolean):[];
+  const artifactsById=new Map(artifactRows.map(item=>[String(item.id),item]));
+  const content=Array.isArray(CRI)?CRI.filter(Boolean).map(item=>({kind:"content",key:String(item.script_id),item,
+    linkedArtifact:item.artifact_id==null?null:(artifactsById.get(String(item.artifact_id))||null)})):[];
+  const linked=new Set(content.map(row=>row.item.artifact_id).filter(id=>id!=null).map(String));
+  const artifacts=artifactRows.filter(a=>!linked.has(String(a.id)))
+    .map(item=>({kind:"artifact",key:_reviewArtifactKey(item.id),item}));
+  return content.concat(artifacts);
+}
+function _reviewCreatedAt(row){return row.item.created_at||null;}
+function _reviewUpdatedAt(row){return row.kind==="content"?(row.item.pushed_at||row.item.created_at):(row.item.decided_at||row.item.created_at);}
+function _reviewTitle(row){return row.kind==="content"?String(row.item.script_id||""):String(row.item.title||"");}
+function _reviewAwaiting(row){return row.kind==="content"?!["approved","posted"].includes(row.item.state):row.item.status==="pending";}
+function _reviewRejected(row){
+  if(row.kind==="content"){const f=_criSavedFeedback(row.item);return !!(f&&f.status==="Rejected");}
+  return row.item.status!=="pending"&&/reject/i.test(String(row.item.decision&&row.item.decision.choice||""));
+}
+function _reviewFilterRows(rows,filter){
+  if(filter==="waiting")return rows.filter(_reviewAwaiting);
+  if(filter==="completed")return rows.filter(row=>!_reviewAwaiting(row));
+  if(filter==="rejected")return rows.filter(_reviewRejected);
+  if(filter==="draft")return rows.filter(row=>row.kind==="content"&&row.item.state==="draft");
+  if(filter==="critiqued")return rows.filter(row=>(row.kind==="content"&&row.item.state==="critiqued")||_reviewHasCritique(row));
+  if(filter==="qcfail")return rows.filter(row=>row.kind==="content"&&_criQcFailed(row.item));
+  if(filter==="blocked")return rows.filter(row=>row.kind==="content"&&row.item.state==="blocked");
+  return rows;
+}
+function _reviewCompareKnown(x,y,direction,tie){
+  const xOk=typeof x==="number"&&Number.isFinite(x),yOk=typeof y==="number"&&Number.isFinite(y);
+  if(!xOk||!yOk)return xOk===yOk?tie():xOk?-1:1;
+  return direction*(x-y)||tie();
+}
+function _reviewSortRows(rows){
+  return rows.slice().sort((a,b)=>{
+    const tie=()=>_reviewTitle(a).localeCompare(_reviewTitle(b))||a.key.localeCompare(b.key);
+    const date=(row,field)=>{const t=Date.parse(field(row)||"");return Number.isFinite(t)?t:null;};
+    if(CRI_SORT==="views-high"||CRI_SORT==="views-low")
+      return _reviewCompareKnown(a.kind==="content"?_criViews(a.item):null,b.kind==="content"?_criViews(b.item):null,CRI_SORT==="views-high"?-1:1,tie);
+    if(CRI_SORT==="rating-high"||CRI_SORT==="rating-low")
+      return _reviewCompareKnown(_reviewCritiqueScore(a)?.normalized,_reviewCritiqueScore(b)?.normalized,CRI_SORT==="rating-high"?-1:1,tie);
+    if(CRI_SORT==="critiqued-first"){
+      const present=Number(_reviewHasCritique(b))-Number(_reviewHasCritique(a));
+      return present||_reviewCompareKnown(_reviewCritiqueScore(a)?.normalized,_reviewCritiqueScore(b)?.normalized,-1,()=>
+        _reviewCompareKnown(date(a,_reviewCreatedAt),date(b,_reviewCreatedAt),-1,tie));
     }
-    if(CRI_SORT==="channel")return contentChannelLabel(a.channel||"unknown").localeCompare(contentChannelLabel(b.channel||"unknown"))||tie();
+    if(CRI_SORT==="channel")return _reviewSourceLabel(a).localeCompare(_reviewSourceLabel(b))||tie();
     if(CRI_SORT==="title")return tie();
     if(CRI_SORT==="attention"){
-      const rank=it=>_criQcFailed(it)||it.state==="blocked"?0:it.state==="draft"?1:it.state==="approved"||it.state==="posted"?3:2;
-      return rank(a)-rank(b)||tie();
+      const rank=row=>row.kind==="content"?(_criQcFailed(row.item)||row.item.state==="blocked"?0:row.item.state==="draft"?1:_reviewAwaiting(row)?2:4):_reviewAwaiting(row)?2:4;
+      return rank(a)-rank(b)||_reviewCompareKnown(date(a,_reviewCreatedAt),date(b,_reviewCreatedAt),-1,tie);
     }
-    const stamp=it=>{const t=Date.parse(it.pushed_at||"");return Number.isFinite(t)?t:0;};
-    return (CRI_SORT==="oldest"?stamp(a)-stamp(b):stamp(b)-stamp(a))||tie();
+    if(CRI_SORT==="updated")return _reviewCompareKnown(date(a,_reviewUpdatedAt),date(b,_reviewUpdatedAt),-1,tie);
+    return _reviewCompareKnown(date(a,_reviewCreatedAt),date(b,_reviewCreatedAt),CRI_SORT==="created-oldest"||CRI_SORT==="oldest"?1:-1,tie);
   });
+}
+function _reviewVisibleRows(rows=_reviewRows()){
+  return _reviewSortRows(_reviewFilterRows(rows,CRI_FILTER)
+    .filter(row=>CRI_CHANNEL==="all"||_reviewSourceKey(row)===CRI_CHANNEL));
+}
+// Kept as a content-only helper for focused tests and callers. The visible room
+// itself uses _reviewVisibleRows() across both established sources.
+function _criVisibleRows(rows){
+  return _reviewVisibleRows((rows||[]).map(item=>({kind:"content",key:String(item.script_id),item}))).map(row=>row.item);
 }
 function _criSavedFeedback(it){
   const feed=LAST.p&&LAST.p.content_review_feedback;
@@ -1659,23 +1767,26 @@ function _criQcBlock(it){
     ?`<div class="empty">QC inferred from filename, not a recorded verdict</div>`:"";
   return rows+inferredNote || `<div class="empty">No QC signal recorded.</div>`;
 }
-function _criDetail(it){
+function _criDetail(it,linkedArtifact=null){
   const scenes=Array.isArray(it.scenes)?it.scenes:[];
   const dur=it.duration_seconds!=null?it.duration_seconds+"s":"—";
   const captions=it.captions||{};
+  const score=_reviewCritiqueScore({kind:"content",item:it});
   const capKeys=[["instagram","Instagram"],["youtube_title","YouTube title"],["youtube_description","YouTube description"],["tiktok","TikTok"]];
   const capRows=capKeys.filter(([k])=>captions[k]).map(([k,label])=>
     `<div style="margin-bottom:8px"><b style="font-size:11px;color:var(--ink-3);text-transform:uppercase">${esc(label)}</b><div style="font-size:13px;color:var(--ink-2);white-space:pre-wrap">${esc(captions[k])}</div></div>`).join("");
+  const mediaPath=linkedArtifact&&linkedArtifact.storage_path?linkedArtifact.storage_path:`reels/${it.script_id}.mp4`;
   const mediaId=it.artifact_id!=null
-    ? MEDIA_REG.push({path:`reels/${it.script_id}.mp4`,revision:it.render_sha||"",img:false,title:it.script_id})-1
+    ? MEDIA_REG.push({path:mediaPath,revision:it.render_sha||(linkedArtifact&&linkedArtifact.content_sha)||"",img:false,title:it.script_id})-1
     : null;
   return `
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
       <div>
         <div style="font-size:17px;font-weight:700">${esc(it.script_id)}</div>
-        <div style="color:var(--ink-3);font-size:11px;font-family:ui-monospace,Menlo,monospace;margin-top:2px">${esc(contentChannelLabel(it.channel))}${it.wave?" · "+esc(it.wave):""}</div>
+        <div style="color:var(--ink-3);font-size:11px;font-family:ui-monospace,Menlo,monospace;margin-top:2px">${esc(contentChannelLabel(it.channel))}${it.wave?" · "+esc(it.wave):""} · created ${esc(ago(it.created_at))}</div>
       </div>
       <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${_criStateBadge(it)}
+        ${score?`<span class="badge badge-info">Critique ${esc(score.label)}</span>`:""}
         ${(it.platform_targets||[]).length?`<span class="badge badge-info">${esc((it.platform_targets||[]).join(" · "))}</span>`:""}</div>
     </div>
     <div class="dcard review-watch" style="margin-bottom:10px">
@@ -1691,6 +1802,7 @@ function _criDetail(it){
       <textarea id="cri-note" rows="2" data-script-id="${escAttr(String(it.script_id))}" placeholder="Why — required for Request changes / Reject"
         style="width:100%;background:var(--bg);border:1px solid var(--edge);border-radius:var(--radius-sm);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
       <div class="empty">Sent with Request changes or Reject · 280 characters. Typing alone does not save or change approval.</div>
+      ${linkedArtifact&&linkedArtifact.status!=="pending"?`<div class="state" style="margin:10px 0"><b>Earlier artifact decision: ${esc(linkedArtifact.decision&&linkedArtifact.decision.choice||"recorded")}</b><br>This is preserved history from the former artifact shelf. Content status remains ${esc(it.state||"unknown")} until the content-review workflow records its own decision.${linkedArtifact.decision&&linkedArtifact.decision.note?`<br><span style="white-space:pre-wrap">Feedback: ${esc(linkedArtifact.decision.note)}</span>`:""}</div>`:""}
       ${_criFeedback(it)}
     <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
       ${actBtn("content_review.approve",{script_id:it.script_id,platforms:it.platform_targets||[]},"Approve","rec",_CRI_NOT_LIVE_REASON)}
@@ -1736,45 +1848,61 @@ function _criDetail(it){
 }
 function viewContentReview(p){
   MEDIA_REG=[];
-  const rows=CRI;
-  if(rows===undefined)return `<div class="status sub">Content Review</div><div class="empty">Loading…</div>`;
-  if(rows===null)return `<div class="status sub">Content Review</div><div class="state state-error"><b>Content review read FAILED</b>Not an empty queue — the read itself failed.</div>`;
-  if(!rows.length)return `<div class="status sub">Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">videos and drafts awaiting a decision before they can post</small></div><div class="empty">Nothing in the review queue yet — the pusher hasn't run, or wave1 has no scripts.</div>`;
-  const counts={all:rows.length,draft:rows.filter(r=>r.state==="draft").length,critiqued:rows.filter(r=>r.state==="critiqued").length,
-    qcfail:rows.filter(_criQcFailed).length,blocked:rows.filter(r=>r.state==="blocked").length,rejected:_criFilterRows(rows,"rejected").length};
-  const filtered=_criVisibleRows(rows);
-  if(!filtered.some(r=>r.script_id===CRI_SEL)) CRI_SEL = filtered[0] ? filtered[0].script_id : null;
-  const selItem=filtered.find(r=>r.script_id===CRI_SEL);
-  const filters=[["all","All"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected (recorded)"]];
-  const channels=[...new Set(rows.map(it=>it.channel||"unknown"))].sort((a,b)=>contentChannelLabel(a).localeCompare(contentChannelLabel(b)));
-  const sortOptions=[["recent","Recently synced"],["oldest","Oldest sync first"],["attention","Needs attention"],["channel","Channel A–Z"],["title","Item A–Z"],["views-high","Most views (48h)"],["views-low","Fewest views (48h)"]];
-  const filterBar=`<div class="acts" style="margin-bottom:12px;flex-wrap:wrap">${filters.map(([k,label])=>
+  const rows=_reviewRows();
+  if(CRI===undefined&&!Array.isArray(ARTS))return `<div class="status sub" data-review-room data-cri-room>Review</div><div class="empty">Loading the unified queue…</div>`;
+  const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":""].filter(Boolean);
+  const counts={all:rows.length,waiting:_reviewFilterRows(rows,"waiting").length,draft:_reviewFilterRows(rows,"draft").length,critiqued:_reviewFilterRows(rows,"critiqued").length,
+    qcfail:_reviewFilterRows(rows,"qcfail").length,blocked:_reviewFilterRows(rows,"blocked").length,
+    completed:_reviewFilterRows(rows,"completed").length,rejected:_reviewFilterRows(rows,"rejected").length};
+  const scored=rows.filter(row=>_reviewCritiqueScore(row)!==null).length;
+  const filtered=_reviewVisibleRows(rows);
+  if(!filtered.some(row=>row.key===CRI_SEL))CRI_SEL=filtered[0]?filtered[0].key:null;
+  const selected=filtered.find(row=>row.key===CRI_SEL);
+  const filters=[["all","All"],["waiting","Awaiting"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["completed","Completed"],["rejected","Rejected"]];
+  const sources=[...new Map(rows.map(row=>[_reviewSourceKey(row),_reviewSourceLabel(row)])).entries()]
+    .sort((a,b)=>a[1].localeCompare(b[1]));
+  const sortOptions=[["created-newest","Newest created"],["created-oldest","Oldest created"],["rating-high","Highest critique rating"],["rating-low","Lowest critique rating"],
+    ["critiqued-first","Critiqued first"],["attention","Needs attention"],["updated","Recent activity"],["channel","Source A–Z"],["title","Item A–Z"],["views-high","Most views (48h)"],["views-low","Fewest views (48h)"]];
+  const filterBar=`<div class="acts" style="margin-bottom:10px;flex-wrap:wrap">${filters.map(([k,label])=>
     `<button class="btn ${CRI_FILTER===k?"rec":""}" data-cri-filter="${escAttr(k)}">${esc(label)} · ${counts[k]}</button>`).join("")}</div>`;
-  const sortBar=`<div class="acts" style="flex-wrap:wrap;margin-bottom:12px"><label>Channel <select id="cri-channel" class="btn"><option value="all">All channels</option>${channels.map(c=>`<option value="${escAttr(c)}" ${CRI_CHANNEL===c?"selected":""}>${esc(contentChannelLabel(c))}</option>`).join("")}</select></label><label>Sort <select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div><div class="empty">${rows.some(it=>_criViews(it)!==null)?"View rankings use recorded 48h counts; unknown values sort last. Views are not a quality score.":"Performance not collected — no best/worst performance ranking yet."} Sorting covers the loaded items only.</div>`;
+  const sortBar=`<div class="review-toolbar"><label>Source<select id="cri-channel" class="btn"><option value="all">All sources</option>${sources.map(([key,label])=>`<option value="${escAttr(key)}" ${CRI_CHANNEL===key?"selected":""}>${esc(label)}</option>`).join("")}</select></label><label>Sort<select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
+    <div class="section-note">Creation sorts use each record's created time. Critique-rating sorts use explicit structured scores only; ${scored} of ${rows.length} loaded items ${scored===1?"has":"have"} one, and unknown scores stay last.</div>`;
+  const summary=`<div class="review-summary">
+    <div class="pcard"><h4>Awaiting you</h4><div class="v">${counts.waiting}</div></div>
+    <div class="pcard"><h4>Critiqued</h4><div class="v">${counts.critiqued}</div><small>${scored} with ratings</small></div>
+    <div class="pcard"><h4>QC issues</h4><div class="v">${counts.qcfail}</div></div>
+    <div class="pcard"><h4>Completed</h4><div class="v">${counts.completed}</div></div>
+  </div>`;
+  const warnings=sourceWarnings.map(msg=>`<div class="state state-error review-source-warning"><b>Partial review data</b>${esc(msg)}</div>`).join("");
+  const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
   const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   if(phone){
-    const idx=filtered.findIndex(r=>r.script_id===CRI_SEL);
+    const idx=filtered.findIndex(row=>row.key===CRI_SEL);
     return `
-      <div class="status sub" data-cri-room>Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${filtered.length?idx+1:0} of ${filtered.length}</small></div>
-      ${filterBar}${sortBar}
-      ${selItem?_criDetail(selItem):`<div class="empty">No items match this filter.</div>`}
+      <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length?idx+1:0} of ${filtered.length}</small></div>
+      <div class="section-note">One queue for production content and review artifacts.</div>
+      ${warnings}${summary}${filterBar}${sortBar}${detail}
       <div class="acts" style="margin-top:4px">
         <button class="btn" data-cri-nav="prev">← Prev</button>
         <button class="btn" data-cri-nav="next">Next →</button>
       </div>`;
   }
   return `
-    <div class="status sub" data-cri-room>Content Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">${filtered.length} waiting</small></div>
-    ${filterBar}${sortBar}
-    <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start">
-      <div>${filtered.map(it=>`
-        <button class="btn" data-cri-sel="${escAttr(it.script_id)}" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;${it.script_id===CRI_SEL?"background:var(--acc-soft);border-color:var(--acc-soft-edge)":""}">
-          <div style="font-weight:650;font-size:13px">${esc(it.script_id)}</div>
-          <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${_criStateBadge(it)}<span style="color:var(--ink-3);font-size:10.5px">${esc(contentChannelLabel(it.channel))}</span></div>
-        </button>`).join("")||`<div class="empty">No items match this filter.</div>`}</div>
-      <div>${selItem?_criDetail(selItem):`<div class="empty">Select an item.</div>`}</div>
+    <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} awaiting you</small></div>
+    <div class="section-note">One queue for production content and review artifacts. Linked render artifacts appear once, with the content workflow.</div>
+    ${warnings}${summary}${filterBar}${sortBar}
+    <div class="review-shell">
+      <div class="review-list">${filtered.map(row=>{
+        const score=_reviewCritiqueScore(row),it=row.item;
+        const badge=row.kind==="content"?_criStateBadge(it):`<span class="badge ${it.status==="pending"?"badge-warn":"badge-ok"}">${it.status==="pending"?"Awaiting":"Decided"}</span>`;
+        return `<button class="btn review-list-item ${row.key===CRI_SEL?"on":""}" data-review-sel="${escAttr(row.key)}"${row.kind==="content"?` data-cri-sel="${escAttr(it.script_id)}"`:` data-art-sel="${escAttr(it.id)}"`}>
+          <div class="review-list-title">${esc(_reviewTitle(row))}</div>
+          <div class="review-list-meta">${badge}${row.kind==="content"&&row.linkedArtifact&&row.linkedArtifact.status!=="pending"?`<span class="badge badge-neutral">Prior artifact decision</span>`:""}<span>${esc(_reviewSourceLabel(row))}</span><span>· ${esc(ago(_reviewCreatedAt(row)))}</span>${score?`<span class="review-list-score">${esc(score.label)}</span>`:""}</div>
+        </button>`;}).join("")||`<div class="empty">No items match this view.</div>`}</div>
+      <div>${detail}</div>
     </div>`;
 }
+function viewReview(p){return viewContentReview(p);}
 // The review note draft must survive render()'s innerHTML rebuild (30s tick /
 // action re-renders) — same capture-before-rebuild pattern as the revenue form's
 // _revCaptureDraft. Cleared when the SELECTED ITEM changes: a why written for
@@ -1795,16 +1923,16 @@ function wireContentReview(p,updatedAt,srcNote){
   document.querySelectorAll("button[data-cri-filter]").forEach(b=>{
     b.onclick=()=>{_criCaptureNoteDraft();CRI_FILTER=b.dataset.criFilter;render(p,updatedAt,srcNote);};
   });
-  document.querySelectorAll("button[data-cri-sel]").forEach(b=>{
-    b.onclick=()=>{_criCaptureNoteDraft();CRI_SEL=b.dataset.criSel;render(p,updatedAt,srcNote);};
+  document.querySelectorAll("button[data-review-sel]").forEach(b=>{
+    b.onclick=()=>{_criCaptureNoteDraft();CRI_SEL=b.dataset.reviewSel;render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-cri-nav]").forEach(b=>{
     b.onclick=()=>{
       _criCaptureNoteDraft();
-      const rows=_criVisibleRows(CRI||[]);
-      const idx=rows.findIndex(r=>r.script_id===CRI_SEL);
+      const rows=_reviewVisibleRows();
+      const idx=rows.findIndex(row=>row.key===CRI_SEL);
       const next=rows[b.dataset.criNav==="next"?idx+1:idx-1];
-      if(next)CRI_SEL=next.script_id;
+      if(next)CRI_SEL=next.key;
       render(p,updatedAt,srcNote);
     };
   });
@@ -1813,7 +1941,7 @@ function wireContentReview(p,updatedAt,srcNote){
 // (plan §6) — every shortcut is a visible button too; a disabled button ignores
 // .click() the same as a real click, so this never bypasses actionAllowed().
 document.addEventListener("keydown", e=>{
-  if(VIEW!=="content_review")return;
+  if(VIEW!=="review"&&VIEW!=="content_review")return;
   // S2 (security review #2, same class as the tickets room): a modifier combo
   // is a BROWSER/system chord, never a shortcut — Cmd+A (select-all) fired
   // Approve; Cmd+R (reload) would fire an action as the page tears down.
@@ -2934,33 +3062,27 @@ function _reviewRestoreMedia(saved){
     if(old.playing&&old.video.paused){const attempt=old.video.play();if(attempt&&attempt.catch)attempt.catch(()=>{});}
   });
 }
-function viewReview(p){
-  MEDIA_REG = [];
-  const rows=ARTS;
-  const pend=(rows||[]).filter(a=>a.status==="pending");
-  const decided=(rows||[]).filter(a=>a.status!=="pending");
-  const card=a=>{
-    const opts=(a.meta&&a.meta.decideOptions)||["Approve","Reject"];
-    const dur=a.meta&&a.meta.durationSeconds?` · ${a.meta.durationSeconds}s`:"";
-    return `<div class="dcard" data-art="${escAttr(a.id)}">
-      <div class="q">${esc(a.title)}<span style="color:var(--ink-3);font-weight:400;font-size:11.5px"> · ${esc(a.kind)}${esc(dur)} · ${esc(ago(a.created_at))}</span></div>
-      <div class="${a.storage_path&&(a.kind==='reel'||a.kind==='image')?'review-watch':''}"><div class="watch-media">
-      ${a.kind==="reel"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,revision:a.content_sha||(a.meta&&a.meta.render_sha)||a.created_at||"",img:false,title:a.title})-1}" style="margin:10px 0;background:#000;border-radius:8px;max-width:280px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`:""}
-      ${a.kind==="image"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,img:true,title:a.title})-1}" style="margin:10px 0;aspect-ratio:16/9;max-width:400px;background:var(--surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">loading…</div>`:""}
-      </div><div class="watch-feedback">
-      ${a.status==="pending"
-        ?`<div style="margin:12px 0"><label for="review-note-${escAttr(a.id)}">Feedback & revisions — what should change, or why reject?</label><textarea id="review-note-${escAttr(a.id)}" data-review-note="${escAttr(a.id)}" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional feedback · sent with your decision"></textarea><div class="empty">Up to 1,000 characters. Typing alone does not save; submitting records this decision, not a publishing approval.</div></div><div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
-        :`<div class="why">Decision: ${esc(a.decision&&a.decision.choice||"not recorded")}</div><div style="white-space:pre-wrap">${a.decision&&a.decision.note?`<b>Feedback:</b> ${esc(a.decision.note)}`:`<span class="empty">No feedback recorded.</span>`}</div>`}
-      ${_savedNotePanel("artifact",a)}
-      </div></div>
-    </div>`;};
-  return `
-    <div class="status sub">Review<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">artifact decisions · production videos are in Content Review</small></div>
-    ${rows===null?`<div class="empty">Shelf read failed — not an empty shelf.</div>`:""}
-    <h4 class="section-h">WAITING ON YOU — ${pend.length}</h4>
-    <div class="cards">${pend.length?pend.map(card).join(""):`<div class="empty">Nothing waiting for review.</div>`}</div>
-    ${decided.length?`<h4 class="section-h">DECIDED — ${decided.length}</h4>
-    <div class="cards">${decided.slice(0,6).map(card).join("")}</div>`:""}`;
+function _artifactDetail(a){
+  const opts=(a.meta&&a.meta.decideOptions)||["Approve","Reject"];
+  const dur=a.meta&&a.meta.durationSeconds?` · ${a.meta.durationSeconds}s`:"";
+  const score=_reviewCritiqueScore({kind:"artifact",item:a});
+  return `<div class="dcard" data-art="${escAttr(a.id)}">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+      <div><div style="font-size:17px;font-weight:700">${esc(a.title)}</div>
+      <div style="color:var(--ink-3);font-size:11px;margin-top:2px">${esc(a.kind)}${esc(dur)} · created ${esc(ago(a.created_at))}</div></div>
+      <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><span class="badge ${a.status==="pending"?"badge-warn":"badge-ok"}">${a.status==="pending"?"Awaiting review":"Decided"}</span>${score?`<span class="badge badge-info">Critique ${esc(score.label)}</span>`:""}</div>
+    </div>
+    <div class="${a.storage_path&&(a.kind==='reel'||a.kind==='image')?'review-watch':''}"><div class="watch-media">
+    ${a.kind==="reel"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,revision:a.content_sha||(a.meta&&a.meta.render_sha)||a.created_at||"",img:false,title:a.title})-1}" style="margin:10px 0;background:#000;border-radius:8px;max-width:280px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">${DEV?"video plays live":"loading…"}</div>`:""}
+    ${a.kind==="image"&&a.storage_path?`<div class="artmedia" data-mi="${MEDIA_REG.push({path:a.storage_path,revision:a.content_sha||a.created_at||"",img:true,title:a.title})-1}" style="margin:10px 0;aspect-ratio:16/9;max-width:400px;background:var(--surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px">loading…</div>`:""}
+    ${!a.storage_path||!(a.kind==="reel"||a.kind==="image")?`<div class="empty">No inline media preview for this artifact.</div>`:""}
+    </div><div class="watch-feedback">
+    ${a.status==="pending"
+      ?`<div style="margin:12px 0"><label for="review-note-${escAttr(a.id)}">Feedback & revisions — what should change, or why reject?</label><textarea id="review-note-${escAttr(a.id)}" data-review-note="${escAttr(a.id)}" rows="3" style="width:100%;box-sizing:border-box;font:inherit;padding:8px" placeholder="Optional feedback · sent with your decision"></textarea><div class="empty">Up to 1,000 characters. Typing alone does not save; submitting records this decision, not a publishing approval.</div></div><div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div>`
+      :`<div class="why">Decision: ${esc(a.decision&&a.decision.choice||"not recorded")}</div><div style="white-space:pre-wrap">${a.decision&&a.decision.note?`<b>Feedback:</b> ${esc(a.decision.note)}`:`<span class="empty">No feedback recorded.</span>`}</div>`}
+    ${_savedNotePanel("artifact",a)}
+    </div></div>
+  </div>`;
 }
 // True while any mounted review video is actively playing — the 30s render
 // tick checks this so a rebuild never restarts the operator's playback.
@@ -4905,11 +5027,10 @@ function render(p, updatedAt, srcNote){
   $("#app").innerHTML=`
   <nav><div class="brand">RANK<span>WISE</span></div>
     ${NAVS.map(([v,label])=>{
-      const n=v==="conversations"?convN:(v==="review"&&ARTS?ARTS.filter(a=>a.status==="pending").length:
+      const n=v==="conversations"?convN:(v==="review"?_reviewRows().filter(_reviewAwaiting).length:
         (v==="decisions"&&Array.isArray(DECS)?DECS.length:
         (v==="tickets"&&Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&t.status==="open").length:
-        (v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:
-        (v==="content_review"&&Array.isArray(CRI)?CRI.filter(r=>r.state!=="approved"&&r.state!=="posted").length:0)))));
+        (v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:0))));
       return `<button class="navlink ${VIEW===v?"on":""}" data-v="${v}"${VIEW===v?' aria-current="page"':""}>${esc(label)} ${n?`<span class="n">${n}</span>`:""}</button>`}).join("")}
     <div class="foot">portal v2 · phase 7<br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
   <main>
@@ -4927,7 +5048,7 @@ function render(p, updatedAt, srcNote){
     <div class="brief">${body}</div>
   </main>`;
   document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ;VIEW=a.dataset.v;
-    if(VIEW==="review"&&!ARTS)await loadArtifacts();
+    if(VIEW==="review")await loadReviewData();
     if(VIEW==="decisions"&&!DECS)await loadDecisions();
     if(VIEW==="work"&&WORK===undefined)await loadWork();
     if(VIEW==="content_review"&&CRI===undefined)await loadContentReview();
@@ -4943,7 +5064,7 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="decisions")wireDecideNav(p,updatedAt,srcNote);
   if(VIEW==="tickets")wireTicketsNav(p,updatedAt,srcNote);
   if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
-  if(VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
+  if(VIEW==="review"||VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
   if(VIEW==="review"||VIEW==="content_review")_wireSavedNotes();
   if(VIEW==="business")wireRevenueForm();
   if(VIEW==="work"){
@@ -5067,8 +5188,8 @@ function render(p, updatedAt, srcNote){
           else if(st==="done"){
             toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
             ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
-            if(isCriNoteAction){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(loadContentReview);}
-            if(reg.action==="artifact.decide"){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(loadArtifacts);}
+            if(isCriNoteAction){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(()=>loadReviewData(true));}
+            if(reg.action==="artifact.decide"){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(()=>loadReviewData(true));}
             if(reg.action.startsWith("ticket.")&&params.id){
               // ONLY approve/reject resolve a ticket (security review F2). `revise` records
               // a note and leaves the ticket OPEN and still awaiting the operator's word —
@@ -5148,8 +5269,7 @@ async function loadAndRender(reason){
       if(!current())return;
       if(WORK_SELECTED!=null)await loadWorkDetail(WORK_SELECTED);
     }
-    if(VIEW==="review")await loadArtifacts();
-    if(VIEW==="content_review")await loadContentReview();
+    if(VIEW==="review"||VIEW==="content_review")await loadReviewData(true);
     if(!current())return;
     render(LAST.p,LAST.updatedAt,LAST.srcNote);
     if(reason==="manual")toast("Refreshed");
@@ -5237,7 +5357,7 @@ async function boot(){
     if(RWSession.tok()&&!RWSession.requireRole(["operator"]))return renderNoAccess();
     if(!tok())return renderLogin();
   }
-  _loadAuxAndRender(loadArtifacts);
+  _loadAuxAndRender(loadReviewData);
   _loadAuxAndRender(loadExceptions);
   // eager: Command's Daily Brief block needs both on first paint, same pattern
   // as loadArtifacts()/loadExceptions() above (unlike the nav-lazy CRI load).
@@ -5298,7 +5418,7 @@ function _resetPortalState(){
   ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="all";CRI_CHANNEL="all";CRI_SORT="recent";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="all";CRI_CHANNEL="all";CRI_SORT="created-newest";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -5337,4 +5457,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 6d810c518415 -->
+<!-- rankwise-portal2-version: be53478eec66 -->
