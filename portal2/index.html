@@ -1030,8 +1030,13 @@ async function loadDecisions(){
 // empty (honest -- the pusher may not have run yet), [...]=loaded rows.
 let CRI = undefined;
 let CRI_SEL = null;     // selected script_id or "artifact:<id>" in the unified room
-let CRI_FILTER = "all";
+let CRI_FILTER = "waiting";
 let CRI_CHANNEL = "all", CRI_SORT = "created-newest";
+// Confirmed decisions leave the working queue immediately, even though the
+// content sidecar snapshot and content_review_items projection update on
+// different clocks. The render SHA binds that local acknowledgement to the
+// exact video; a new render automatically needs review again.
+const REVIEW_HANDLED = new Map();
 // content_review.* is LIVE (migration 082 applied 2026-09-02 + the four
 // operator_action_worker handlers shipped) — buttons enable through the normal
 // allowlist gate; this reason only shows if the live allowlist drops them.
@@ -1458,7 +1463,20 @@ function _reviewRows(){
 function _reviewCreatedAt(row){return row.item.created_at||null;}
 function _reviewUpdatedAt(row){return row.kind==="content"?(row.item.pushed_at||row.item.created_at):(row.item.decided_at||row.item.created_at);}
 function _reviewTitle(row){return row.kind==="content"?String(row.item.script_id||""):String(row.item.title||"");}
-function _reviewAwaiting(row){return row.kind==="content"?!["approved","posted"].includes(row.item.state):row.item.status==="pending";}
+function _reviewContentHandled(it){
+  if(["approved","posted"].includes(it.state))return true;
+  if(it.render_sha&&it.approved_at&&it.approved_render_sha===it.render_sha)return true;
+  const local=REVIEW_HANDLED.get(String(it.script_id));
+  if(local!==undefined&&(!local||!it.render_sha||local===String(it.render_sha)))return true;
+  const feedback=_criSavedFeedback(it);
+  if(!feedback||!["Queue","Rejected"].includes(feedback.status))return false;
+  const reviewed=String(feedback.reviewed_render_sha||"").trim();
+  // Legacy feedback predates version binding. Treat it as handled so the
+  // operator's recorded response does not keep resurfacing; it remains visible
+  // in Decided / All history. New decisions are exact-render bound.
+  return !reviewed||!it.render_sha||reviewed===String(it.render_sha);
+}
+function _reviewAwaiting(row){return row.kind==="content"?!_reviewContentHandled(row.item):row.item.status==="pending";}
 function _reviewRejected(row){
   if(row.kind==="content"){const f=_criSavedFeedback(row.item);return !!(f&&f.status==="Rejected");}
   return row.item.status!=="pending"&&/reject/i.test(String(row.item.decision&&row.item.decision.choice||""));
@@ -1858,7 +1876,7 @@ function viewContentReview(p){
   const filtered=_reviewVisibleRows(rows);
   if(!filtered.some(row=>row.key===CRI_SEL))CRI_SEL=filtered[0]?filtered[0].key:null;
   const selected=filtered.find(row=>row.key===CRI_SEL);
-  const filters=[["all","All"],["waiting","Awaiting"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["completed","Completed"],["rejected","Rejected"]];
+  const filters=[["waiting","Needs response"],["completed","Decided"],["all","All history"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected"]];
   const sources=[...new Map(rows.map(row=>[_reviewSourceKey(row),_reviewSourceLabel(row)])).entries()]
     .sort((a,b)=>a[1].localeCompare(b[1]));
   const sortOptions=[["created-newest","Newest created"],["created-oldest","Oldest created"],["rating-high","Highest critique rating"],["rating-low","Lowest critique rating"],
@@ -1868,10 +1886,10 @@ function viewContentReview(p){
   const sortBar=`<div class="review-toolbar"><label>Source<select id="cri-channel" class="btn"><option value="all">All sources</option>${sources.map(([key,label])=>`<option value="${escAttr(key)}" ${CRI_CHANNEL===key?"selected":""}>${esc(label)}</option>`).join("")}</select></label><label>Sort<select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
     <div class="section-note">Creation sorts use each record's created time. Critique-rating sorts use explicit structured scores only; ${scored} of ${rows.length} loaded items ${scored===1?"has":"have"} one, and unknown scores stay last.</div>`;
   const summary=`<div class="review-summary">
-    <div class="pcard"><h4>Awaiting you</h4><div class="v">${counts.waiting}</div></div>
+    <div class="pcard"><h4>Needs response</h4><div class="v">${counts.waiting}</div></div>
     <div class="pcard"><h4>Critiqued</h4><div class="v">${counts.critiqued}</div><small>${scored} with ratings</small></div>
     <div class="pcard"><h4>QC issues</h4><div class="v">${counts.qcfail}</div></div>
-    <div class="pcard"><h4>Completed</h4><div class="v">${counts.completed}</div></div>
+    <div class="pcard"><h4>Decided</h4><div class="v">${counts.completed}</div><small>kept out of the work queue</small></div>
   </div>`;
   const warnings=sourceWarnings.map(msg=>`<div class="state state-error review-source-warning"><b>Partial review data</b>${esc(msg)}</div>`).join("");
   const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
@@ -1880,7 +1898,7 @@ function viewContentReview(p){
     const idx=filtered.findIndex(row=>row.key===CRI_SEL);
     return `
       <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length?idx+1:0} of ${filtered.length}</small></div>
-      <div class="section-note">One queue for production content and review artifacts.</div>
+      <div class="section-note">Needs-response items are shown first. Prior decisions stay available under Decided and All history; nothing is deleted.</div>
       ${warnings}${summary}${filterBar}${sortBar}${detail}
       <div class="acts" style="margin-top:4px">
         <button class="btn" data-cri-nav="prev">← Prev</button>
@@ -1888,8 +1906,8 @@ function viewContentReview(p){
       </div>`;
   }
   return `
-    <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} awaiting you</small></div>
-    <div class="section-note">One queue for production content and review artifacts. Linked render artifacts appear once, with the content workflow.</div>
+    <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} need a response</small></div>
+    <div class="section-note">Needs-response items are the default work queue. Prior decisions stay separated under Decided and All history; nothing is deleted. Linked render artifacts appear once, with the content workflow.</div>
     ${warnings}${summary}${filterBar}${sortBar}
     <div class="review-shell">
       <div class="review-list">${filtered.map(row=>{
@@ -2469,6 +2487,9 @@ const SMS_DRAFTS=new Map();
 const SMS_ENQUIRY_ASSIGNMENTS=new Map();
 const SMS_ENQUIRY_PREVIEWS=new Map();
 const SMS_ENQUIRY_BUSY=new Set();
+// Tab-local holds prevent repeat clicks after uncertain queue responses. The
+// private outbox independently deduplicates the exact message across reloads.
+const SMS_SEND_ATTEMPTS=new Map();
 // Test-only in-process adapter: ignored on a published page (DEV=false).
 // No production capability flag or queue registration exists yet.
 let SMS_REPLY_LOCAL_ADAPTER=null;
@@ -2525,8 +2546,11 @@ function _smsReplyComposer(t){
       ${solo?'':`<button type="button" id="sms-enquiry-assign" ${a||busy?'disabled':''}>${a?'Follow-up assigned':'Assign to me / recover follow-up'}</button>`}
       <span id="sms-enquiry-assignment">${solo?_smsSoloAssignmentLabel(t):a?`Follow-up #${esc(a.work_id)} — assigned to you.`:busy?'Assignment pending — not yet confirmed.':'Explicit assignment required before a verified draft.'}</span>
       <button type="button" id="sms-enquiry-preview" ${a&&_smsEnquiryAllowed('business_sms.preview')&&!busy&&!t.optout?'':'disabled'}>${v?'Verified draft ready':'Verify saved draft'}</button>
-      ${v?`<div id="sms-enquiry-verified"><p>To: ${esc(v.recipient)}</p><p>From: ${esc(m.to_number)}</p><div style="white-space:pre-wrap">${esc(v.fullbody)}</div><button type="button" disabled>Send</button></div>`:''}
-      <div id="sms-enquiry-notice">Verified draft only — sending disabled; consent/spending not approved. Preview requests are saved privately; nothing is sent.</div>
+      ${v?`<div id="sms-enquiry-verified"><p>To: ${esc(v.recipient)}</p><p>From: ${esc(m.to_number)}</p><div style="white-space:pre-wrap">${esc(v.fullbody)}</div>
+        ${_smsEnquiryAllowed('business_sms.reply')?'<label><input type="checkbox" id="sms-direct-response"> This is a direct response to this saved enquiry, not marketing. Send this exact message.</label>':''}
+        <button type="button" id="sms-enquiry-send" disabled>Send</button>
+        <p id="sms-send-state">${esc(SMS_SEND_ATTEMPTS.get(v.digest)?.message||'')}</p></div>`:''}
+      <div id="sms-enquiry-notice">${_smsEnquiryAllowed('business_sms.reply')?'Send requires your explicit confirmation. Conservative cost estimates apply; delivery does not resolve the enquiry.':'Verified draft only — sending is not enabled. Preview requests are saved privately; nothing is sent.'}</div>
     </div>`})()}
   </form>`;
 }
@@ -2553,6 +2577,13 @@ function _convoFeedNotice(label,state){
 function _convoEmptyDetail(label){
   return `<div class="state">No ${esc(label.toLowerCase())} in the available snapshot.</div>`;
 }
+function _smsValidReplyReceipt(r,work,delivery=false){
+  const keys=['resolution','retry_allowed','state','work_id'];if(delivery)keys.push('readback');
+  return r&&typeof r==='object'&&!Array.isArray(r)&&Object.keys(r).sort().join(',')===keys.sort().join(',')&&
+    ['queued','sending','sent','delivered','undelivered','failed','unknown','held'].includes(r.state)&&
+    Number.isSafeInteger(r.work_id)&&r.work_id>0&&r.work_id===work&&r.retry_allowed===false&&r.resolution==='separate_work_item'&&
+    (!delivery||['verified','unavailable'].includes(r.readback));
+}
 function _smsReplyHistory(t,p){
   const feed=p?.business_sms_replies;
   if(!feed||feed.state==='not_configured')return '<div class="state">Business reply history is not connected.</div>';
@@ -2569,9 +2600,12 @@ function _smsReplyHistory(t,p){
     ${rows.map(r=>{
       const state=known.includes(r.state)?r.state:'unknown';
       const warn=['sending','unknown','held','failed','undelivered'].includes(state);
+      const queue=typeof r.operation_id==='string'&&/^business-sms-queue:([1-9][0-9]*)$/.exec(r.operation_id);
+      const request=queue&&Number(queue[1]);
       return `<div class="state ${warn?'state-error':''}"><b>${esc(state)}</b> · follow-up #${esc(r.work_id)}
         ${r.error_code?` · provider error ${esc(r.error_code)}`:''}
-        <div>${warn?'Needs attention. Reconcile this attempt before any new send.':'Delivery is separate from resolving the enquiry.'}</div></div>`;
+        <div>${warn?'Needs attention. Reconcile this attempt before any new send.':'Delivery is separate from resolving the enquiry.'}</div>
+        ${_smsEnquiryAllowed('business_sms.delivery')&&Number.isSafeInteger(request)&&request>0?`<button type="button" data-sms-delivery="${request}" data-sms-work="${r.work_id}">Check delivery — no resend</button><p data-sms-delivery-result role="status"></p>`:''}</div>`;
     }).join('')||'<p>No reply receipts linked to the messages shown.</p>'}
     ${feed.truncated?'<p>Recent receipts only; older attempts may be outside this window.</p>':''}
     </section>`;
@@ -2580,7 +2614,7 @@ function _smsThreadDetail(t,p){
   const msgs=(t.messages||[]).slice().reverse(); // oldest→newest for reading order
   return `
     <div class="convo-detail-head">${esc(_fmtPhone(t.from_number))}</div>
-    <div class="convo-detail-sub">${t.optout?`<span class="badge badge-warn">opted out (STOP)</span>`:""}<span>Showing ${msgs.length} recent message${msgs.length===1?"":"s"}${Number.isInteger(t.message_count)&&t.message_count>msgs.length?` of ${esc(t.message_count)} in the fetched window`:""} · not complete history · inbound only, no reply path live yet</span></div>
+    <div class="convo-detail-sub">${t.optout?`<span class="badge badge-warn">opted out (STOP)</span>`:""}<span>Showing ${msgs.length} recent message${msgs.length===1?"":"s"}${Number.isInteger(t.message_count)&&t.message_count>msgs.length?` of ${esc(t.message_count)} in the fetched window`:""} · not complete history · incoming messages; reply receipts below</span></div>
     ${msgs.map(m=>`
       <div class="convo-msg">
         <div>${esc(m.body||"(no text)")}</div>
@@ -2710,6 +2744,25 @@ function viewConversations(p){
     </div>${outbound}`;
 }
 function wireConversations(p, updatedAt, srcNote){
+  document.querySelectorAll('[data-sms-delivery]').forEach(button=>{
+    button.onclick=async()=>{
+      const epoch=PORTAL_EPOCH,identity=RWSession.sessionIdentity(),recipient=SELECTED_SMS;
+      const request=Number(button.dataset.smsDelivery),work=Number(button.dataset.smsWork);
+      const current=()=>_portalReadCurrent(epoch)&&identity===RWSession.sessionIdentity()&&identity===PORTAL_AUTH_ID;
+      if(button.disabled||!current()||!_currentOperatorSubject(identity)||!_smsEnquiryAllowed('business_sms.delivery')||!Number.isSafeInteger(request)||request<=0||!Number.isSafeInteger(work)||work<=0)return;
+      const panel=button.parentElement.querySelector('[data-sms-delivery-result]');button.disabled=true;
+      panel.textContent='Checking saved attempt; no new message will be sent.';
+      let message='Delivery unavailable. Do not resend an uncertain attempt.';
+      try{
+        const row=await enquiryQueue('business_sms.delivery',{send_request_id:request},epoch,recipient,null);
+        if(!current())return;
+        let result=row?.result;if(typeof result==='string')result=JSON.parse(result);
+        if(row?.action!=='business_sms.delivery'||row.status!=='done'||!_smsValidReplyReceipt(result,work,true)||result.readback!=='verified')throw Error('unverified-delivery');
+        message='Provider checked: '+result.state+'. Enquiry resolution is separate. Snapshot history updates on refresh.';
+      }catch{}
+      finally{if(current()&&SELECTED_SMS===recipient&&button.isConnected){panel.textContent=message;button.disabled=false;}}
+    };
+  });
   const form=document.getElementById("sms-reply-form");
   const enquiryMessage=()=>{
     const thread=(p.conversations_sms_threads?.threads||[]).find(x=>x.from_number===SELECTED_SMS);
@@ -2780,9 +2833,51 @@ function wireConversations(p, updatedAt, srcNote){
         if(!row||row.action!=='business_sms.preview'||row.status!=='done'||!result||result.state!=='previewed'||
            result.inbound_id!==msg.id||result.work_id!==assignment.work_id||!/^[0-9a-f]{64}$/.test(result.digest)||result.digest!==digest||result.sending_enabled!==false)
           throw new Error('preview-unverified');
-        SMS_ENQUIRY_PREVIEWS.set(msg.id,{...result,recipient,sender:msg.to_number,fullbody:full});
+        if(!Number.isSafeInteger(row.id)||row.id<=0)throw new Error('preview-request-unverified');
+        SMS_ENQUIRY_PREVIEWS.set(msg.id,{...result,preview_request_id:row.id,recipient,sender:msg.to_number,fullbody:full});
       }catch(e){if(enquiryVisible(epoch,recipient))toast('Verified draft unavailable — sending remains disabled','err');}
       finally{if(enquiryCurrent(epoch)){SMS_ENQUIRY_BUSY.delete(msg.id);if(enquiryVisible(epoch,recipient)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}}
+    };
+  }
+  const sendButton=document.getElementById('sms-enquiry-send'),attestation=document.getElementById('sms-direct-response');
+  if(sendButton&&attestation){
+    const sendState=()=>{
+      const thread=(LAST.p?.conversations_sms_threads?.threads||[]).find(x=>x.from_number===SELECTED_SMS);
+      const msg=thread&&_smsEnquiryValidMessage(thread),a=_smsEnquiryAssignment(thread,msg),v=msg&&SMS_ENQUIRY_PREVIEWS.get(msg.id);
+      const input=document.getElementById('sms-reply-body');
+      return msg&&a&&v&&!thread.optout&&input&&!input.disabled&&_smsEnquiryAllowed('business_sms.reply')&&
+        v.work_id===a.work_id&&v.sender===msg.to_number&&v.recipient===SELECTED_SMS&&
+        v.fullbody===input.value.trim()+'\nReply STOP to opt out. Rankwise, rankwise.ca'&&
+        Number.isSafeInteger(v.preview_request_id)&&v.preview_request_id>0?{msg,v}:null;
+    };
+    attestation.onchange=()=>{const s=sendState();sendButton.disabled=!s||!attestation.checked||SMS_SEND_ATTEMPTS.has(s.v.digest);};
+    sendButton.onclick=async()=>{
+      const epoch=PORTAL_EPOCH,identity=RWSession.sessionIdentity(),recipient=SELECTED_SMS,s=sendState();
+      if(!s||sendButton.disabled||!attestation.checked||!enquiryCurrent(epoch)||!_currentOperatorSubject(identity)||identity!==PORTAL_AUTH_ID||SMS_SEND_ATTEMPTS.has(s.v.digest))return;
+      const attempt={message:'Send request pending — do not resend.',request_id:null};
+      SMS_SEND_ATTEMPTS.set(s.v.digest,attempt);sendButton.disabled=true;attestation.disabled=true;
+      document.getElementById('sms-send-state').textContent=attempt.message;
+      const current=()=>enquiryCurrent(epoch)&&identity===RWSession.sessionIdentity()&&identity===PORTAL_AUTH_ID&&SMS_SEND_ATTEMPTS.get(s.v.digest)===attempt;
+      const params={preview_request_id:s.v.preview_request_id,approved_digest:s.v.digest,explicit_send:true,reply_basis:'direct_inbound_response'};
+      try{
+        // No await between the final identity/draft check and authenticated POST.
+        if(!current()||sendState()?.v!==s.v)return;
+        let done=false;
+        await enqueueAction('business_sms.reply',params,(st,detail,id)=>{
+          if(!current())return;
+          if(Number.isSafeInteger(id)&&id>0)attempt.request_id=id;
+          if(st==='done'||st==='failed')done=true;
+        });
+        if(!current())return;
+        if(!done||!attempt.request_id)throw Error('send-unconfirmed');
+        const rows=await rest('operator_action_queue?id=eq.'+attempt.request_id+'&select=id,action,status,result');
+        if(!current())return;
+        const row=Array.isArray(rows)&&rows.length===1?rows[0]:null;
+        let result=row?.result;if(typeof result==='string')result=JSON.parse(result);
+        if(!row||row.id!==attempt.request_id||row.action!=='business_sms.reply'||!['done','failed'].includes(row.status)||!_smsValidReplyReceipt(result,s.v.work_id))throw Error('receipt-unverified');
+        attempt.message='Reply status: '+result.state+'. Delivery and enquiry resolution are separate. No automatic retry.';
+      }catch{if(current())attempt.message='Send outcome unconfirmed. Do not resend; inspect the saved reply history.';}
+      finally{if(current()&&enquiryVisible(epoch,recipient)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);}
     };
   }
   if(form){
@@ -5109,6 +5204,7 @@ function render(p, updatedAt, srcNote){
       // chars. Sits BEFORE the DEV return so the R/X keypress path (which
       // .click()s these same buttons) and DEV both go through the same prompt.
       const isCriNoteAction=reg.action==="content_review.request_changes"||reg.action==="content_review.reject";
+      const isCriDecisionAction=reg.action==="content_review.approve"||isCriNoteAction;
       if(isCriNoteAction){
         const ta=$("#cri-note");
         reviewSubmittedRaw=ta?ta.value:"";
@@ -5188,7 +5284,12 @@ function render(p, updatedAt, srcNote){
           else if(st==="done"){
             toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
             ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
-            if(isCriNoteAction){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(()=>loadReviewData(true));}
+            if(isCriDecisionAction){
+              const item=Array.isArray(CRI)?CRI.find(it=>it&&it.script_id===params.script_id):null;
+              REVIEW_HANDLED.set(String(params.script_id),String(item&&item.render_sha||""));
+              if(isCriNoteAction)_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);
+              _loadAuxAndRender(()=>loadReviewData(true));
+            }
             if(reg.action==="artifact.decide"){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(()=>loadReviewData(true));}
             if(reg.action.startsWith("ticket.")&&params.id){
               // ONLY approve/reject resolve a ticket (security review F2). `revise` records
@@ -5404,6 +5505,7 @@ function _resetPortalState(){
   SMS_ENQUIRY_ASSIGNMENTS.clear();
   SMS_ENQUIRY_PREVIEWS.clear();
   SMS_ENQUIRY_BUSY.clear();
+  SMS_SEND_ATTEMPTS.clear();
   SMS_REPLY_RECEIPTS.clear();SMS_REPLY_LOCAL_ADAPTER=null;
   ARTS=null;DECS=null;CRI=undefined;WIP=undefined;EXC=undefined;
   // F-A (publish review #2, same class as F1 which missed it): the sign-out link is
@@ -5418,7 +5520,7 @@ function _resetPortalState(){
   ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="all";CRI_CHANNEL="all";CRI_SORT="created-newest";WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -5457,4 +5559,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: be53478eec66 -->
+<!-- rankwise-portal2-version: 77d8a889631c -->
