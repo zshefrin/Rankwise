@@ -298,15 +298,33 @@ main{padding:0 0 60px;min-width:0}
 .decide-sec{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
 .decide-sec .sec-h{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:650;margin-bottom:7px}
 .decide-arts{display:flex;gap:8px;flex-wrap:wrap}
-.decide-dock{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--edge);padding:10px 12px 12px;border-radius:var(--radius) var(--radius) 0 0;box-shadow:0 -6px 16px rgba(0,0,0,.3);margin-top:12px}
+.decide-dock{background:var(--surface);border-top:1px solid var(--edge);padding:10px 12px 12px;border-radius:var(--radius) var(--radius) 0 0;margin-top:12px}
 .decide-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
 .decide-opts .btn{padding:11px 8px;font-size:13px;text-align:center}
+.decide-compare{display:grid;gap:10px;margin-top:12px}
+.decide-option{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:12px 13px}
+.decide-option.rec{border-color:var(--acc-soft-edge)}
+.decide-option-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px}
+.decide-option-head h4{font-size:15px;line-height:1.3;min-width:0}
+.decide-option-head .badge{margin-left:auto;flex:none}
+.decide-option-detail{color:var(--ink-3);font-size:12px;margin-bottom:9px}
+.decide-option-cols{display:grid;gap:8px;margin-bottom:10px}
+.decide-option-col h5{font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.decide-option-col.yes h5{color:var(--ok)} .decide-option-col.no h5{color:var(--warn)}
+.decide-option-col ul{display:grid;gap:3px}
+.decide-option-col li{list-style:none;color:var(--ink-2);font-size:12px;line-height:1.4;display:flex;gap:6px}
+.decide-option-col li::before{content:"+";color:var(--ok);font-weight:800}
+.decide-option-col.no li::before{content:"−";color:var(--warn)}
+.decide-option-why{background:var(--acc-soft);border:1px solid var(--acc-soft-edge);border-radius:var(--radius-sm);padding:7px 9px;font-size:12px;margin-bottom:9px}
+.decide-option .btn{width:100%;min-height:44px}
+.decide-card-contract{font-size:11.5px;color:var(--ink-3);margin-top:8px}
+@media (min-width:900px){.decide-shell{max-width:1000px}.decide-compare{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}.decide-option{display:flex;flex-direction:column}.decide-option .btn{margin-top:auto}.decide-option-cols{grid-template-columns:1fr}}
 .decide-nav{display:flex;justify-content:space-between;margin-top:8px}
 .decide-nav .nav-btn{background:none;border:0;color:var(--ink-3);font:600 11.5px inherit;padding:6px;cursor:pointer}
 .decide-nav .nav-btn:disabled{opacity:.4;cursor:default}
-/* wide screens: sticky buys nothing (no thumb-reach concern) and overlaps the
-   card content at first paint — let the dock sit in flow at the card's end. */
-@media (min-width:900px){.decide-dock{position:static;box-shadow:none;border-radius:var(--radius)}}
+[data-decided-history] .dcard{overflow-wrap:anywhere;min-width:0}
+/* Variant B keeps the compared options in natural document flow on every size. */
+@media (min-width:900px){.decide-dock{box-shadow:none;border-radius:var(--radius)}}
 </style></head><body>
 <div id="app"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1008,17 +1026,23 @@ async function loadArtifacts(){
 // first is an arbitrary-but-defensible tiebreak (no urgency/severity field on
 // decisions yet to sort by).
 let DECS = null;
+// Read-only history is deliberately separate from the open answer stack. A
+// failed history read must not erase the live queue, and history rows never
+// enter DEC_REG or render answer controls.
+let DEC_RECENT = undefined;
 async function loadDecisions(){
   const current=_auxReadGuard("decisions");
-  if(DEV){DECS=DEMO.decisions_open;return DECS}
-  try{
+  if(DEV){DECS=DEMO.decisions_open;DEC_RECENT=DEMO.decisions_recent||[];return DECS}
+  // Start both reads together and cache each independently. The caller still
+  // awaits the complete refresh; one failed read never erases the other cache.
+  const read=async query=>{try{const r=await rest(query);return (RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r}catch{return null}};
+  await Promise.all([
     // phase 2: embed the parent work_item (decisions.work_id FK, 076) so the
     // DECIDE card can show where the question came from — PostgREST resolves
     // the to-one embed off the FK; rows arrive with a nested `work_items` object.
-    const r=await rest("decisions?select=*,work_items(title,state,owner,type)&state=eq.open&order=created_at.desc&limit=5");
-    if(!current())return DECS;
-    DECS=(RWSession.bad&&RWSession.bad(r))||!Array.isArray(r)?null:r;
-  }catch{if(current())DECS=null}
+    read("decisions?select=*,work_items(title,state,owner,type)&state=eq.open&order=created_at.desc&limit=5").then(rows=>{if(current())DECS=rows}),
+    read("decisions?select=id,work_id,question,state,decided_choice,decided_at,decided_by,created_at&state=in.(decided,executed)&decided_at=not.is.null&order=decided_at.desc&limit=30").then(rows=>{if(current())DEC_RECENT=rows})
+  ]);
   return DECS;
 }
 // Content Review room (Phase 1 steps 3+5, PHASE1-CONTENT-REVIEW-PLAN.md §6) --
@@ -3253,13 +3277,70 @@ function _decIgnoredLine(d){
     return `If ignored: waits for you${when} — never auto-acts`;
   return `If ignored: stays open${when} — no default set`;
 }
+// Variant B comparison contract: `alternatives` remains the persisted answer
+// vocabulary. An optional `card.options` object only enriches those labels with
+// authored detail/pros/cons; it never invents copy or changes the choice sent to
+// the existing version-CAS RPC. Choices always come from persisted alternatives;
+// production minters should dual-write the optional card object per the spec.
+function _decOptions(d){
+  const labels=Array.isArray(d&&d.alternatives)?d.alternatives:[];
+  const raw=d&&d.card&&Array.isArray(d.card.options)?d.card.options:[];
+  const validLabels=labels.length>0&&labels.every(x=>typeof x==="string"&&x.trim().length>0)
+    &&new Set(labels).size===labels.length;
+  if(!validLabels)return {options:[],invalid:true,notice:"This decision has malformed or missing answer labels. It is held until the source is repaired."};
+  const validTextList=v=>v===undefined||(Array.isArray(v)&&v.every(x=>typeof x==="string"&&x.trim().length>0));
+  const validOption=x=>x&&typeof x==="object"&&typeof x.label==="string"&&x.label.trim().length>0
+    &&(x.detail===undefined||x.detail===null||typeof x.detail==="string")&&validTextList(x.pros)&&validTextList(x.cons)
+    &&(x.recommended===undefined||typeof x.recommended==="boolean");
+  const rawValid=raw.length===labels.length&&raw.every(validOption)
+    &&new Set(raw.map(x=>x.label)).size===raw.length&&raw.every((x,i)=>x.label===labels[i]);
+  const byLabel=new Map((rawValid?raw:[]).filter(x=>x&&typeof x==="object"&&typeof x.label==="string")
+    .map(x=>[x.label,x]));
+  const enriched=rawValid;
+  const options=labels.map((label)=>{
+    // If a dual-write drifts, keep the persisted label but do not attach a
+    // neighbouring option's rationale to it. The honest fallback is label-only.
+    const x=enriched?(byLabel.get(label)||{}):{};
+    const list=v=>Array.isArray(v)?v.slice():[];
+    return {label,detail:typeof x.detail==="string"?x.detail:"",pros:list(x.pros),cons:list(x.cons),
+      recommended:enriched&&x.recommended===true,
+      recommendedReason:""};
+  });
+  const recommendedCount=options.filter(x=>x.recommended).length;
+  if(recommendedCount>1)options.forEach(x=>{x.recommended=false});
+  return {options,invalid:false,notice:(!enriched&&raw.length)?"Option detail is unavailable because structured labels do not match the persisted choices; showing labels only.":recommendedCount>1?"Multiple recommendations were supplied; showing all choices without a recommendation.":""};
+}
+function _decOptionCard(d,o){
+  const why=o.recommended&&d.card&&typeof d.card.why_recommended==="string"?d.card.why_recommended:"";
+  const bullets=(title,items,kind)=>items.length?`<div class="decide-option-col ${kind}"><h5>${title}</h5><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:"";
+  const i=DEC_REG.push({id:d.id,version:d.version,choice:o.label})-1;
+  return `<article class="decide-option ${o.recommended?"rec":""}">
+    <div class="decide-option-head"><h4>${esc(o.label)}</h4>${o.recommended?`<span class="badge badge-warn">Suggested</span>`:""}</div>
+    ${o.detail?`<div class="decide-option-detail">${esc(o.detail)}</div>`:""}
+    ${(o.pros.length||o.cons.length)?`<div class="decide-option-cols">${bullets("Why yes",o.pros,"yes")}${bullets("Why not",o.cons,"no")}</div>`:""}
+    ${why?`<div class="decide-option-why"><b>Why this is suggested:</b> ${esc(why)}</div>`:""}
+    <button class="btn ${o.recommended?"rec":""}" data-dec-i="${i}">${esc(o.label)}</button>
+  </article>`;
+}
+function viewRecentDecisions(){
+  if(DEC_RECENT===undefined)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="empty">Loading decision history…</div></section>`;
+  if(DEC_RECENT===null)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="state state-error"><b>Decision history unavailable</b>Not an empty history — the read itself failed.</div></section>`;
+  const valid=d=>d&&Number.isSafeInteger(d.id)&&d.id>0&&["decided","executed"].includes(d.state)
+    &&typeof d.question==="string"&&d.question.trim()&&typeof d.decided_choice==="string"&&d.decided_choice.trim()
+    &&typeof d.decided_at==="string"&&/^\d{4}-\d{2}-\d{2}T/.test(d.decided_at)&&Number.isFinite(Date.parse(d.decided_at))
+    &&(d.decided_by==null||typeof d.decided_by==="string");
+  if(!Array.isArray(DEC_RECENT)||DEC_RECENT.length>30||!DEC_RECENT.every(valid)||new Set(DEC_RECENT.map(d=>d.id)).size!==DEC_RECENT.length)
+    return `<section data-decided-history><div class="section-h">Recently decided</div><div class="state state-error"><b>Decision history unavailable</b>The read returned malformed rows.</div></section>`;
+  if(!DEC_RECENT.length)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="empty">No recent decisions.</div></section>`;
+  return `<section data-decided-history><div class="section-h">Recently decided <small>read-only history</small></div><div class="cards">${DEC_RECENT.map(d=>`<article class="dcard row" data-decided-id="${escAttr(d.id)}"><div class="q">${esc(d.question)}</div><div class="why">Answer: ${esc(d.decided_choice)}</div><small class="mut">Decided ${esc(d.decided_at)} (${esc(ago(d.decided_at))})${d.decided_by?` by ${esc(d.decided_by)}`:""}</small></article>`).join("")}</div></section>`;
+}
 function viewDecisions(p){
   MEDIA_REG=[];
   const rows=DECS;
   const head=`<div class="status sub">Decide<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">capped at 5 — everything else stays in fleet triage</small></div>`;
-  if(rows===null)return head+`<div class="state state-error"><b>Decision queue read FAILED</b>Not an empty queue — the read itself failed.</div>`;
-  if(!Array.isArray(rows))return head+`<div class="empty">Loading…</div>`;
-  if(!rows.length)return head+`<div class="empty">No open decisions right now.</div>`;
+  if(rows===null)return head+`<div class="state state-error"><b>Decision queue read FAILED</b>Not an empty queue — the read itself failed.</div>`+viewRecentDecisions();
+  if(!Array.isArray(rows))return head+`<div class="empty">Loading…</div>`+viewRecentDecisions();
+  if(!rows.length)return head+`<div class="empty">No open decisions right now.</div>`+viewRecentDecisions();
   if(DEC_IDX>rows.length)DEC_IDX=rows.length;
   if(DEC_IDX<0)DEC_IDX=0;
   const top=`<div class="decide-top"><div style="font-size:13px;font-weight:750">Daily answer block</div>
@@ -3270,15 +3351,16 @@ function viewDecisions(p){
       <div class="empty" style="text-align:center;padding:32px 0">End of the stack — ${DEC_SKIPPED.size
         ?`${DEC_SKIPPED.size} skipped (still open — skipping writes nothing)`:"all seen"}.</div>
       <div class="decide-nav" style="justify-content:center"><button class="nav-btn" data-dec-nav="restart">↺ Start over</button></div>
-    </div>`;
+    </div>`+viewRecentDecisions();
   }
   const d=rows[DEC_IDX];
   const wi=d.work_items||null;
-  const alts=Array.isArray(d.alternatives)?d.alternatives.map(String):[];
+  const optionState=_decOptions(d), options=optionState.options;
   const arts=_decAttachedArts(d);
+  const card=d.card&&typeof d.card==="object"&&!Array.isArray(d.card)?d.card:null;
   const whyBits=[
-    d.recommendation?`Recommended: ${d.recommendation}`:"",
-    d.reversal_cost?`Reversal cost: ${d.reversal_cost}`:"",
+    !card&&d.recommendation?`Recommended: ${d.recommendation}`:"",
+    !card&&d.reversal_cost?`Reversal cost: ${d.reversal_cost}`:"",
   ].filter(Boolean);
   const artsBody=arts===null
     ?`<span class="empty">Shelf read failed — attachments unknown, not none.</span>`
@@ -3294,19 +3376,25 @@ function viewDecisions(p){
   return head+`<div class="decide-shell" data-decide-room>${top}
     <div class="decide-q">${esc(d.question)}</div>
     <div class="decide-ctx">#${esc(d.id)}${wi?` · ${esc(wi.type||"work")} from ${esc(wi.owner||"unowned")} · ${esc(wi.title||"")}`:""}</div>
+    ${card&&card.why_now?`<div class="decide-sec"><div class="sec-h">Why now</div>${esc(card.why_now)}</div>`:""}
+    ${card&&card.what_changes?`<div class="decide-sec"><div class="sec-h">What changes</div>${esc(card.what_changes)}</div>`:""}
+    ${card&&typeof card.cost==="string"&&card.cost?`<div class="decide-sec"><div class="sec-h">Cost</div>${esc(card.cost)}</div>`:""}
+    ${card&&typeof card.undo==="string"&&card.undo?`<div class="decide-sec"><div class="sec-h">Undo</div>${esc(card.undo)}</div>`:""}
+    ${card&&card.not_asking?`<div class="decide-sec"><div class="sec-h">Not being asked</div>${esc(card.not_asking)}</div>`:""}
+    ${card&&typeof card.details==="string"&&card.details?`<details class="decide-sec"><summary>Technical details</summary><div>${esc(card.details)}</div></details>`:""}
     ${whyBits.length?`<div class="decide-sec"><div class="sec-h">Why it matters</div>${whyBits.map(esc).join("<br>")}</div>`:""}
     <div class="decide-sec"><div class="sec-h">If you ignore it</div>${esc(_decIgnoredLine(d))}</div>
     <div class="decide-sec"><div class="sec-h">Attached artifacts</div>${artsBody}</div>
     <div class="decide-dock">
-      <div class="decide-opts">${alts.length
-        ?alts.map(alt=>decBtn(d,alt,d.recommendation===alt?"rec":"")).join("")
-        :decBtn(d,"Acknowledge")}</div>
+      ${optionState.invalid?`<div class="state state-error"><b>Decision cannot be answered yet</b>${esc(optionState.notice)}</div>`:options.length?`<div class="decide-opts decide-compare">${options.map(o=>_decOptionCard(d,o)).join("")}</div>`:`<div class="decide-opts">${decBtn(d,"Acknowledge")}</div>`}
+      ${optionState.notice&&!optionState.invalid?`<div class="decide-card-contract">${esc(optionState.notice)}</div>`:""}
+      ${card&&card.question_thread?`<div class="decide-card-contract">Question thread requires the decision-questions backend; no question can be sent from this page yet.</div>`:""}
       <div class="decide-nav">
         <button class="nav-btn" data-dec-nav="prev"${DEC_IDX===0?" disabled":""}>← Prev</button>
         <button class="nav-btn" data-dec-nav="skip">Skip for now →</button>
       </div>
     </div>
-  </div>`;
+  </div>`+viewRecentDecisions();
 }
 function decBtn(d,choice,cls){
   const i=DEC_REG.push({id:d.id,version:d.version,choice})-1;
@@ -5507,7 +5595,7 @@ function _resetPortalState(){
   SMS_ENQUIRY_BUSY.clear();
   SMS_SEND_ATTEMPTS.clear();
   SMS_REPLY_RECEIPTS.clear();SMS_REPLY_LOCAL_ADAPTER=null;
-  ARTS=null;DECS=null;CRI=undefined;WIP=undefined;EXC=undefined;
+  ARTS=null;DECS=null;DEC_RECENT=undefined;CRI=undefined;WIP=undefined;EXC=undefined;
   // F-A (publish review #2, same class as F1 which missed it): the sign-out link is
   // logout()+boot() with NO page reload, so every tab-scoped operator-state module var
   // survives into the next login in the same tab. Reset them all here or the previous
@@ -5559,4 +5647,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 77d8a889631c -->
+<!-- rankwise-portal2-version: 9f9608793c5c -->
