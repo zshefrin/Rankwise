@@ -277,15 +277,20 @@ main{padding:0 0 60px;min-width:0}
   .proof{grid-template-columns:1fr}
   .acts small{flex-basis:100%;margin-left:0;margin-top:4px}
 }
-/* ── DECIDE room (phase 2) — one decision per card, variant-b card stack
-   (mocks/2026-09-01/variant-b-cardstack.html is the ratified visual reference).
-   Mobile-first: the card unit never changes shape, a wide screen just centers it. */
+/* DECIDE — selected September12 Variant B, options compared.
+   Reference: mocks/2026-09-12/variant-b-options-compared.html.
+   Authored data only; no mock questions, answers or controls enter production. */
 .decide-shell{max-width:430px;margin:0 auto}
+.decide-shell.decide-b{padding:16px 16px 40px}
 .wr-shell{max-width:1000px;margin:0 auto}
 .wr-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px;align-items:start}
 .wr-col{min-width:0}
 .wr-live{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:4px 16px 14px}
 @media(max-width:940px){.wr-cols{grid-template-columns:1fr}}
+.decide-context{position:sticky;top:0;z-index:4;background:var(--overlay);backdrop-filter:blur(8px);border-bottom:1px solid var(--edge);padding:9px 16px;display:flex;gap:10px;align-items:center;margin:-16px -16px 16px}
+.decide-context .title{font-size:12.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.decide-context .counter{margin-left:auto;flex:none;font:700 11.5px var(--mono);color:var(--ink-3)}
+.decide-context .counter b{color:var(--ink)}
 .decide-top{display:flex;align-items:center;gap:10px;padding:2px 2px 8px}
 .decide-progress{margin-left:auto;font:700 12px ui-monospace,Menlo,monospace;color:var(--ink-3)}
 .decide-progress b{color:var(--ink);font-variant-numeric:tabular-nums}
@@ -294,18 +299,30 @@ main{padding:0 0 60px;min-width:0}
 .decide-dots .dot.current{background:var(--acc);width:18px;border-radius:4px}
 .decide-dots .dot.skipped{background:var(--warn)}
 .decide-q{font-size:20px;font-weight:800;letter-spacing:-.015em;line-height:1.25;margin-bottom:4px}
+.decide-b .decide-q{font-size:23px;letter-spacing:-.022em;line-height:1.2;margin-bottom:10px;text-wrap:balance}
 .decide-ctx{font-family:ui-monospace,Menlo,monospace;color:var(--ink-3);font-size:10.5px;margin-bottom:12px}
+.decide-why{color:var(--ink-2);font-size:14px;margin-bottom:12px;line-height:1.5}
+.decide-notasking{display:inline-flex;align-items:center;gap:6px;background:var(--info-soft);color:var(--info);border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:600;margin-bottom:12px}
+.decide-facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--edge);border:1px solid var(--edge);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
+.decide-facts>div{background:var(--surface);padding:10px 12px;min-width:0}
+.decide-facts>div.wide{grid-column:1/-1}
+.decide-facts dt{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-bottom:3px}
+.decide-facts dd{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.decide-suggestion{background:var(--acc-soft);border:1px solid var(--acc-soft-edge);border-radius:var(--radius-sm);padding:8px 10px;font-size:12.5px;color:var(--ink);line-height:1.4;margin:14px 0 12px}
+.decide-compare-head{display:flex;align-items:baseline;gap:8px;margin:18px 0 9px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.decide-compare-head span{font-size:11px;letter-spacing:0;text-transform:none;color:var(--ink-3);font-weight:500;margin-left:auto}
 .decide-sec{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
 .decide-sec .sec-h{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:650;margin-bottom:7px}
 .decide-arts{display:flex;gap:8px;flex-wrap:wrap}
 .decide-dock{background:var(--surface);border-top:1px solid var(--edge);padding:10px 12px 12px;border-radius:var(--radius) var(--radius) 0 0;margin-top:12px}
+.decide-b .decide-dock{position:static;margin-top:0;background:none;border:0;padding:0;border-radius:0}
 .decide-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
 .decide-opts .btn{padding:11px 8px;font-size:13px;text-align:center}
-.decide-compare{display:grid;gap:10px;margin-top:12px}
-.decide-option{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:12px 13px}
+.decide-compare{display:grid;grid-template-columns:1fr;gap:12px;margin-top:0}
+.decide-option{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius-lg);padding:14px;min-width:0;overflow-wrap:anywhere}
 .decide-option.rec{border-color:var(--acc-soft-edge)}
 .decide-option-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px}
-.decide-option-head h4{font-size:15px;line-height:1.3;min-width:0}
+.decide-option-head h4{font-size:15.5px;font-weight:750;letter-spacing:-.015em;line-height:1.25;min-width:0}
 .decide-option-head .badge{margin-left:auto;flex:none}
 .decide-option-detail{color:var(--ink-3);font-size:12px;margin-bottom:9px}
 .decide-option-cols{display:grid;gap:8px;margin-bottom:10px}
@@ -316,13 +333,35 @@ main{padding:0 0 60px;min-width:0}
 .decide-option-col li::before{content:"+";color:var(--ok);font-weight:800}
 .decide-option-col.no li::before{content:"−";color:var(--warn)}
 .decide-option-why{background:var(--acc-soft);border:1px solid var(--acc-soft-edge);border-radius:var(--radius-sm);padding:7px 9px;font-size:12px;margin-bottom:9px}
-.decide-option .btn{width:100%;min-height:44px}
+.decide-option .btn{width:100%;min-height:46px;padding:12px;font-size:14px;font-weight:650}
 .decide-card-contract{font-size:11.5px;color:var(--ink-3);margin-top:8px}
-@media (min-width:900px){.decide-shell{max-width:1000px}.decide-compare{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}.decide-option{display:flex;flex-direction:column}.decide-option .btn{margin-top:auto}.decide-option-cols{grid-template-columns:1fr}}
+details.decide-tech{margin-top:14px;border-top:1px solid var(--edge-soft);padding-top:10px}
+details.decide-tech summary{font-size:11.5px;color:var(--ink-3);cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:6px}
+details.decide-tech summary::-webkit-details-marker{display:none}
+details.decide-tech summary::before{content:"▸";font-size:9px;transition:transform var(--dur) var(--ease)}
+details.decide-tech[open] summary::before{transform:rotate(90deg)}
+details.decide-tech .body{margin-top:8px;font:11.5px/1.6 var(--mono);color:var(--ink-3);word-break:break-word}
+.decide-done-card{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius-lg);padding:15px 16px;margin-top:16px}
+.decide-done-tag{display:inline-flex;align-items:center;gap:6px;background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-soft-edge);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:11px}
+.decide-done-question{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:12px}
+.decide-done-answer{border-left:3px solid var(--ok);padding:2px 0 2px 12px;margin-bottom:2px}
+.decide-done-answer .label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-bottom:4px}
+.decide-done-answer .value{font-size:16px;font-weight:750;letter-spacing:-.01em}
+.decide-done-answer .meta{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+@media (min-width:900px){.decide-shell{max-width:1000px}.decide-shell.decide-b{padding-top:24px}.decide-context{margin-top:-24px}.decide-b .decide-q{font-size:28px;max-width:26ch}.decide-why{max-width:70ch;font-size:15px}.decide-facts{grid-template-columns:repeat(3,minmax(0,1fr))}.decide-facts>div.wide{grid-column:auto}.decide-compare{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}.decide-option{display:flex;flex-direction:column}.decide-option .btn{margin-top:auto}.decide-option-cols{grid-template-columns:1fr}}
 .decide-nav{display:flex;justify-content:space-between;margin-top:8px}
 .decide-nav .nav-btn{background:none;border:0;color:var(--ink-3);font:600 11.5px inherit;padding:6px;cursor:pointer}
+[data-decide-room] .decide-nav{gap:10px;max-width:640px;margin-top:20px;padding-top:13px;border-top:1px solid var(--edge)}
+[data-decide-room] .decide-nav .nav-btn{font:inherit;font-size:12.5px;font-weight:600;padding:12px 6px;min-height:44px}
+.decide-nav [data-dec-nav="skip"]{margin-left:auto;color:var(--ink-2);border:1px solid var(--edge);border-radius:99px;padding:12px 18px;background:var(--surface)}
 .decide-nav .nav-btn:disabled{opacity:.4;cursor:default}
+[data-decided-history]{max-width:1000px;margin:18px auto 0;padding:0 16px 40px}
+[data-decided-history] .section-h{font-size:19px;font-weight:750;margin-bottom:10px}
+[data-decided-history] .section-h small{font-size:11px;color:var(--ink-3);font-weight:500;margin-left:6px}
 [data-decided-history] .dcard{overflow-wrap:anywhere;min-width:0}
+[data-decided-history] .dcard.row{padding:15px 16px}
+[data-decided-history] .dcard.row .q{font-size:18px;font-weight:800;line-height:1.25}
+[data-decided-history] .dcard.row .why{font-size:14px;margin:9px 0;color:var(--ink)}
 /* Variant B keeps the compared options in natural document flow on every size. */
 @media (min-width:900px){.decide-dock{box-shadow:none;border-radius:var(--radius)}}
 </style></head><body>
@@ -890,7 +929,7 @@ async function enqueueAction(action, params, onstate){
     if(!current())return;
     const st=row&&row[0]&&String(row[0].status||"");
     if(st==="processing"){onstate&&onstate("processing",null,id);}
-    if(st==="done"){onstate&&onstate("done",null,id);return}
+    if(st==="done"){onstate&&onstate("done",row[0].result,id);return}
     if(st==="failed"){onstate&&onstate("failed",row[0].result,id);return}
   }
   if(current())onstate&&onstate("still-queued",null,id);
@@ -1004,7 +1043,7 @@ function changeLog(p){
 // ── views ────────────────────────────────────────────────────────────────
 let VIEW = "command";
 const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"],["war_room","War room"],["work","Work / Agents"],["pipeline","Pipeline"],["ctos","ctOS"],["review","Review"],
-              ["conversations","Conversations"],["content","Content"],["machine","Machine"],["business","Business"]];
+              ["analytics","Analytics"],["conversations","Conversations"],["content","Content"],["machine","Machine"],["business","Business"]];
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
 let ARTS = null;
 async function loadArtifacts(){
@@ -1487,20 +1526,49 @@ function _reviewRows(){
 function _reviewCreatedAt(row){return row.item.created_at||null;}
 function _reviewUpdatedAt(row){return row.kind==="content"?(row.item.pushed_at||row.item.created_at):(row.item.decided_at||row.item.created_at);}
 function _reviewTitle(row){return row.kind==="content"?String(row.item.script_id||""):String(row.item.title||"");}
-function _reviewContentHandled(it){
+function _reviewArtifactDecisionMatches(it,artifact){
+  // operator_artifacts are immutable per content_sha. A linked artifact decision
+  // therefore resolves this content row only when both identifiers and the exact
+  // reviewed bytes agree. Do not infer an approval/rejection class from choice
+  // text: the worker's canonical decided status + structured receipt is the fact.
+  if(!it||!artifact||String(it.artifact_id)!==String(artifact.id)||
+     typeof it.render_sha!=="string"||!it.render_sha.trim()||
+     typeof artifact.content_sha!=="string"||artifact.content_sha!==it.render_sha||
+     artifact.status!=="decided"||!artifact.decision||typeof artifact.decision!=="object"||
+     typeof artifact.decision.choice!=="string"||!artifact.decision.choice.trim()||
+     artifact.decision.via!=="portal-v2"||typeof artifact.decision.at!=="string"||
+     typeof artifact.decided_at!=="string")return false;
+  const receiptAt=Date.parse(artifact.decision.at), decidedAt=Date.parse(artifact.decided_at);
+  return Number.isFinite(receiptAt)&&Number.isFinite(decidedAt)&&receiptAt===decidedAt;
+}
+function _reviewContentHandled(it,linkedArtifact=null){
   if(["approved","posted"].includes(it.state))return true;
   if(it.render_sha&&it.approved_at&&it.approved_render_sha===it.render_sha)return true;
   const local=REVIEW_HANDLED.get(String(it.script_id));
-  if(local!==undefined&&(!local||!it.render_sha||local===String(it.render_sha)))return true;
+  // REVIEW_HANDLED is only a post-receipt UI bridge. Its value must be the
+  // submitted render identity, never an "item was handled" wildcard: a refresh
+  // may have already replaced this row with newer bytes before the receipt lands.
+  if(typeof local==="string"&&typeof it.render_sha==="string"&&it.render_sha.trim()&&
+     local===it.render_sha)return true;
+  if(_reviewArtifactDecisionMatches(it,linkedArtifact))return true;
   const feedback=_criSavedFeedback(it);
   if(!feedback||!["Queue","Rejected"].includes(feedback.status))return false;
   const reviewed=String(feedback.reviewed_render_sha||"").trim();
-  // Legacy feedback predates version binding. Treat it as handled so the
-  // operator's recorded response does not keep resurfacing; it remains visible
-  // in Decided / All history. New decisions are exact-render bound.
-  return !reviewed||!it.render_sha||reviewed===String(it.render_sha);
+  // A legacy sidecar without a rendered-byte identity cannot prove it addressed
+  // the current video. Keep it actionable rather than hiding a possible rerender.
+  return !!(reviewed&&it.render_sha&&reviewed===String(it.render_sha));
 }
-function _reviewAwaiting(row){return row.kind==="content"?!_reviewContentHandled(row.item):row.item.status==="pending";}
+function _contentReviewReceipt(detail,action,sid,renderSha){
+  try{
+    const r=JSON.parse(detail), keys=Object.keys(r).sort().join(",");
+    if(keys!=="action,outcome,render_sha,schema,script_id"||
+       r.schema!=="rankwise.content-review-receipt.v1"||r.action!==action||
+       r.script_id!==sid||r.render_sha!==renderSha)return null;
+    if(action==="content_review.approve")return ["applied","already_approved"].includes(r.outcome)?r:null;
+    return r.outcome==="applied"?r:null;
+  }catch{return null;}
+}
+function _reviewAwaiting(row){return row.kind==="content"?!_reviewContentHandled(row.item,row.linkedArtifact):row.item.status==="pending";}
 function _reviewRejected(row){
   if(row.kind==="content"){const f=_criSavedFeedback(row.item);return !!(f&&f.status==="Rejected");}
   return row.item.status!=="pending"&&/reject/i.test(String(row.item.decision&&row.item.decision.choice||""));
@@ -1821,6 +1889,10 @@ function _criDetail(it,linkedArtifact=null){
   const mediaId=it.artifact_id!=null
     ? MEDIA_REG.push({path:mediaPath,revision:it.render_sha||(linkedArtifact&&linkedArtifact.content_sha)||"",img:false,title:it.script_id})-1
     : null;
+  const artifactResponse=_reviewArtifactDecisionMatches(it,linkedArtifact);
+  const renderSha=typeof it.render_sha==="string"&&/^[0-9a-f]{16}$/.test(it.render_sha)?it.render_sha:null;
+  const reviewParams=extra=>Object.assign({script_id:it.script_id},extra,renderSha?{expected_render_sha:renderSha}:{});
+  const renderReason=renderSha?_CRI_NOT_LIVE_REASON:"Current render identity unavailable — refresh after the render completes.";
   return `
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
       <div>
@@ -1844,13 +1916,14 @@ function _criDetail(it,linkedArtifact=null){
       <textarea id="cri-note" rows="2" data-script-id="${escAttr(String(it.script_id))}" placeholder="Why — required for Request changes / Reject"
         style="width:100%;background:var(--bg);border:1px solid var(--edge);border-radius:var(--radius-sm);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;resize:vertical"></textarea>
       <div class="empty">Sent with Request changes or Reject · 280 characters. Typing alone does not save or change approval.</div>
-      ${linkedArtifact&&linkedArtifact.status!=="pending"?`<div class="state" style="margin:10px 0"><b>Earlier artifact decision: ${esc(linkedArtifact.decision&&linkedArtifact.decision.choice||"recorded")}</b><br>This is preserved history from the former artifact shelf. Content status remains ${esc(it.state||"unknown")} until the content-review workflow records its own decision.${linkedArtifact.decision&&linkedArtifact.decision.note?`<br><span style="white-space:pre-wrap">Feedback: ${esc(linkedArtifact.decision.note)}</span>`:""}</div>`:""}
+      ${artifactResponse?`<div class="state" style="margin:10px 0"><b>Artifact response recorded for this exact render: ${esc(linkedArtifact.decision.choice)}</b><br>Kept in Decided history. A different render returns to Needs response.${linkedArtifact.decision.note?`<br><span style="white-space:pre-wrap">Feedback: ${esc(linkedArtifact.decision.note)}</span>`:""}</div>`:
+        linkedArtifact&&linkedArtifact.status!=="pending"?`<div class="state" style="margin:10px 0"><b>Earlier artifact decision: ${esc(linkedArtifact.decision&&linkedArtifact.decision.choice||"recorded")}</b><br>This remains active because the artifact receipt does not bind to this exact render.${linkedArtifact.decision&&linkedArtifact.decision.note?`<br><span style="white-space:pre-wrap">Feedback: ${esc(linkedArtifact.decision.note)}</span>`:""}</div>`:""}
       ${_criFeedback(it)}
     <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
-      ${actBtn("content_review.approve",{script_id:it.script_id,platforms:it.platform_targets||[]},"Approve","rec",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.request_changes",{script_id:it.script_id},"Request changes","",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.reject",{script_id:it.script_id},"Reject","",_CRI_NOT_LIVE_REASON)}
-      ${actBtn("content_review.watched",{script_id:it.script_id},"Watched","",_CRI_NOT_LIVE_REASON)}
+      ${actBtn("content_review.approve",reviewParams({platforms:it.platform_targets||[]}),"Approve","rec",renderReason,!renderSha)}
+      ${actBtn("content_review.request_changes",reviewParams({}),"Request changes","",renderReason,!renderSha)}
+      ${actBtn("content_review.reject",reviewParams({}),"Reject","",renderReason,!renderSha)}
+      ${actBtn("content_review.watched",reviewParams({}),"Watched","",renderReason,!renderSha)}
     </div>
       ${_savedNotePanel("media",it)}
     </div>
@@ -1922,7 +1995,7 @@ function viewContentReview(p){
     const idx=filtered.findIndex(row=>row.key===CRI_SEL);
     return `
       <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length?idx+1:0} of ${filtered.length}</small></div>
-      <div class="section-note">Needs-response items are shown first. Prior decisions stay available under Decided and All history; nothing is deleted.</div>
+      <div class="section-note">Needs-response items are shown first. Exact-render responses stay available under Decided and All history; nothing is deleted.</div>
       ${warnings}${summary}${filterBar}${sortBar}${detail}
       <div class="acts" style="margin-top:4px">
         <button class="btn" data-cri-nav="prev">← Prev</button>
@@ -1931,15 +2004,16 @@ function viewContentReview(p){
   }
   return `
     <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} need a response</small></div>
-    <div class="section-note">Needs-response items are the default work queue. Prior decisions stay separated under Decided and All history; nothing is deleted. Linked render artifacts appear once, with the content workflow.</div>
+    <div class="section-note">Needs-response items are the default work queue. Exact-render responses stay under Decided and All history; nothing is deleted. Linked render artifacts appear once, with the content workflow.</div>
     ${warnings}${summary}${filterBar}${sortBar}
     <div class="review-shell">
       <div class="review-list">${filtered.map(row=>{
         const score=_reviewCritiqueScore(row),it=row.item;
+        const artifactResponse=row.kind==="content"&&_reviewArtifactDecisionMatches(it,row.linkedArtifact);
         const badge=row.kind==="content"?_criStateBadge(it):`<span class="badge ${it.status==="pending"?"badge-warn":"badge-ok"}">${it.status==="pending"?"Awaiting":"Decided"}</span>`;
         return `<button class="btn review-list-item ${row.key===CRI_SEL?"on":""}" data-review-sel="${escAttr(row.key)}"${row.kind==="content"?` data-cri-sel="${escAttr(it.script_id)}"`:` data-art-sel="${escAttr(it.id)}"`}>
           <div class="review-list-title">${esc(_reviewTitle(row))}</div>
-          <div class="review-list-meta">${badge}${row.kind==="content"&&row.linkedArtifact&&row.linkedArtifact.status!=="pending"?`<span class="badge badge-neutral">Prior artifact decision</span>`:""}<span>${esc(_reviewSourceLabel(row))}</span><span>· ${esc(ago(_reviewCreatedAt(row)))}</span>${score?`<span class="review-list-score">${esc(score.label)}</span>`:""}</div>
+          <div class="review-list-meta">${badge}${artifactResponse?`<span class="badge badge-ok">Artifact response · exact render</span>`:row.kind==="content"&&row.linkedArtifact&&row.linkedArtifact.status!=="pending"?`<span class="badge badge-neutral">Earlier artifact decision</span>`:""}<span>${esc(_reviewSourceLabel(row))}</span><span>· ${esc(ago(_reviewCreatedAt(row)))}</span>${score?`<span class="review-list-score">${esc(score.label)}</span>`:""}</div>
         </button>`;}).join("")||`<div class="empty">No items match this view.</div>`}</div>
       <div>${detail}</div>
     </div>`;
@@ -2417,17 +2491,28 @@ const ACTS_DONE = new Set();
 // refuses to fire while this is non-empty; keys clear on queued/done/failed.
 const ACTS_INFLIGHT = new Set();
 function actKey(action, params){return action+"|"+JSON.stringify(params||{})}
-function actBtn(action, params, label, cls, notAllowedReason){
+// A CRI response is identified by the rendered bytes, not by the mutable note,
+// reason, or enqueue timestamp. Keep this construction shared by the renderer
+// and dispatcher: JSON property insertion order is part of actKey(), so two
+// hand-built equivalent objects can otherwise acquire different keys.
+function contentReviewActionKey(action, params){
+  if(!["content_review.approve","content_review.request_changes","content_review.reject","content_review.watched"].includes(action))return null;
+  const keyParams={script_id:params&&params.script_id,expected_render_sha:params&&params.expected_render_sha};
+  if(action==="content_review.approve")keyParams.platforms=(params&&params.platforms)||[];
+  return actKey(action,keyParams);
+}
+function actionKey(action, params){return contentReviewActionKey(action,params)||actKey(action,params)}
+function actBtn(action, params, label, cls, notAllowedReason, forceDisabled=false){
   const i = ACTS_REG.push({action, params}) - 1;
   // F-B (publish review #2): ACTS_DONE only arms on "queued" (after the enqueue RTT), so a
   // 30s/120s render rebuild DURING the in-flight window would paint this button ENABLED and a
   // second click enqueues a duplicate. ACTS_INFLIGHT holds the airborne key across that window
   // (the shared data-i handler adds it on click, clears it on queued/done/failed/settle), so
   // treat in-flight as done for the disabled state too.
-  const key = actKey(action, params);
+  const key = actionKey(action, params);
   const done = ACTS_DONE.has(key) || ACTS_INFLIGHT.has(key);
   const ok = actionAllowed(action);
-  const dis = (done||!ok) ? ` disabled title="${escAttr(done?"already recorded":(notAllowedReason||"not enabled yet"))}"` : "";
+  const dis = (done||!ok||forceDisabled) ? ` disabled title="${escAttr(done?"already recorded":(forceDisabled?(notAllowedReason||"unavailable"):(notAllowedReason||"not enabled yet")))}"` : "";
   return `<button class="btn ${escAttr(cls||"")}" data-i="${i}"${dis}>${esc(label)}</button>`;
 }
 function navBtn(label, view, cls){
@@ -3045,6 +3130,54 @@ function viewContent(p){
     <div class="section-note" style="margin-top:-6px">parked — not one-tap approvable, an operator pulls these off hold first</div>
     <div class="cards">${onHold.slice(0,10).map(it=>row(firstLine(it.title||"item"),[it.client_key,it.type].filter(Boolean).join(" · "))).join("")}</div>`:""}`;
 }
+// Analytics is a compact read of existing snapshot fields, not another metrics
+// producer. Content outcomes come from the established content_experiments
+// projection; search/business signals stay absent when this snapshot has none.
+function _analyticsNumber(value){return typeof value==="number"&&Number.isFinite(value)?value:null;}
+function _analyticsSourceRows(p){
+  if(!Array.isArray(p.source_status))return null;
+  return p.source_status.filter(row=>{
+    const key=String((row&&row.source)||"").toLowerCase();
+    return /gsc|search console|ga4|analytics|serp/.test(key);
+  });
+}
+function viewAnalytics(p){
+  const ce=p.content_experiments;
+  const ceValid=!!(ce&&typeof ce==="object"&&!Array.isArray(ce)&&Array.isArray(ce.runs)&&
+    ce.runs.every(run=>run&&typeof run==="object"&&!Array.isArray(run)));
+  const runs=ceValid?ce.runs:[];
+  const ceBroken=p.content_experiments_build_ok===false;
+  const bm=p.business_metrics&&typeof p.business_metrics==="object"&&!Array.isArray(p.business_metrics)?p.business_metrics:null;
+  const funnel=bm&&bm.funnel&&typeof bm.funnel==="object"&&!Array.isArray(bm.funnel)?bm.funnel:null;
+  const pipeline=funnel&&funnel.pipeline&&typeof funnel.pipeline==="object"&&!Array.isArray(funnel.pipeline)?funnel.pipeline:null;
+  const funnelRows=pipeline?Object.entries(pipeline).filter(([,value])=>_analyticsNumber(value)!==null):[];
+  const clientHealthKnown=!!(bm&&Object.prototype.hasOwnProperty.call(bm,"client_health")&&Array.isArray(bm.client_health));
+  const clients=clientHealthKnown?bm.client_health:[];
+  const clientSignals=clients.filter(client=>client&&(_analyticsNumber(client.aeo_rate_pct)!==null||
+    (typeof client.clicks_delta==="string"&&client.clicks_delta.trim())));
+  const sourceRows=_analyticsSourceRows(p);
+  return `<section data-analytics>
+    <div class="status sub">Analytics<small>existing snapshot signals only</small></div>
+    <h4 class="section-h">CONTENT PERFORMANCE</h4>
+    ${ceBroken||!ceValid?`<div class="state state-error"><b>Content outcomes unavailable</b>${ceBroken?"The content-outcomes projection failed for this snapshot.":"The content-outcomes projection is missing or malformed for this snapshot."} This is not zero performance.</div>`:
+      !runs.length?`<div class="empty">No joined content outcomes in this snapshot. Performance appears here only after a verified outcome joins.</div>`:
+      `<div class="proof">${runs.slice(0,4).map(run=>{const posts=_analyticsNumber(run.post_count);return `<div class="pcard"><h4>${esc(run.hypothesis||"Unclassified")}</h4><div class="v">${esc(fmtCount(run.avg_views))}</div><small>average views · ${esc(posts===null?"post count unavailable":String(posts)+" posts")} · latest ${esc(run.latest_date?ago(run.latest_date):"date unavailable")}</small></div>`;}).join("")}</div>
+       <div class="section-note">Outcome window: ${esc(ce.as_of?ago(ce.as_of):"date unavailable")}. Watch-time and skip-rate stay in Content details; this view does not invent a combined score.</div>`}
+    <div class="acts" style="margin-top:10px"><button class="btn" data-goto="content">Open content details</button></div>
+    <h4 class="section-h">BUSINESS &amp; SEARCH SIGNALS</h4>
+    ${!bm?`<div class="state state-error"><b>Business/search snapshot unavailable</b>This snapshot does not contain the existing business_metrics projection.</div>`:
+      `<div class="section-note">Snapshot generated ${esc(bm.as_of?ago(bm.as_of):"at an unknown time")}. Counts below are existing funnel or client-search fields, not a new analytics calculation.</div>
+       ${pipeline===null?`<div class="state state-error"><b>Funnel projection unavailable</b>The existing funnel payload is missing or malformed for this snapshot.</div>`:funnelRows.length?`<div class="proof" style="margin-top:10px">${funnelRows.slice(0,6).map(([label,value])=>`<div class="pcard"><h4>${esc(String(label).replaceAll("_"," "))}</h4><div class="v">${esc(String(value))}</div><small>existing funnel count</small></div>`).join("")}</div>`:`<div class="empty">No funnel counts in this snapshot.</div>`}
+       <h4 class="section-h">CLIENT SEARCH SIGNALS</h4>
+       ${!clientHealthKnown?`<div class="state state-error"><b>Client search signals unavailable</b>The existing client-health payload is missing or malformed for this snapshot.</div>`:clientSignals.length?`<div class="cards">${clientSignals.slice(0,12).map(client=>`<div class="dcard row"><div class="q">${esc(client.client_name||client.client_key||"Client")}</div><div class="why">${[
+          _analyticsNumber(client.aeo_rate_pct)!==null?`AI citation rate ${client.aeo_rate_pct}%`:"",
+          typeof client.clicks_delta==="string"&&client.clicks_delta.trim()?`clicks ${client.clicks_delta.trim()}`:"",
+          client.updated_at?`updated ${ago(client.updated_at)}`:""
+        ].filter(Boolean).map(esc).join(" · ")}</div></div>`).join("")}</div>`:`<div class="empty">No client-level search signals in this snapshot.</div>`}`}
+    <h4 class="section-h">SEARCH DATA AVAILABILITY</h4>
+    ${sourceRows===null?`<div class="state state-error"><b>Search data availability unavailable</b>The source-status projection is missing or malformed for this snapshot.</div>`:sourceRows.length?`<div class="cards">${sourceRows.slice(0,8).map(source=>`<div class="dcard row"><div class="q">${esc(source.source||"Search source")}</div><div class="why">${esc(source.status||"unknown")} · ${esc(source.updated_at?ago(source.updated_at):"freshness unavailable")}${source.detail?` · ${esc(firstLine(source.detail))}`:""}</div></div>`).join("")}</div>`:`<div class="empty">No GSC, GA4, or SERP availability rows in this snapshot. This does not mean there was no traffic or no search activity.</div>`}
+  </section>`;
+}
 // Automations directory (Operating Model v2 §4 Pillar 2, build item 6): a
 // registry-backed directory of every producer, off push_operator_snapshot.py's
 // p.automations (built server-side from system-map-registry.json + best-effort
@@ -3311,15 +3444,13 @@ function _decOptions(d){
   return {options,invalid:false,notice:(!enriched&&raw.length)?"Option detail is unavailable because structured labels do not match the persisted choices; showing labels only.":recommendedCount>1?"Multiple recommendations were supplied; showing all choices without a recommendation.":""};
 }
 function _decOptionCard(d,o){
-  const why=o.recommended&&d.card&&typeof d.card.why_recommended==="string"?d.card.why_recommended:"";
   const bullets=(title,items,kind)=>items.length?`<div class="decide-option-col ${kind}"><h5>${title}</h5><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:"";
   const i=DEC_REG.push({id:d.id,version:d.version,choice:o.label})-1;
   return `<article class="decide-option ${o.recommended?"rec":""}">
     <div class="decide-option-head"><h4>${esc(o.label)}</h4>${o.recommended?`<span class="badge badge-warn">Suggested</span>`:""}</div>
     ${o.detail?`<div class="decide-option-detail">${esc(o.detail)}</div>`:""}
     ${(o.pros.length||o.cons.length)?`<div class="decide-option-cols">${bullets("Why yes",o.pros,"yes")}${bullets("Why not",o.cons,"no")}</div>`:""}
-    ${why?`<div class="decide-option-why"><b>Why this is suggested:</b> ${esc(why)}</div>`:""}
-    <button class="btn ${o.recommended?"rec":""}" data-dec-i="${i}">${esc(o.label)}</button>
+    <button class="btn ${o.recommended?"rec":""}" data-dec-i="${i}" aria-label="Choose: ${escAttr(o.label)}">Choose this</button>
   </article>`;
 }
 function viewRecentDecisions(){
@@ -3332,22 +3463,20 @@ function viewRecentDecisions(){
   if(!Array.isArray(DEC_RECENT)||DEC_RECENT.length>30||!DEC_RECENT.every(valid)||new Set(DEC_RECENT.map(d=>d.id)).size!==DEC_RECENT.length)
     return `<section data-decided-history><div class="section-h">Recently decided</div><div class="state state-error"><b>Decision history unavailable</b>The read returned malformed rows.</div></section>`;
   if(!DEC_RECENT.length)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="empty">No recent decisions.</div></section>`;
-  return `<section data-decided-history><div class="section-h">Recently decided <small>read-only history</small></div><div class="cards">${DEC_RECENT.map(d=>`<article class="dcard row" data-decided-id="${escAttr(d.id)}"><div class="q">${esc(d.question)}</div><div class="why">Answer: ${esc(d.decided_choice)}</div><small class="mut">Decided ${esc(d.decided_at)} (${esc(ago(d.decided_at))})${d.decided_by?` by ${esc(d.decided_by)}`:""}</small></article>`).join("")}</div></section>`;
+  return `<section data-decided-history><div class="section-h">Recently decided <small>read-only history</small></div><div class="cards">${DEC_RECENT.map(d=>`<article class="decide-done-card dcard row" data-decided-id="${escAttr(d.id)}"><div class="decide-done-tag">✓ Decided</div><div class="decide-done-question">${esc(d.question)}</div><div class="decide-done-answer"><div class="label">Your answer</div><div class="value">${esc(d.decided_choice)}</div><div class="meta">Decided ${esc(d.decided_at)} (${esc(ago(d.decided_at))})${d.decided_by?` · ${esc(d.decided_by)}`:""}</div></div></article>`).join("")}</div></section>`;
 }
 function viewDecisions(p){
   MEDIA_REG=[];
   const rows=DECS;
-  const head=`<div class="status sub">Decide<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">capped at 5 — everything else stays in fleet triage</small></div>`;
-  if(rows===null)return head+`<div class="state state-error"><b>Decision queue read FAILED</b>Not an empty queue — the read itself failed.</div>`+viewRecentDecisions();
-  if(!Array.isArray(rows))return head+`<div class="empty">Loading…</div>`+viewRecentDecisions();
-  if(!rows.length)return head+`<div class="empty">No open decisions right now.</div>`+viewRecentDecisions();
+  const head="";
+  if(rows===null)return head+`<div class="decide-shell decide-b"><div class="decide-context"><div class="title">Your decisions</div></div><div class="state state-error"><b>Decision queue read FAILED</b>Not an empty queue — the read itself failed.</div></div>`+viewRecentDecisions();
+  if(!Array.isArray(rows))return head+`<div class="decide-shell decide-b"><div class="decide-context"><div class="title">Your decisions</div></div><div class="empty">Loading…</div></div>`+viewRecentDecisions();
+  if(!rows.length)return head+`<div class="decide-shell decide-b"><div class="decide-context"><div class="title">Your decisions</div></div><div class="decide-q">Nothing waiting on your answer.</div><div class="decide-why">No open decisions right now. Your saved answers are below.</div></div>`+viewRecentDecisions();
   if(DEC_IDX>rows.length)DEC_IDX=rows.length;
   if(DEC_IDX<0)DEC_IDX=0;
-  const top=`<div class="decide-top"><div style="font-size:13px;font-weight:750">Daily answer block</div>
-      <div class="decide-progress"><b>${Math.min(DEC_IDX+1,rows.length)}</b>/${rows.length}</div></div>
-    <div class="decide-dots">${rows.map((x,i)=>`<span class="dot ${i===DEC_IDX?"current":DEC_SKIPPED.has(x.id)?"skipped":""}"></span>`).join("")}</div>`;
+  const top=`<div class="decide-context"><div class="title">${esc(rows[DEC_IDX]?.question||"Your decisions")}</div><div class="counter"><b>${Math.min(DEC_IDX+1,rows.length)}</b>/${rows.length}</div></div>`;
   if(DEC_IDX>=rows.length){ // walked past the last card — end of the stack
-    return head+`<div class="decide-shell" data-decide-room>${top}
+    return head+`<div class="decide-shell decide-b" data-decide-room>${top}
       <div class="empty" style="text-align:center;padding:32px 0">End of the stack — ${DEC_SKIPPED.size
         ?`${DEC_SKIPPED.size} skipped (still open — skipping writes nothing)`:"all seen"}.</div>
       <div class="decide-nav" style="justify-content:center"><button class="nav-btn" data-dec-nav="restart">↺ Start over</button></div>
@@ -3358,10 +3487,11 @@ function viewDecisions(p){
   const optionState=_decOptions(d), options=optionState.options;
   const arts=_decAttachedArts(d);
   const card=d.card&&typeof d.card==="object"&&!Array.isArray(d.card)?d.card:null;
-  const whyBits=[
-    !card&&d.recommendation?`Recommended: ${d.recommendation}`:"",
-    !card&&d.reversal_cost?`Reversal cost: ${d.reversal_cost}`:"",
-  ].filter(Boolean);
+  const why=card&&typeof card.why_now==="string"&&card.why_now.trim()?card.why_now:"";
+  const suggested=options.find(o=>o.recommended);
+  const recommendation=suggested?suggested.label:!card&&typeof d.recommendation==="string"?d.recommendation:"";
+  const reason=suggested&&card&&typeof card.why_recommended==="string"?card.why_recommended:"";
+  const fact=value=>typeof value==="string"&&value.trim()?value.trim():"Not recorded";
   const artsBody=arts===null
     ?`<span class="empty">Shelf read failed — attachments unknown, not none.</span>`
     :!arts.length?`<span class="empty">No artifacts attached.</span>`
@@ -3373,26 +3503,24 @@ function viewDecisions(p){
         const opts=(a.meta&&a.meta.decideOptions)||["Approve","Reject"];
         return `<div style="margin-top:8px"><div style="font-size:12px;color:var(--ink-2);margin-bottom:6px">${esc(a.title)}</div>
           <div class="acts">${opts.slice(0,4).map((o,j)=>actBtn("artifact.decide",{artifact_id:a.id,choice:o},o,j===0?"rec":"")).join("")}</div></div>`;}).join("")}`;
-  return head+`<div class="decide-shell" data-decide-room>${top}
+  return head+`<div class="decide-shell decide-b" data-decide-room>${top}
     <div class="decide-q">${esc(d.question)}</div>
-    <div class="decide-ctx">#${esc(d.id)}${wi?` · ${esc(wi.type||"work")} from ${esc(wi.owner||"unowned")} · ${esc(wi.title||"")}`:""}</div>
-    ${card&&card.why_now?`<div class="decide-sec"><div class="sec-h">Why now</div>${esc(card.why_now)}</div>`:""}
-    ${card&&card.what_changes?`<div class="decide-sec"><div class="sec-h">What changes</div>${esc(card.what_changes)}</div>`:""}
-    ${card&&typeof card.cost==="string"&&card.cost?`<div class="decide-sec"><div class="sec-h">Cost</div>${esc(card.cost)}</div>`:""}
-    ${card&&typeof card.undo==="string"&&card.undo?`<div class="decide-sec"><div class="sec-h">Undo</div>${esc(card.undo)}</div>`:""}
-    ${card&&card.not_asking?`<div class="decide-sec"><div class="sec-h">Not being asked</div>${esc(card.not_asking)}</div>`:""}
-    ${card&&typeof card.details==="string"&&card.details?`<details class="decide-sec"><summary>Technical details</summary><div>${esc(card.details)}</div></details>`:""}
-    ${whyBits.length?`<div class="decide-sec"><div class="sec-h">Why it matters</div>${whyBits.map(esc).join("<br>")}</div>`:""}
-    <div class="decide-sec"><div class="sec-h">If you ignore it</div>${esc(_decIgnoredLine(d))}</div>
-    <div class="decide-sec"><div class="sec-h">Attached artifacts</div>${artsBody}</div>
+    ${why?`<div class="decide-why">${esc(why)}</div>`:""}
+    ${card&&typeof card.not_asking==="string"&&card.not_asking.trim()?`<div class="decide-notasking">✓ ${esc(card.not_asking.trim())}</div>`:""}
+    <dl class="decide-facts"><div><dt>Cost</dt><dd>${esc(fact(card&&card.cost))}</dd></div><div><dt>Undo</dt><dd>${esc(fact(card?card.undo:d.reversal_cost))}</dd></div><div class="wide"><dt>If ignored</dt><dd>${esc(_decIgnoredLine(d))}</dd></div></dl>
+    ${card&&typeof card.what_changes==="string"&&card.what_changes.trim()?`<div class="decide-sec"><div class="sec-h">What changes</div>${esc(card.what_changes)}</div>`:""}
+    ${recommendation?`<div class="decide-suggestion"><b>★ Suggested: ${esc(recommendation)}</b>${reason?` — ${esc(reason)}`:""}</div>`:""}
+    <div class="decide-compare-head">Your options<span>${optionState.invalid?"Choices unavailable":`${options.length} to compare`}</span></div>
     <div class="decide-dock">
       ${optionState.invalid?`<div class="state state-error"><b>Decision cannot be answered yet</b>${esc(optionState.notice)}</div>`:options.length?`<div class="decide-opts decide-compare">${options.map(o=>_decOptionCard(d,o)).join("")}</div>`:`<div class="decide-opts">${decBtn(d,"Acknowledge")}</div>`}
       ${optionState.notice&&!optionState.invalid?`<div class="decide-card-contract">${esc(optionState.notice)}</div>`:""}
-      ${card&&card.question_thread?`<div class="decide-card-contract">Question thread requires the decision-questions backend; no question can be sent from this page yet.</div>`:""}
-      <div class="decide-nav">
-        <button class="nav-btn" data-dec-nav="prev"${DEC_IDX===0?" disabled":""}>← Prev</button>
-        <button class="nav-btn" data-dec-nav="skip">Skip for now →</button>
-      </div>
+    </div>
+    ${arts===null||arts.length?`<div class="decide-sec" style="margin-top:20px"><div class="sec-h">Attached artifacts</div>${artsBody}</div>`:""}
+    <details class="decide-tech"><summary>Technical details</summary><div class="body">#${esc(d.id)}${wi?` · ${esc(wi.type||"work")} from ${esc(wi.owner||"unowned")} · ${esc(wi.title||"")}`:""}${card&&typeof card.details==="string"&&card.details.trim()?`<div>${esc(card.details)}</div>`:""}</div></details>
+    ${card&&card.question_thread?`<div class="decide-card-contract">Questions are unavailable in this room; the decision-questions backend is not connected.</div>`:""}
+    <div class="decide-nav">
+      <button class="nav-btn" data-dec-nav="prev"${DEC_IDX===0?" disabled":""}>← Previous</button>
+      <button class="nav-btn" data-dec-nav="skip">Not tonight</button>
     </div>
   </div>`+viewRecentDecisions();
 }
@@ -5203,6 +5331,7 @@ function render(p, updatedAt, srcNote){
     : VIEW==="pipeline"?viewPipeline(p)
     : VIEW==="conversations"?viewConversations(p)
     : VIEW==="content"?viewContent(p)
+    : VIEW==="analytics"?viewAnalytics(p)
     : VIEW==="ctos"?viewCtos(p,updatedAt)
     : VIEW==="machine"?viewMachine(p,updatedAt)
     : VIEW==="business"?viewBusiness(p,updatedAt)
@@ -5293,6 +5422,10 @@ function render(p, updatedAt, srcNote){
       // .click()s these same buttons) and DEV both go through the same prompt.
       const isCriNoteAction=reg.action==="content_review.request_changes"||reg.action==="content_review.reject";
       const isCriDecisionAction=reg.action==="content_review.approve"||isCriNoteAction;
+      // The action registry freezes this identity when the card rendered. Never
+      // re-read CRI here: it may already contain newer bytes than this click saw.
+      const submittedCriRenderSha=isCriDecisionAction&&typeof params.expected_render_sha==="string"&&
+        /^[0-9a-f]{16}$/.test(params.expected_render_sha)?params.expected_render_sha:null;
       if(isCriNoteAction){
         const ta=$("#cri-note");
         reviewSubmittedRaw=ta?ta.value:"";
@@ -5341,8 +5474,8 @@ function render(p, updatedAt, srcNote){
       if(reg.action==="outreach.log_call" && (params.disposition==="do_not_contact"||params.disposition==="booked")){
         if(!confirm(`Confirm: mark this prospect "${params.disposition.replace(/_/g," ")}"? This is terminal — it ends the sequence.`))return;
       }
-      const key=actKey(reg.action, params);
-      if(ACTS_DONE.has(key)){toast("Already recorded — refresh if this looks wrong","err");return}
+      const key=actionKey(reg.action,params);
+      if(ACTS_DONE.has(key)||ACTS_INFLIGHT.has(key)){toast("Already recorded — refresh if this looks wrong","err");return}
       b.disabled=true;
       const card=b.closest(".dcard");
       if(DEV){toast("DEV preview — action not sent");b.disabled=false;return}
@@ -5370,15 +5503,19 @@ function render(p, updatedAt, srcNote){
             if(isTixNoteAction){const ta=$("#tix-note");if(ta)ta.value="";TIX_NOTE_DRAFT={id:null,text:""};}}
           else if(st==="processing")toast("Running…");
           else if(st==="done"){
-            toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
             ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
             if(isCriDecisionAction){
-              const item=Array.isArray(CRI)?CRI.find(it=>it&&it.script_id===params.script_id):null;
-              REVIEW_HANDLED.set(String(params.script_id),String(item&&item.render_sha||""));
-              if(isCriNoteAction)_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);
+              const receipt=_contentReviewReceipt(detail,reg.action,String(params.script_id),submittedCriRenderSha);
+              if(receipt){
+                REVIEW_HANDLED.set(String(params.script_id),submittedCriRenderSha);
+                if(isCriNoteAction)_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);
+                toast(receipt.outcome==="already_approved"?"Already approved — recorded":"Done — recorded");
+              }else toast("Recorded, but receipt needs refresh verification","err");
               _loadAuxAndRender(()=>loadReviewData(true));
+            }else{
+              toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
+              if(reg.action==="artifact.decide")_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw),_loadAuxAndRender(()=>loadReviewData(true));
             }
-            if(reg.action==="artifact.decide"){_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);_loadAuxAndRender(()=>loadReviewData(true));}
             if(reg.action.startsWith("ticket.")&&params.id){
               // ONLY approve/reject resolve a ticket (security review F2). `revise` records
               // a note and leaves the ticket OPEN and still awaiting the operator's word —
@@ -5647,4 +5784,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 9f9608793c5c -->
+<!-- rankwise-portal2-version: 68992ee4d314 -->
