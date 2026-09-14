@@ -1639,6 +1639,10 @@ function _criFeedback(it){
 // decision reason and remain local drafts until snapshot history proves a save.
 const REVIEW_SAVED_NOTE_DRAFTS=new Map(), REVIEW_SAVED_NOTE_PENDING=new Map();
 let REVIEW_NOTES_SNAPSHOT=null;
+// content_review_push.project_lab() has one already-approved historical source
+// layout. Keep this exact string aligned with the worker; it is deliberately
+// not a generic _dev allowance or a date-pattern matcher.
+const _SAVED_NOTE_METRO_LAB_SOURCE="vault/_dev/content-refresh-2026-09-06/lab-mn";
 function _savedNoteTarget(kind,it){
   return kind==="media"?{kind:"media",id:typeof it.script_id==="string"?it.script_id:"",source_dir:String(it.source_dir||"")}:{kind:"artifact",id:String(it.id)};
 }
@@ -1647,7 +1651,8 @@ function _savedNoteKey(target){
   if(target.kind==="artifact"&&/^[1-9][0-9]*$/.test(target.id))
     return JSON.stringify(["artifact",target.id]);
   if(target.kind==="media"&&/^[a-z0-9][a-z0-9-]{0,80}$/.test(target.id)&&
-     typeof target.source_dir==="string"&&/^vault\/Clients\/Rankwise\/Content\/Scripts\/[^\\]+$/.test(target.source_dir)&&
+     typeof target.source_dir==="string"&&
+     (/^vault\/Clients\/Rankwise\/Content\/Scripts\/[^\\]+$/.test(target.source_dir)||target.source_dir===_SAVED_NOTE_METRO_LAB_SOURCE)&&
      !/[\u0000-\u001f\u007f-\u009f]/.test(target.source_dir)&&
      !target.source_dir.split("/").some(x=>!x||x==="."||x===".."))
     return JSON.stringify(["media",target.id,target.source_dir]);
@@ -5784,4 +5789,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 68992ee4d314 -->
+<!-- rankwise-portal2-version: 28e58647f713 -->
