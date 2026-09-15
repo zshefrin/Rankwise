@@ -3254,6 +3254,19 @@ function _analyticsSourceRows(p){
 }
 function _revenueMonthlySeries(p){
   const rev=p&&p.revenue, rows=rev&&rev.schema==="revenue.v2"&&rev.available===true&&Array.isArray(rev.rows)?rev.rows:[];
+  const aggregate=rev&&rev.monthly_totals&&typeof rev.monthly_totals==="object"&&!Array.isArray(rev.monthly_totals)?rev.monthly_totals:null;
+  if(aggregate){
+    const todayMonth=new Date().toISOString().slice(0,7);
+    let rejected=0;
+    const months=Object.entries(aggregate).filter(([month,value])=>{
+      const validShape=/^\d{4}-\d{2}$/.test(month), monthNum=validShape?Number(month.slice(5)):0;
+      const validCalendar=validShape&&monthNum>=1&&monthNum<=12&&month<=todayMonth;
+      const validAmount=typeof value==="string"&&/^\d{1,12}\.\d{2}$/.test(value)&&Number(value)>=0;
+      if(!validCalendar||!validAmount){rejected+=1;return false;} return true;
+    })
+      .sort(([a],[b])=>a.localeCompare(b)).slice(-6);
+    return {series:months.map(([month,value])=>({month,amount:Number(value),deals:null})),rejected,aggregated:true};
+  }
   const byMonth=new Map();
   let rejected=0;
   const today=new Date().toISOString().slice(0,10);
@@ -3266,7 +3279,7 @@ function _revenueMonthlySeries(p){
     const month=date.slice(0,7), item=byMonth.get(month)||{month,amount:0,deals:0};
     item.amount+=amount;item.deals+=1;byMonth.set(month,item);
   });
-  return {series:[...byMonth.values()].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6),rejected};
+  return {series:[...byMonth.values()].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6),rejected,aggregated:false};
 }
 function _progressRevenueChart(p){
   const rev=p&&p.revenue;
@@ -3277,8 +3290,8 @@ function _progressRevenueChart(p){
   const incomplete=skipped+rejected;
   if(!series.length)return incomplete?`<div class="state state-error">Recorded revenue trend incomplete — ${esc(incomplete)} malformed row${incomplete===1?"":"s"} excluded and no valid dated collections remain.</div>`:`<div class="empty">No dated collections are available for a trend yet.</div>`;
   const max=Math.max(...series.map(x=>x.amount),0);
-  const coverage=rev.truncated||incomplete?`newest loaded rows · incomplete${incomplete?` · ${incomplete} malformed excluded`:""}`:"loaded close ledger";
-  return `<div class="progress-chart" data-progress-revenue><div class="progress-chart-head"><h3>Recorded collections by month</h3><span class="src">${esc(coverage)}</span></div><div class="progress-bars">${series.map(x=>`<div class="progress-bar-col"><div class="progress-bar-track" title="${esc(x.month)} · CAD ${x.amount.toFixed(2)} · ${x.deals} deal${x.deals===1?"":"s"}"><div class="progress-bar-fill" style="height:${max?Math.max(3,Math.round(x.amount/max*100)):3}%"></div></div><div class="progress-bar-value">${esc(x.amount.toFixed(0))}</div><div class="progress-bar-label">${esc(x.month.slice(2))}</div></div>`).join("")}</div><p class="section-note">CAD recorded amounts by close date. This is a ledger trend, not bank reconciliation or verified active MRR.</p></div>`;
+  const coverage=monthly.aggregated?(incomplete?`full-ledger monthly totals · ${incomplete} invalid excluded`:"full-ledger monthly totals"):rev.truncated||incomplete?`newest loaded rows · incomplete${incomplete?` · ${incomplete} malformed excluded`:""}`:"loaded close ledger";
+  return `<div class="progress-chart" data-progress-revenue><div class="progress-chart-head"><h3>Recorded collections by month</h3><span class="src">${esc(coverage)}</span></div><div class="progress-bars">${series.map(x=>`<div class="progress-bar-col"><div class="progress-bar-track" title="${esc(x.month)} · CAD ${x.amount.toFixed(2)}${x.deals===null?"":` · ${x.deals} deal${x.deals===1?"":"s"}`}"><div class="progress-bar-fill" style="height:${max?Math.max(3,Math.round(x.amount/max*100)):3}%"></div></div><div class="progress-bar-value">${esc(x.amount.toFixed(0))}</div><div class="progress-bar-label">${esc(x.month.slice(2))}</div></div>`).join("")}</div><p class="section-note">CAD recorded amounts by close date. This is a ledger trend, not bank reconciliation or verified active MRR.</p></div>`;
 }
 function viewAnalytics(p){
   const ce=p.content_experiments;
@@ -5411,10 +5424,23 @@ function viewCommitments(fs,broken){
   if(fs.available!==true)return `<div class="state state-error"><b>Commitment data unavailable</b>Missing data is not a zero-dollar monthly commitment.</div>`;
   const rows=Array.isArray(fs.rows)?fs.rows:[],unpriced=rows.filter(r=>typeof r.cad_month!=="number"||!Number.isFinite(r.cad_month)).length;
   const needs=rows.filter(r=>r.needsConfirm===true).length,unknown=rows.filter(r=>r.renewalBasis!=="usage"&&r.renewalFindable!==false&&moneyDate(r.renewal)==="Not recorded").length;
+  const currencyMapValid=(obj)=>obj&&typeof obj==="object"&&!Array.isArray(obj)&&Object.entries(obj).every(([k,v])=>["CAD","USD"].includes(k)&&typeof v==="number"&&Number.isFinite(v)&&v>=0);
+  const hasVerifiedMap=currencyMapValid(fs.verifiedTotalsByCurrency);
+  const hasEstimatedMap=currencyMapValid(fs.estimatedTotalsByCurrency);
+  const verified=hasVerifiedMap?fs.verifiedTotalsByCurrency:{};
+  const estimated=hasEstimatedMap?fs.estimatedTotalsByCurrency:{};
+  const currencyLine=(obj,fallback)=>currencyMapValid(obj)&&Object.keys(obj).length?Object.entries(obj).map(([k,v])=>`${k} ${v.toFixed(2)}`).join(" · "):(Number.isFinite(fallback)?`CAD ${fallback.toFixed(2)}`:"Unavailable");
+  const verifiedFallback=typeof fs.verifiedUnknownCurrencyCad==="number"&&Number.isFinite(fs.verifiedUnknownCurrencyCad)?fs.verifiedUnknownCurrencyCad:0;
+  const legacyFallback=!Object.prototype.hasOwnProperty.call(fs,"verifiedTotalsByCurrency")&&typeof fs.totalKnownCadMonth==="number"&&Number.isFinite(fs.totalKnownCadMonth)?fs.totalKnownCadMonth:0;
+  const verifiedLabel=hasVerifiedMap?(Object.keys(verified).length?currencyLine(verified,null):"No native-currency total recorded"):"Unavailable · no native total recorded";
+  const estimatedLabel=hasEstimatedMap?(Object.keys(estimated).length?currencyLine(estimated,null):"No native-currency estimate recorded"):(legacyFallback?`CAD ${legacyFallback.toFixed(2)} · legacy estimate`:"Unavailable");
+  const unknownCurrency=verifiedFallback>0?` · unknown currency CAD eq ${verifiedFallback.toFixed(2)}`:"";
+  const usageCount=Number.isFinite(Number(fs.usageBasedCount))?Number(fs.usageBasedCount):0;
+  const unknownPriceCount=Number.isFinite(Number(fs.unknownPriceCount))?Number(fs.unknownPriceCount):unpriced;
   const today=new Date();today.setHours(0,0,0,0);const soon=new Date(today);soon.setDate(soon.getDate()+30);
   const renewSoon=rows.filter(r=>{if(r.renewalBasis==="usage")return false;const raw=moneyDate(r.renewal);if(raw==="Not recorded")return false;const d=new Date(String(r.renewal)+"T12:00:00Z");return !Number.isNaN(d.valueOf())&&d>=today&&d<=soon;}).length;
   return `${broken?'<div class="state state-error"><b>Spend feed failed to build</b>Last-known figures may be stale; this is not a fresh read.</div>':''}
-    <div class="money-hero"><div class="money-period"><span class="money-scope">Known fixed commitments / month</span><span class="money-value">${esc(estimateMoney(fs.totalKnownCadMonth,"CAD "))}</span><p>Monthly equivalent estimate, not actual payments.${unpriced?` ${unpriced} unpriced provider${unpriced===1?'':'s'} excluded.`:''}</p></div><div class="money-period"><span class="money-scope">What needs checking</span><h3>${needs} price${needs===1?'':'s'} to verify · ${unknown} renewal date${unknown===1?'':'s'} missing</h3><p>${renewSoon?`${renewSoon} renewal${renewSoon===1?'':'s'} due in the next 30 days. `:''}Report generated ${esc(moneyDate(fs.asOf))}. This is not the date each price was verified.</p></div></div>
+    <div class="money-hero"><div class="money-period"><span class="money-scope">Verified recurring / month</span><h3>${esc(verifiedLabel)}${esc(unknownCurrency)}</h3><p>Backed by recorded expense rows. Native currencies stay separate.</p></div><div class="money-period"><span class="money-scope">Estimated recurring / month</span><h3>${esc(estimatedLabel)}</h3><p>${esc(String(usageCount))} usage-based · ${esc(String(unknownPriceCount))} unknown price. Not actual payments.</p></div><div class="money-period"><span class="money-scope">What needs checking</span><h3>${needs} price${needs===1?'':'s'} to verify · ${unknown} renewal date${unknown===1?'':'s'} missing</h3><p>${renewSoon?`${renewSoon} renewal${renewSoon===1?'':'s'} due in the next 30 days. `:''}Report generated ${esc(moneyDate(fs.asOf))}. This is not the date each price was verified.</p></div></div>
     <div class="money-table-heading"><h2>Subscriptions &amp; commitments</h2><span class="section-note">${rows.length} provider${rows.length===1?'':'s'} · read-only</span></div>
     <div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Provider</th><th scope="col">Price / cycle</th><th scope="col">Next renewal</th><th scope="col" class="money-amount">Monthly CAD estimate</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(r.name||"Provider not recorded")}<small>${r.needsConfirm?'Price needs verification':'Recorded expense basis'}</small><details><summary>Evidence &amp; use</summary>Last recorded use: ${esc(moneyDate(r.lastUsed))}. Evidence: ${esc(['direct','weak','none'].includes(r.evidenceStrength)?r.evidenceStrength:'none')}. Missing use evidence does not mean unused.</details></td><td>${esc(estimateMoney(r.amount,["CAD","USD"].includes(r.currency)?r.currency+" ":"Currency unknown "))}<small>${esc(({monthly:'per month',quarterly:'per quarter',annual:'per year',yearly:'per year'})[r.cadence]||'Cycle not recorded')}</small></td><td>${r.renewalBasis==='usage'?'Usage-based · no fixed renewal':esc(moneyDate(r.renewal))}</td><td class="money-amount">${esc(estimateMoney(r.cad_month,"CAD "))}</td></tr>`).join(''):'<tr><td colspan="4">No subscription rows recorded in this report.</td></tr>'}</tbody></table></div>
     <p class="section-note">Known CAD monthly equivalents only. Annual plans are spread over months; foreign-currency conversions are estimates. Metered usage is separate.</p>`;
@@ -6211,4 +6237,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 67121fae783e -->
+<!-- rankwise-portal2-version: 213c3e2a38ba -->
