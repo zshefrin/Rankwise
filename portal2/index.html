@@ -5154,6 +5154,17 @@ function viewPipeline(p){
 
   const s2 = pb.stage2_contacted, s3 = pb.stage3_conversation;
   const outreachBroken = !ok("outreach");
+  const sharedContacts=(()=>{
+    if(outreachBroken)return [];
+    const byId=new Map();
+    [...(s2?.items||[]).map(x=>({...x,_stage:"contacted"})),...(s3?.items||[]).map(x=>({...x,_stage:"conversation"}))].forEach(x=>{
+      const key=String(x.prospect_id||"").trim(); if(!key)return;
+      const prior=byId.get(key); if(!prior||String(x.updated_at||"")>String(prior.updated_at||""))byId.set(key,x);
+    });
+    return [...byId.values()].sort((a,b)=>String(b.updated_at||"").localeCompare(String(a.updated_at||""))).slice(0,8);
+  })();
+  const unresolvedCount=outreachBroken?0:[...(s2?.items||[]),...(s3?.items||[])].filter(x=>!String(x.prospect_id||"").trim()).length;
+  const sharedContext=sharedContacts.length?`<section class="pipe-section" data-shared-contact-context><h3 class="pipe-section-h">RECENT OUTREACH RECORDS <small>up to 8 loaded · prospect IDs only · Inbox is not auto-linked</small></h3><div class="cards">${sharedContacts.map(x=>{const terminal=["do_not_contact","unsubscribed","not_interested","dead_end"].includes(String(x.status||"").toLowerCase())||x.dead_end===true;return `<div class="dcard row"><div><div class="q">${esc(x.prospect_name||x.prospect_id||"Contact")}</div><div class="why">${esc(String(x.status||"unknown").replace(/_/g," "))}${!terminal&&x.next_action_channel?` · next via ${esc(x.next_action_channel)}`:""}${!terminal&&x.next_action_at?` · due ${esc(x.next_action_at)}`:""}</div><small>updated ${esc(ago(x.updated_at))}</small></div><div class="acts"><button class="btn" data-goto="conversations">Open Inbox</button></div></div>`;}).join("")}${unresolvedCount?`<div class="pipe-more">${esc(unresolvedCount)} record${unresolvedCount===1?"":"s"} omitted — prospect identity unresolved.</div>`:""}</div></section>`:outreachBroken?`<section class="pipe-section" data-shared-contact-context><div class="state state-error"><b>Recent outreach records unavailable</b>Outreach identity records failed this push; do not infer an empty history.</div></section>`:unresolvedCount?`<section class="pipe-section" data-shared-contact-context><div class="state state-error">${esc(unresolvedCount)} outreach record${unresolvedCount===1?"":"s"} loaded without a prospect ID; history is unresolved.</div></section>`:`<section class="pipe-section" data-shared-contact-context><div class="empty">No recent outreach records in the current stages.</div></section>`;
   const s2Html = outreachBroken ? "" : ((s2?.items||[]).length
     ? (s2.items||[]).map(r=>`
         <div class="pipe-card">
@@ -5226,6 +5237,7 @@ function viewPipeline(p){
       <div class="pcard"><h4>Sales in flight</h4><div class="v">${esc(count(ok("leads_md"),salesCount))}</div><small>booked + proposal + won</small></div>
       <div class="pcard"><h4>Clients</h4><div class="v">${esc(count(ok("clients"),clientCount))}</div><small>onboarding + active</small></div>
     </div>
+    ${sharedContext}
     <section class="pipe-section"><h3 class="pipe-section-h">Market inventory <small>not revenue pipeline</small></h3>
       <div class="pipe-board">
         ${_pipeCol("Inbound leads", ok("widget_leads")?widgetLeads.length:"?", inboundHtml, !ok("widget_leads"))}
@@ -6252,4 +6264,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 39da2c219755 -->
+<!-- rankwise-portal2-version: a06b150c2959 -->
