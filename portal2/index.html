@@ -3626,16 +3626,16 @@ function _decOptionCard(d,o){
   </article>`;
 }
 function viewRecentDecisions(){
-  if(DEC_RECENT===undefined)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="empty">Loading decision history…</div></section>`;
-  if(DEC_RECENT===null)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="state state-error"><b>Decision history unavailable</b>Not an empty history — the read itself failed.</div></section>`;
+  if(DEC_RECENT===undefined)return `<section data-decided-history><div class="section-h">Recent answers <small>read-only history</small></div><div class="empty">Loading decision history…</div></section>`;
+  if(DEC_RECENT===null)return `<section data-decided-history><div class="section-h">Recent answers <small>read-only history</small></div><div class="state state-error"><b>Decision history unavailable</b>Not an empty history — the read itself failed.</div></section>`;
   const valid=d=>d&&Number.isSafeInteger(d.id)&&d.id>0&&["decided","executed"].includes(d.state)
     &&typeof d.question==="string"&&d.question.trim()&&typeof d.decided_choice==="string"&&d.decided_choice.trim()
     &&typeof d.decided_at==="string"&&/^\d{4}-\d{2}-\d{2}T/.test(d.decided_at)&&Number.isFinite(Date.parse(d.decided_at))
     &&(d.decided_by==null||typeof d.decided_by==="string");
   if(!Array.isArray(DEC_RECENT)||DEC_RECENT.length>30||!DEC_RECENT.every(valid)||new Set(DEC_RECENT.map(d=>d.id)).size!==DEC_RECENT.length)
-    return `<section data-decided-history><div class="section-h">Recently decided</div><div class="state state-error"><b>Decision history unavailable</b>The read returned malformed rows.</div></section>`;
-  if(!DEC_RECENT.length)return `<section data-decided-history><div class="section-h">Recently decided</div><div class="empty">No recent decisions.</div></section>`;
-  return `<section data-decided-history><div class="section-h">Recently decided <small>read-only history</small></div><div class="cards">${DEC_RECENT.map(d=>`<article class="decide-done-card dcard row" data-decided-id="${escAttr(d.id)}"><div class="decide-done-tag">✓ Decided</div><div class="decide-done-question">${esc(d.question)}</div><div class="decide-done-answer"><div class="label">Your answer</div><div class="value">${esc(d.decided_choice)}</div><div class="meta">Decided ${esc(d.decided_at)} (${esc(ago(d.decided_at))})${d.decided_by?` · ${esc(d.decided_by)}`:""}</div></div></article>`).join("")}</div></section>`;
+    return `<section data-decided-history><div class="section-h">Recent answers <small>read-only history</small></div><div class="state state-error"><b>Decision history unavailable</b>The read returned malformed rows.</div></section>`;
+  if(!DEC_RECENT.length)return `<section data-decided-history><div class="section-h">Recent answers <small>read-only history</small></div><div class="empty">No recent decisions.</div></section>`;
+  return `<section data-decided-history><div class="section-h">Recent answers <small>read-only history · no universal undo</small></div><div class="section-note">Past answers are saved. Changing an answer isn’t available here yet.</div><div class="cards">${DEC_RECENT.map(d=>`<article class="decide-done-card dcard row" data-decided-id="${escAttr(d.id)}"><div class="decide-done-tag">✓ ${esc(d.state==="executed"?"Executed":"Decided")}</div><div class="decide-done-question">${esc(d.question)}</div><div class="decide-done-answer"><div class="label">Your answer</div><div class="value">${esc(d.decided_choice)}</div><div class="meta">Decided ${esc(d.decided_at)} (${esc(ago(d.decided_at))})${d.decided_by?` · ${esc(d.decided_by)}`:""}</div></div></article>`).join("")}</div></section>`;
 }
 function viewDecisions(p){
   MEDIA_REG=[];
@@ -6264,4 +6264,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: a06b150c2959 -->
+<!-- rankwise-portal2-version: 155528aaeca2 -->
