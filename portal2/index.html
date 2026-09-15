@@ -3261,12 +3261,22 @@ function _revenueMonthlySeries(p){
     let rejected=0;
     const months=Object.entries(aggregate).filter(([month,value])=>{
       const validShape=/^\d{4}-\d{2}$/.test(month), monthNum=validShape?Number(month.slice(5)):0;
-      const validCalendar=validShape&&monthNum>=1&&monthNum<=12&&month<=todayMonth;
+      const yearNum=validShape?Number(month.slice(0,4)):0;
+      const validCalendar=validShape&&yearNum>=2000&&yearNum<=9999&&monthNum>=1&&monthNum<=12&&month<=todayMonth;
       const validAmount=typeof value==="string"&&/^\d{1,12}\.\d{2}$/.test(value)&&Number(value)>=0;
       if(!validCalendar||!validAmount){rejected+=1;return false;} return true;
     })
       .sort(([a],[b])=>a.localeCompare(b)).slice(-6);
-    return {series:months.map(([month,value])=>({month,amount:Number(value),deals:null})),rejected,aggregated:true};
+    const values=new Map(months.map(([month,value])=>[month,Number(value)]));
+    const baseSeries=months.map(([month,value])=>({month,amount:Number(value),deals:null}));
+    const filled=[];
+    const backendPartial=Number(rev.skipped_rows)>0;
+    if(months.length&&rejected===0&&!backendPartial){
+      let [year,month]=months[0][0].split("-").map(Number);
+      const end=months[months.length-1][0];
+      while(`${year}-${String(month).padStart(2,"0")}`<=end){const key=`${year}-${String(month).padStart(2,"0")}`;filled.push({month:key,amount:values.get(key)||0,deals:null});month+=1;if(month===13){year+=1;month=1;}}
+    }
+    return {series:(filled.length?filled:baseSeries).slice(-6),rejected,aggregated:true};
   }
   const byMonth=new Map();
   let rejected=0;
@@ -6242,4 +6252,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 50c8a6c8abbf -->
+<!-- rankwise-portal2-version: 39da2c219755 -->
