@@ -151,6 +151,7 @@ main{padding:0 0 60px;min-width:0}
 .cmdk-item small{color:var(--ink-3)}
 .cmdk-foot{padding:9px 14px;border-top:1px solid var(--edge);color:var(--ink-3);font-size:11px}
 .shortcut-sheet{padding:18px}.shortcut-sheet h2{margin:0 0 12px;font-size:18px}.shortcut-sheet dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0}.shortcut-sheet dt{font-family:ui-monospace,monospace;color:var(--acc)}.shortcut-sheet dd{margin:0;color:var(--ink-2)}
+.action-feedback{max-width:880px;margin:0 auto 10px;padding:8px 28px}.action-feedback details{border:1px solid var(--edge);border-radius:8px;background:var(--surface);padding:8px 10px}.action-feedback summary{cursor:pointer;color:var(--ink-2);font-size:12px}.action-feedback-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--edge-soft);font-size:12px}.action-feedback-row small{color:var(--ink-3)}
 @media(max-width:600px){.money-hero,.money-charts{grid-template-columns:1fr}.money-period{padding:18px}.money-period:first-child{border-right:0;border-bottom:1px solid var(--edge)}.money-table{min-width:630px}.money-toolbar input,.money-toolbar select,.money-table-heading select{font-size:16px}.money-value{font-size:34px}}
 .ctos-intro{color:var(--ink-2);max-width:760px;margin:8px 0 16px;font-size:14px}
 .ctos-atlas-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0 10px}
@@ -2620,6 +2621,24 @@ const ACTS_DONE = new Set();
 // rows (LIVE-simmed with deferred POSTs). The batch button renders disabled and
 // refuses to fire while this is non-empty; keys clear on queued/done/failed.
 const ACTS_INFLIGHT = new Set();
+const ACTION_FEEDBACK=[];
+function actionFeedback(action,state,detail,queueId){
+  const label=String(action||"action").replace(/[._]/g," ");
+  const status=state==="failed"?"FAILED":state==="done"?"Done":state==="verification-pending"?"Verify":state==="processing"?"Running":state==="still-queued"?"Still queued":"Queued";
+  const clean=detail&&typeof detail!="object"?firstLine(detail):"";
+  const last=ACTION_FEEDBACK[0];
+  if(last&&last.label===label&&last.status===status&&last.detail===clean&&last.queueId===queueId)return;
+  const entry={label,status,detail:clean,queueId:Number.isSafeInteger(queueId)?queueId:null,at:new Date().toISOString()};
+  const prior=entry.queueId==null?-1:ACTION_FEEDBACK.findIndex(x=>x.queueId===entry.queueId);
+  if(prior>=0)ACTION_FEEDBACK[prior]=entry;else ACTION_FEEDBACK.unshift(entry);
+  ACTION_FEEDBACK.splice(4);
+  const host=$("#action-feedback-live");
+  if(host){const open=!!host.querySelector("details")?.open;host.outerHTML=actionFeedbackMarkup();if(open)$("#action-feedback-live details")?.setAttribute("open","");}
+}
+function actionFeedbackMarkup(){
+  if(!ACTION_FEEDBACK.length)return `<div id="action-feedback-live" class="action-feedback" style="display:none"></div>`;
+  return `<div id="action-feedback-live" class="action-feedback"><details><summary>Recent Portal actions · ${ACTION_FEEDBACK.length}</summary>${ACTION_FEEDBACK.map(x=>`<div class="action-feedback-row"><span><b>${esc(x.status)}</b> · ${esc(x.label)}${x.queueId?` #${esc(x.queueId)}`:""}${x.detail?` · ${esc(x.detail)}`:""}</span><small>${esc(ago(x.at))}</small></div>`).join("")}</details></div>`;
+}
 function actKey(action, params){return action+"|"+JSON.stringify(params||{})}
 // A CRI response is identified by the rendered bytes, not by the mutable note,
 // reason, or enqueue timestamp. Keep this construction shared by the renderer
@@ -5875,6 +5894,7 @@ function render(p, updatedAt, srcNote){
         <button class="pill" data-goto="ctos">Open ctOS</button>
       </div>
     </div>
+    ${actionFeedbackMarkup()}
     <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}</div>
     ${_paletteMarkup()}
   </main>`;
@@ -6012,7 +6032,7 @@ function render(p, updatedAt, srcNote){
       ACTS_INFLIGHT.add(key);
       const epoch=PORTAL_EPOCH;
       try{
-        await enqueueAction(reg.action,{...params,at:new Date().toISOString()},(st,detail)=>{
+        await enqueueAction(reg.action,{...params,at:new Date().toISOString()},(st,detail,queueId)=>{
           if(!_portalReadCurrent(epoch))return;
           // ACTS_DONE arms on "queued", not "done" (F-a residual, post-fix re-review):
           // the enqueue watch loop only polls ~12s, but the worker drain cron runs
@@ -6023,21 +6043,22 @@ function render(p, updatedAt, srcNote){
           // succeeds ("queued"), so re-enqueueing is already a duplicate at that
           // point regardless of drain state. Deleted on "failed" so a genuinely
           // failed action stays retryable — the "done" add is now a harmless no-op.
-          if(st==="queued"){toast("Queued…");ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
+          if(st==="queued"){actionFeedback(reg.action,st,null,queueId);toast("Queued…");ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
             // Keep feedback until confirmed processing; queued is not saved.
             if(isTixNoteAction){const ta=$("#tix-note");if(ta)ta.value="";TIX_NOTE_DRAFT={id:null,text:""};}}
-          else if(st==="processing")toast("Running…");
+          else if(st==="processing"){actionFeedback(reg.action,st,null,queueId);toast("Running…");}
           else if(st==="done"){
             ACTS_DONE.add(key);ACTS_INFLIGHT.delete(key);
             if(isCriDecisionAction){
               const receipt=_contentReviewReceipt(detail,reg.action,String(params.script_id),submittedCriRenderSha);
               if(receipt){
+                actionFeedback(reg.action,st,detail,queueId);
                 REVIEW_HANDLED.set(String(params.script_id),submittedCriRenderSha);
                 if(isCriNoteAction)_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);
                 toast(receipt.outcome==="already_approved"?"Already approved — recorded":"Done — recorded");
-              }else toast("Recorded, but receipt needs refresh verification","err");
+              }else {actionFeedback(reg.action,"verification-pending","receipt needs refresh verification",queueId);toast("Recorded, but receipt needs refresh verification","err");}
               _loadAuxAndRender(()=>loadReviewData(true));
-            }else{
+            }else{actionFeedback(reg.action,st,detail,queueId);
               toast(reg.action==="ticket.approve"?"Approved — showing next ticket":"Done — recorded");
               if(reg.action==="artifact.decide")_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw),_loadAuxAndRender(()=>loadReviewData(true));
             }
@@ -6052,8 +6073,8 @@ function render(p, updatedAt, srcNote){
               tixApplyActionResult(reg.action, params.id);
             }else if(card)card.style.opacity=.45;
           }
-          else if(st==="failed"){toast("FAILED — "+(detail||"see Machine"),"err");ACTS_DONE.delete(key);ACTS_INFLIGHT.delete(key);b.disabled=false;}
-          else if(st==="still-queued"){toast("Still queued — check back");}
+          else if(st==="failed"){ACTS_DONE.delete(key);ACTS_INFLIGHT.delete(key);b.disabled=false;actionFeedback(reg.action,st,detail,queueId);toast("FAILED — "+(detail||"see Machine"),"err");}
+          else if(st==="still-queued"){actionFeedback(reg.action,st,null,queueId);toast("Still queued — check back");}
         });
         if(_portalReadCurrent(epoch))ACTS_INFLIGHT.delete(key);
       }catch{if(!_portalReadCurrent(epoch))return;toast("Could not enqueue — retry","err");ACTS_INFLIGHT.delete(key);b.disabled=false;}
@@ -6237,6 +6258,7 @@ function renderBootSkeleton(){
 function _resetPortalState(){
   ++PORTAL_EPOCH;++PORTAL_READ_SEQ;++WORK_READ_SEQ;++WORK_DETAIL_SEQ;
   CMDK_OPEN=false;SHORTCUTS_OPEN=false;CMDK_QUERY="";
+  ACTION_FEEDBACK.length=0;
   PORTAL_AUTH_ID=RWSession.sessionIdentity();
   SIGNED_URL_CACHE.clear();MEDIA_REG=[];ACTS_REG=[];DEC_REG=[];CUR_ALLOWLIST=null;
   if(_tt){clearTimeout(_tt);_tt=null;}
@@ -6312,4 +6334,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: b3f198860b42 -->
+<!-- rankwise-portal2-version: be0912256715 -->
