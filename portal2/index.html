@@ -142,6 +142,15 @@ main{padding:0 0 60px;min-width:0}
 .money-bar-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;overflow-wrap:anywhere}
 .money-track{height:7px;background:var(--edge);border-radius:4px;margin-top:6px;overflow:hidden}
 .money-fill{height:100%;background:var(--acc)}
+.cmdk-backdrop{position:fixed;inset:0;background:rgba(5,10,18,.58);z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:12vh 18px 24px}
+.cmdk{width:min(620px,100%);background:var(--surface);border:1px solid var(--edge);border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden}
+.cmdk input{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--edge);padding:16px;font:inherit;font-size:16px;background:var(--surface);color:var(--ink);outline:0}
+.cmdk-list{max-height:52vh;overflow:auto;padding:8px}
+.cmdk-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;border:0;background:none;color:var(--ink);padding:11px 12px;border-radius:7px;cursor:pointer;font:inherit}
+.cmdk-item:hover,.cmdk-item:focus-visible{background:var(--surface-2);outline:0}.cmdk-item[hidden]{display:none}
+.cmdk-item small{color:var(--ink-3)}
+.cmdk-foot{padding:9px 14px;border-top:1px solid var(--edge);color:var(--ink-3);font-size:11px}
+.shortcut-sheet{padding:18px}.shortcut-sheet h2{margin:0 0 12px;font-size:18px}.shortcut-sheet dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0}.shortcut-sheet dt{font-family:ui-monospace,monospace;color:var(--acc)}.shortcut-sheet dd{margin:0;color:var(--ink-2)}
 @media(max-width:600px){.money-hero,.money-charts{grid-template-columns:1fr}.money-period{padding:18px}.money-period:first-child{border-right:0;border-bottom:1px solid var(--edge)}.money-table{min-width:630px}.money-toolbar input,.money-toolbar select,.money-table-heading select{font-size:16px}.money-value{font-size:34px}}
 .ctos-intro{color:var(--ink-2);max-width:760px;margin:8px 0 16px;font-size:14px}
 .ctos-atlas-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0 10px}
@@ -1123,6 +1132,40 @@ function changeLog(p){
 let VIEW = "command";
 const NAVS = [["command","Today"],["review","Review"],["conversations","Inbox"],["work","AI Work"],["analytics","Progress"],["business","Money"],
               ["war_room","War room"],["pipeline","Pipeline"],["decisions","Decide"],["tickets","Tickets"],["ctos","ctOS"],["content","Content"],["machine","Machine"]];
+let CMDK_OPEN=false, SHORTCUTS_OPEN=false, CMDK_QUERY="";
+function _paletteRows(){
+  return NAVS.map(([view,label],i)=>({view,label,hotkey:i<9?String(i+1):""}));
+}
+function _paletteMarkup(){
+  if(SHORTCUTS_OPEN)return `<div class="cmdk-backdrop" data-shortcut-close><div class="cmdk shortcut-sheet" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts"><h2>Keyboard shortcuts</h2><dl><dt>⌘K</dt><dd>Open command palette</dd><dt>1–9</dt><dd>Go to a Portal section</dd><dt>/</dt><dd>Focus the current page filter, when available</dd><dt>?</dt><dd>Show this shortcut sheet</dd><dt>Esc</dt><dd>Close palette or shortcuts</dd></dl><div class="acts" style="margin-top:16px"><button class="btn rec" data-shortcut-dismiss>Close</button></div></div></div>`;
+  if(!CMDK_OPEN)return "";
+  return `<div class="cmdk-backdrop" data-cmdk-close><div class="cmdk" role="dialog" aria-modal="true" aria-label="Command palette"><input id="cmdk-input" type="search" autocomplete="off" value="${escAttr(CMDK_QUERY)}" placeholder="Go to a Portal section…" aria-label="Search Portal commands"><div class="cmdk-list" data-cmdk-list>${_paletteRows().map(x=>`<button class="cmdk-item" data-palette-goto="${escAttr(x.view)}"><span>${esc(x.label)}</span><small>${x.hotkey||""}</small></button>`).join("")}</div><div class="cmdk-foot">Enter a destination · Esc closes</div></div></div>`;
+}
+function _wirePalette(){
+  document.querySelectorAll("[data-palette-goto]").forEach(b=>b.onclick=()=>{document.querySelector(".cmdk-backdrop")?.remove();CMDK_OPEN=false;SHORTCUTS_OPEN=false;document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.paletteGoto)}"]`)?.click();});
+  document.querySelector("[data-cmdk-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){CMDK_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);}});
+  document.querySelector("[data-shortcut-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);}});
+  document.querySelector("[data-shortcut-dismiss]")?.addEventListener("click",()=>{SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);});
+  const input=$("#cmdk-input");
+  if(input){input.focus();input.oninput=()=>{CMDK_QUERY=input.value;const q=input.value.trim().toLowerCase();document.querySelectorAll("[data-palette-goto]").forEach(b=>b.hidden=!!q&&!b.textContent.toLowerCase().includes(q));};const q=input.value.trim().toLowerCase();document.querySelectorAll("[data-palette-goto]").forEach(b=>b.hidden=!!q&&!b.textContent.toLowerCase().includes(q));input.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();document.querySelector("[data-palette-goto]:not([hidden])")?.click();}else if(e.key==="ArrowDown"){e.preventDefault();document.querySelector("[data-palette-goto]:not([hidden])")?.focus();}};}
+  const sheet=document.querySelector(".shortcut-sheet");if(sheet)sheet.querySelector("[data-shortcut-dismiss]")?.focus();
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&(CMDK_OPEN||SHORTCUTS_OPEN)){e.preventDefault();CMDK_OPEN=false;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();CMDK_OPEN=true;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+  if(e.key==="?"&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!e.isComposing&&!e.target?.isContentEditable&&!(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))){e.preventDefault();SHORTCUTS_OPEN=true;CMDK_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+  if(CMDK_OPEN||SHORTCUTS_OPEN){
+    if((CMDK_OPEN||SHORTCUTS_OPEN)&&e.key==="Tab"){
+      const box=document.querySelector(CMDK_OPEN?".cmdk": ".shortcut-sheet"),els=box?[...box.querySelectorAll("input,button:not([hidden])")]:[];
+      if(els.length){const i=els.indexOf(document.activeElement);const n=e.shiftKey?(i<=0?els.length-1:i-1):(i===els.length-1?0:i+1);e.preventDefault();els[n].focus();}
+    }
+    return;
+  }
+  if(e.metaKey||e.ctrlKey||e.altKey||e.isComposing)return;
+  const tag=(e.target&&e.target.tagName)||"";if(/INPUT|TEXTAREA|SELECT/.test(tag)||e.target?.isContentEditable)return;
+  if(/^[1-9]$/.test(e.key)){const n=+e.key-1;if(NAVS[n]){e.preventDefault();document.querySelector(`nav button[data-v="${CSS.escape(NAVS[n][0])}"]`)?.click();}}
+  else if(e.key==="/"){const target=document.querySelector("#money-query,#cri-filter,#cri-channel");if(target){e.preventDefault();target.focus();}}
+});
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
 let ARTS = null;
 async function loadArtifacts(){
@@ -2144,6 +2187,7 @@ function wireContentReview(p,updatedAt,srcNote){
 // .click() the same as a real click, so this never bypasses actionAllowed().
 document.addEventListener("keydown", e=>{
   if(VIEW!=="review"&&VIEW!=="content_review")return;
+  if(CMDK_OPEN||SHORTCUTS_OPEN)return;
   // S2 (security review #2, same class as the tickets room): a modifier combo
   // is a BROWSER/system chord, never a shortcut — Cmd+A (select-all) fired
   // Approve; Cmd+R (reload) would fire an action as the page tears down.
@@ -4969,6 +5013,7 @@ function wireTicketsNav(p,updatedAt,srcNote){
 // actionAllowed() (same contract as the content-review A/R/X handler above).
 document.addEventListener("keydown", e=>{
   if(VIEW!=="tickets")return;
+  if(CMDK_OPEN||SHORTCUTS_OPEN)return;
   // S2 (security review #2, HIGH): Cmd+R (browser reload) fired Kill —
   // ticket.reject on the visible ticket, terminal, no confirm — and Cmd+A
   // (select-all) fired Approve. A modifier combo is never a shortcut.
@@ -5831,6 +5876,7 @@ function render(p, updatedAt, srcNote){
       </div>
     </div>
     <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}</div>
+    ${_paletteMarkup()}
   </main>`;
   document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";VIEW=a.dataset.v;
     if(VIEW==="command")await Promise.all([loadReviewData(true),loadDecisions()]);
@@ -5864,6 +5910,7 @@ function render(p, updatedAt, srcNote){
     }
   }
   if(VIEW==="conversations")wireConversations(p,updatedAt,srcNote);
+  _wirePalette();
   document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
   const lo=document.querySelector("[data-logout]");
   if(lo)lo.onclick=e=>{e.preventDefault();portalLogout();};
@@ -6189,6 +6236,7 @@ function renderBootSkeleton(){
 }
 function _resetPortalState(){
   ++PORTAL_EPOCH;++PORTAL_READ_SEQ;++WORK_READ_SEQ;++WORK_DETAIL_SEQ;
+  CMDK_OPEN=false;SHORTCUTS_OPEN=false;CMDK_QUERY="";
   PORTAL_AUTH_ID=RWSession.sessionIdentity();
   SIGNED_URL_CACHE.clear();MEDIA_REG=[];ACTS_REG=[];DEC_REG=[];CUR_ALLOWLIST=null;
   if(_tt){clearTimeout(_tt);_tt=null;}
@@ -6264,4 +6312,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 155528aaeca2 -->
+<!-- rankwise-portal2-version: b3f198860b42 -->
