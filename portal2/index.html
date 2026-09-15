@@ -3295,8 +3295,15 @@ function viewAnalytics(p){
   const clientSignals=clients.filter(client=>client&&(_analyticsNumber(client.aeo_rate_pct)!==null||
     (typeof client.clicks_delta==="string"&&client.clicks_delta.trim())));
   const sourceRows=_analyticsSourceRows(p);
+  const progress=p.progress&&p.progress.schema==="progress.v1"?p.progress:null;
+  const progressMetrics=progress&&progress.metrics&&typeof progress.metrics==="object"&&!Array.isArray(progress.metrics)?progress.metrics:null;
+  const progressValue=(key,label)=>{const m=progressMetrics&&progressMetrics[key],partial=m&&m.status==="partial";return m&&(m.status==="verified"||partial)&&typeof m.value==="number"?`<div class="pcard"><h4>${esc(label)}</h4><div class="v">${esc(String(m.value))}</div><small>${partial?"partial":"verified"} · ${esc(m.source||"source unavailable")}</small></div>`:`<div class="pcard"><h4>${esc(label)}</h4><div class="v">—</div><small>unavailable · no zero inferred</small></div>`;};
   return `<section data-analytics>
     <div class="status sub">Progress<small>what changed · what is verified · what needs leverage</small></div>
+    ${progress?`<h4 class="section-h">BUSINESS PULSE</h4><div class="proof">${progressValue("collected_month","Collected this month")}${progressValue("collected_all_time","Collected all time")}${progressValue("active_opportunities","Active opportunities")}${progressValue("booked_audits","Booked audits")}</div>
+      <div class="section-note">${progress.comparison&&progress.comparison.status==="matched"?"Matched-period comparison available.":"Matched-period comparison is not available yet; no trend is invented."}</div>
+      ${Array.isArray(progress.reasons)&&progress.reasons.length?`<h4 class="section-h">WHY THIS NEEDS ATTENTION</h4><div class="cards">${progress.reasons.slice(0,4).map(item=>`<div class="dcard row"><div class="q">${esc(item.text||"Source note")}</div><div class="why">${esc(item.source||"source unavailable")}</div></div>`).join("")}</div>`:""}
+      ${progress.next_lever?`<div class="dcard" style="margin-top:10px"><div class="q">NEXT LEVER · ${esc(progress.next_lever.label||"Review the queue")}</div><div class="why">${esc(progress.next_lever.reason||"Source-backed action available")}</div><div class="acts"><button class="btn" data-goto="${esc(progress.next_lever.view||"review")}">Open next lever</button></div></div>`:""}`:""}
     <h4 class="section-h">REVENUE TREND</h4>
     ${_progressRevenueChart(p)}
     <h4 class="section-h">CONTENT PERFORMANCE</h4>
@@ -6204,4 +6211,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: c782252676a1 -->
+<!-- rankwise-portal2-version: 67121fae783e -->
