@@ -130,6 +130,14 @@ main{padding:0 0 60px;min-width:0}
 .money-review-summary span{padding:7px 9px;border:1px solid var(--edge);border-radius:6px;background:var(--surface)}
 .money-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
 .money-chart{padding:18px;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface);min-width:0}
+.progress-chart{padding:16px;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface);margin:12px 0 18px}
+.progress-chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.progress-bars{display:grid;grid-template-columns:repeat(6,minmax(34px,1fr));gap:8px;align-items:end;height:150px}
+.progress-bar-col{display:grid;grid-template-rows:1fr auto;gap:6px;min-width:0;height:100%}
+.progress-bar-track{height:100%;display:flex;align-items:end;background:var(--surface-2);border-radius:5px 5px 2px 2px;overflow:hidden}
+.progress-bar-fill{width:100%;min-height:3px;background:var(--acc);border-radius:5px 5px 0 0}
+.progress-bar-label{font-size:10px;color:var(--ink-3);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-bar-value{font-size:10px;color:var(--ink-2);text-align:center;font-variant-numeric:tabular-nums}
 .money-bar{margin-top:14px}
 .money-bar-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;overflow-wrap:anywhere}
 .money-track{height:7px;background:var(--edge);border-radius:4px;margin-top:6px;overflow:hidden}
@@ -3244,6 +3252,28 @@ function _analyticsSourceRows(p){
     return /gsc|search console|ga4|analytics|serp/.test(key);
   });
 }
+function _revenueMonthlySeries(p){
+  const rev=p&&p.revenue, rows=rev&&rev.schema==="revenue.v2"&&rev.available===true&&Array.isArray(rev.rows)?rev.rows:[];
+  const byMonth=new Map();
+  rows.forEach(r=>{
+    const date=typeof r?.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)?r.date:null;
+    const amount=typeof r?.collected==="string"&&/^\d{1,12}\.\d{2}$/.test(r.collected)?Number(r.collected):null;
+    if(!date||amount===null||!Number.isFinite(amount))return;
+    const month=date.slice(0,7), item=byMonth.get(month)||{month,amount:0,deals:0};
+    item.amount+=amount;item.deals+=1;byMonth.set(month,item);
+  });
+  return [...byMonth.values()].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6);
+}
+function _progressRevenueChart(p){
+  const rev=p&&p.revenue;
+  if(!rev||rev.schema!=="revenue.v2"||rev.available!==true)return `<div class="state state-error">Recorded revenue trend unavailable — failed reads are not zero revenue.</div>`;
+  const series=_revenueMonthlySeries(p);
+  const skipped=Number.isInteger(rev.skipped_rows)&&rev.skipped_rows>0?rev.skipped_rows:0;
+  if(!series.length)return skipped?`<div class="state state-error">Recorded revenue trend incomplete — ${esc(skipped)} malformed row${skipped===1?"":"s"} excluded and no valid dated collections remain.</div>`:`<div class="empty">No dated collections are available for a trend yet.</div>`;
+  const max=Math.max(...series.map(x=>x.amount),0);
+  const coverage=rev.truncated||skipped?`newest loaded rows · incomplete${skipped?` · ${skipped} malformed excluded`:""}`:"loaded close ledger";
+  return `<div class="progress-chart" data-progress-revenue><div class="progress-chart-head"><h3>Recorded collections by month</h3><span class="src">${esc(coverage)}</span></div><div class="progress-bars">${series.map(x=>`<div class="progress-bar-col"><div class="progress-bar-track" title="${esc(x.month)} · CAD ${x.amount.toFixed(2)} · ${x.deals} deal${x.deals===1?"":"s"}"><div class="progress-bar-fill" style="height:${max?Math.max(3,Math.round(x.amount/max*100)):3}%"></div></div><div class="progress-bar-value">${esc(x.amount.toFixed(0))}</div><div class="progress-bar-label">${esc(x.month.slice(2))}</div></div>`).join("")}</div><p class="section-note">CAD recorded amounts by close date. This is a ledger trend, not bank reconciliation or verified active MRR.</p></div>`;
+}
 function viewAnalytics(p){
   const ce=p.content_experiments;
   const ceValid=!!(ce&&typeof ce==="object"&&!Array.isArray(ce)&&Array.isArray(ce.runs)&&
@@ -3260,7 +3290,9 @@ function viewAnalytics(p){
     (typeof client.clicks_delta==="string"&&client.clicks_delta.trim())));
   const sourceRows=_analyticsSourceRows(p);
   return `<section data-analytics>
-    <div class="status sub">Progress<small>current signals · no matched-period trend available</small></div>
+    <div class="status sub">Progress<small>what changed · what is verified · what needs leverage</small></div>
+    <h4 class="section-h">REVENUE TREND</h4>
+    ${_progressRevenueChart(p)}
     <h4 class="section-h">CONTENT PERFORMANCE</h4>
     ${ceBroken||!ceValid?`<div class="state state-error"><b>Content outcomes unavailable</b>${ceBroken?"The content-outcomes projection failed for this snapshot.":"The content-outcomes projection is missing or malformed for this snapshot."} This is not zero performance.</div>`:
       !runs.length?`<div class="empty">No joined content outcomes in this snapshot. Performance appears here only after a verified outcome joins.</div>`:
@@ -5366,8 +5398,10 @@ function viewCommitments(fs,broken){
   if(fs.available!==true)return `<div class="state state-error"><b>Commitment data unavailable</b>Missing data is not a zero-dollar monthly commitment.</div>`;
   const rows=Array.isArray(fs.rows)?fs.rows:[],unpriced=rows.filter(r=>typeof r.cad_month!=="number"||!Number.isFinite(r.cad_month)).length;
   const needs=rows.filter(r=>r.needsConfirm===true).length,unknown=rows.filter(r=>r.renewalBasis!=="usage"&&moneyDate(r.renewal)==="Not recorded").length;
+  const today=new Date();today.setHours(0,0,0,0);const soon=new Date(today);soon.setDate(soon.getDate()+30);
+  const renewSoon=rows.filter(r=>{if(r.renewalBasis==="usage")return false;const raw=moneyDate(r.renewal);if(raw==="Not recorded")return false;const d=new Date(String(r.renewal)+"T12:00:00Z");return !Number.isNaN(d.valueOf())&&d>=today&&d<=soon;}).length;
   return `${broken?'<div class="state state-error"><b>Spend feed failed to build</b>Last-known figures may be stale; this is not a fresh read.</div>':''}
-    <div class="money-hero"><div class="money-period"><span class="money-scope">Known fixed commitments / month</span><span class="money-value">${esc(estimateMoney(fs.totalKnownCadMonth,"CAD "))}</span><p>Monthly equivalent estimate, not actual payments.${unpriced?` ${unpriced} unpriced provider${unpriced===1?'':'s'} excluded.`:''}</p></div><div class="money-period"><span class="money-scope">What needs checking</span><h3>${needs} price${needs===1?'':'s'} to verify · ${unknown} renewal date${unknown===1?'':'s'} missing</h3><p>Report generated ${esc(moneyDate(fs.asOf))}. This is not the date each price was verified.</p></div></div>
+    <div class="money-hero"><div class="money-period"><span class="money-scope">Known fixed commitments / month</span><span class="money-value">${esc(estimateMoney(fs.totalKnownCadMonth,"CAD "))}</span><p>Monthly equivalent estimate, not actual payments.${unpriced?` ${unpriced} unpriced provider${unpriced===1?'':'s'} excluded.`:''}</p></div><div class="money-period"><span class="money-scope">What needs checking</span><h3>${needs} price${needs===1?'':'s'} to verify · ${unknown} renewal date${unknown===1?'':'s'} missing</h3><p>${renewSoon?`${renewSoon} renewal${renewSoon===1?'':'s'} due in the next 30 days. `:''}Report generated ${esc(moneyDate(fs.asOf))}. This is not the date each price was verified.</p></div></div>
     <div class="money-table-heading"><h2>Subscriptions &amp; commitments</h2><span class="section-note">${rows.length} provider${rows.length===1?'':'s'} · read-only</span></div>
     <div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Provider</th><th scope="col">Price / cycle</th><th scope="col">Next renewal</th><th scope="col" class="money-amount">Monthly CAD estimate</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(r.name||"Provider not recorded")}<small>${r.needsConfirm?'Price needs verification':'Recorded expense basis'}</small><details><summary>Evidence &amp; use</summary>Last recorded use: ${esc(moneyDate(r.lastUsed))}. Evidence: ${esc(['direct','weak','none'].includes(r.evidenceStrength)?r.evidenceStrength:'none')}. Missing use evidence does not mean unused.</details></td><td>${esc(estimateMoney(r.amount,["CAD","USD"].includes(r.currency)?r.currency+" ":"Currency unknown "))}<small>${esc(({monthly:'per month',quarterly:'per quarter',annual:'per year',yearly:'per year'})[r.cadence]||'Cycle not recorded')}</small></td><td>${r.renewalBasis==='usage'?'Usage-based · no fixed renewal':esc(moneyDate(r.renewal))}</td><td class="money-amount">${esc(estimateMoney(r.cad_month,"CAD "))}</td></tr>`).join(''):'<tr><td colspan="4">No subscription rows recorded in this report.</td></tr>'}</tbody></table></div>
     <p class="section-note">Known CAD monthly equivalents only. Annual plans are spread over months; foreign-currency conversions are estimates. Metered usage is separate.</p>`;
@@ -6164,4 +6198,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 6153b03e9acf -->
+<!-- rankwise-portal2-version: 64120f14cb2e -->
