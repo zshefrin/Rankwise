@@ -89,6 +89,56 @@ main{padding:0 0 60px;min-width:0}
 .ctos-stat{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius-lg);padding:14px 16px}
 .ctos-stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums;margin-top:3px}
 .ctos-atlas{width:100%;height:70vh;min-height:540px;border:1px solid var(--edge);border-radius:var(--radius-lg);background:var(--surface-3)}
+.brief.brief-atlas{max-width:1440px}
+.brief.brief-money{max-width:1200px}
+.money-tabs{display:flex;gap:22px;border-bottom:1px solid var(--edge);margin:16px 0 22px;flex-wrap:wrap}
+.money-tabs button{font:inherit;color:var(--ink-2);background:none;border:0;border-bottom:2px solid transparent;padding:10px 0;cursor:pointer}
+.money-tabs button[aria-pressed=true]{color:var(--acc);border-bottom-color:var(--acc)}
+.money-hero{display:grid;grid-template-columns:1.3fr 1fr;border:1px solid var(--edge);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)}
+.money-period{display:flex;flex-direction:column;align-items:flex-start;gap:9px;padding:24px;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;min-width:0}
+.money-period:first-child{background:linear-gradient(125deg,var(--acc-soft),var(--surface));border-right:1px solid var(--edge)}
+.money-period:hover{background:var(--surface-2)}
+.money-period-label{width:100%;display:flex;justify-content:space-between;gap:12px;font-weight:600}
+.money-period-label span{color:var(--acc)}
+.money-value{font-size:40px;letter-spacing:-.04em;line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.money-period:last-child .money-value{font-size:32px}
+.money-value small{font-size:12px;color:var(--ink-2);letter-spacing:.04em;margin-right:8px}
+.money-value .money-cents{font-size:.65em;color:var(--ink-2)}
+.money-secondary,.money-scope{color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums}
+.money-total-foot,.money-table-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+.money-total-foot{color:var(--ink-2);font-size:13px}
+.money-explainer{color:var(--ink-2);font-size:13px;margin:10px 0 24px}
+.money-explainer summary{cursor:pointer;width:fit-content}
+.money-explainer p{padding:8px 0}
+.money-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.money-toolbar label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--ink-2);min-width:120px}
+.money-toolbar label:first-child{flex:1}
+.money-toolbar input,.money-toolbar select,.money-table-heading select{font:inherit;background:var(--surface);color:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:9px;min-width:0;max-width:100%}
+.money-table-heading h2,.money-chart h3{font-size:16px;font-weight:600}
+.money-table-wrap{overflow-x:auto;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface)}
+.money-table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+.money-table th,.money-table td{padding:12px;border-bottom:1px solid var(--edge);vertical-align:top}
+.money-table th{font-weight:500;color:var(--ink-2);background:var(--surface-3);white-space:nowrap}
+.money-table tr:last-child td{border-bottom:0}
+.money-table td small{display:block;color:var(--ink-2);font-size:11px;margin-top:3px}
+.money-table .money-amount{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.money-table details{margin-top:5px;color:var(--ink-2)}
+.money-table summary{cursor:pointer;color:var(--acc)}
+.money-review-status{color:var(--acc);font-size:12px}
+.money-reviewed{color:var(--ink-2)}
+.money-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
+.money-chart{padding:18px;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface);min-width:0}
+.money-bar{margin-top:14px}
+.money-bar-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;overflow-wrap:anywhere}
+.money-track{height:7px;background:var(--edge);border-radius:4px;margin-top:6px;overflow:hidden}
+.money-fill{height:100%;background:var(--acc)}
+@media(max-width:600px){.money-hero,.money-charts{grid-template-columns:1fr}.money-period{padding:18px}.money-period:first-child{border-right:0;border-bottom:1px solid var(--edge)}.money-table{min-width:630px}.money-toolbar input,.money-toolbar select,.money-table-heading select{font-size:16px}.money-value{font-size:34px}}
+.ctos-intro{color:var(--ink-2);max-width:760px;margin:8px 0 16px;font-size:14px}
+.ctos-atlas-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0 10px}
+.ctos-atlas-heading h2{font-size:16px;font-weight:600}
+.ctos-atlas-heading a{color:var(--acc);font-size:13px}
+.ctos-support{margin-top:20px;border-top:1px solid var(--edge);padding-top:16px}
+.ctos-support>summary{cursor:pointer;color:var(--ink-2);font-size:14px}
 .brief{max-width:880px;margin:0 auto;padding:26px 28px}
 .status{font-size:23px;font-weight:750;letter-spacing:-.015em;display:flex;align-items:center;gap:11px;
   text-wrap:balance;margin-bottom:4px}
@@ -992,10 +1042,11 @@ function statusLine(p){
 // §1's open question on whether that itself should be consequence-ranked.
 const _SEV_RANK={bad:2,warn:1,info:0};
 function _bySeverity(a,b){return (_SEV_RANK[b.severity]||0)-(_SEV_RANK[a.severity]||0)}
-function cardsFrom(p){
-  const dec=(p.decision_inbox||[]).filter(x=>x&&(x.question||x.title)).map(x=>({...x,_src:"decision"})).sort(_bySeverity);
-  const urgent=(p.needs_you||[]).filter(x=>x&&String(x.tier||"")==="act_now").map(x=>({...x,_src:"needs_you"})).sort(_bySeverity);
-  return urgent.concat(dec).slice(0,3);
+function cardsFrom(p,limit=3,includeToday=false){
+  const dec=(Array.isArray(p.decision_inbox)?p.decision_inbox:[]).filter(x=>x&&(x.question||x.title)).map(x=>({...x,_src:"decision"})).sort(_bySeverity);
+  const urgent=(Array.isArray(p.needs_you)?p.needs_you:[]).filter(x=>x&&(x.tier==="act_now"||(includeToday&&x.tier==="today"))).map(x=>({...x,_src:"needs_you"})).sort(_bySeverity);
+  const rows=urgent.concat(dec);
+  return limit===null?rows:rows.slice(0,limit);
 }
 function spendLegs(p){
   const t=(p.spend&&p.spend.totals)||{};
@@ -1042,8 +1093,8 @@ function changeLog(p){
 
 // ── views ────────────────────────────────────────────────────────────────
 let VIEW = "command";
-const NAVS = [["command","Command"],["decisions","Decide"],["tickets","Tickets"],["war_room","War room"],["work","Work / Agents"],["pipeline","Pipeline"],["ctos","ctOS"],["review","Review"],
-              ["analytics","Analytics"],["conversations","Conversations"],["content","Content"],["machine","Machine"],["business","Business"]];
+const NAVS = [["command","Today"],["review","Review"],["conversations","Inbox"],["work","AI Work"],["analytics","Progress"],["business","Money"],
+              ["war_room","War room"],["pipeline","Pipeline"],["decisions","Decide"],["tickets","Tickets"],["ctos","ctOS"],["content","Content"],["machine","Machine"]];
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
 let ARTS = null;
 async function loadArtifacts(){
@@ -1146,6 +1197,8 @@ let ROUTER_READY = undefined;
 // the row still exists, but is cleared by renderLogin() so one operator's
 // private task context cannot appear after auth teardown.
 let WORK_SELECTED = null;
+const WORK_DISCLOSURES=new Set(); // tab-local presentation only; cleared on sign-out
+const TODAY_DISCLOSURES=new Set();
 let WORK_FOCUS_DETAIL = false;
 let PORTAL_EPOCH=0, PORTAL_READ_SEQ=0, WORK_READ_SEQ=0, WORK_DETAIL_SEQ=0;
 let PORTAL_AUTH_ID=RWSession.sessionIdentity(), AUTH_REDIRECT_SETTLING=false;
@@ -2534,18 +2587,26 @@ function row(title, sub, actions){
 // banned — impeccable skill absolute-bans list) with a background tint, the
 // compliant shape: still legible at a glance, no colored bar.
 const _SEV_TONE={bad:"tone-bad",warn:"tone-warn"};
-function viewCommand(p, updatedAt){
-  const st=statusLine(p), cards=cardsFrom(p), pr=proofPoints(p,updatedAt), log=changeLog(p);
-  const convN=(p.due_calls||[]).length+(p.leads||[]).length;
-  const col={ok:"var(--ok)",warn:"var(--warn)",bad:"var(--bad)"}[st.cls];
-  return `
-      <div class="status"><span class="dot" style="background:${col}"></span>${esc(st.txt)}
-        <small>${esc(new Date().toLocaleString([],{weekday:"short",hour:"2-digit",minute:"2-digit"}))}<br>machine owns the rest</small></div>
-      <div class="cards">${
-        cards.length?cards.map((c,i)=>{
+function _todayApprovals(p){
+  const reviewReady=Array.isArray(CRI)&&Array.isArray(ARTS);
+  const reviewCount=_reviewRows().filter(_reviewAwaiting).length;
+  const ticketsReady=Array.isArray(p.tickets)&&!p.tickets_degraded;
+  const tickets=(Array.isArray(p.tickets)?p.tickets:[]).filter(t=>t&&!t.approved&&t.status==="open"&&!TIX_RESOLVED.has(String(t.id)));
+  const choices=[
+    {view:"decisions",title:"Decisions",count:Array.isArray(DECS)?DECS.length:null,ready:Array.isArray(DECS),why:"Choose a response before this work proceeds.",scope:"Newest 5 open decisions"},
+    {view:"review",title:"Review",count:reviewCount,ready:reviewReady,why:"Inspect the current version and approve, reject or request changes.",scope:"Loaded review items only"},
+    {view:"tickets",title:"Tickets",count:tickets.length,ready:ticketsReady,why:"Choose which proposed fixes may proceed.",scope:"Loaded open, unapproved tickets"}
+  ];
+  const active=choices.filter(c=>!c.ready||c.count>0);
+  return `<section class="log" data-today-approvals><h2 style="font-size:18px;margin:0 0 12px">Needs your response</h2>
+    ${active.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--edge-soft)"><div style="flex:1;min-width:180px"><b>${esc(c.title)} · ${c.count==null||(!c.ready&&!c.count)?"?":esc(c.count)}${!c.ready&&c.count?" loaded":""}</b><div style="font-size:13px;margin-top:5px">${esc(c.why)}</div><small>${c.ready?esc(c.scope):"Read incomplete or unavailable — count is not clearance."}</small></div>${navBtn("Open "+c.title,c.view,"rec")}</div>`).join("")||`<p>No responses found in the loaded approval queues.</p>`}
+    <small>These queues are separate from manual requests below; missing data is not an all-clear.</small></section>`;
+}
+function _todayRequestCard(c){
           const q=firstLine(c.question||c.title);
-          const why=[c.sub,c.detail,c.why].filter(Boolean).join(" — ");
-          const dest={outreach:"conversations",today:"command",content:"content",system:"machine",money:"business"}[c.action_tab||c.tab]||"machine";
+          const tab=c.action_tab||c.tab;
+          const why=tab==="content"?"Open Review to inspect the current version and choose a response.":[c.sub,c.detail,c.why].filter(Boolean).join(" — ");
+          const dest={outreach:"conversations",today:"command",content:"review",system:"machine",money:"business"}[tab]||"machine";
           // decision.answer only works on a REAL operator_decision_queue row (integer id) —
           // derived triggers (synthetic ids like "decision:findings:critical") have no row
           // to PATCH. _ALLOWED_KEYS on the snapshot side deliberately excludes raw options,
@@ -2558,24 +2619,36 @@ function viewCommand(p, updatedAt){
           const canAnswer = c._src === "decision" && typeof c.id === "number";
           const tone=_SEV_TONE[c.severity]||"";
           return `
-        <div class="dcard ${tone}">
+        <div class="dcard ${tone}" data-today-request style="overflow-wrap:anywhere">
           <div class="q">${tone?`<span class="sev-dot ${c.severity}"></span>`:""}${esc(q)}</div>
           ${why?`<div class="why">${esc(why)}</div>`:""}
-          <div class="acts">${navBtn(c.action_label||"Open", dest, "rec")}
+          <div class="acts">${dest!=="command"?navBtn({business:"Inspect in Money",review:"Open Review",conversations:"Open Inbox",machine:"Open Machine"}[dest]||"Open",dest,"rec"):!canAnswer?`<small>Manual step · complete outside Portal, then verify on refresh.</small>`:""}
             ${canAnswer?actBtn("decision.answer",{decision_id:c.id,choice:"acknowledged"},"Acknowledge",""):""}
             <small>${esc(c.expires?("expires "+c.expires+(c.default?" → "+c.default:"")):"")}</small></div>
-        </div>`;}).join(""):`<div class="state">No decisions waiting — nothing needs you right now.</div>`}
-      </div>
-      ${convN?`<button class="rollup" data-goto="conversations"><span><b>${convN} item${convN===1?"":"s"} waiting</b> in Conversations</span><span class="go">open →</span></button>`:""}
+        </div>`;
+}
+function viewCommand(p, updatedAt){
+  const all=cardsFrom(p,null,true),cards=all.filter(c=>c._src==="needs_you"||typeof c.id==="number"),alerts=all.filter(c=>c._src==="decision"&&typeof c.id!=="number");
+  const pr=proofPoints(p,updatedAt), log=changeLog(p);
+  const needsKnown=Array.isArray(p.needs_you),legacyKnown=Array.isArray(p.decision_inbox);
+  return `<h1 class="status" style="margin-bottom:18px">Today</h1>
+      ${_todayApprovals(p)}
+      <section data-today-requests style="margin-top:24px"><h2 style="font-size:18px">Manual steps &amp; other requests</h2>
+      ${!needsKnown||!legacyKnown?`<div class="state state-error">${!needsKnown?"Manual-request feed unavailable. ":""}${!legacyKnown?"Legacy-request coverage unavailable. ":""}This is not an empty checklist.</div>`:""}
+      <div class="cards">${cards.slice(0,3).map(_todayRequestCard).join("")||`<p>No act-now or today requests in this snapshot.</p>`}</div>
+      ${cards.length>3?`<details data-today-disclosure="requests" ${TODAY_DISCLOSURES.has('requests')?'open':''}><summary>${cards.length-3} more loaded requests</summary><div class="cards">${cards.slice(3).map(_todayRequestCard).join("")}</div></details>`:""}
+      <small>Source-reported requests; these may overlap the approval queues. General failures are in operational context.</small></section>
+      <details class="log" data-today-context data-today-disclosure="context" ${TODAY_DISCLOSURES.has('context')?'open':''} style="margin-top:24px"><summary>Operational context · health, background work &amp; source detail</summary>
+      ${alerts.length?`<h2 style="font-size:18px">Source alerts · responsibility needs triage</h2><div class="cards">${alerts.map(_todayRequestCard).join("")}</div>`:""}
       ${dailyBriefSection(p)}
       ${opsBriefSection(p)}
       ${exceptionsSection()}
       <div class="proof">${pr.map(x=>`
         <div class="pcard"><h4>${esc(x.h)} <span class="src">${esc(x.src)}</span></h4>
         <div class="v" style="font-size:${x.v.length>14?15:20}px">${esc(x.v)}</div><small>${esc(x.s)}</small></div>`).join("")}</div>
-      <div class="log"><b>Since your last check-in</b><br>${
+      <div class="log"><b>Events in this snapshot</b><br>${
         log.length?log.map(e=>`<span class="t">${esc(e.at?new Date(e.at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"·")}</span>${esc(e.text)}<br>`).join("")
-        :`<span class="empty">No events recorded in this snapshot.</span>`}</div>`;
+        :`<span class="empty">No events recorded in this snapshot.</span>`}</div></details>`;
 }
 // ── Conversations inbox (CONVERSATIONS-FOR-REAL, build.GOAL.md @ dca7fba0,
 // 2026-08-27) — OPERATOR VIEW ONLY, full SMS/call content. This is the UI half
@@ -3115,11 +3188,17 @@ function contentRow(it){
   </div>`;
 }
 function viewContent(p){
-  const items=p.content_items||[], onHold=p.on_hold_items||[];
+  const items=p.content_items, onHold=p.on_hold_items;
+  const validRows=v=>Array.isArray(v)&&v.every(row=>row&&typeof row==="object"&&!Array.isArray(row));
+  if(!validRows(items)||!validRows(onHold))return `
+    <div class="status sub">Content</div>
+    <div class="state state-error"><b>Content feed unavailable</b>Inbox or on-hold data is missing or malformed in this snapshot. This is not an empty queue; refresh before taking an approval action.</div>
+    <div class="acts" style="margin-top:14px">${navBtn("Open Review queue","review","rec")}</div>`;
   const ce=p.content_experiments||{runs:[]}, ceBroken=p.content_experiments_build_ok===false;
   const runs=ce.runs||[];
   return `
     <div class="status sub">Content</div>
+    <div class="acts" style="margin:12px 0">${navBtn("Open Review queue","review","rec")}</div>
     <div class="proof" style="margin-top:16px">
       <div class="pcard"><h4>Inbox</h4><div class="v">${esc(String(items.length))}</div><small>drafts awaiting your flip</small></div>
       <div class="pcard"><h4>On hold</h4><div class="v">${esc(String(onHold.length))}</div><small>nothing auto-posts — ever</small></div>
@@ -3162,7 +3241,7 @@ function viewAnalytics(p){
     (typeof client.clicks_delta==="string"&&client.clicks_delta.trim())));
   const sourceRows=_analyticsSourceRows(p);
   return `<section data-analytics>
-    <div class="status sub">Analytics<small>existing snapshot signals only</small></div>
+    <div class="status sub">Progress<small>current signals · no matched-period trend available</small></div>
     <h4 class="section-h">CONTENT PERFORMANCE</h4>
     ${ceBroken||!ceValid?`<div class="state state-error"><b>Content outcomes unavailable</b>${ceBroken?"The content-outcomes projection failed for this snapshot.":"The content-outcomes projection is missing or malformed for this snapshot."} This is not zero performance.</div>`:
       !runs.length?`<div class="empty">No joined content outcomes in this snapshot. Performance appears here only after a verified outcome joins.</div>`:
@@ -4496,9 +4575,22 @@ function _workDecisionCapture(){
 const _WORK_TERMINAL=new Set(["closed","cancelled","accepted","rejected","decided"]);
 function _workTone(state){
   if(state==="in_progress"||state==="verification")return "badge-info";
-  if(state==="blocked"||state==="failed_verification")return "badge-bad";
-  if(_WORK_TERMINAL.has(state))return "badge-ok";
+  if(state==="blocked"||state==="failed_verification"||state==="rejected")return "badge-bad";
+  if(state==="accepted"||state==="closed")return "badge-ok";
   return "badge-neutral";
+}
+const _WORK_LABELS={intake:"Queued for review",ready:"Ready — not running",reopened:"Reopened",returned:"Returned",in_progress:"Reported running",verification:"In verification",blocked:"Blocked",failed_verification:"Verification failed",awaiting_consumption:"Result awaiting consumption",closed:"Closed",accepted:"Accepted",rejected:"Rejected",cancelled:"Cancelled",decided:"Decision recorded"};
+function _workDate(w,ev,createdLabel="Created"){
+  const valid=value=>{
+    const match=typeof value==="string"&&/^(\d{4})-(\d{2})-(\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+    if(!match||!_routerTimestamp(value))return false;
+    const month=Number(match[2]),day=Number(match[3]);
+    return month>=1&&month<=12&&day>=1&&day<=new Date(Date.UTC(Number(match[1]),month,0)).getUTCDate();
+  };
+  const stamp=[[ev?.created_at,"Latest event"],[w.closed_at,"Closed"],[w.created_at,createdLabel]].find(([value])=>valid(value));
+  if(!stamp)return `<span data-work-date>Date unavailable</span>`;
+  const [value,label]=stamp;
+  return `<span data-work-date>${esc(label)} <time datetime="${escAttr(value)}">${esc(new Date(value).toLocaleString("en-CA",{year:"numeric",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}))}</time></span>`;
 }
 function _workCard(w,eventByWork,verifyByWork){
   const claim=w.wip_claim_owner?`${w.wip_claim_owner} · lease ${inTime(w.wip_claim_expires_at)}`:"unclaimed";
@@ -4506,15 +4598,18 @@ function _workCard(w,eventByWork,verifyByWork){
   const vr=verifyByWork.get(String(w.id));
   const cost=w.cost_usd==null?"cost unledgered":`$${Number(w.cost_usd).toFixed(2)} USD`;
   const selected=String(WORK_SELECTED)===String(w.id);
-  return `<div data-work-id="${escAttr(String(w.id))}" style="padding:12px 0;border-top:1px solid var(--edge-soft);${selected?"background:var(--acc-soft);border-radius:var(--radius);padding-left:10px;padding-right:10px":""}">
-    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${_workTone(w.state)}">${esc(w.state||"unknown")}</span><span class="badge badge-neutral">${esc(w.type||"work")}</span><b style="min-width:0">#${esc(w.id)} · ${esc(w.title||"Untitled work")}</b></div>
-    <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">owner ${esc(w.owner||"unowned")} · model ${esc(w.model||"unrecorded")} · ${esc(cost)} · claim ${esc(claim)} · v${esc(w.version==null?"?":w.version)}</div>
-    ${w.consumer?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px">consumer: ${esc(w.consumer)}</div>`:""}
-    ${w.next_action?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px"><b>Next:</b> ${esc(firstLine(w.next_action))}</div>`:""}
-    ${w.outcome?`<div style="font-size:12px;color:var(--ink-2);margin-top:5px"><b>Outcome:</b> ${esc(firstLine(w.outcome))}</div>`:""}
-    ${vr?`<div style="font-size:11.5px;color:${vr.verdict==="pass"?"var(--ok)":"var(--bad)"};margin-top:5px">verification ${esc(vr.verdict)} by ${esc(vr.verifier)} · ${esc(ago(vr.created_at))}</div>`:""}
-    ${ev?`<div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">latest event: ${esc(ev.event_type)} by ${esc(ev.actor)} · ${esc(ago(ev.created_at))}${ev.from_state||ev.to_state?` · ${esc(ev.from_state||"?")}→${esc(ev.to_state||"?")}`:""}</div>`:""}
-    <button class="btn" type="button" data-work-select="${escAttr(String(w.id))}" aria-pressed="${selected?"true":"false"}" style="margin-top:8px">${selected?"Selected":"Inspect task"}</button>
+  return `<div data-work-id="${escAttr(String(w.id))}" style="padding:16px 0;border-top:1px solid var(--edge-soft);overflow-wrap:anywhere;${selected?"background:var(--acc-soft);border-radius:var(--radius);padding-left:10px;padding-right:10px":""}">
+    <div style="display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap"><b style="font-size:15px;min-width:0">${esc(w.title||"Untitled work")}</b><span class="badge ${_workTone(w.state)}">${esc(_WORK_LABELS[w.state]||"State unavailable")}</span></div>
+    <div style="font-size:12px;color:var(--ink-3);margin:7px 0">${esc(w.owner||"Owner not recorded")} · ${_workDate(w,ev)}</div>
+    <div data-work-outcome style="font-size:13px;margin-top:7px"><b>Outcome:</b> ${w.outcome?esc(firstLine(w.outcome)):'<span class="missing">No outcome recorded</span>'}</div>
+    ${w.next_action?`<div style="font-size:13px;margin-top:7px"><b>Next:</b> ${esc(firstLine(w.next_action))}</div>`:""}
+    <button class="btn" type="button" data-work-select="${escAttr(String(w.id))}" aria-pressed="${selected?"true":"false"}" style="margin-top:10px">${selected?"Selected":"Inspect task"}</button>
+    <details data-work-meta data-work-disclosure="meta-${escAttr(String(w.id))}" ${WORK_DISCLOSURES.has('meta-'+w.id)?'open':''} style="margin-top:9px"><summary>Task #${esc(w.id)} · evidence &amp; technical details</summary>
+    <div style="font-size:12px;color:var(--ink-3);margin-top:7px">state ${esc(w.state||"unknown")} · ${esc(w.type||"work")} · model ${esc(w.model||"unrecorded")} · ${esc(cost)} · claim ${esc(claim)} · v${esc(w.version==null?"?":w.version)}</div>
+    ${w.consumer?`<div style="font-size:12px;margin-top:5px">consumer: ${esc(w.consumer)}</div>`:""}
+    ${vr?`<div style="font-size:12px;margin-top:5px">Latest recorded verification ${esc(vr.verdict)} by ${esc(vr.verifier)} · ${esc(ago(vr.created_at))}</div>`:""}
+    ${ev?`<div style="font-size:12px;margin-top:5px">latest event: ${esc(ev.event_type)} by ${esc(ev.actor)} · ${esc(ago(ev.created_at))}${ev.from_state||ev.to_state?` · ${esc(ev.from_state||"?")}→${esc(ev.to_state||"?")}`:""}</div>`:""}
+    <small>Inspect the exact result before accepting; a row or past check is not release proof.</small></details>
   </div>`;
 }
 function _workSafeObjective(w){
@@ -4669,11 +4764,30 @@ function _workSelectedDetail(items,eventByWork,verifyByWork){
   }
   return _workDetail(items.find(w=>String(w.id)===String(WORK_SELECTED)),eventByWork,verifyByWork);
 }
-function viewWork(){
-  const head=`<div class="status sub">Work / Agents<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">canonical spine · direct operator read</small></div>`+_routerForm()+
-    `<form id="work-lookup" class="log" style="margin:12px 0"><label for="work-lookup-id">Inspect a task by its receipt ID</label><div style="display:flex;gap:8px;margin-top:8px"><input id="work-lookup-id" aria-label="Task ID" inputmode="numeric" pattern="[1-9][0-9]*" required style="min-width:0;flex:1" placeholder="Task number"><button class="btn" type="submit">Inspect</button></div><small>The overview shows only the newest 100 tasks. An older task can still be inspected by ID; no private draft is stored in your browser.</small></form>`;
-  if(WORK===undefined)return head+`<div class="empty">Loading work spine…</div>`;
-  if(WORK===null)return head+`<div class="state state-error"><b>Work spine read FAILED</b>Items, events, or verifications could not be read; this is not an empty queue.</div>`+_workSelectedDetail([],new Map(),new Map());
+function aiActivitySection(p){
+  const feed=p.ai_activity;
+  const unknown=`<section data-ai-activity class="log"><h2 style="font-size:17px">Recorded AI activity</h2><p>Activity summaries unavailable. Task records below are separate.</p></section>`;
+  if(p.ai_activity_build_ok===false||!feed||feed.schema!=="ai_activity.v1"||feed.available!==true||feed.source!=="curated_session_log"||!Array.isArray(feed.rows)||feed.rows.length>30||feed.shown_count!==feed.rows.length||!["ok","empty"].includes(feed.reason))return unknown;
+  const counts=[feed.invalid_count,feed.withheld_count];
+  if(counts.some(n=>!Number.isSafeInteger(n)||n<0)||typeof feed.truncated!=="boolean")return unknown;
+  const labels={codex:"Codex","claude-code":"Claude Code","claude-ai":"Claude","claude":"Claude"};
+  const valid=r=>r&&typeof r.id==="string"&&/^[a-f0-9]{20}$/.test(r.id)&&Object.prototype.hasOwnProperty.call(labels,r.ai)&&["done","partial","blocked"].includes(r.status)&&typeof r.task==="string"&&Array.from(r.task).length<=160&&typeof r.summary==="string"&&Array.from(r.summary).length<=1000&&_routerTimestamp(r.occurred_at)&&!_workDate({created_at:r.occurred_at},null).includes("Date unavailable");
+  if(feed.rows.some(r=>!valid(r)))return unknown;
+  const rows=[...feed.rows].sort((a,b)=>Date.parse(b.occurred_at)-Date.parse(a.occurred_at));
+  const card=r=>{
+    const key="activity-"+r.id,excerpt=Array.from(r.summary).length>240?Array.from(r.summary).slice(0,240).join("")+"…":r.summary;
+    return `<article data-ai-record="${escAttr(r.id)}" style="padding:14px 0;border-top:1px solid var(--edge-soft);overflow-wrap:anywhere"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b>${esc(r.task||"Untitled recorded work")}</b><span class="badge ${r.status==="blocked"?"badge-bad":"badge-neutral"}">Reported ${esc(r.status)}</span></div><small>${esc(labels[r.ai])} · ${_workDate({created_at:r.occurred_at},null,"Recorded")}</small><p style="font-size:13px;margin:8px 0">${esc(excerpt||"No summary recorded.")}</p>${Array.from(r.summary).length>240?`<details data-work-disclosure="${key}" ${WORK_DISCLOSURES.has(key)?'open':''}><summary>Full recorded summary</summary><p style="white-space:pre-wrap">${esc(r.summary)}</p></details>`:""}${r.truncated?`<small>Source text shortened; this is not the complete entry.</small>`:""}</article>`;
+  };
+  return `<section data-ai-activity class="log"><h2 style="font-size:18px;margin:0 0 8px">Recorded AI activity</h2><small>Work-summary entries, not live sessions or deployment proof.</small>
+    ${rows.slice(0,3).map(card).join("")||`<p>No recorded summaries in this read.</p>`}
+    ${rows.length>3?`<details data-work-disclosure="activity-more" ${WORK_DISCLOSURES.has('activity-more')?'open':''}><summary>${rows.length-3} more recorded summaries</summary>${rows.slice(3).map(card).join("")}</details>`:""}
+    <small>${rows.length} shown · newest 30 from a bounded log read${feed.truncated?" · older entries omitted":""}${feed.invalid_count?` · ${feed.invalid_count} invalid entries excluded`:""}${feed.withheld_count?` · ${feed.withheld_count} entries withheld for privacy`:""}.</small></section>`;
+}
+function viewWork(p=LAST.p||{}){
+  const head=`<div class="status sub">AI Work</div><div class="acts" style="margin-bottom:14px"><a class="btn" href="#router-prompt">New instruction</a><a class="btn" href="#work-lookup-id">Find older task</a></div>`+aiActivitySection(p);
+  const tools=_routerForm()+`<form id="work-lookup" class="log" style="margin:12px 0"><label for="work-lookup-id">Inspect a task by its receipt ID</label><div style="display:flex;gap:8px;margin-top:8px"><input id="work-lookup-id" aria-label="Task ID" inputmode="numeric" pattern="[1-9][0-9]*" required style="min-width:0;flex:1" placeholder="Task number"><button class="btn" type="submit">Inspect</button></div><small>The overview shows only the newest 100 tasks. An older task can still be inspected by ID; no private draft is stored in your browser.</small></form>`;
+  if(WORK===undefined)return head+`<div class="empty">Loading work spine…</div>`+tools;
+  if(WORK===null)return head+`<div class="state state-error"><b>Work spine read FAILED</b>Items, events, or verifications could not be read; this is not an empty queue.</div>`+_workSelectedDetail([],new Map(),new Map())+tools;
   const items=WORK.items||[],events=WORK.events||[],vers=WORK.verifications||[];
   const actions=Array.isArray(WORK.actions)?WORK.actions:null;
   const eventByWork=new Map(),verifyByWork=new Map();
@@ -4681,20 +4795,23 @@ function viewWork(){
   vers.forEach(v=>{const k=String(v.work_id);if(!verifyByWork.has(k))verifyByWork.set(k,v)});
   const active=items.filter(w=>!_WORK_TERMINAL.has(w.state));
   const groups=[
-    ["Running / verification",active.filter(w=>w.state==="in_progress"||w.state==="verification")],
-    ["Ready / intake",active.filter(w=>["intake","ready","reopened","returned"].includes(w.state))],
+    ["Results to inspect · Awaiting consumption",active.filter(w=>w.state==="awaiting_consumption")],
+    ["Reported running / verification",active.filter(w=>w.state==="in_progress"||w.state==="verification")],
+    ["Queued · Ready / intake",active.filter(w=>["intake","ready","reopened","returned"].includes(w.state))],
     ["Blocked / failed verification",active.filter(w=>w.state==="blocked"||w.state==="failed_verification")],
-    ["Awaiting consumption",active.filter(w=>w.state==="awaiting_consumption")],
-    ["Recently finished",items.filter(w=>_WORK_TERMINAL.has(w.state)).slice(0,12)]
+    ["Recently finished",items.filter(w=>_WORK_TERMINAL.has(w.state)).slice(0,12)],
+    ["Other recorded states",active.filter(w=>!Object.prototype.hasOwnProperty.call(_WORK_LABELS,w.state))]
   ];
   const claimed=active.filter(w=>w.wip_claim_owner).length;
   const owners=new Set(active.map(w=>w.wip_claim_owner||w.owner).filter(Boolean)).size;
   const actionRows=actions&&actions.slice(0,20).map(a=>`<div data-action-receipt style="padding:10px 0;border-top:1px solid var(--edge-soft)"><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="badge ${a.status==="done"?"badge-ok":a.status==="failed"?"badge-bad":a.status==="processing"?"badge-info":"badge-neutral"}">${esc(a.status||"unknown")}</span><b>#${esc(a.id)} · ${esc(a.action||"unknown action")}</b></div><div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">requested ${esc(ago(a.created_at))}${a.processed_at?` · processed ${esc(ago(a.processed_at))}`:""}${a.result?` · ${esc(firstLine(a.result))}`:""}</div></div>`).join("");
-  return head+`<div class="state" style="margin:12px 0;background:var(--warn-soft);border-color:var(--warn-soft-edge)"><b>Supervised coordination — automatic dispatch is off.</b>The spine records owners, leases and results. Queued is not running: a supervisor must pick up the task. Repository file-path claims still live on the separate tab board and are not represented here.</div>
-    <div class="proof"><div class="pcard"><h4>Active</h4><div class="v">${active.length}</div><small>non-terminal work</small></div><div class="pcard"><h4>Claimed</h4><div class="v">${claimed}</div><small>live or stale leases</small></div><div class="pcard"><h4>Owners</h4><div class="v">${owners}</div><small>recorded active actors</small></div><div class="pcard"><h4>Verifications</h4><div class="v">${vers.length}</div><small>newest 100 read</small></div></div>
-    ${_workSelectedDetail(items,eventByWork,verifyByWork)}
-    <div class="log" style="margin-top:14px"><b>Portal action receipts (${actions?actions.length:"?"})</b><br><small>Direct worker queue truth: requested, processing, done, or failed. This view has no retry button.</small>${actions===null?`<div class="state state-error"><b>Action receipt read FAILED</b>The work spine remains visible; receipt state is unknown, not empty.</div>`:actionRows||`<div class="empty">No action receipts found.</div>`}</div>
-    ${groups.map(([name,rows])=>`<div class="log" style="margin-top:14px"><b>${esc(name)} (${rows.length})</b><br>${rows.length?rows.map(w=>_workCard(w,eventByWork,verifyByWork)).join(""):`<div class="empty">None in the newest ${items.length} work items.</div>`}</div>`).join("")}
+  return head+`<p class="section-note" data-work-scope>${items.length} loaded tasks · newest 100 only, not complete session history. Queued is not running.</p>
+    ${WORK_SELECTED!==null?_workSelectedDetail(items,eventByWork,verifyByWork):""}
+    ${actions===null?`<div class="state state-error"><b>Action receipt read FAILED</b>The work spine remains visible; receipt state is unknown, not empty.</div>`:""}
+    ${groups.filter(([,rows])=>rows.length).map(([name,rows])=>`<section class="log" data-work-group style="margin-top:14px"><h2 style="font-size:17px;margin:0 0 8px">${esc(name)} (${rows.length})</h2>${rows.map(w=>_workCard(w,eventByWork,verifyByWork)).join("")}</section>`).join("")||`<div class="empty">No work items in this read.</div>`}
+    <details class="log" data-work-receipts data-work-disclosure="receipts" ${WORK_DISCLOSURES.has('receipts')?'open':''} style="margin-top:14px"><summary>Portal action receipts (${actions?actions.length:"?"})</summary><small>Requested, processing, done, or failed. A receipt is not proof of repair or deployment.</small>${actionRows||`<div class="empty">${actions===null?"Receipt state unavailable.":"No action receipts found."}</div>`}</details>
+    <details class="log" data-work-coordination data-work-disclosure="coordination" ${WORK_DISCLOSURES.has('coordination')?'open':''} style="margin-top:14px"><summary>Coordination &amp; coverage</summary><p>Supervised coordination — automatic dispatch is off. A supervisor must pick up queued work. Repository file-path claims still live on the separate tab board and are not represented here.</p><p>${active.length} active · ${claimed} claimed (live or stale leases) · ${owners} recorded owners · ${vers.length} verifications (newest 100).</p><p>Task dates describe recorded events, not session duration. Historical terminal tasks are capped at 12 here; use exact-ID lookup for older work.</p></details>
+    ${tools}
     `;
 }
 function wireTicketsNav(p,updatedAt,srcNote){
@@ -4874,16 +4991,33 @@ function viewPipeline(p){
   // rendered all 7 columns as confident-empty ("No widget leads yet.", etc.)
   // instead of unknown -- the same unknown-vs-empty class the per-source
   // checks below already close, reopened at the whole-board level.
-  if(!p.pipeline_board){
+  const plainObject=v=>v!==null&&typeof v==="object"&&!Array.isArray(v);
+  if(!plainObject(p.pipeline_board)){
     return `<div class="status sub">Pipeline</div>
       <div class="state state-error"><b>Pipeline board FAILED to build this push</b>Every column above is unknown this push, not empty — refresh, or check Machine for the underlying error.</div>`;
   }
   const pb = p.pipeline_board;
-  const src = pb.sources || {};
-  const ok = (name) => src[name]?.ok !== false;
+  const src = pb.sources;
+  const safeInt=v=>Number.isSafeInteger(v)&&v>=0;
+  const rowArray=v=>Array.isArray(v)&&v.every(plainObject);
+  const stageOk=name=>plainObject(pb[name])&&safeInt(pb[name].count)&&rowArray(pb[name].items);
+  const sourceOk=name=>plainObject(src)&&plainObject(src[name])&&src[name].ok===true;
+  const stage1=plainObject(pb.stage1_lead_in)?pb.stage1_lead_in:{};
+  const health={
+    widget_leads:sourceOk("widget_leads")&&rowArray(stage1.widget_leads),
+    registry:sourceOk("registry")&&safeInt(stage1.registry_total)&&rowArray(stage1.registry_sample),
+    outreach:sourceOk("outreach")&&stageOk("stage2_contacted")&&stageOk("stage3_conversation")&&safeInt(pb.stage3_conversation.dead_end_count),
+    leads_md:sourceOk("leads_md")&&["stage4_booked","stage5_discovery_proposal","stage6_closed_won"].every(stageOk)&&safeInt(pb.stage6_closed_won.closed_lost_count)&&safeInt(pb.stage6_closed_won.ghosted_count),
+    clients:sourceOk("clients")&&stageOk("stage7_8_onboarding_active")
+  };
+  if(p.pipeline_board_build_ok===false||!Object.values(health).some(Boolean)){
+    return `<div class="status sub">Pipeline</div>
+      <div class="state state-error"><b>Pipeline board unavailable</b>Stage/source projections are missing, malformed or failed. Columns are unknown, not empty; refresh before interpreting pipeline state.</div>`;
+  }
+  const ok = name=>health[name]===true;
 
   const s1 = pb.stage1_lead_in || {};
-  const widgetLeads = s1.widget_leads || [];
+  const widgetLeads = ok("widget_leads")?s1.widget_leads:[];
   const leadInBroken = !ok("widget_leads") && !ok("registry");
   const leadInHtml = (ok("widget_leads")
     ? (widgetLeads.length ? widgetLeads.map(l=>`
@@ -4960,7 +5094,7 @@ function viewPipeline(p){
     <div class="section-note">Stranger to paying client, one board. Read-only — no actions here yet
       (advance/exclude/close stays on Conversations, Content, and Business for now).${testExcluded?` ${esc(testExcluded)} test row${testExcluded===1?"":"s"} in leads.md excluded from Booked/Discovery/Closed-won below.`:""}</div>
     <div class="pipe-board">
-      ${_pipeCol("Lead-in", widgetLeads.length + (s1.registry_total||0), leadInHtml, leadInBroken && !ok("registry"))}
+      ${_pipeCol("Lead-in", ok("widget_leads")&&ok("registry")?widgetLeads.length+s1.registry_total:"?", leadInHtml, leadInBroken)}
       ${_pipeCol("Contacted", s2?.count ?? "?", s2Html, outreachBroken)}
       ${_pipeCol("Conversation", s3?.count ?? "?", s3Html, outreachBroken)}
       ${_pipeCol("Booked", s4?.count ?? "?", s4Html, leadsMdBroken)}
@@ -4985,6 +5119,60 @@ function financeTotals(totals,empty){
   if(!entries.length)return empty;
   return entries.map(([c,v])=>financeMoney(v,c)).join(" · ");
 }
+let MONEY_UI={tab:"purchases",period:"month",status:"all",currency:"all",query:""};
+function financeMonthLabel(month){
+  if(typeof month!=="string"||!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return "Period unknown";
+  return new Date(month+"-15T12:00:00Z").toLocaleDateString("en-CA",{month:"long",year:"numeric",timeZone:"UTC"});
+}
+function financeHeroAmount(totals){
+  if(!totals||typeof totals!=="object"||Array.isArray(totals))return '<span class="money-scope">Totals unavailable</span>';
+  const entries=Object.entries(totals).sort(([a],[b])=>a.localeCompare(b));
+  if(!entries.length)return '<span class="money-scope">No reviewed purchases recorded</span>';
+  return entries.map(([currency,value],index)=>{
+    const text=financeMoney(value,currency);
+    if(index||typeof value!=="string"||!/^[-]?\d{1,12}\.\d{2}$/.test(value)||!["CAD","USD"].includes(currency))return `<span class="money-secondary">${esc(text)}${index?" · kept separate":""}</span>`;
+    const parts=text.slice(4).split(".");
+    return `<span class="money-value"><small>${esc(currency)}</small> ${esc(parts[0])}<span class="money-cents">.${esc(parts[1])}</span></span>`;
+  }).join("");
+}
+function financePurchaseRows(f){
+  const reviewed=f.ledger?.available===true&&Array.isArray(f.ledger.rows)?f.ledger.rows.map(r=>({...r,reviewed:true})):[];
+  const pending=f.pending?.available===true&&Array.isArray(f.pending.rows)?f.pending.rows.map(r=>({...r,reviewed:false})):[];
+  return [...reviewed,...pending].filter(r=>r&&typeof r==="object").sort((a,b)=>String(b.date||b.received||"").localeCompare(String(a.date||a.received||""))||String(a.vendor||"").localeCompare(String(b.vendor||"")));
+}
+function financeFilteredRows(f){
+  return financePurchaseRows(f).filter(r=>
+    (MONEY_UI.period==="all"||String(r.date||r.received||"").startsWith(f.month||"!"))&&
+    (MONEY_UI.status==="all"||(MONEY_UI.status==="reviewed")===r.reviewed)&&
+    (MONEY_UI.currency==="all"||(MONEY_UI.currency==="unknown"?!["CAD","USD"].includes(r.currency):r.currency===MONEY_UI.currency))&&
+    String(r.vendor||"").toLowerCase().includes(MONEY_UI.query.trim().toLowerCase()));
+}
+function financePurchaseTable(f){
+  const rows=financeFilteredRows(f), ledger=f.ledger||{}, pending=f.pending||{};
+  return `<div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Date</th><th scope="col">Company / purchase</th><th scope="col" class="money-amount">Amount</th><th scope="col">Currency</th><th scope="col">Review status</th></tr></thead><tbody>${rows.length?rows.map(r=>{
+    const fullAmount=financeMoney(r.amount,r.currency);
+    const amount=fullAmount.startsWith("Amount")?fullAmount:fullAmount.replace(/^(?:CAD|USD|Currency unverified) /,"");
+    const reasons=(Array.isArray(r.review_reasons)?r.review_reasons:[]).map(x=>String(x).replaceAll("_"," "));
+    const status=r.reviewed?"Reviewed":reasons.some(x=>x.includes("duplicate"))?"Possible duplicate":amount==="Amount unknown"?"Amount missing":!["CAD","USD"].includes(r.currency)?"Currency unverified":"Needs review";
+    return `<tr><td>${esc(r.date||r.received||"Date unknown")}<small>${r.date?"Document date":r.received?"Email received · charge date unverified":"No usable date"}</small></td><td>${esc(r.vendor||"Unclassified")}<small>${r.evidence_type==="api_credit_funding"?"API credit funding confirmation":r.reviewed?"Reviewed invoice":"Invoice candidate"}</small></td><td class="money-amount">${esc(amount)}</td><td>${esc(["CAD","USD"].includes(r.currency)?r.currency:"Unverified")}</td><td><span class="money-review-status${r.reviewed?" money-reviewed":""}">${status}</span><details><summary>Details</summary>${esc(r.reviewed?"Reviewed invoice evidence; statement matching still required.":reasons.join(" · ")||"Inspect original evidence locally before approval.")}</details></td></tr>`;
+  }).join(""):'<tr><td colspan="5" class="empty">No loaded purchases match these filters.</td></tr>'}</tbody></table></div>
+    <p class="section-note" role="status">${rows.length} matching loaded records · ${esc(String(ledger.shown_count??0))} reviewed / ${esc(String(ledger.reviewed_count??"unknown"))} recorded · ${esc(String(pending.shown_count??0))} pending / ${esc(String(pending.count??"unknown"))} recorded. ${ledger.truncated===true||pending.count>pending.shown_count?"Loaded rows are capped; totals include the full recorded set.":""}</p>`;
+}
+function financeVendorCharts(f){
+  // Only chart geometry uses Number. Displayed money is summed as integer cents.
+  const rows=financePurchaseRows(f).filter(r=>r.reviewed&&String(r.date).startsWith(f.month||"!")&&typeof r.amount==="string"&&/^\d{1,12}\.\d{2}$/.test(r.amount));
+  return `<div class="money-charts">${["CAD","USD"].map(currency=>{
+    const grouped=new Map();
+    rows.filter(r=>r.currency===currency).forEach(r=>grouped.set(r.vendor,(grouped.get(r.vendor)||0n)+BigInt(r.amount.replace(".",""))));
+    const entries=[...grouped].sort((a,b)=>a[1]>b[1]?-1:a[1]<b[1]?1:String(a[0]).localeCompare(String(b[0])));
+    const total=entries.reduce((sum,[,amount])=>sum+amount,0n);
+    return `<section class="money-chart"><h3>${esc(currency)} · purchases by company</h3>${entries.length?entries.map(([vendor,amount])=>{
+      const value=(amount/100n).toString()+"."+(amount%100n).toString().padStart(2,"0");
+      const width=total?Number(amount*10000n/total)/100:0;
+      return `<div class="money-bar"><div class="money-bar-head"><span>${esc(vendor)}</span><span>${esc(financeMoney(value,currency))}</span></div><div class="money-track" aria-hidden="true"><div class="money-fill" style="width:${width}%"></div></div></div>`;
+    }).join(""):'<p class="section-note">No loaded reviewed purchases in this currency for this month.</p>'}</section>`;
+  }).join("")}</div><p class="section-note">${esc(f.month||"Period unknown")} · breakdown of loaded reviewed rows only${f.ledger?.truncated===true?" — older records may be outside the snapshot cap":""}. Pending evidence and estimated subscriptions are excluded.</p>`;
+}
 function viewFinance(p){
   const f=p.finance;
   if(p.finance_build_ok!==true||!f||f.schema!=="finance.v1")return `<section data-finance><h4 class="section-h">FINANCIAL EVIDENCE</h4><div class="state state-error">Financial evidence unavailable — not zero spending. Refresh the snapshot after collection; older snapshots do not contain this feed.</div></section>`;
@@ -5000,22 +5188,56 @@ function viewFinance(p){
     collection.all_sources_configured===true?"both sources configured":"personal mailbox connection incomplete",
     collection.mode==="local_review_first"?"review-first intake":collection.mode==="receipts_only"?"receipt-only scan — not full scheduled coverage":"usage-only scan — no invoice collection"
   ].join(" · ");
-  const rows=Array.isArray(pending.rows)?pending.rows:[];
   return `<section data-finance>
-    <h4 class="section-h">FINANCIAL EVIDENCE — ${esc(f.month||"period unknown")}</h4>
     ${repairNote?`<div class="state state-error" role="alert">${esc(repairNote)}</div>`:""}
-    <div class="state ${ready?"":"state-error"}"><b>Spend not reconciled</b><br>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</div>
-    <div class="proof" style="margin-top:12px">
-      <div class="pcard"><h4>Reviewed records · this month</h4><div class="v" style="font-size:18px">${esc(ledger.available===true?financeTotals(ledger.reviewed_month_totals,"No reviewed records this month"):"Ledger unavailable")}</div><small>Reviewed invoice/charge records only — not bank-reconciled cash spend.</small></div>
-      <div class="pcard"><h4>Reviewed records · all recorded periods</h4><div class="v" style="font-size:18px">${esc(ledger.available===true?financeTotals(ledger.reviewed_totals,"No reviewed records recorded"):"Ledger unavailable")}</div><small>${ledger.available===true?esc(String(ledger.reviewed_count))+" records":"Unknown record count"}. Not a full-year spend total. API funding included: ${esc(ledger.available===true?financeTotals(ledger.funding_totals_included,"none recorded"):"unavailable")} — do not add again.</small></div>
-      <div class="pcard"><h4>Pending evidence · NOT approved</h4><div class="v" style="font-size:18px">${esc(pending.available===true?financeTotals(pending.totals_by_currency,"No currency-qualified pending total"):"Pending store unavailable")}</div><small>${pending.available===true?`${esc(String(pending.count))} candidates · ${esc(String(pending.currency_unknown_count))} currency unknown · ${esc(String(pending.unpriced_count))} amount unknown`:"Unknown pending count"}. Incomplete subtotal; may include duplicate evidence. Never add this to reviewed totals.</small></div>
-    </div>
-    <p class="section-note">${esc(f.reconciliation?.note||"Original bank statements and complete coverage are required.")} API credit funding is a purchase of credit, not proof of consumed API usage. Unknown currency is never guessed from a dollar symbol.</p>
+    <div class="money-hero">${[
+      {period:"month",label:"This month",totals:ledger.reviewed_month_totals,scope:financeMonthLabel(f.month),count:ledger.reviewed_month_count},
+      {period:"all",label:"All time",totals:ledger.reviewed_totals,scope:ledger.reviewed_date_coverage?.oldest?"Recorded since "+ledger.reviewed_date_coverage.oldest:"Recorded history · coverage unknown",count:ledger.reviewed_count}
+    ].map(item=>`<button type="button" class="money-period" data-money-period="${item.period}" aria-label="Show ${item.label.toLowerCase()} reviewed purchases"><span class="money-period-label">${item.label}<span aria-hidden="true">↗</span></span>${ledger.available===true?financeHeroAmount(item.totals):'<span class="money-scope">Ledger unavailable</span>'}<span class="money-scope">${esc(item.scope)}${Number.isInteger(item.count)?` · ${item.count} reviewed purchases`:""}</span></button>`).join("")}</div>
+    <div class="money-total-foot"><span>Reviewed invoices · pending excluded · <b>Spend not reconciled</b></span>${pending.available===true?`<button type="button" class="btn" data-money-review>${esc(String(pending.count))} to review →</button>`:"<span>Pending store unavailable</span>"}</div>
+    <details class="money-explainer"${!ready||repairNote?" open":""}><summary>Audit coverage and what these totals mean</summary><p>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</p><p>${esc(f.reconciliation?.note||"Original bank statements and complete coverage are required.")} All time means recorded history, not proof of complete spending coverage. CAD and USD stay separate.</p><p>API funding included: ${esc(ledger.available===true?financeTotals(ledger.funding_totals_included,"none recorded"):"unavailable")} — do not add again. Credit funding is not consumed API usage.</p><p>${pending.available===true?`${esc(String(pending.count))} candidates · ${esc(String(pending.currency_unknown_count))} currency unknown · ${esc(String(pending.unpriced_count))} amount unknown. Pending evidence subtotal: ${esc(financeTotals(pending.totals_by_currency,"No currency-qualified pending total"))}. May include duplicate evidence; never add to reviewed totals.`:"Pending store unavailable"}</p></details>
     ${pending.available===true&&pending.cleanup_pending_count>0?`<p class="state state-error">${esc(String(pending.cleanup_pending_count))} already-recorded candidates need cleanup retry. Excluded from pending counts and totals; do not confirm them as new expenses.</p>`:""}
-    ${pending.available===true&&rows.length?`<h4 class="section-h">REVIEW NEEDED — showing ${esc(String(pending.shown_count))} of ${esc(String(pending.count))}</h4><div class="cards">${rows.map(r=>row(
-      `${r.vendor||"Unclassified"} · ${financeMoney(r.amount,r.currency)}`,
-      [r.evidence_type==="api_credit_funding"?"API credit funding confirmation":"Invoice candidate",r.date?"document date "+r.date:r.received?"email date "+r.received+" (charge date unverified)":"date unverified",...(Array.isArray(r.review_reasons)?r.review_reasons.map(x=>String(x).replaceAll("_"," ")):[])].join(" · "))).join("")}</div><p class="section-note">Inspect original evidence locally before approval. No automatic confirmation, guessed currency, or ID-only approval of incomplete records.</p>`:""}
+    ${MONEY_UI.tab==="overview"?financeVendorCharts(f):`<div class="money-table-heading"><h2>Purchases</h2><select id="money-period" aria-label="Purchase period"><option value="month">${esc(financeMonthLabel(f.month))}</option><option value="all">All time</option></select></div>
+    ${ledger.available===true&&!Array.isArray(ledger.rows)?'<p class="state state-error">Reviewed purchase details are not in this snapshot yet. The totals above remain recorded totals; pending rows are not your complete purchase history.</p>':""}
+    <div class="money-toolbar"><label for="money-query">Company<input type="search" id="money-query" placeholder="Search companies" maxlength="100"></label><label for="money-status">Review status<select id="money-status"><option value="all">All records</option><option value="reviewed">Reviewed</option><option value="pending">Needs review</option></select></label><label for="money-currency">Currency<select id="money-currency"><option value="all">All currencies</option><option value="CAD">CAD</option><option value="USD">USD</option><option value="unknown">Unverified</option></select></label></div><div id="money-table-results">${financePurchaseTable(f)}</div><p class="section-note">Inspect original evidence locally before approval. This table has no confirmation or payment actions.</p>`}
   </section>`;
+}
+function wireMoney(){
+  const rerender=()=>{if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);};
+  document.querySelectorAll('[data-money-tab]').forEach(el=>el.onclick=()=>{MONEY_UI.tab=el.dataset.moneyTab;rerender();});
+  document.querySelectorAll('[data-money-period]').forEach(el=>el.onclick=()=>{MONEY_UI={tab:"purchases",period:el.dataset.moneyPeriod,status:"reviewed",currency:"all",query:""};rerender();});
+  const review=document.querySelector('[data-money-review]');
+  if(review)review.onclick=()=>{MONEY_UI={tab:"purchases",period:"all",status:"pending",currency:"all",query:""};rerender();};
+  for(const key of ["query","period","status","currency"]){
+    const el=document.getElementById('money-'+key);if(!el)continue;
+    el.value=MONEY_UI[key];
+    el[key==="query"?"oninput":"onchange"]=()=>{MONEY_UI[key]=el.value;const host=document.getElementById('money-table-results');if(host&&LAST?.p?.finance)host.innerHTML=financePurchaseTable(LAST.p.finance);};
+  }
+}
+function moneyDate(value){
+  if(typeof value!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value))return "Not recorded";
+  const d=new Date(value+"T12:00:00Z");
+  return Number.isNaN(d.valueOf())||d.toISOString().slice(0,10)!==value?"Not recorded":d.toLocaleDateString("en-CA",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});
+}
+function viewCommitments(fs,broken){
+  if(fs.available!==true)return `<div class="state state-error"><b>Commitment data unavailable</b>Missing data is not a zero-dollar monthly commitment.</div>`;
+  const rows=Array.isArray(fs.rows)?fs.rows:[],unpriced=rows.filter(r=>typeof r.cad_month!=="number"||!Number.isFinite(r.cad_month)).length;
+  const needs=rows.filter(r=>r.needsConfirm===true).length,unknown=rows.filter(r=>r.renewalBasis!=="usage"&&moneyDate(r.renewal)==="Not recorded").length;
+  return `${broken?'<div class="state state-error"><b>Spend feed failed to build</b>Last-known figures may be stale; this is not a fresh read.</div>':''}
+    <div class="money-hero"><div class="money-period"><span class="money-scope">Known fixed commitments / month</span><span class="money-value">${esc(estimateMoney(fs.totalKnownCadMonth,"CAD "))}</span><p>Monthly equivalent estimate, not actual payments.${unpriced?` ${unpriced} unpriced provider${unpriced===1?'':'s'} excluded.`:''}</p></div><div class="money-period"><span class="money-scope">What needs checking</span><h3>${needs} price${needs===1?'':'s'} to verify · ${unknown} renewal date${unknown===1?'':'s'} missing</h3><p>Report generated ${esc(moneyDate(fs.asOf))}. This is not the date each price was verified.</p></div></div>
+    <div class="money-table-heading"><h2>Subscriptions &amp; commitments</h2><span class="section-note">${rows.length} provider${rows.length===1?'':'s'} · read-only</span></div>
+    <div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Provider</th><th scope="col">Price / cycle</th><th scope="col">Next renewal</th><th scope="col" class="money-amount">Monthly CAD estimate</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(r.name||"Provider not recorded")}<small>${r.needsConfirm?'Price needs verification':'Recorded expense basis'}</small><details><summary>Evidence &amp; use</summary>Last recorded use: ${esc(moneyDate(r.lastUsed))}. Evidence: ${esc(['direct','weak','none'].includes(r.evidenceStrength)?r.evidenceStrength:'none')}. Missing use evidence does not mean unused.</details></td><td>${esc(estimateMoney(r.amount,["CAD","USD"].includes(r.currency)?r.currency+" ":"Currency unknown "))}<small>${esc(({monthly:'per month',quarterly:'per quarter',annual:'per year',yearly:'per year'})[r.cadence]||'Cycle not recorded')}</small></td><td>${r.renewalBasis==='usage'?'Usage-based · no fixed renewal':esc(moneyDate(r.renewal))}</td><td class="money-amount">${esc(estimateMoney(r.cad_month,"CAD "))}</td></tr>`).join(''):'<tr><td colspan="4">No subscription rows recorded in this report.</td></tr>'}</tbody></table></div>
+    <p class="section-note">Known CAD monthly equivalents only. Annual plans are spread over months; foreign-currency conversions are estimates. Metered usage is separate.</p>`;
+}
+function viewRecordedRevenue(rev){
+  if(rev.schema!=="revenue.v2"||rev.available!==true)return `<div class="state state-error" data-revenue-summary><b>Revenue data unavailable</b>${rev.schema==='revenue.v2'?'The close ledger could not be read.':'This snapshot does not include the detailed revenue reader.'} Missing or failed reads are not $0.</div>`;
+  const t=rev.totals||{},rows=Array.isArray(rev.rows)?rev.rows:[];
+  return `<div data-revenue-summary>${rev.skipped_rows?`<div class="state state-error"><b>Partial ledger · ${esc(rev.skipped_rows)} malformed row${rev.skipped_rows===1?'':'s'} excluded</b>Totals and records below cover valid rows only; they are incomplete.</div>`:''}
+    <div class="money-hero"><div class="money-period"><span class="money-scope">${esc(financeMonthLabel(rev.month))} · recorded collections</span>${financeHeroAmount({CAD:t.collected_month})}<p>Amounts recorded against this month’s close dates.</p></div><div class="money-period"><span class="money-scope">All-time recorded collections</span>${financeHeroAmount({CAD:t.collected_all_time})}<p>Full valid ledger, including records outside the table cap.</p></div></div>
+    <div class="money-charts"><div class="money-chart"><h3>Recorded recurring amounts</h3><p>${esc(financeMoney(t.recorded_mrr,'CAD'))}</p><p class="section-note">Sum of recurring amounts on close records—not verified active MRR or current billing.</p></div><div class="money-chart"><h3>Deals recorded</h3><p>${Number.isInteger(rev.month_deals_closed)?esc(rev.month_deals_closed):'Unknown'} this month · ${Number.isInteger(rev.deals_closed)?esc(rev.deals_closed):'Unknown'} all time</p><p class="section-note">By recorded close date, not invoice or payment date.</p></div></div>
+    <div class="money-table-heading"><h2>Recorded closes</h2><span class="section-note">${esc(rows.length)} shown${rev.truncated?' · newest records only':''}</span></div>
+    <div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Close date</th><th scope="col">Business</th><th scope="col" class="money-amount">Recurring CAD</th><th scope="col" class="money-amount">Collected CAD</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(moneyDate(r.date))}</td><td>${esc(r.business||'Business not recorded')}</td><td class="money-amount">${esc(financeMoney(r.mrr,'CAD'))}</td><td class="money-amount">${esc(financeMoney(r.collected,'CAD'))}</td></tr>`).join(''):`<tr><td colspan="4">${rev.skipped_rows?'No valid close records available.':'No closed deals recorded in the readable ledger.'}</td></tr>`}</tbody></table></div>
+    <p class="section-note">Recorded close coverage: ${esc(moneyDate(rev.date_coverage?.oldest))} – ${esc(moneyDate(rev.date_coverage?.newest))}. Collections are recorded amounts, not reconciled bank deposits.</p></div>`;
 }
 function viewBusiness(p, updatedAt){
   const sp=spendLegs(p), rev=p.revenue||{}, gl=p.go_live||{};
@@ -5024,19 +5246,18 @@ function viewBusiness(p, updatedAt){
   const fs=sf&&sf.fixed_subs||{}, met=sf&&sf.metered&&sf.metered.providers||{}, bal=sf&&sf.balances&&sf.balances.rows||[];
   const lanes=sf?laneRollup(fs,met):[];
   return `
-    <div class="status sub">Business</div>
-    ${viewFinance(p)}
-    ${sfBroken?`<div class="state state-error" style="margin-top:14px"><b>Spend feed FAILED to build this push</b>Figures below may be stale — error state, not a clean read.</div>`:""}
-    <div class="proof" style="margin-top:16px">
-      <div class="pcard"><h4>Revenue</h4><div class="v">${rev.mrr!=null?esc("$"+rev.mrr):"$0"}</div><small>${rev.mrr?"MRR":"pre-revenue — first client is the mission"}</small></div>
-      <div class="pcard"><h4>Commitment estimate / mo <span class="src">${esc(fs.asOf||(sp.asOf?ago(sp.asOf):"—"))}</span></h4>
-        <div class="v">${fs.totalKnownCadMonth!=null?esc(estimateMoney(fs.totalKnownCadMonth,"CA$")):(sp.legs.length?sp.legs.map(([k,v])=>esc(k+" $"+v.toFixed(2))).join(" · "):"—")}</div>
-        <small>Estimated commitments, not actual payments. Any CAD conversion is an estimate.</small></div>
-      <div class="pcard"><h4>Go-live</h4><div class="v" style="font-size:15px">${esc(gl.state||gl.status||"gated")}</div><small>outreach sends blocked · nothing auto-sends</small></div>
-    </div>
+    <div class="status sub">Money</div>
+    <p class="ctos-intro">Purchases, invoices and what still needs checking.</p>
+    <div class="money-tabs" aria-label="Money sections">${["purchases","overview","subscriptions","revenue"].map(tab=>`<button type="button" data-money-tab="${tab}" aria-pressed="${MONEY_UI.tab===tab}">${tab[0].toUpperCase()+tab.slice(1)}</button>`).join("")}</div>
+    ${["purchases","overview"].includes(MONEY_UI.tab)?viewFinance(p):""}
+    <section${MONEY_UI.tab!=="subscriptions"?" hidden":""} data-money-subscriptions>
+      ${viewCommitments(fs,sfBroken)}
+    </section>
+    <section${MONEY_UI.tab!=="revenue"?" hidden":""} data-money-revenue>
+    ${viewRecordedRevenue(rev)}
     <h4 class="section-h">RECORD A CLOSED DEAL</h4>
     <div class="dcard">
-      <div class="why" style="margin:0 0 4px">Founder-close only (v1) — stages a real revenue.csv row via mark_closed_won.py. Nothing auto-sends, nothing outward.</div>
+      <div class="why" style="margin:0 0 4px">Record a real founder-closed deal in CAD. Confirmation queues a ledger record; it does not collect payment or send an invoice.</div>
       <div class="field-grid">
         <div class="field"><label for="rev-business">Business *</label><input id="rev-business" type="text" placeholder="Ace Plumbing" maxlength="200" autocomplete="off"></div>
         <div class="field"><label for="rev-city">City</label><input id="rev-city" type="text" placeholder="Coquitlam" maxlength="200" autocomplete="off"></div>
@@ -5048,18 +5269,13 @@ function viewBusiness(p, updatedAt){
       <div class="acts" style="margin-top:12px"><button id="rev-submit" class="btn rec">Record Revenue</button></div>
       <div class="form-err" id="rev-err" role="alert"></div>
     </div>
-    ${lanes.length?`<h4 class="section-h">SPEND BY LANE — approximate, provider→lane is a maintained guess</h4>
-    <div class="cards">${lanes.map(l=>row(
-      `${l.label} · ${l.known?"$"+l.total.toFixed(2):"?"}`,
-      l.items.join(" · "))).join("")}</div>`:""}
-    ${(fs.rows||[]).length?`<h4 class="section-h">SUBSCRIPTIONS — ${fs.rows.length}</h4>
-    <div class="log" style="border-top:0;padding-top:0">${fs.rows.map(r=>
-      `<span class="t" style="min-width:70px;display:inline-block">${esc(estimateMoney(r.cad_month))}</span>${esc(r.name)}${r.needsConfirm?` <span class="badge badge-warn">unconfirmed</span>`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(r.source||"")}</span><br>`).join("")}</div>`:""}
-    ${Object.keys(met).length?`<h4 class="section-h">METERED (scripted calls only — undercounts interactive)</h4>
-    <div class="log" style="border-top:0;padding-top:0">${Object.entries(met).map(([k,v])=>
-      `<span class="t" style="min-width:70px;display:inline-block">${esc(estimateMoney(v.monthCad))}</span>${esc(k)} · wk $${esc(String(v.weekCad??"?"))}${v.consoleUsdMonth!=null?` · console US$${esc(String(v.consoleUsdMonth))}`:""} <span style="color:var(--ink-3);font-size:10.5px">${esc(v.asOf||"")}</span><br>`).join("")}</div>`:""}
-    ${bal.length?`<h4 class="section-h">BALANCES (last-known events, never invented)</h4>
-    <div class="cards">${bal.map(b=>row(b.provider||"?", (b.state==="unknown"?"balance unknown — ":"")+firstLine(b.lastKnownEvent||""))).join("")}</div>`:""}`;
+    </section>
+    <section${MONEY_UI.tab!=="subscriptions"?" hidden":""} data-money-subscription-detail>
+    ${Object.keys(met).length?`<h4 class="section-h">METERED USAGE — separate from fixed commitments</h4><p class="section-note">Scripted calls only; interactive use may be missing. These are usage estimates, not invoice totals.</p>
+    <div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Provider</th><th scope="col">Observed</th><th scope="col" class="money-amount">Trailing week CAD</th><th scope="col" class="money-amount">Month CAD</th></tr></thead><tbody>${Object.entries(met).map(([k,v])=>`<tr><td>${esc(k)}${v.consoleUsdMonth!=null?`<small>Console month: ${esc(estimateMoney(v.consoleUsdMonth,'USD '))} · separate source</small>`:''}</td><td>${esc(v.asOf||'Not recorded')}</td><td class="money-amount">${esc(estimateMoney(v.weekCad,'CAD '))}</td><td class="money-amount">${esc(estimateMoney(v.monthCad,'CAD '))}</td></tr>`).join('')}</tbody></table></div>`:""}
+    ${lanes.length?`<details class="finance-method"><summary>Estimated allocation by business function</summary><p class="section-note">Provider-to-function mapping is a maintained estimate, not transaction attribution.</p><div class="cards">${lanes.map(l=>row(`${l.label} · ${l.known?"$"+l.total.toFixed(2):"?"}`,l.items.join(" · "))).join("")}</div></details>`:""}
+    ${bal.length?`<details class="finance-method"><summary>Last-known balance events</summary><div class="cards">${bal.map(b=>row(b.provider||"?", (b.state==="unknown"?"balance unknown — ":"")+firstLine(b.lastKnownEvent||""))).join("")}</div></details>`:""}
+    </section>`;
 }
 
 // ctOS pulse is its own truth contract. Findings are one input elsewhere in the
@@ -5157,25 +5373,28 @@ function viewCtos(p,updatedAt){
     :"unavailable";
   return `<div class="status sub"><span class="dot" style="background:${ctosPulseColor(pulse.state)}"></span>ctOS
       <small>${esc(pulse.state.toUpperCase())} · ${esc(pulse.reason)}</small></div>
-    <div class="ctos-grid">${stats.map(([label,value])=>`<div class="ctos-stat"><span class="section-note">${esc(label)}</span><b>${esc(_ctosValue(value))}</b></div>`).join("")}</div>
-    <h4 class="section-h">EVIDENCE FRESHNESS — operational timestamps</h4>
-    <div class="cards">
-      ${row("Runtime scan",`last genuine scan ${scanWhen}`)}
-      ${row("Registry review",`last semantic audit ${reviewWhen}`)}
-      ${row("Portal data refresh",updatedAt?`snapshot refreshed ${ago(updatedAt)}`:"snapshot refresh unavailable")}
-    </div>
+    <p class="ctos-intro">Your system map: what runs, how the pieces connect, and where a failure could affect the business. Select a node in the atlas to inspect it.</p>
+    <div class="ctos-atlas-heading"><h2>System atlas</h2>${DEV?"":`<a href="/portal/system/system-map.html" target="_blank" rel="noopener">Open full-size atlas ↗</a>`}</div>
+    ${DEV?`<div class="empty">The live system atlas mounts here after publish.</div>`:
+      `<iframe class="ctos-atlas" src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`}
     <h4 class="section-h">TOP EXCEPTIONS — ${exceptions.length}</h4>
     <div class="cards">${exceptions.length?exceptions.map(x=>row(
       `${x.kind||"ctOS exception"} · ${x.count==null?"?":x.count}`,
-      x.label||"No detail recorded")).join(""):`<div class="empty">No ctOS exceptions in the current verified scan.</div>`}</div>
+      x.label||"No detail recorded")).join(""):`<div class="empty">${pulse.state==="healthy"?"No ctOS exceptions in the current verified scan.":"No exception details available. This does not mean every system is healthy."}</div>`}</div>
     <h4 class="section-h">RECENT VERIFIED SYSTEM ACTIVITY</h4>
     <div class="cards">${verified.length?verified.map(x=>row(
       x.action||"system action",
       `${x.processed_at||x.at?ago(x.processed_at||x.at):"time unavailable"} · ${firstLine(x.summary||x.result||"worker receipt recorded")}`)).join(""):
       `<div class="empty">No completed worker receipts are present in this snapshot. This is not an invented activity feed.</div>`}</div>
-    <h4 class="section-h">SYSTEM ATLAS — live topology</h4>
-    ${DEV?`<div class="empty">The live system atlas mounts here after publish.</div>`:
-      `<iframe class="ctos-atlas" src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`}`;
+    <details class="ctos-support"><summary>System inventory and data freshness</summary>
+      <div class="ctos-grid">${stats.map(([label,value])=>`<div class="ctos-stat"><span class="section-note">${esc(label)}</span><b>${esc(_ctosValue(value))}</b></div>`).join("")}</div>
+      <h4 class="section-h">EVIDENCE FRESHNESS — operational timestamps</h4>
+      <div class="cards">
+        ${row("Runtime scan",`last genuine scan ${scanWhen}`)}
+        ${row("Registry review",`last semantic audit ${reviewWhen}`)}
+        ${row("Portal data refresh",updatedAt?`snapshot refreshed ${ago(updatedAt)}`:"snapshot refresh unavailable")}
+      </div>
+    </details>`;
 }
 // record_revenue is _FORM_ONLY_ACTIONS server-side (operator_action_worker.py)
 // — deliberately excluded from p.action_allowlist (that gate is for generic
@@ -5312,6 +5531,12 @@ function render(p, updatedAt, srcNote){
   _tixCaptureNoteDraft();  // and the tickets-room revise note
   _workFollowupCapture();  // exact per-parent text before the Work detail node is rebuilt
   _workDecisionCapture();  // exact revision feedback before the same Work detail rebuild
+  document.querySelectorAll('details[data-work-disclosure]').forEach(el=>{
+    if(el.open)WORK_DISCLOSURES.add(el.dataset.workDisclosure);else WORK_DISCLOSURES.delete(el.dataset.workDisclosure);
+  });
+  document.querySelectorAll('details[data-today-disclosure]').forEach(el=>{
+    if(el.open)TODAY_DISCLOSURES.add(el.dataset.todayDisclosure);else TODAY_DISCLOSURES.delete(el.dataset.todayDisclosure);
+  });
   // R2 (security review #3, HIGH): every innerHTML rebuild below DESTROYS the
   // focused element — after a 120s data refresh mid-sentence, focus fell to
   // <body> and the operator's next plain keystroke hit the room keydown
@@ -5332,7 +5557,7 @@ function render(p, updatedAt, srcNote){
     : VIEW==="decisions"?viewDecisions(p)
     : VIEW==="tickets"?viewTickets(p)
     : VIEW==="war_room"?viewWarRoom(p)
-    : VIEW==="work"?viewWork()
+    : VIEW==="work"?viewWork(p)
     : VIEW==="pipeline"?viewPipeline(p)
     : VIEW==="conversations"?viewConversations(p)
     : VIEW==="content"?viewContent(p)
@@ -5349,7 +5574,7 @@ function render(p, updatedAt, srcNote){
         (v==="tickets"&&Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&t.status==="open").length:
         (v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:0))));
       return `<button class="navlink ${VIEW===v?"on":""}" data-v="${v}"${VIEW===v?' aria-current="page"':""}>${esc(label)} ${n?`<span class="n">${n}</span>`:""}</button>`}).join("")}
-    <div class="foot">portal v2 · phase 7<br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
+    <div class="foot"><a href="/portal/" target="_blank" rel="noopener">Legacy portal ↗</a><br>Fallback · Portal 2 is your main workspace<br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
   <main>
     <div class="mast">
       <div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="height:100%;display:flex;align-items:center;gap:10px;padding:0 18px;max-width:calc(100% - 260px)">
@@ -5362,11 +5587,12 @@ function render(p, updatedAt, srcNote){
         <button class="pill" data-goto="ctos">Open ctOS</button>
       </div>
     </div>
-    <div class="brief">${body}</div>
+    <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}</div>
   </main>`;
-  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ;VIEW=a.dataset.v;
-    if(VIEW==="review")await loadReviewData();
-    if(VIEW==="decisions"&&!DECS)await loadDecisions();
+  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";VIEW=a.dataset.v;
+    if(VIEW==="command")await Promise.all([loadReviewData(true),loadDecisions()]);
+    if(VIEW==="review")await loadReviewData(fromToday);
+    if(VIEW==="decisions"&&(fromToday||!DECS))await loadDecisions();
     if(VIEW==="work"&&WORK===undefined)await loadWork();
     if(VIEW==="content_review"&&CRI===undefined)await loadContentReview();
     if(_portalReadCurrent(epoch)){
@@ -5383,7 +5609,7 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
   if(VIEW==="review"||VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
   if(VIEW==="review"||VIEW==="content_review")_wireSavedNotes();
-  if(VIEW==="business")wireRevenueForm();
+  if(VIEW==="business"){wireRevenueForm();wireMoney();}
   if(VIEW==="work"){
     wireRouterForm();wireWorkSelection();wireRouterDecision();wireRouterFollowup();
     // Only an explicit Inspect click requests focus. Periodic/manual refreshes
@@ -5401,6 +5627,10 @@ function render(p, updatedAt, srcNote){
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
   document.querySelectorAll("button[data-goto]").forEach(b=>{
+    if(b.closest('[data-today-approvals]')){
+      b.onclick=()=>document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.goto)}"]`)?.click();
+      return;
+    }
     b.onclick=()=>{VIEW=b.dataset.goto;render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-i]").forEach(b=>{
@@ -5601,6 +5831,7 @@ async function loadAndRender(reason){
       if(WORK_SELECTED!=null)await loadWorkDetail(WORK_SELECTED);
     }
     if(VIEW==="review"||VIEW==="content_review")await loadReviewData(true);
+    if(VIEW==="command"&&reason!=="boot")await Promise.all([loadReviewData(true),loadDecisions()]);
     if(!current())return;
     render(LAST.p,LAST.updatedAt,LAST.srcNote);
     if(reason==="manual")toast("Refreshed");
@@ -5745,12 +5976,13 @@ function _resetPortalState(){
   // revise note, sign out, log back in same tab, open Tickets → the note was restored). The
   // draft vars are the sensitive ones; the rest is a clean-slate so nothing carries over.
   TIX_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFT={id:null,text:""};CRI_NOTE_DRAFTS.clear();REVIEW_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_DRAFTS.clear();REVIEW_SAVED_NOTE_PENDING.clear();REVIEW_NOTES_SNAPSHOT=null;REV_DRAFT=null;REV_PENDING=false;
+  MONEY_UI={tab:"purchases",period:"month",status:"all",currency:"all",query:""};
   Object.assign(ROUTER_DRAFT,{text:"",packet:null,pending:false,rejected:false,message:"",epoch:ROUTER_DRAFT.epoch+1});ROUTER_READY=undefined;
   ROUTER_FOLLOWUP_DRAFTS.clear();++ROUTER_FOLLOWUP_GENERATION;
   ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();WORK=undefined;WORK_SELECTED=null;WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();WORK=undefined;WORK_SELECTED=null;WORK_DISCLOSURES.clear();TODAY_DISCLOSURES.clear();WORK_FOCUS_DETAIL=false;VIEW="command";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -5789,4 +6021,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 28e58647f713 -->
+<!-- rankwise-portal2-version: 99eb8e1790b9 -->
