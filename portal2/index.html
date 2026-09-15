@@ -1695,7 +1695,13 @@ function _contentReviewReceipt(detail,action,sid,renderSha){
 }
 function _reviewAwaiting(row){return row.kind==="content"?!_reviewContentHandled(row.item,row.linkedArtifact):row.item.status==="pending";}
 function _reviewRejected(row){
-  if(row.kind==="content"){const f=_criSavedFeedback(row.item);return !!(f&&f.status==="Rejected");}
+  if(row.kind==="content"){
+    const f=_criSavedFeedback(row.item);
+    const artifact=row.linkedArtifact;
+    const linkedChoice=String(artifact&&artifact.decision&&artifact.decision.choice||"").trim().toLowerCase();
+    const linkedReject=artifact&&_reviewArtifactDecisionMatches(row.item,artifact)&&["reject","rejected"].includes(linkedChoice);
+    return !!(f&&f.status==="Rejected")||!!linkedReject;
+  }
   return row.item.status!=="pending"&&/reject/i.test(String(row.item.decision&&row.item.decision.choice||""));
 }
 function _reviewFilterRows(rows,filter){
@@ -1757,7 +1763,7 @@ function _criFeedback(it){
   const f=_criSavedFeedback(it);
   if(!f)return `<div class="empty">${feed.available===false?"Feedback read incomplete — absence is not confirmed.":"No saved feedback in this snapshot."}</div>`;
   return `<div class="empty">Saved feedback · snapshot readback, not a new decision</div>`+
-    (f.rejected_reason?`<div style="white-space:pre-wrap"><b>Rejection reason:</b> ${esc(f.rejected_reason)}</div>`:"")+
+    (f.rejected_reason?`<div style="white-space:pre-wrap"><b>Rejection reason:</b> ${esc(f.rejected_reason)}</div>`:(f.status==="Rejected"?`<div class="empty">Rejection reason was not included in this snapshot.</div>`:""))+
     (f.revision_note?`<div style="white-space:pre-wrap"><b>Revision instructions:</b> ${esc(f.revision_note)}</div>`:"");
 }
 // Saved revision notes are a separate, versioned record.  They are never a
@@ -2095,7 +2101,8 @@ function viewContentReview(p){
   MEDIA_REG=[];
   const rows=_reviewRows();
   if(CRI===undefined&&!Array.isArray(ARTS))return `<div class="status sub" data-review-room data-cri-room>Review</div><div class="empty">Loading the unified queue…</div>`;
-  const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":""].filter(Boolean);
+  const feedbackFeed=LAST.p&&LAST.p.content_review_feedback;
+  const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":"",CRI_FILTER==="rejected"&&(!feedbackFeed||feedbackFeed.available!==true||!Array.isArray(feedbackFeed.items))?"Rejection feedback read incomplete — the Rejected count is not clearance.":""].filter(Boolean);
   const counts={all:rows.length,waiting:_reviewFilterRows(rows,"waiting").length,draft:_reviewFilterRows(rows,"draft").length,critiqued:_reviewFilterRows(rows,"critiqued").length,
     qcfail:_reviewFilterRows(rows,"qcfail").length,blocked:_reviewFilterRows(rows,"blocked").length,
     completed:_reviewFilterRows(rows,"completed").length,rejected:_reviewFilterRows(rows,"rejected").length};
@@ -2119,6 +2126,7 @@ function viewContentReview(p){
     <div class="pcard"><h4>Decided</h4><div class="v">${counts.completed}</div><small>kept out of the work queue</small></div>
   </div>`;
   const warnings=sourceWarnings.map(msg=>`<div class="state state-error review-source-warning"><b>Partial review data</b>${esc(msg)}</div>`).join("");
+  const rejectedLane=CRI_FILTER==="rejected"?`<div data-rejected-lane class="state" style="margin:10px 0"><b>Rejected content</b><br>Reasons and revision instructions are shown from the latest snapshot. Notes below are private, versioned, and do not change the decision.</div>`:"";
   const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
   const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   if(phone){
@@ -2126,7 +2134,7 @@ function viewContentReview(p){
     return `
       <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length?idx+1:0} of ${filtered.length}</small></div>
       <div class="section-note">Needs-response items are shown first. Exact-render responses stay available under Decided and All history; nothing is deleted.</div>
-      ${warnings}${summary}${filterBar}${sortBar}${detail}
+      ${warnings}${summary}${rejectedLane}${filterBar}${sortBar}${detail}
       <div class="acts" style="margin-top:4px">
         <button class="btn" data-cri-nav="prev">← Prev</button>
         <button class="btn" data-cri-nav="next">Next →</button>
@@ -2135,7 +2143,7 @@ function viewContentReview(p){
   return `
     <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} need a response</small></div>
     <div class="section-note">Needs-response items are the default work queue. Exact-render responses stay under Decided and All history; nothing is deleted. Linked render artifacts appear once, with the content workflow.</div>
-    ${warnings}${summary}${filterBar}${sortBar}
+    ${warnings}${summary}${rejectedLane}${filterBar}${sortBar}
     <div class="review-shell">
       <div class="review-list">${filtered.map(row=>{
         const score=_reviewCritiqueScore(row),it=row.item;
@@ -6334,4 +6342,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: be0912256715 -->
+<!-- rankwise-portal2-version: a0b3448e7136 -->
