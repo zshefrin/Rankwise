@@ -5124,7 +5124,9 @@ function financeTotals(totals,empty){
 let MONEY_UI={tab:"purchases",period:"month",status:"all",currency:"all",query:""};
 const MONEY_REVIEW_STATES=new Set(["evidence_complete","evidence_partial","source_changed"]);
 const MONEY_EVIDENCE_TYPES=new Set(["invoice_candidate","api_credit_funding"]);
-const MONEY_REMAINING=new Set(["document_fields","approval","statement_match","source_recheck"]);
+const MONEY_REMAINING=new Set(["document_fields","approval","statement_match","source_recheck","currency","charge_date","receipt_reference"]);
+const MONEY_REMAINING_LABELS={document_fields:"document fields",approval:"approval",statement_match:"statement match",source_recheck:"source recheck",currency:"currency",charge_date:"charge date",receipt_reference:"receipt reference"};
+const MONEY_EVIDENCE_MISSING_FLAGS=new Set(["document_fields","source_recheck","currency","charge_date","receipt_reference"]);
 function financeReview(row){
   const review=row&&typeof row.review==="object"&&!Array.isArray(row.review)?row.review:null;
   if(!review||!MONEY_REVIEW_STATES.has(review.state))return null;
@@ -5158,7 +5160,11 @@ function financeReviewLabel(row,history){
   if(!review&&history!==undefined&&(!history||history.available!==true))return {key:"unknown",label:"Review status unknown",detail:"No usable review history is available; do not infer that this record is new or previously reviewed."};
   if(!review)return {key:"new",label:"Needs review",detail:"No linked prior review recorded."};
   if(review.state==="evidence_complete")return {key:"complete",label:"Evidence checked · approval pending",detail:"Historical evidence review only; approval and statement matching remain separate."};
-  if(review.state==="evidence_partial")return {key:"partial",label:"Evidence still needed",detail:"Prior checks retained; resolve the missing document fields. Recording approval and statement matching are separate."};
+  if(review.state==="evidence_partial"){
+    const missing=review.remaining.filter(flag=>MONEY_EVIDENCE_MISSING_FLAGS.has(flag)).map(flag=>MONEY_REMAINING_LABELS[flag]);
+    const missingText=missing.length?"Missing evidence: "+missing.join(", ")+".":"Missing evidence not specified.";
+    return {key:"partial",label:"Evidence still needed · approval pending",detail:"Prior checks retained; resolve the missing evidence. Recording approval and statement matching are separate.",missingText};
+  }
   return {key:"changed",label:"Source changed · recheck",detail:"The source changed after the historical review; recheck the current evidence."};
 }
 function financeRowReview(row){return financeReview(row);}
@@ -5178,7 +5184,9 @@ function financeReviewSummary(f){
   const h=financeReviewHistory(f);
   if(!h||h.available!==true)return '<div class="section-note">Prior review history is unavailable; current pending rows are shown without assuming they were or were not reviewed.</div>';
   const n=v=>Number.isInteger(v)?String(v):"unknown";
-  return `<div class="money-review-summary" aria-label="Prior review summary"><span><b>${n(h.complete)}</b> evidence complete · approval pending</span><span><b>${n((h.partial||0)+(h.changed||0))}</b> evidence / recheck needed</span><span><b>${n(h.newEvidence)}</b> no linked prior review</span></div><details class="money-explainer"><summary>How prior review history is used</summary><p>These are historical evidence signals only. They never mean approved, paid, or currently matched. A source change requires recheck; missing history is unknown, not blanket unreviewed.</p></details>`;
+  const followup=f&&f.review_history?.followup;
+  const followupWarning=followup&&typeof followup==='object'&&!Array.isArray(followup)&&followup.available===false?'<p class="section-note">Latest follow-up unavailable; earlier checks retained.</p>':'';
+  return `${followupWarning}<div class="money-review-summary" aria-label="Prior review summary"><span><b>${n(h.complete)}</b> evidence complete · approval pending</span><span><b>${n((h.partial||0)+(h.changed||0))}</b> evidence / recheck needed</span><span><b>${n(h.newEvidence)}</b> no linked prior review</span></div><details class="money-explainer"><summary>How prior review history is used</summary><p>These are historical evidence signals only. They never mean approved, paid, or currently matched. A source change requires recheck; missing history is unknown, not blanket unreviewed.</p></details>`;
 }
 function financeMonthLabel(month){
   if(typeof month!=="string"||!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return "Period unknown";
@@ -5218,11 +5226,12 @@ function financePurchaseTable(f){
     const amount=fullAmount.startsWith("Amount")?fullAmount:fullAmount.replace(/^(?:CAD|USD|Currency unverified) /,"");
     const reasons=(Array.isArray(r.review_reasons)?r.review_reasons:[]).map(x=>String(x).replaceAll("_"," "));
     const reviewLabel=financeReviewLabel(r,history);
-    const status=r.reviewed?"Reviewed":reviewLabel.key!=="new"&&reviewLabel.key!=="unknown"?reviewLabel.label:reasons.some(x=>x.includes("duplicate"))?"Possible duplicate":amount==="Amount unknown"?"Amount missing":!["CAD","USD"].includes(values.currency)?"Currency unverified":reviewLabel.key==="unknown"?"Review status unknown":"Needs review";
+    const status=r.reviewed?"Reviewed":reviewLabel.key!=="new"&&reviewLabel.key!=="unknown"?reviewLabel.label:reviewLabel.key==="unknown"?"Review status unknown":reasons.some(x=>x.includes("duplicate"))?"Possible duplicate":amount==="Amount unknown"?"Amount missing":!["CAD","USD"].includes(values.currency)?"Currency unverified":"Needs review";
     const detail=r.reviewed?"Reviewed invoice evidence; statement matching still required.":reviewLabel.key!=="new"&&reviewLabel.key!=="unknown"?reviewLabel.detail:(reasons.join(" · ")||"Inspect original evidence locally before approval.");
+    const missing=reviewLabel.key==="partial"?`<small class="money-partial-missing">${esc(reviewLabel.missingText)}</small>`:"";
     const prior=financeRowReview(r),basis=prior&&prior.state!=="source_changed"?`<small>Prior evidence · ${esc(prior.reviewedAt.slice(0,10))}</small>`:"";
     const dateBasis=prior?.fields?.date?"Historical evidence date":r.date?"Document date":r.received?"Email received · charge date unverified":"No usable date";
-    return `<tr><td>${esc(values.date)}<small>${dateBasis}</small>${basis}</td><td>${esc(r.vendor||"Unclassified")}<small>${values.evidenceType==="api_credit_funding"?"API credit funding confirmation":r.reviewed?"Reviewed invoice":"Invoice candidate"}</small></td><td class="money-amount">${esc(amount)}</td><td>${esc(["CAD","USD"].includes(values.currency)?values.currency:"Unverified")}</td><td><span class="money-review-status${r.reviewed?" money-reviewed":""}">${esc(status)}</span><details><summary>Details</summary>${esc(detail)}${!r.reviewed?` · ${esc(financeIntakeDetails(r))}`:""}</details></td></tr>`;
+    return `<tr><td>${esc(values.date)}<small>${dateBasis}</small>${basis}</td><td>${esc(r.vendor||"Unclassified")}<small>${values.evidenceType==="api_credit_funding"?"API credit funding confirmation":r.reviewed?"Reviewed invoice":"Invoice candidate"}</small></td><td class="money-amount">${esc(amount)}</td><td>${esc(["CAD","USD"].includes(values.currency)?values.currency:"Unverified")}</td><td><span class="money-review-status${r.reviewed?" money-reviewed":""}">${esc(status)}</span>${missing}<details><summary>Details</summary>${esc(detail)}${!r.reviewed?` · ${esc(financeIntakeDetails(r))}`:""}</details></td></tr>`;
   }).join(""):'<tr><td colspan="5" class="empty">No loaded purchases match these filters.</td></tr>'}</tbody></table></div>
     <p class="section-note" role="status">${rows.length} matching loaded records · ${esc(String(ledger.shown_count??0))} reviewed / ${esc(String(ledger.reviewed_count??"unknown"))} recorded · ${esc(String(pending.shown_count??0))} pending / ${esc(String(pending.count??"unknown"))} recorded. ${ledger.truncated===true||pending.count>pending.shown_count?"Loaded rows are capped; totals include the full recorded set.":""}</p>`;
 }
@@ -6090,4 +6099,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: a650c5d35de6 -->
+<!-- rankwise-portal2-version: e3e5e55f9c7a -->
