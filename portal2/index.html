@@ -304,6 +304,23 @@ main{padding:0 0 60px;min-width:0}
 .pipe-card-sub{color:var(--ink-2);font-size:11.5px;margin-top:3px}
 .pipe-card-meta{color:var(--ink-3);font-size:10.5px;margin-top:4px}
 .pipe-more{color:var(--ink-3);font-size:11px;padding:2px 4px}
+.pipe-section{margin:18px 0 24px}
+.pipe-section-h{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-2)}
+.pipe-section-h small{font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.pipe-pulse{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0 18px}
+.pipe-pulse .pcard{padding:10px 12px;min-width:0}
+.pipe-pulse .v{font-size:20px;font-variant-numeric:tabular-nums}
+.pipe-pulse .pcard small{display:block;margin-top:3px}
+@media(max-width:760px){.pipe-pulse{grid-template-columns:repeat(2,minmax(0,1fr))}.pipe-pulse .pcard:last-child{grid-column:span 2}}
+.wr-command{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 18px}
+.wr-command .pcard{padding:10px 12px}
+.wr-command .v{font-size:20px;font-variant-numeric:tabular-nums}
+.wr-command .pcard small{display:block;margin-top:3px}
+.wr-command-card{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin:6px 0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius)}
+.wr-command-card .sev-dot{margin-top:5px;flex:none}
+.wr-command-card .q{font-weight:650;font-size:13px}
+.wr-command-card .why{margin-top:3px;color:var(--ink-2);font-size:11.5px}
+@media(max-width:760px){.wr-command{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .work-detail-grid{display:grid;grid-template-columns:minmax(110px,150px) 1fr;gap:8px 14px;font-size:12.5px}
 .work-detail-grid dt{color:var(--ink-3);font-weight:650}
 .work-detail-grid dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -3867,12 +3884,38 @@ function wrIdentityFault(room,q){
     ?"duplicate prospect id in this block":"";
 }
 
+function warRoomCommandPanel(p){
+  const decisions=Array.isArray(p.decision_inbox)?p.decision_inbox.filter(x=>x&&(x.question||x.title)):null;
+  const needs=Array.isArray(p.needs_you)?p.needs_you.filter(x=>x&&x.tier==="act_now"):null;
+  const tickets=Array.isArray(p.tickets)?p.tickets.filter(x=>x&&!x.approved&&x.status==="open"):null;
+  const findings=openFindings(p), serious=findings.filter(x=>["critical","high"].includes(String(x.severity||"")));
+  const unknown=[decisions,needs,tickets].some(x=>x===null);
+  const attention=(needs||[]).concat(decisions||[]).concat(tickets||[]).concat(serious);
+  const card=(x,i)=>{
+    const title=x.question||x.title||x.label||"Exception requires review";
+    const why=x.sub||x.reason||x.description||x.detail||"Open the linked work surface for evidence and next action.";
+    const tone=x.severity||((x.tier==="act_now"||x.severity==="critical")?"bad":"warn");
+    return `<div class="wr-command-card"><span class="sev-dot ${escAttr(tone)}"></span><div><div class="q">${esc(title)}</div><div class="why">${esc(firstLine(String(why)))}</div></div></div>`;
+  };
+  return `<div class="wr-command" data-war-room-command>
+    <div class="pcard"><h4>Needs Zack</h4><div class="v">${needs===null?"?":needs.length}</div><small>manual decisions only</small></div>
+    <div class="pcard"><h4>Blocked / at risk</h4><div class="v">${unknown?"?":tickets.length+serious.length}</div><small>tickets + serious findings</small></div>
+    <div class="pcard"><h4>Decision queue</h4><div class="v">${decisions===null?"?":decisions.length}</div><small>source-backed requests</small></div>
+    <div class="pcard"><h4>Call block</h4><div class="v">${esc(String(p.founder_call_room?.counts?.callable??"?"))}</div><small>callable after gates</small></div>
+  </div>
+  <section class="wr-command-list">
+    <h4 class="section-h">OPERATOR ATTENTION <span class="src">${unknown?"coverage incomplete":"ranked from current snapshot"}</span></h4>
+    ${attention.length?attention.slice(0,5).map(card).join(""):unknown?`<div class="state state-error">Attention feeds are incomplete this push. This is not an empty queue.</div>`:`<div class="empty">No current exception or decision card.</div>`}
+  </section>`;
+}
+
 function viewWarRoom(p){
   const room=p.founder_call_room;
   const degraded=p.founder_call_room_degraded
     ?`<div class="state state-error"><b>Call room DEGRADED</b>Gates could not be fully evaluated (${esc(p.founder_call_room_degraded)}) — nothing in this block is callable this push.</div>`:"";
-  const head=`<div class="status sub">War room</div>${degraded}`;
-  if(!room)return head+`<div class="empty">No call block in this snapshot — none is configured, or the snapshot predates this panel.</div>`;
+  const head=`<div class="status sub">War room<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">operator attention · supervised call block</small></div>${degraded}`;
+  const command=warRoomCommandPanel(p);
+  if(!room)return head+command+`<div class="empty">No call block in this snapshot — none is configured, or the snapshot predates this panel.</div>`;
   if(WR_BLOCK!==room.block_id)resetWarRoom(room.block_id);
   const all=Array.isArray(room.prospects)?room.prospects:[];
   const rows=wrRows(room);
@@ -3891,8 +3934,8 @@ function viewWarRoom(p){
     <div style="margin-top:8px"><button class="nav-btn" data-wr-mode-toggle>${WR_REHEARSAL?"Switch to a LIVE block":"Back to rehearsal"}</button> <button class="nav-btn" data-wr-reconcile>Refresh call receipts</button></div>
   </div></div>`;
 
-  if(!all.length)return head+banner+resumeNote+`<div class="empty">The block has no prospects.</div>`;
-  if(!rows.length)return head+banner+resumeNote+receipt+`<div class="empty" style="text-align:center;padding:28px 0">${WR_REHEARSAL?"Rehearsal complete — practice is not a recorded call.":"Block complete — every prospect has a recorded outcome."}</div>${wrDebrief()}`;
+  if(!all.length)return head+command+banner+resumeNote+`<div class="empty">The block has no prospects.</div>`;
+  if(!rows.length)return head+command+banner+resumeNote+receipt+`<div class="empty" style="text-align:center;padding:28px 0">${WR_REHEARSAL?"Rehearsal complete — practice is not a recorded call.":"Block complete — every prospect has a recorded outcome."}</div>${wrDebrief()}`;
   const selected=rows.findIndex(q=>String(q.id)===WR_CURRENT);
   // Duplicate ids are HELD, not hidden, so the cursor must still be able to walk past one.
   // Stay on the index we are already on when it still carries WR_CURRENT; findIndex alone
@@ -3916,7 +3959,7 @@ function viewWarRoom(p){
       ${q.blocked?`<div style="margin-top:6px"><b>This one is blocked outright and cannot be acknowledged.</b></div>`:""}</div>`:"";
 
   const opener=(q.openers||{})[WR_MODE]||"";
-  return head+banner+resumeNote+receipt+`<div class="wr-shell" data-war-room><div class="wr-cols">
+  return head+command+banner+resumeNote+receipt+`<div class="wr-shell" data-war-room><div class="wr-cols">
     <div class="wr-col">
     <div class="decide-top"><div style="font-size:13px;font-weight:750">${esc(q.name)} · ${esc(q.city)}</div>
       <div class="decide-progress"><b>${WR_IDX+1}</b>/${rows.length}</div>${dots}</div>
@@ -5091,19 +5134,41 @@ function viewPipeline(p){
 
   const testExcluded = pb.leads_md_test_excluded || 0;
 
+  const count=(valid,value)=>valid?String(value):"?";
+  const inventoryCount=ok("registry")?s1.registry_total:"?";
+  const inboundCount=ok("widget_leads")?widgetLeads.length:"?";
+  const activeCount=ok("outreach")?(s2.count+s3.count):"?";
+  const salesCount=ok("leads_md")?(s4.count+s5.count+s6.count):"?";
+  const clientCount=ok("clients")?s78.count:"?";
+  const inboundHtml=ok("widget_leads")
+    ? (widgetLeads.length?widgetLeads.map(l=>`<div class="pipe-card"><div class="pipe-card-title">${esc(l.business_name)}</div><div class="pipe-card-sub">${esc([l.city,l.phone||l.email].filter(Boolean).join(" · ")||"—")}</div><div class="pipe-card-meta">${l.icp_fit?"candidate · ":"excluded — "+esc(l.exclude_reason||"?")}${l.icp_fit?esc(ago(l.first_seen)):""}</div></div>`).join(""):`<div class="empty" style="padding:6px 2px">No widget leads yet.</div>`)
+    : `<div class="state state-error"><b>Widget-leads feed FAILED</b>Unknown this push.</div>`;
   return `
-    <div class="status sub">Pipeline</div>
-    <div class="section-note">Stranger to paying client, one board. Read-only — no actions here yet
-      (advance/exclude/close stays on Conversations, Content, and Business for now).${testExcluded?` ${esc(testExcluded)} test row${testExcluded===1?"":"s"} in leads.md excluded from Booked/Discovery/Closed-won below.`:""}</div>
-    <div class="pipe-board">
-      ${_pipeCol("Lead-in", ok("widget_leads")&&ok("registry")?widgetLeads.length+s1.registry_total:"?", leadInHtml, leadInBroken)}
-      ${_pipeCol("Contacted", s2?.count ?? "?", s2Html, outreachBroken)}
-      ${_pipeCol("Conversation", s3?.count ?? "?", s3Html, outreachBroken)}
-      ${_pipeCol("Booked", s4?.count ?? "?", s4Html, leadsMdBroken)}
-      ${_pipeCol("Discovery / Proposal", s5?.count ?? "?", s5Html, leadsMdBroken)}
-      ${_pipeCol("Closed-won", s6?.count ?? "?", s6Html, leadsMdBroken)}
-      ${_pipeCol("Onboarding + Active", s78?.count ?? "?", s78Html, clientsBroken)}
-    </div>`;
+    <div class="status sub">Pipeline<small style="margin-left:auto;font-size:12px;color:var(--ink-3)">inventory ≠ opportunity ≠ client delivery</small></div>
+    <div class="section-note">Read-only operating view. Cold-dial inventory is deliberately separated from real opportunity activity; no stage advance, send, close, or client action is implied here.${testExcluded?` ${esc(testExcluded)} test row${testExcluded===1?"":"s"} excluded from sales stages.`:""}</div>
+    <div class="pipe-pulse" aria-label="Pipeline pulse">
+      <div class="pcard"><h4>Market inventory</h4><div class="v">${esc(count(ok("registry"),inventoryCount))}</div><small>uncontacted registry candidates</small></div>
+      <div class="pcard"><h4>Inbound</h4><div class="v">${esc(count(ok("widget_leads"),inboundCount))}</div><small>widget leads</small></div>
+      <div class="pcard"><h4>Active opportunity</h4><div class="v">${esc(count(ok("outreach"),activeCount))}</div><small>contacted + conversation</small></div>
+      <div class="pcard"><h4>Sales in flight</h4><div class="v">${esc(count(ok("leads_md"),salesCount))}</div><small>booked + proposal + won</small></div>
+      <div class="pcard"><h4>Clients</h4><div class="v">${esc(count(ok("clients"),clientCount))}</div><small>onboarding + active</small></div>
+    </div>
+    <section class="pipe-section"><h3 class="pipe-section-h">Market inventory <small>not revenue pipeline</small></h3>
+      <div class="pipe-board">
+        ${_pipeCol("Inbound leads", ok("widget_leads")?widgetLeads.length:"?", inboundHtml, !ok("widget_leads"))}
+        ${_pipeCol("cold-dial registry", ok("registry")?s1.registry_total:"?", ok("registry")?`<div class="pipe-card"><div class="pipe-card-title">${esc(s1.registry_total??"?")} candidates</div><div class="pipe-card-sub">uncontacted inventory, not active opportunities</div>${(s1.registry_sample||[]).slice(0,5).map(r=>`<div class="pipe-card-meta">${esc(r.business_name)} — ${esc(r.city||"?")}</div>`).join("")}${s1.registry_total>5?`<div class="pipe-more">+${esc(s1.registry_total-5)} more</div>`:""}</div>`:`<div class="state state-error"><b>Registry feed FAILED</b>Unknown this push.</div>`, !ok("registry"))}
+      </div>
+    </section>
+    <section class="pipe-section"><h3 class="pipe-section-h">Active opportunity <small>records with actual outreach or sales activity</small></h3>
+      <div class="pipe-board">
+        ${_pipeCol("Contacted", s2?.count ?? "?", s2Html, outreachBroken)}
+        ${_pipeCol("Conversation", s3?.count ?? "?", s3Html, outreachBroken)}
+        ${_pipeCol("Booked", s4?.count ?? "?", s4Html, leadsMdBroken)}
+        ${_pipeCol("Discovery / Proposal", s5?.count ?? "?", s5Html, leadsMdBroken)}
+        ${_pipeCol("Closed-won", s6?.count ?? "?", s6Html, leadsMdBroken)}
+        ${_pipeCol("Onboarding + Active", s78?.count ?? "?", s78Html, clientsBroken)}
+      </div>
+    </section>`;
 }
 // Financial evidence arrives as exact decimal STRINGS. Do not convert through
 // Number, round whole dollars, blend FX, or substitute missing values with zero.
@@ -6099,4 +6164,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: e3e5e55f9c7a -->
+<!-- rankwise-portal2-version: 6153b03e9acf -->
