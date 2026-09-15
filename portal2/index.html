@@ -126,6 +126,8 @@ main{padding:0 0 60px;min-width:0}
 .money-table summary{cursor:pointer;color:var(--acc)}
 .money-review-status{color:var(--acc);font-size:12px}
 .money-reviewed{color:var(--ink-2)}
+.money-review-summary{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;color:var(--ink-2);font-size:12px}
+.money-review-summary span{padding:7px 9px;border:1px solid var(--edge);border-radius:6px;background:var(--surface)}
 .money-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
 .money-chart{padding:18px;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface);min-width:0}
 .money-bar{margin-top:14px}
@@ -5120,6 +5122,64 @@ function financeTotals(totals,empty){
   return entries.map(([c,v])=>financeMoney(v,c)).join(" · ");
 }
 let MONEY_UI={tab:"purchases",period:"month",status:"all",currency:"all",query:""};
+const MONEY_REVIEW_STATES=new Set(["evidence_complete","evidence_partial","source_changed"]);
+const MONEY_EVIDENCE_TYPES=new Set(["invoice_candidate","api_credit_funding"]);
+const MONEY_REMAINING=new Set(["document_fields","approval","statement_match","source_recheck"]);
+function financeReview(row){
+  const review=row&&typeof row.review==="object"&&!Array.isArray(row.review)?row.review:null;
+  if(!review||!MONEY_REVIEW_STATES.has(review.state))return null;
+  const fields=review.fields&&typeof review.fields==="object"&&!Array.isArray(review.fields)?review.fields:{};
+  const iso=typeof review.reviewed_at==="string"&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(review.reviewed_at)&&Number.isFinite(Date.parse(review.reviewed_at))?review.reviewed_at:null;
+  if(!iso)return null;
+  const fieldDate=typeof fields.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(fields.date)&&Number.isFinite(Date.parse(fields.date+"T12:00:00Z"))&&new Date(fields.date+"T12:00:00Z").toISOString().slice(0,10)===fields.date?fields.date:null;
+  const fieldAmount=typeof fields.amount==="string"&&/^[-]?\d{1,12}\.\d{2}$/.test(fields.amount)?fields.amount:null;
+  const fieldCurrency=["CAD","USD"].includes(fields.currency)?fields.currency:null;
+  const evidenceType=MONEY_EVIDENCE_TYPES.has(fields.evidence_type)?fields.evidence_type:null;
+  const remaining=Array.isArray(review.remaining)&&review.remaining.every(x=>MONEY_REMAINING.has(x))?[...new Set(review.remaining)]:null;
+  if(remaining===null)return null;
+  if(review.state!=="source_changed"&&!evidenceType)return null;
+  if(review.state==="evidence_complete"&&(!fieldDate||!fieldAmount||!fieldCurrency))return null;
+  return {state:review.state,reviewedAt:iso,fields:review.state==="source_changed"?null:{date:fieldDate,amount:fieldAmount,currency:fieldCurrency,evidenceType},remaining};
+}
+function financeReviewHistory(f){
+  const h=f&&f.review_history;
+  if(!h||typeof h!=="object"||Array.isArray(h)||typeof h.available!=="boolean")return null;
+  const reason=typeof h.reason==="string"&&/^[a-z][a-z0-9_]{1,48}$/.test(h.reason)?h.reason:"invalid";
+  const count=k=>Number.isInteger(h[k])&&h[k]>=0?h[k]:null;
+  const complete=count("evidence_complete_count"),partial=count("evidence_partial_count"),changed=count("source_changed_count"),newEvidence=count("not_previously_reviewed_count"),matched=count("matched_count"),source=count("source_count");
+  const expected=Number.isInteger(f?.pending?.count)&&f.pending.count>=0?f.pending.count:null;
+  if(h.available!==true)return {available:false,reason};
+  if([complete,partial,changed,newEvidence,matched,source].some(v=>v===null)||matched!==complete+partial||expected===null||matched+changed+newEvidence!==expected||matched+changed>source)return null;
+  return {available:h.available,reason,reviewedAt:typeof h.reviewed_at==="string"?h.reviewed_at:null,complete,partial,changed,newEvidence,matched,source};
+}
+function financeReviewLabel(row,history){
+  const review=financeReview(row);
+  if(!review&&row&&row.review&&typeof row.review==="object")return {key:"unknown",label:"Review status unknown",detail:"The linked review record is malformed; do not infer that this record is new or previously reviewed."};
+  if(!review&&history!==undefined&&(!history||history.available!==true))return {key:"unknown",label:"Review status unknown",detail:"No usable review history is available; do not infer that this record is new or previously reviewed."};
+  if(!review)return {key:"new",label:"Needs review",detail:"No linked prior review recorded."};
+  if(review.state==="evidence_complete")return {key:"complete",label:"Evidence checked · approval pending",detail:"Historical evidence review only; approval and statement matching remain separate."};
+  if(review.state==="evidence_partial")return {key:"partial",label:"Evidence still needed",detail:"Prior checks retained; resolve the missing document fields. Recording approval and statement matching are separate."};
+  return {key:"changed",label:"Source changed · recheck",detail:"The source changed after the historical review; recheck the current evidence."};
+}
+function financeRowReview(row){return financeReview(row);}
+function financeRowValues(row){
+  const review=financeRowReview(row),fields=review&&review.state!=="source_changed"?review.fields:null;
+  return {date:fields?.date||row.date||row.received||"Date unknown",amount:fields?.amount||row.amount,currency:fields?.currency||row.currency,evidenceType:fields?.evidenceType||row.evidence_type};
+}
+function financeIntakeDetails(row){
+  const values=[];
+  if(row.date)values.push("Intake date: "+row.date); else if(row.received)values.push("Intake received: "+row.received+" · charge date unverified");
+  if(row.amount!==undefined)values.push("Intake amount: "+financeMoney(row.amount,row.currency));
+  values.push("Intake currency: "+(["CAD","USD"].includes(row.currency)?row.currency:"Unverified"));
+  if(row.evidence_type)values.push("Intake evidence: "+row.evidence_type);
+  return values.join(" · ");
+}
+function financeReviewSummary(f){
+  const h=financeReviewHistory(f);
+  if(!h||h.available!==true)return '<div class="section-note">Prior review history is unavailable; current pending rows are shown without assuming they were or were not reviewed.</div>';
+  const n=v=>Number.isInteger(v)?String(v):"unknown";
+  return `<div class="money-review-summary" aria-label="Prior review summary"><span><b>${n(h.complete)}</b> evidence complete · approval pending</span><span><b>${n((h.partial||0)+(h.changed||0))}</b> evidence / recheck needed</span><span><b>${n(h.newEvidence)}</b> no linked prior review</span></div><details class="money-explainer"><summary>How prior review history is used</summary><p>These are historical evidence signals only. They never mean approved, paid, or currently matched. A source change requires recheck; missing history is unknown, not blanket unreviewed.</p></details>`;
+}
 function financeMonthLabel(month){
   if(typeof month!=="string"||!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return "Period unknown";
   return new Date(month+"-15T12:00:00Z").toLocaleDateString("en-CA",{month:"long",year:"numeric",timeZone:"UTC"});
@@ -5136,25 +5196,33 @@ function financeHeroAmount(totals){
   }).join("");
 }
 function financePurchaseRows(f){
-  const reviewed=f.ledger?.available===true&&Array.isArray(f.ledger.rows)?f.ledger.rows.map(r=>({...r,reviewed:true})):[];
-  const pending=f.pending?.available===true&&Array.isArray(f.pending.rows)?f.pending.rows.map(r=>({...r,reviewed:false})):[];
-  return [...reviewed,...pending].filter(r=>r&&typeof r==="object").sort((a,b)=>String(b.date||b.received||"").localeCompare(String(a.date||a.received||""))||String(a.vendor||"").localeCompare(String(b.vendor||"")));
+  const history=financeReviewHistory(f);
+  const reviewed=f.ledger?.available===true&&Array.isArray(f.ledger.rows)?f.ledger.rows.map(r=>({...r,review:null,reviewed:true})):[];
+  const pending=f.pending?.available===true&&Array.isArray(f.pending.rows)?f.pending.rows.map(r=>({...r,review:history?.available===true?r.review:null,reviewed:false})):[];
+  return [...reviewed,...pending].filter(r=>r&&typeof r==="object").sort((a,b)=>String(financeRowValues(b).date).localeCompare(String(financeRowValues(a).date))||String(a.vendor||"").localeCompare(String(b.vendor||"")));
 }
 function financeFilteredRows(f){
+  const history=financeReviewHistory(f);
   return financePurchaseRows(f).filter(r=>
-    (MONEY_UI.period==="all"||String(r.date||r.received||"").startsWith(f.month||"!"))&&
-    (MONEY_UI.status==="all"||(MONEY_UI.status==="reviewed")===r.reviewed)&&
-    (MONEY_UI.currency==="all"||(MONEY_UI.currency==="unknown"?!["CAD","USD"].includes(r.currency):r.currency===MONEY_UI.currency))&&
+    (MONEY_UI.period==="all"||String(financeRowValues(r).date).startsWith(f.month||"!"))&&
+    (MONEY_UI.status==="all"||(MONEY_UI.status==="reviewed")===r.reviewed||MONEY_UI.status==="pending"&&!r.reviewed)&&
+    (!MONEY_UI.status.startsWith("evidence_")||!r.reviewed&&financeReviewLabel(r,history).key===MONEY_UI.status.slice(9))&&
+    (MONEY_UI.status!=="new_evidence"||!r.reviewed&&financeReviewLabel(r,history).key==="new")&&
+    (MONEY_UI.currency==="all"||(MONEY_UI.currency==="unknown"?!["CAD","USD"].includes(financeRowValues(r).currency):financeRowValues(r).currency===MONEY_UI.currency))&&
     String(r.vendor||"").toLowerCase().includes(MONEY_UI.query.trim().toLowerCase()));
 }
 function financePurchaseTable(f){
-  const rows=financeFilteredRows(f), ledger=f.ledger||{}, pending=f.pending||{};
+  const rows=financeFilteredRows(f), ledger=f.ledger||{}, pending=f.pending||{}, history=financeReviewHistory(f);
   return `<div class="money-table-wrap"><table class="money-table"><thead><tr><th scope="col">Date</th><th scope="col">Company / purchase</th><th scope="col" class="money-amount">Amount</th><th scope="col">Currency</th><th scope="col">Review status</th></tr></thead><tbody>${rows.length?rows.map(r=>{
-    const fullAmount=financeMoney(r.amount,r.currency);
+    const values=financeRowValues(r),fullAmount=financeMoney(values.amount,values.currency);
     const amount=fullAmount.startsWith("Amount")?fullAmount:fullAmount.replace(/^(?:CAD|USD|Currency unverified) /,"");
     const reasons=(Array.isArray(r.review_reasons)?r.review_reasons:[]).map(x=>String(x).replaceAll("_"," "));
-    const status=r.reviewed?"Reviewed":reasons.some(x=>x.includes("duplicate"))?"Possible duplicate":amount==="Amount unknown"?"Amount missing":!["CAD","USD"].includes(r.currency)?"Currency unverified":"Needs review";
-    return `<tr><td>${esc(r.date||r.received||"Date unknown")}<small>${r.date?"Document date":r.received?"Email received · charge date unverified":"No usable date"}</small></td><td>${esc(r.vendor||"Unclassified")}<small>${r.evidence_type==="api_credit_funding"?"API credit funding confirmation":r.reviewed?"Reviewed invoice":"Invoice candidate"}</small></td><td class="money-amount">${esc(amount)}</td><td>${esc(["CAD","USD"].includes(r.currency)?r.currency:"Unverified")}</td><td><span class="money-review-status${r.reviewed?" money-reviewed":""}">${status}</span><details><summary>Details</summary>${esc(r.reviewed?"Reviewed invoice evidence; statement matching still required.":reasons.join(" · ")||"Inspect original evidence locally before approval.")}</details></td></tr>`;
+    const reviewLabel=financeReviewLabel(r,history);
+    const status=r.reviewed?"Reviewed":reviewLabel.key!=="new"&&reviewLabel.key!=="unknown"?reviewLabel.label:reasons.some(x=>x.includes("duplicate"))?"Possible duplicate":amount==="Amount unknown"?"Amount missing":!["CAD","USD"].includes(values.currency)?"Currency unverified":reviewLabel.key==="unknown"?"Review status unknown":"Needs review";
+    const detail=r.reviewed?"Reviewed invoice evidence; statement matching still required.":reviewLabel.key!=="new"&&reviewLabel.key!=="unknown"?reviewLabel.detail:(reasons.join(" · ")||"Inspect original evidence locally before approval.");
+    const prior=financeRowReview(r),basis=prior&&prior.state!=="source_changed"?`<small>Prior evidence · ${esc(prior.reviewedAt.slice(0,10))}</small>`:"";
+    const dateBasis=prior?.fields?.date?"Historical evidence date":r.date?"Document date":r.received?"Email received · charge date unverified":"No usable date";
+    return `<tr><td>${esc(values.date)}<small>${dateBasis}</small>${basis}</td><td>${esc(r.vendor||"Unclassified")}<small>${values.evidenceType==="api_credit_funding"?"API credit funding confirmation":r.reviewed?"Reviewed invoice":"Invoice candidate"}</small></td><td class="money-amount">${esc(amount)}</td><td>${esc(["CAD","USD"].includes(values.currency)?values.currency:"Unverified")}</td><td><span class="money-review-status${r.reviewed?" money-reviewed":""}">${esc(status)}</span><details><summary>Details</summary>${esc(detail)}${!r.reviewed?` · ${esc(financeIntakeDetails(r))}`:""}</details></td></tr>`;
   }).join(""):'<tr><td colspan="5" class="empty">No loaded purchases match these filters.</td></tr>'}</tbody></table></div>
     <p class="section-note" role="status">${rows.length} matching loaded records · ${esc(String(ledger.shown_count??0))} reviewed / ${esc(String(ledger.reviewed_count??"unknown"))} recorded · ${esc(String(pending.shown_count??0))} pending / ${esc(String(pending.count??"unknown"))} recorded. ${ledger.truncated===true||pending.count>pending.shown_count?"Loaded rows are capped; totals include the full recorded set.":""}</p>`;
 }
@@ -5194,12 +5262,13 @@ function viewFinance(p){
       {period:"month",label:"This month",totals:ledger.reviewed_month_totals,scope:financeMonthLabel(f.month),count:ledger.reviewed_month_count},
       {period:"all",label:"All time",totals:ledger.reviewed_totals,scope:ledger.reviewed_date_coverage?.oldest?"Recorded since "+ledger.reviewed_date_coverage.oldest:"Recorded history · coverage unknown",count:ledger.reviewed_count}
     ].map(item=>`<button type="button" class="money-period" data-money-period="${item.period}" aria-label="Show ${item.label.toLowerCase()} reviewed purchases"><span class="money-period-label">${item.label}<span aria-hidden="true">↗</span></span>${ledger.available===true?financeHeroAmount(item.totals):'<span class="money-scope">Ledger unavailable</span>'}<span class="money-scope">${esc(item.scope)}${Number.isInteger(item.count)?` · ${item.count} reviewed purchases`:""}</span></button>`).join("")}</div>
-    <div class="money-total-foot"><span>Reviewed invoices · pending excluded · <b>Spend not reconciled</b></span>${pending.available===true?`<button type="button" class="btn" data-money-review>${esc(String(pending.count))} to review →</button>`:"<span>Pending store unavailable</span>"}</div>
-    <details class="money-explainer"${!ready||repairNote?" open":""}><summary>Audit coverage and what these totals mean</summary><p>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</p><p>${esc(f.reconciliation?.note||"Original bank statements and complete coverage are required.")} All time means recorded history, not proof of complete spending coverage. CAD and USD stay separate.</p><p>API funding included: ${esc(ledger.available===true?financeTotals(ledger.funding_totals_included,"none recorded"):"unavailable")} — do not add again. Credit funding is not consumed API usage.</p><p>${pending.available===true?`${esc(String(pending.count))} candidates · ${esc(String(pending.currency_unknown_count))} currency unknown · ${esc(String(pending.unpriced_count))} amount unknown. Pending evidence subtotal: ${esc(financeTotals(pending.totals_by_currency,"No currency-qualified pending total"))}. May include duplicate evidence; never add to reviewed totals.`:"Pending store unavailable"}</p></details>
+    <div class="money-total-foot"><span>Reviewed invoices · pending excluded · <b>Spend not reconciled</b></span>${pending.available===true?`<button type="button" class="btn" data-money-review>${esc(String(pending.count))} pending records →</button>`:"<span>Pending store unavailable</span>"}</div>
+    ${financeReviewSummary(f)}
+    <details class="money-explainer"${!ready||repairNote?" open":""}><summary>Audit coverage and what these totals mean</summary><p>${esc(collectionNote)}${collection.checked_at?` · checked ${esc(ago(collection.checked_at))}`:""}. Collection success is not complete accounting.</p><p>${esc(f.reconciliation?.note||"Original bank statements and complete coverage are required.")} All time means recorded history, not proof of complete spending coverage. CAD and USD stay separate.</p><p>API funding included: ${esc(ledger.available===true?financeTotals(ledger.funding_totals_included,"none recorded"):"unavailable")} — do not add again. Credit funding is not consumed API usage.</p><p>${pending.available===true?`${esc(String(pending.count))} candidates · ${esc(String(pending.currency_unknown_count))} currency unknown · ${esc(String(pending.unpriced_count))} amount unknown. Pending evidence subtotal (intake values; historical corrections excluded): ${esc(financeTotals(pending.totals_by_currency,"No currency-qualified pending total"))}. May include duplicate evidence; never add to reviewed totals.`:"Pending store unavailable"}</p></details>
     ${pending.available===true&&pending.cleanup_pending_count>0?`<p class="state state-error">${esc(String(pending.cleanup_pending_count))} already-recorded candidates need cleanup retry. Excluded from pending counts and totals; do not confirm them as new expenses.</p>`:""}
     ${MONEY_UI.tab==="overview"?financeVendorCharts(f):`<div class="money-table-heading"><h2>Purchases</h2><select id="money-period" aria-label="Purchase period"><option value="month">${esc(financeMonthLabel(f.month))}</option><option value="all">All time</option></select></div>
     ${ledger.available===true&&!Array.isArray(ledger.rows)?'<p class="state state-error">Reviewed purchase details are not in this snapshot yet. The totals above remain recorded totals; pending rows are not your complete purchase history.</p>':""}
-    <div class="money-toolbar"><label for="money-query">Company<input type="search" id="money-query" placeholder="Search companies" maxlength="100"></label><label for="money-status">Review status<select id="money-status"><option value="all">All records</option><option value="reviewed">Reviewed</option><option value="pending">Needs review</option></select></label><label for="money-currency">Currency<select id="money-currency"><option value="all">All currencies</option><option value="CAD">CAD</option><option value="USD">USD</option><option value="unknown">Unverified</option></select></label></div><div id="money-table-results">${financePurchaseTable(f)}</div><p class="section-note">Inspect original evidence locally before approval. This table has no confirmation or payment actions.</p>`}
+    <div class="money-toolbar"><label for="money-query">Company<input type="search" id="money-query" placeholder="Search companies" maxlength="100"></label><label for="money-status">Review status<select id="money-status"><option value="all">All records</option><option value="reviewed">Reviewed</option><option value="pending">Needs review</option><option value="evidence_complete">Evidence complete</option><option value="evidence_partial">Evidence partial</option><option value="new_evidence">New evidence</option></select></label><label for="money-currency">Currency<select id="money-currency"><option value="all">All currencies</option><option value="CAD">CAD</option><option value="USD">USD</option><option value="unknown">Unverified</option></select></label></div><div id="money-table-results">${financePurchaseTable(f)}</div><p class="section-note">Inspect original evidence locally before approval. This table has no confirmation or payment actions.</p>`}
   </section>`;
 }
 function wireMoney(){
@@ -6021,4 +6090,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 99eb8e1790b9 -->
+<!-- rankwise-portal2-version: a650c5d35de6 -->
