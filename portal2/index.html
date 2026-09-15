@@ -324,7 +324,8 @@ main{padding:0 0 60px;min-width:0}
 .wr-command .pcard{padding:10px 12px}
 .wr-command .v{font-size:20px;font-variant-numeric:tabular-nums}
 .wr-command .pcard small{display:block;margin-top:3px}
-.wr-command-card{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin:6px 0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius)}
+.wr-command-card{display:flex;width:100%;gap:10px;align-items:flex-start;padding:10px 12px;margin:6px 0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);color:inherit;text-align:left;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+.wr-command-card>div{min-width:0;flex:1}
 .wr-command-card .sev-dot{margin-top:5px;flex:none}
 .wr-command-card .q{font-weight:650;font-size:13px}
 .wr-command-card .why{margin-top:3px;color:var(--ink-2);font-size:11.5px}
@@ -3948,12 +3949,16 @@ function warRoomCommandPanel(p){
   const tickets=Array.isArray(p.tickets)?p.tickets.filter(x=>x&&!x.approved&&x.status==="open"):null;
   const findings=openFindings(p), serious=findings.filter(x=>["critical","high"].includes(String(x.severity||"")));
   const unknown=[decisions,needs,tickets].some(x=>x===null);
-  const attention=(needs||[]).concat(decisions||[]).concat(tickets||[]).concat(serious);
+  const validGoto=(value,fallback)=>typeof value==="string"&&["command","review","conversations","work","analytics","business","war_room","pipeline","decisions","tickets","ctos","content","machine"].includes(value)?value:fallback;
+  const severityRank=(x)=>({critical:0,high:1,bad:1,medium:2,warn:2,low:3,info:4}[String(x.severity||"").toLowerCase()]??4);
+  const requestGoto=(x)=>({outreach:"conversations",today:"command",content:"review",system:"machine",money:"business"}[x.action_tab||x.tab]||validGoto(x.goto,"machine"));
+  const rawAttention=(needs||[]).map(x=>({...x,_goto:requestGoto(x),_rank:severityRank(x),_src:"needs"})).concat((decisions||[]).map(x=>({...x,_goto:"decisions",_rank:severityRank(x)+1,_src:"decisions"}))).concat((tickets||[]).map(x=>({...x,_goto:"tickets",_rank:severityRank(x)+2,_src:"tickets"}))).concat(serious.map(x=>({...x,_goto:"machine",_rank:severityRank(x),_src:"findings"})));
+  const sorted=rawAttention.sort((a,b)=>a._rank-b._rank),seen=new Set(),attention=sorted.filter(x=>{const key=`${x._src}:${String(x.id||x.question||x.title||x.label||x.description||"").trim().toLowerCase()}`;if(!key||seen.has(key))return false;seen.add(key);return true;});
   const card=(x,i)=>{
     const title=x.question||x.title||x.label||"Exception requires review";
     const why=x.sub||x.reason||x.description||x.detail||"Open the linked work surface for evidence and next action.";
     const tone=x.severity||((x.tier==="act_now"||x.severity==="critical")?"bad":"warn");
-    return `<div class="wr-command-card"><span class="sev-dot ${escAttr(tone)}"></span><div><div class="q">${esc(title)}</div><div class="why">${esc(firstLine(String(why)))}</div></div></div>`;
+    return `<button class="wr-command-card" data-goto="${escAttr(x._goto||"decide")}" title="Open ${escAttr(x._goto||"decide")}"><span class="sev-dot ${escAttr(tone)}"></span><div><div class="q">${esc(title)}</div><div class="why">${esc(firstLine(String(why)))}</div></div><span class="wr-command-open">Open →</span></button>`;
   };
   return `<div class="wr-command" data-war-room-command>
     <div class="pcard"><h4>Needs Zack</h4><div class="v">${needs===null?"?":needs.length}</div><small>manual decisions only</small></div>
@@ -3962,7 +3967,7 @@ function warRoomCommandPanel(p){
     <div class="pcard"><h4>Call block</h4><div class="v">${esc(String(p.founder_call_room?.counts?.callable??"?"))}</div><small>callable after gates</small></div>
   </div>
   <section class="wr-command-list">
-    <h4 class="section-h">OPERATOR ATTENTION <span class="src">${unknown?"coverage incomplete":"ranked from current snapshot"}</span></h4>
+    <h4 class="section-h">OPERATOR ATTENTION <span class="src">${unknown?"coverage incomplete":"prioritized · deduplicated"}</span></h4>
     ${attention.length?attention.slice(0,5).map(card).join(""):unknown?`<div class="state state-error">Attention feeds are incomplete this push. This is not an empty queue.</div>`:`<div class="empty">No current exception or decision card.</div>`}
   </section>`;
 }
@@ -5843,7 +5848,7 @@ function render(p, updatedAt, srcNote){
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
   document.querySelectorAll("button[data-goto]").forEach(b=>{
-    if(b.closest('[data-today-approvals]')){
+    if(b.closest('[data-today-approvals]')||b.closest('[data-war-room-command]')||b.closest('.wr-command-list')){
       b.onclick=()=>document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.goto)}"]`)?.click();
       return;
     }
@@ -6237,4 +6242,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 213c3e2a38ba -->
+<!-- rankwise-portal2-version: 50c8a6c8abbf -->
