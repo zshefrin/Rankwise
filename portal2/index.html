@@ -1133,7 +1133,9 @@ function changeLog(p){
 let VIEW = "command";
 const NAVS = [["command","Today"],["review","Review"],["conversations","Inbox"],["work","AI Work"],["analytics","Progress"],["business","Money"],
               ["war_room","War room"],["pipeline","Pipeline"],["decisions","Decide"],["tickets","Tickets"],["ctos","ctOS"],["content","Content"],["machine","Machine"]];
-let CMDK_OPEN=false, SHORTCUTS_OPEN=false, CMDK_QUERY="";
+let CMDK_OPEN=false, SHORTCUTS_OPEN=false, CMDK_QUERY="", MODAL_OPENER=null;
+function modalOpenerSelector(el){if(!el)return null;if(el.id)return `#${CSS.escape(el.id)}`;if(el.dataset?.v)return `nav button[data-v="${CSS.escape(el.dataset.v)}"]`;if(el.dataset?.goto)return `[data-goto="${CSS.escape(el.dataset.goto)}"]`;return null;}
+function restoreModalFocus(){const selector=MODAL_OPENER;MODAL_OPENER=null;const el=selector?document.querySelector(selector):null;if(el&&typeof el.focus==="function")el.focus({preventScroll:true});}
 function _paletteRows(){
   return NAVS.map(([view,label],i)=>({view,label,hotkey:i<9?String(i+1):""}));
 }
@@ -1144,17 +1146,17 @@ function _paletteMarkup(){
 }
 function _wirePalette(){
   document.querySelectorAll("[data-palette-goto]").forEach(b=>b.onclick=()=>{document.querySelector(".cmdk-backdrop")?.remove();CMDK_OPEN=false;SHORTCUTS_OPEN=false;document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.paletteGoto)}"]`)?.click();});
-  document.querySelector("[data-cmdk-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){CMDK_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);}});
-  document.querySelector("[data-shortcut-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);}});
-  document.querySelector("[data-shortcut-dismiss]")?.addEventListener("click",()=>{SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);});
+  document.querySelector("[data-cmdk-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){CMDK_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);restoreModalFocus();}});
+  document.querySelector("[data-shortcut-close]")?.addEventListener("click",e=>{if(e.target===e.currentTarget){SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);restoreModalFocus();}});
+  document.querySelector("[data-shortcut-dismiss]")?.addEventListener("click",()=>{SHORTCUTS_OPEN=false;render(LAST.p,LAST.updatedAt,LAST.srcNote);restoreModalFocus();});
   const input=$("#cmdk-input");
   if(input){input.focus();input.oninput=()=>{CMDK_QUERY=input.value;const q=input.value.trim().toLowerCase();document.querySelectorAll("[data-palette-goto]").forEach(b=>b.hidden=!!q&&!b.textContent.toLowerCase().includes(q));};const q=input.value.trim().toLowerCase();document.querySelectorAll("[data-palette-goto]").forEach(b=>b.hidden=!!q&&!b.textContent.toLowerCase().includes(q));input.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();document.querySelector("[data-palette-goto]:not([hidden])")?.click();}else if(e.key==="ArrowDown"){e.preventDefault();document.querySelector("[data-palette-goto]:not([hidden])")?.focus();}};}
   const sheet=document.querySelector(".shortcut-sheet");if(sheet)sheet.querySelector("[data-shortcut-dismiss]")?.focus();
 }
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"&&(CMDK_OPEN||SHORTCUTS_OPEN)){e.preventDefault();CMDK_OPEN=false;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
-  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();CMDK_OPEN=true;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
-  if(e.key==="?"&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!e.isComposing&&!e.target?.isContentEditable&&!(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))){e.preventDefault();SHORTCUTS_OPEN=true;CMDK_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+  if(e.key==="Escape"&&(CMDK_OPEN||SHORTCUTS_OPEN)){e.preventDefault();CMDK_OPEN=false;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);restoreModalFocus();return;}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();if(!CMDK_OPEN&&!SHORTCUTS_OPEN)MODAL_OPENER=modalOpenerSelector(document.activeElement);CMDK_OPEN=true;SHORTCUTS_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
+  if(e.key==="?"&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!e.isComposing&&!e.target?.isContentEditable&&!(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))){e.preventDefault();if(!CMDK_OPEN&&!SHORTCUTS_OPEN)MODAL_OPENER=modalOpenerSelector(document.activeElement);SHORTCUTS_OPEN=true;CMDK_OPEN=false;if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);return;}
   if(CMDK_OPEN||SHORTCUTS_OPEN){
     if((CMDK_OPEN||SHORTCUTS_OPEN)&&e.key==="Tab"){
       const box=document.querySelector(CMDK_OPEN?".cmdk": ".shortcut-sheet"),els=box?[...box.querySelectorAll("input,button:not([hidden])")]:[];
@@ -6284,7 +6286,7 @@ function renderBootSkeleton(){
 }
 function _resetPortalState(){
   ++PORTAL_EPOCH;++PORTAL_READ_SEQ;++WORK_READ_SEQ;++WORK_DETAIL_SEQ;
-  CMDK_OPEN=false;SHORTCUTS_OPEN=false;CMDK_QUERY="";
+  CMDK_OPEN=false;SHORTCUTS_OPEN=false;CMDK_QUERY="";MODAL_OPENER=null;
   ACTION_FEEDBACK.length=0;
   DEC_SELECTED=null;
   DEC_RPC_PENDING=null;
@@ -6363,4 +6365,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 8d96d89b1d0d -->
+<!-- rankwise-portal2-version: 7a31140b0f48 -->
