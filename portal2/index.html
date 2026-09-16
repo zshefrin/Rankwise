@@ -5619,6 +5619,7 @@ function viewBusiness(p, updatedAt){
 const _CTOS_STATES=new Set(["healthy","attention","degraded","critical","stopped","unknown"]);
 const _CTOS_SCHEMA="ctos.summary.v1";
 const _CTOS_STALE_HOURS=8;
+const _CTOS_SEMANTIC_STALE_DAYS=14;
 // Per-state fallback text (F9e): a state with an empty reason used to render
 // "healthy · ctOS status unavailable", which reads as a contradiction.
 const _CTOS_FALLBACK_REASON={
@@ -5666,6 +5667,11 @@ function ctosPulse(p){
       state="unknown";
       reason=`scan is ${ageH.toFixed(1)}h old (snapshot frozen?)`;
     }
+    const semanticAge=Number(raw.semantic_age_days);
+    if(state==="healthy"&&Number.isFinite(semanticAge)&&semanticAge>_CTOS_SEMANTIC_STALE_DAYS){
+      state="attention";
+      reason=`runtime scan is fresh, but map semantics are ${Math.round(semanticAge)}d old`;
+    }
   }
   return {
     state:state,
@@ -5686,6 +5692,12 @@ function ctosPulseText(p){
 }
 
 function _ctosValue(v){return typeof v==="number"&&Number.isFinite(v)?String(v):"—";}
+function _ctosDateLabel(value){
+  if(typeof value!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value))return "unavailable";
+  const d=new Date(value+"T00:00:00Z");
+  if(!Number.isFinite(d.getTime())||d.toISOString().slice(0,10)!==value||d.getTime()>Date.now())return "unavailable";
+  return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric",timeZone:"UTC"});
+}
 function viewCtos(p,updatedAt){
   const pulse=ctosPulse(p);
   const raw=p&&p.ctos_summary&&p.ctos_summary.schema_version===_CTOS_SCHEMA?p.ctos_summary:{};
@@ -5704,11 +5716,17 @@ function viewCtos(p,updatedAt){
   const exceptions=Array.isArray(pulse.top_exceptions)?pulse.top_exceptions:[];
   const scanWhen=raw.scan_observed_at?ago(raw.scan_observed_at):"unavailable";
   const reviewWhen=raw.semantic_reviewed_at
-    ?`${esc(raw.semantic_reviewed_at)}${typeof raw.semantic_age_days==="number"?` · ${esc(String(raw.semantic_age_days))}d ago`:""}`
+    ?`${esc(_ctosDateLabel(raw.semantic_reviewed_at))}${typeof raw.semantic_age_days==="number"?` · ${esc(String(raw.semantic_age_days))}d ago`:""}`
     :"unavailable";
+  const semanticAge=Number(raw.semantic_age_days);
+  const semanticStale=Number.isFinite(semanticAge)&&semanticAge>_CTOS_SEMANTIC_STALE_DAYS;
+  const freshnessBanner=semanticStale
+    ?`<div class="state state-error" data-ctos-freshness><b>Atlas descriptions need review</b><br>The runtime scan is separate and may be current, but curated atlas text and relationships were last reviewed ${Math.round(semanticAge)} days ago. Treat missing systems and descriptions as unknown.</div>`
+    :`<div class="state" data-ctos-freshness><b>Atlas layers</b><br>Runtime scan: ${esc(scanWhen)} · descriptions and relationships: ${esc(reviewWhen)}.</div>`;
   return `<div class="status sub"><span class="dot" style="background:${ctosPulseColor(pulse.state)}"></span>ctOS
       <small>${esc(pulse.state.toUpperCase())} · ${esc(pulse.reason)}</small></div>
-    <p class="ctos-intro">Your system map: what runs, how the pieces connect, and where a failure could affect the business. Select a node in the atlas to inspect it.</p>
+    <p class="ctos-intro">A visual map of what runs, what it touches, and where failures can spread. Runtime status and curated descriptions are separate evidence layers.</p>
+    ${freshnessBanner}
     <div class="ctos-atlas-heading"><h2>System atlas</h2>${DEV?"":`<a href="/portal/system/system-map.html" target="_blank" rel="noopener">Open full-size atlas ↗</a>`}</div>
     ${DEV?`<div class="empty">The live system atlas mounts here after publish.</div>`:
       `<iframe class="ctos-atlas" src="/portal/system/system-map.html" title="ctOS system atlas" loading="lazy"></iframe>`}
@@ -6365,4 +6383,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 9722c635e012 -->
+<!-- rankwise-portal2-version: 13e413d99c67 -->
