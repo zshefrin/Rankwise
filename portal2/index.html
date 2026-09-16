@@ -3686,14 +3686,17 @@ function _decOptions(d){
   if(recommendedCount>1)options.forEach(x=>{x.recommended=false});
   return {options,invalid:false,notice:(!enriched&&raw.length)?"Option detail is unavailable because structured labels do not match the persisted choices; showing labels only.":recommendedCount>1?"Multiple recommendations were supplied; showing all choices without a recommendation.":""};
 }
+let DEC_SELECTED=null, DEC_RPC_PENDING=null;
 function _decOptionCard(d,o){
   const bullets=(title,items,kind)=>items.length?`<div class="decide-option-col ${kind}"><h5>${title}</h5><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:"";
   const i=DEC_REG.push({id:d.id,version:d.version,choice:o.label})-1;
+  const selected=DEC_SELECTED&&DEC_SELECTED.id===d.id&&DEC_SELECTED.version===d.version&&DEC_SELECTED.choice===o.label;
+  const pending=DEC_RPC_PENDING&&DEC_RPC_PENDING.id===d.id&&DEC_RPC_PENDING.version===d.version;
   return `<article class="decide-option ${o.recommended?"rec":""}">
     <div class="decide-option-head"><h4>${esc(o.label)}</h4>${o.recommended?`<span class="badge badge-warn">Suggested</span>`:""}</div>
     ${o.detail?`<div class="decide-option-detail">${esc(o.detail)}</div>`:""}
     ${(o.pros.length||o.cons.length)?`<div class="decide-option-cols">${bullets("Why yes",o.pros,"yes")}${bullets("Why not",o.cons,"no")}</div>`:""}
-    <button class="btn ${o.recommended?"rec":""}" data-dec-i="${i}" aria-label="Choose: ${escAttr(o.label)}">Choose this</button>
+    <button class="btn ${selected?"rec":o.recommended?"rec":""}" data-dec-i="${i}"${pending?` disabled title="decision is being recorded"`:""} aria-label="${selected?"Confirm":"Choose"}: ${escAttr(o.label)}">${selected?"Confirm this choice":"Choose this"}</button>
   </article>`;
 }
 function viewRecentDecisions(){
@@ -3726,6 +3729,7 @@ function viewDecisions(p){
     </div>`+viewRecentDecisions();
   }
   const d=rows[DEC_IDX];
+  if(DEC_SELECTED&&(!d||DEC_SELECTED.id!==d.id||DEC_SELECTED.version!==d.version))DEC_SELECTED=null;
   const wi=d.work_items||null;
   const optionState=_decOptions(d), options=optionState.options;
   const arts=_decAttachedArts(d);
@@ -3753,6 +3757,7 @@ function viewDecisions(p){
     <dl class="decide-facts"><div><dt>Cost</dt><dd>${esc(fact(card&&card.cost))}</dd></div><div><dt>Undo</dt><dd>${esc(fact(card?card.undo:d.reversal_cost))}</dd></div><div class="wide"><dt>If ignored</dt><dd>${esc(_decIgnoredLine(d))}</dd></div></dl>
     ${card&&typeof card.what_changes==="string"&&card.what_changes.trim()?`<div class="decide-sec"><div class="sec-h">What changes</div>${esc(card.what_changes)}</div>`:""}
     ${recommendation?`<div class="decide-suggestion"><b>★ Suggested: ${esc(recommendation)}</b>${reason?` — ${esc(reason)}`:""}</div>`:""}
+    ${DEC_SELECTED&&DEC_SELECTED.id===d.id?`<div class="state" data-decision-review><b>Review before submitting</b><br>Selected: <strong>${esc(DEC_SELECTED.choice)}</strong><br><small>Nothing has been submitted. Choose a different option or confirm this choice.</small></div>`:""}
     <div class="decide-compare-head">Your options<span>${optionState.invalid?"Choices unavailable":`${options.length} to compare`}</span></div>
     <div class="decide-dock">
       ${optionState.invalid?`<div class="state state-error"><b>Decision cannot be answered yet</b>${esc(optionState.notice)}</div>`:options.length?`<div class="decide-opts decide-compare">${options.map(o=>_decOptionCard(d,o)).join("")}</div>`:`<div class="decide-opts">${decBtn(d,"Acknowledge")}</div>`}
@@ -3777,6 +3782,7 @@ function decBtn(d,choice,cls){
 function wireDecideNav(p,updatedAt,srcNote){
   document.querySelectorAll("button[data-dec-nav]").forEach(b=>{
     b.onclick=()=>{
+      DEC_SELECTED=null;
       const rows=Array.isArray(DECS)?DECS:[];
       if(b.dataset.decNav==="prev")DEC_IDX=Math.max(0,DEC_IDX-1);
       else if(b.dataset.decNav==="restart"){DEC_IDX=0;DEC_SKIPPED.clear();}
@@ -5077,16 +5083,26 @@ function wireDecisions(p,updatedAt,srcNote){
       const reg=DEC_REG[+b.dataset.decI];
       if(!reg){toast("Stale button — refresh","err");return}
       if(DEV){toast("DEV preview — decision not sent");return}
+      const needsReview=!!b.closest("[data-decide-room]");
+      const same=needsReview&&DEC_SELECTED&&DEC_SELECTED.id===reg.id&&DEC_SELECTED.version===reg.version&&DEC_SELECTED.choice===reg.choice;
+      if(DEC_RPC_PENDING){toast(same?"Decision is still being recorded — wait for the receipt":"Another decision is still being recorded — wait for the receipt","err");return}
+      if(needsReview&&!same){DEC_SELECTED={id:reg.id,version:reg.version,choice:reg.choice};render(p,updatedAt,srcNote);return}
+      if(needsReview)DEC_SELECTED=null;
+      const requestToken=needsReview?{id:reg.id,version:reg.version,choice:reg.choice,epoch}:null;
+      if(needsReview)DEC_RPC_PENDING=requestToken;
+      const clearPending=()=>{if(requestToken&&DEC_RPC_PENDING===requestToken)DEC_RPC_PENDING=null;};
       const release=_holdRoomButtons(b);
       try{
         const r=await RWSession.authedFetch(SB+"/rest/v1/rpc/decide_decision",{method:"POST",
           body:JSON.stringify({p_decision_id:reg.id,p_choice:reg.choice,
             p_actor:RWSession.userEmail()||"operator",p_expected_version:reg.version})});
-        if(!_portalReadCurrent(epoch))return;
-        if(r===null)return; // session torn down — authedFetch already handled it
+        if(!_portalReadCurrent(epoch)){clearPending();return}
+        if(r===null){clearPending();return;} // session torn down — authedFetch already handled it
         if(!r.ok){
           toast("Could not record ("+r.status+")","err");
+          clearPending();
           release();
+          if(_portalReadCurrent(epoch)&&LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
           return;
         }
         // decide_decision is LIVE (migration 078, applied 2026-08-27). A lost-race
@@ -5095,15 +5111,17 @@ function wireDecisions(p,updatedAt,srcNote){
         // zero rows, confirmed live by hq's own service-role smoke test) — `row.id==
         // null` catches both shapes; verified against both directly (2026-08-28).
         const row=await r.json().catch(()=>null);
-        if(!_portalReadCurrent(epoch))return;
+        if(!_portalReadCurrent(epoch)){clearPending();return}
         if(!row||row.id==null){toast("Already decided elsewhere — refreshing","err");}
         else{toast("Recorded: "+reg.choice);}
         DECS=null;await loadDecisions();if(!_portalReadCurrent(epoch))return;
-        await loadExceptions();if(_portalReadCurrent(epoch))render(LAST.p,LAST.updatedAt,LAST.srcNote);
+        clearPending();await loadExceptions();if(_portalReadCurrent(epoch))render(LAST.p,LAST.updatedAt,LAST.srcNote);
       }catch{
-        if(!_portalReadCurrent(epoch))return;
+        if(!_portalReadCurrent(epoch)){clearPending();return}
+        clearPending();
         toast("Could not record — retry","err");
         release();
+        if(LAST.p)render(LAST.p,LAST.updatedAt,LAST.srcNote);
       }
     };
   });
@@ -5906,7 +5924,7 @@ function render(p, updatedAt, srcNote){
     <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}</div>
     ${_paletteMarkup()}
   </main>`;
-  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";VIEW=a.dataset.v;
+  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";if(a.dataset.v!=="decisions")DEC_SELECTED=null;VIEW=a.dataset.v;
     if(VIEW==="command")await Promise.all([loadReviewData(true),loadDecisions()]);
     if(VIEW==="review")await loadReviewData(fromToday);
     if(VIEW==="decisions"&&(fromToday||!DECS))await loadDecisions();
@@ -5922,6 +5940,7 @@ function render(p, updatedAt, srcNote){
   if(VIEW==="decisions"||VIEW==="command")wireDecisions(p,updatedAt,srcNote);
   if(VIEW==="command")wireOpsBrief(p,updatedAt,srcNote);
   if(VIEW==="decisions")wireDecideNav(p,updatedAt,srcNote);
+  if(VIEW==="decisions"&&DEC_SELECTED){const chosen=[...document.querySelectorAll("button[data-dec-i]")].find(b=>b.textContent.trim()==="Confirm this choice");if(chosen)chosen.focus();}
   if(VIEW==="tickets")wireTicketsNav(p,updatedAt,srcNote);
   if(VIEW==="war_room")wireWarRoom(p,updatedAt,srcNote);
   if(VIEW==="review"||VIEW==="content_review")wireContentReview(p,updatedAt,srcNote);
@@ -5939,17 +5958,17 @@ function render(p, updatedAt, srcNote){
   }
   if(VIEW==="conversations")wireConversations(p,updatedAt,srcNote);
   _wirePalette();
-  document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
+  document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{if(el.dataset.goto!=="decisions")DEC_SELECTED=null;VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
   const lo=document.querySelector("[data-logout]");
   if(lo)lo.onclick=e=>{e.preventDefault();portalLogout();};
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
   document.querySelectorAll("button[data-goto]").forEach(b=>{
     if(b.closest('[data-today-approvals]')||b.closest('[data-war-room-command]')||b.closest('.wr-command-list')){
-      b.onclick=()=>document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.goto)}"]`)?.click();
+      b.onclick=()=>{if(b.dataset.goto!=="decisions")DEC_SELECTED=null;document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.goto)}"]`)?.click();};
       return;
     }
-    b.onclick=()=>{VIEW=b.dataset.goto;render(p,updatedAt,srcNote);};
+    b.onclick=()=>{if(b.dataset.goto!=="decisions")DEC_SELECTED=null;VIEW=b.dataset.goto;render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-i]").forEach(b=>{
     b.onclick=async()=>{
@@ -6267,6 +6286,8 @@ function _resetPortalState(){
   ++PORTAL_EPOCH;++PORTAL_READ_SEQ;++WORK_READ_SEQ;++WORK_DETAIL_SEQ;
   CMDK_OPEN=false;SHORTCUTS_OPEN=false;CMDK_QUERY="";
   ACTION_FEEDBACK.length=0;
+  DEC_SELECTED=null;
+  DEC_RPC_PENDING=null;
   PORTAL_AUTH_ID=RWSession.sessionIdentity();
   SIGNED_URL_CACHE.clear();MEDIA_REG=[];ACTS_REG=[];DEC_REG=[];CUR_ALLOWLIST=null;
   if(_tt){clearTimeout(_tt);_tt=null;}
@@ -6342,4 +6363,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: a0b3448e7136 -->
+<!-- rankwise-portal2-version: 8d96d89b1d0d -->
