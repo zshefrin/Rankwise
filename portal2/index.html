@@ -6112,7 +6112,7 @@ function render(p, updatedAt, srcNote){
   // R2 focus restore — runs LAST, after the per-view wiring above has already
   // re-filled the textarea's value (wireTicketsNav / wireContentReview id-keyed
   // draft restore), so the caret indices refer to the restored text.
-  if(_focusSnap){
+  if(_focusSnap&&!CMDK_OPEN&&!SHORTCUTS_OPEN){
     const el=document.getElementById(_focusSnap.id);
     // F3 (publish review): if the focused field carried a ticket id and the element now
     // mounted under the same DOM id belongs to a DIFFERENT ticket (a 120s refetch reordered
@@ -6365,4 +6365,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 7a31140b0f48 -->
+<!-- rankwise-portal2-version: 9722c635e012 -->
