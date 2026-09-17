@@ -18,10 +18,11 @@
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); overflow: hidden; touch-action: none; }
   ::selection { background: rgba(53,199,232,.3); }
 
-  #app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
+  #app { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
 
   /* ── top bar ── */
   .topbar {
+    position: relative;
     display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
     padding: 11px 18px; border-bottom: 1px solid var(--line);
     background: rgba(11,17,23,.96); z-index: 30; touch-action: auto;
@@ -35,6 +36,7 @@
   }
   #search:focus { outline: none; border-color: var(--accent); }
   .counters { display: flex; flex-wrap: wrap; gap: 7px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
   .counter {
     font-family: var(--mono); font-size: 10px; letter-spacing: .05em; padding: 4px 9px;
     border: 1px solid var(--line); border-radius: 3px; background: var(--panel2); color: var(--ink-mut);
@@ -86,6 +88,8 @@
     background: var(--panel2); color: var(--ink-dim); cursor: pointer; border-radius: 2px;
   }
   .day.on { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  .day:disabled { opacity: .45; cursor: not-allowed; }
+  #modeBtn:disabled { opacity: .45; cursor: not-allowed !important; }
   #playBtn {
     font-family: var(--mono); font-size: 11px; width: 30px; height: 24px; background: var(--panel2);
     border: 1px solid var(--line); color: var(--ink); cursor: pointer; border-radius: 2px;
@@ -96,22 +100,72 @@
   .scrubwrap:has(#scrub:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .clock { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); width: 52px; text-align: center; font-variant-numeric: tabular-nums; }
   .clock[data-skip="1"]::after { content: '≫'; color: var(--ink-dim); font-size: 10px; margin-left: 3px; }
-  /* playback event ticker (week-play feed) */
-  #ticker { position: absolute; left: 10px; bottom: 44px; z-index: 11; display: none; max-width: min(46vw, 430px);
-    font-family: var(--mono); font-size: 10px; line-height: 1.5; color: var(--ink-mut);
-    background: rgba(11,17,23,.82); border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; pointer-events: auto; }
-  #ticker .tk { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #ticker .tk:nth-last-child(n+4) { opacity: .45; }
-  #ticker .tk .t { color: var(--accent); }
-  #ticker .tk .w { color: var(--ink-dim); }
-  #ticker .tk button { background: none; border: 0; color: var(--ink); font: inherit; cursor: pointer; padding: 0; }
-  #ticker .tk button:hover { color: var(--accent); }
-  #ticker .tkday { display: block; color: var(--accent); letter-spacing: .18em; font-weight: 700; margin: 2px 0; opacity: .85; }
-  @media (max-width: 720px) { #ticker { max-width: 72vw; font-size: 9px; } }
-  .nowchip { font-family: var(--mono); font-size: 10px; color: var(--ink-mut); letter-spacing: .04em; max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .nowchip button { background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; padding: 2px 0; }
-  .nowchip .idle { color: var(--ink-dim); }
-  @media (max-width: 720px) { .nowchip { max-width: none; flex-basis: 100%; order: 9; } }
+
+  /* Timeline and event list share one surface; neither obscures the map. */
+  .audit-details { margin-left: auto; font: 11px var(--mono); }
+  .audit-details summary { cursor: pointer; color: #9AAEBD; padding: 7px 9px; border: 1px solid var(--line-bright); border-radius: 4px; }
+  .audit-details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .audit-details .stamp { position: absolute; top: calc(100% + 8px); right: 12px; width: min(620px, calc(100vw - 24px)); max-height: 45vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line-bright); padding: 14px; font-size: 12px; line-height: 1.6; letter-spacing: 0; text-transform: none; color: #ADBDCA; z-index: 40; touch-action: pan-y; }
+  .audit-details[open] .stamp { display: block; }
+  .filter-details { font: 11px var(--mono); }
+  .filter-details summary { cursor: pointer; padding: 7px 9px; border: 1px solid var(--line-bright); border-radius: 4px; color: #ADBDCA; }
+  .filter-details[open] .counters { display: flex; flex-wrap: wrap; position: absolute; top: calc(100% + 8px); right: 12px; width: min(390px, calc(100vw - 24px)); margin: 0; padding: 14px; background: var(--panel); border: 1px solid var(--line-bright); z-index: 40; }
+  summary:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .district-focus { display: inline-flex; min-width: 0; }
+  #districtFocus { max-width: 100%; }
+  body.timeline-collapsed .dock { display: block; padding: 8px 12px; }
+  body.timeline-collapsed .timeline-title { margin: 0; }
+  body.timeline-collapsed .timeline-controls, body.timeline-collapsed .timeline-transport,
+  body.timeline-collapsed #nowChip, body.timeline-collapsed #timelineNote, body.timeline-collapsed #ticker { display: none; }
+  #freshPill { display: inline-flex !important; }
+  #freshTxt { display: inline-block; max-width: min(50vw, 420px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+  .dock { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 36%); gap: 24px; padding: 16px 18px; align-items: start; }
+  .timeline-main { min-width: 0; }
+  .timeline-title { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px; }
+  .timeline-title strong { font-size: 15px; font-weight: 600; }
+  #timelineDate { color: #9AAEBD; font: 11px var(--mono); }
+  .timeline-controls, .timeline-transport { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  #districtFocus { min-height: 34px; color: #ADBDCA; font: 11px var(--mono); background: var(--panel2); border: 1px solid var(--line-bright); border-radius: 4px; padding: 5px 8px; }
+  .timeline-transport { margin-top: 10px; }
+  .dock button { min-height: 34px; color: #ADBDCA; font: 11px var(--mono); background: var(--panel2); border: 1px solid var(--line-bright); border-radius: 4px; cursor: pointer; padding: 5px 9px; }
+  .dock button:hover:not(:disabled) { color: var(--ink); border-color: var(--accent); }
+  .dock button:disabled { cursor: default; opacity: .55; }
+  .dock .day { width: 30px; padding: 0; }
+  .dock .day.on { background: var(--accent); color: var(--bg); }
+  #modeBtn[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+  #playBtn { width: 38px; height: 34px; color: var(--accent); }
+  #nowBtn { margin-left: auto; }
+  .scrubwrap { display: block; min-width: 140px; height: 42px; }
+  .clock { width: 58px; flex-shrink: 0; font-size: 16px; }
+  .nowchip { max-width: 100%; min-height: 22px; margin-top: 7px; font-size: 11px; color: #9AAEBD; }
+  .nowchip .idle { color: #9AAEBD; }
+  .dock .nowchip button { padding: 0 4px; min-height: 24px; border: 0; background: none; color: var(--accent); }
+  #timelineNote { margin: 2px 0 0; color: #9AAEBD; font-size: 11px; line-height: 1.5; }
+  #ticker { position: static; max-width: none; min-width: 0; padding: 0; background: none; border: 0; font: 12px var(--sans); color: #9AAEBD; }
+  #tickerHead { font: 600 13px var(--sans); letter-spacing: 0; border: 0; margin: 0; padding: 0; }
+  #tickerContext { font-size: 11px; margin: 3px 0 5px; padding: 0; border: 0; }
+  #tickerRows { max-height: 150px; overflow-y: auto; touch-action: pan-y; scrollbar-width: thin; }
+  #ticker .timeline-event { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 32px; text-align: left; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; padding: 7px 2px; font: 12px var(--sans); }
+  .timeline-event time { color: var(--accent); font: 11px var(--mono); }
+  .timeline-event .event-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+  .timeline-event .event-when { font-size: 10px; color: #9AAEBD; }
+  .timeline-empty { padding: 12px 0; font-size: 12px; }
+  @media (max-width: 900px) { .dock { gap: 16px; grid-template-columns: minmax(0, 1fr) 260px; } }
+  @media (max-width: 720px) {
+    .dock { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 12px; padding: 10px 12px; max-height: 48vh; overflow-y: auto; }
+    .timeline-main, #ticker { flex-shrink: 0; }
+    .timeline-title { margin-bottom: 8px; }
+    .timeline-controls { gap: 5px; }
+    .timeline-controls .days { order: 3; width: 100%; }
+    .dock .day { min-height: 34px; width: 28px; }
+    .timeline-transport { flex-wrap: nowrap; }
+    .scrubwrap { min-width: 70px; }
+    #tickerRows { max-height: 102px; }
+    #timelineDate { font-size: 10px; }
+    .topbar { gap: 7px 10px; padding: 8px 12px; }
+    .audit-details { margin-left: 0; position: static; }
+    #freshTxt { max-width: 68vw; }
+  }
 
   /* ── inspector ── */
   .inspector {
@@ -121,6 +175,7 @@
     padding: 18px 20px 34px; touch-action: pan-y; visibility: hidden;
   }
   body.has-sel .inspector { transform: translateX(0); visibility: visible; }
+  body.attn-open .inspector { transform: translateX(103%); visibility: hidden; }
   @media (prefers-reduced-motion: reduce) { .inspector { transition: none; } }
   .ih { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
   .ih h3 { margin: 0 0 5px; font-family: var(--mono); font-size: 14.5px; letter-spacing: .03em; line-height: 1.4; }
@@ -186,17 +241,22 @@
   .results .dot { width: 7px; height: 7px; flex-shrink: 0; }
 
   @media (max-width: 720px) {
-    .brand { font-size: 12px; }
+    .topbar { gap: 6px 8px; }
+    .brand { font-size: 11px; letter-spacing: .08em; }
+    .audit-details summary { font-size: 10px; padding: 6px; }
+    .search-wrap { flex: 1; min-width: 120px; }
+    .district-focus { flex: 1; min-width: 120px; }
+    #districtFocus { width: 100%; }
     .stamp { display: none; }
     #freshPill { display: inline-flex !important; }
-    #search { width: 130px; }
+    #search { width: 100%; min-height: 34px; }
     .day { width: 38px; height: 38px; font-size: 12px; }
     #playBtn { width: 44px; height: 38px; }
     .counter { padding: 8px 10px; }
     .toggle { padding: 8px 11px; }
     .legend { max-width: none; left: 0; right: 0; bottom: 0; border-left: 0; border-right: 0; display: none; }
     .legend.open { display: flex; }
-    .inspector { top: auto; left: 0; right: 0; width: auto; max-width: none; height: 56vh; border-left: none; border-top: 2px solid var(--accent); transform: translateY(103%); }
+    .inspector { top: 0; bottom: 0; left: 0; right: 0; width: auto; max-width: none; height: 100%; max-height: 100%; border-left: none; border-top: 1px solid var(--line-bright); transform: translateY(103%); }
     body.has-sel .inspector { transform: translateY(0); }
     .attn { width: 100vw; max-width: 100vw; }
   }
@@ -205,14 +265,15 @@
 <div id="app">
   <header class="topbar">
     <span class="brand">RANKWISE<b>//</b>ctOS <span style="color:var(--ink-dim)">ATLAS</span></span>
-    <span class="stamp" id="stamp"></span>
+    <details class="audit-details" id="auditDetails"><summary>Audit details</summary><div class="stamp" id="stamp"></div></details>
     <span id="freshPill" style="display:none;font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:3px 8px;border:1px solid var(--line);border-radius:3px;align-items:center;gap:5px"><i id="freshDot" style="width:7px;height:7px;border-radius:50%;background:var(--ink-dim);display:inline-block"></i><span id="freshTxt">SNAPSHOT</span></span>
-  <div class="counters" id="counters"></div>
+    <details class="filter-details" id="filterDetails"><summary>Status filters</summary><div class="counters" id="counters"></div></details>
     <button class="toggle" id="attnToggle" aria-pressed="false">▲ Attention</button>
-    <span style="position:relative">
+    <span class="search-wrap" style="position:relative">
       <input id="search" type="search" placeholder="/ find node…" aria-label="Search nodes" autocomplete="off">
       <div class="results" id="results"></div>
     </span>
+    <label class="district-focus" for="districtFocus"><span class="sr-only">Focus district</span><select id="districtFocus" aria-label="Focus district"><option value="">All districts</option></select></label>
   </header>
 
   <div id="stage">
@@ -226,21 +287,35 @@
 
     <aside class="attn" id="attnPanel" aria-label="Gap register and doc drift"></aside>
     <aside class="inspector" id="inspector" aria-label="Node inspector"></aside>
-    <div id="ticker" aria-label="Playback event feed"></div>
   </div>
 
-  <div class="dock">
+  <section class="dock" aria-label="Activity timeline">
+    <div class="timeline-main">
+    <div class="timeline-title"><strong>Activity timeline</strong><span id="timelineDate">Pacific time</span><button id="timelineToggle" aria-expanded="true" aria-label="Collapse activity timeline">Collapse</button></div>
+    <div class="timeline-controls">
+    <button id="modeBtn" disabled aria-label="Show logged starts" aria-pressed="false">Logged starts</button>
     <div class="days" id="days" role="group" aria-label="Day of week"></div>
-    <button id="playBtn" aria-label="Play or pause the cron week">▶</button>
-    <button id="nowBtn" style="font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--accent);cursor:pointer;border-radius:2px" title="Jump to the real current day and time">NOW</button>
-    <button id="modeBtn" style="display:none;font-family:var(--mono);font-size:10px;height:24px;padding:0 9px;background:var(--panel2);border:1px solid var(--line);color:var(--ink-mut);cursor:pointer;border-radius:2px">SCHED</button>
+    <button id="nowBtn" title="Jump to the current Pacific time in the schedule">Now</button>
+    </div>
+    <div class="timeline-transport">
+    <button id="prevEventBtn" aria-label="Previous timeline event" title="Previous event">‹</button>
+    <button id="playBtn" aria-label="Play timeline playback" aria-pressed="false">▶</button>
+    <button id="nextEventBtn" aria-label="Next timeline event" title="Next event">›</button>
     <span class="clock" id="clock">06:00</span>
-    <span id="nowChip" class="nowchip" aria-live="polite"></span>
     <span class="scrubwrap">
-      <canvas id="scrubCanvas"></canvas>
+      <canvas id="scrubCanvas" aria-hidden="true"></canvas>
       <input id="scrub" type="range" min="0" max="1439" value="360" aria-label="Time of day scrubber">
     </span>
-  </div>
+    </div>
+    <div id="nowChip" class="nowchip"></div>
+    <p id="timelineNote">Schedule only — not proof of execution.</p>
+    </div>
+    <aside id="ticker" aria-label="Timeline activity feed">
+      <div id="tickerHead">Schedule</div>
+      <div id="tickerContext"></div>
+      <div id="tickerRows"></div>
+    </aside>
+  </section>
 </div>
 
 <script>
@@ -305,23 +380,54 @@ for (const d of (M ? M.districts : [])) {
   const members = nodes.filter((n) => n.district === d.id);
   if (!plan || !members.length) continue;
   members.sort((a, b) => (statusRank[a.status] ?? 9) - (statusRank[b.status] ?? 9) || CADENCE_H(b) - CADENCE_H(a));
-  const cols = plan.cols;
+  /* Keep dense districts legible: cap rows before packing the city.  The
+     hand-authored column count remains the minimum, so small districts keep
+     their intended silhouette while infra does not become a wall. */
+  const cols = Math.max(plan.cols, Math.ceil(members.length / 8));
   members.forEach((n, i) => {
     n._tx = plan.ax + (i % cols) * PITCH;
     n._ty = plan.ay + Math.floor(i / cols) * PITCH;
     n._h = CADENCE_H(n);
   });
   const rows = Math.ceil(members.length / cols);
-  districts.push({ ...d, ...plan, w: cols * PITCH, h: rows * PITCH, members });
+  districts.push({ ...d, ...plan, cols, w: cols * PITCH, h: rows * PITCH, members });
 }
 
 const iso = (tx, ty) => [(tx - ty) * TILE_W / 2, (tx + ty) * TILE_H / 2];
 for (const d of districts) {
   d.members.slice().sort((a, b) => CADENCE_H(b) - CADENCE_H(a)).slice(0, 2).forEach((lm) => { lm._landmark = true; });
 }
+/* Pack the eight semantic districts into a deterministic 2×4 atlas.  Widths
+   and heights are measured after density sizing, so no district can overlap
+   another even when the registry grows. */
+const DISTRICT_GAP = 2.2;
+const DISTRICT_GRID = [['intake', 'intelligence', 'portal', 'trading-boundary'], ['content', 'outreach', 'infra', 'substrate']];
+const byDistrict = new Map(districts.map((d) => [d.id, d]));
+const colW = [0, 0, 0, 0], rowH = [0, 0];
+DISTRICT_GRID.forEach((row, ri) => row.forEach((id, ci) => { const d = byDistrict.get(id); if (d) { colW[ci] = Math.max(colW[ci], d.w); rowH[ri] = Math.max(rowH[ri], d.h); } }));
+const colX = colW.map((_, i) => colW.slice(0, i).reduce((s, w) => s + w + DISTRICT_GAP, 0));
+const rowY = rowH.map((_, i) => rowH.slice(0, i).reduce((s, h) => s + h + DISTRICT_GAP, 0));
+DISTRICT_GRID.forEach((row, ri) => row.forEach((id, ci) => {
+  const d = byDistrict.get(id); if (!d) return;
+  const dx = colX[ci] - d.ax, dy = rowY[ri] - d.ay;
+  d.ax += dx; d.ay += dy;
+  d.members.forEach((n) => { n._tx += dx; n._ty += dy; });
+}));
+const districtFocus = $('districtFocus');
+if (districtFocus) {
+  districts.forEach((d) => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name; districtFocus.appendChild(opt); });
+  districtFocus.addEventListener('change', () => {
+    const d = byDistrict.get(districtFocus.value);
+    if (!d) { camTouched = false; fitWorld(); return; }
+    deselect();
+    const b = cameraBounds([d]);
+    animateCam(b.x, b.y, b.z);
+  });
+}
 
 /* camera */
 const cam = { x: 0, y: 0, z: 1 };
+const MIN_ZOOM = 0.04;
 const canvas = $('world'), ctx = canvas.getContext('2d');
 let DPR = Math.min(devicePixelRatio || 1, 3);
 let CW = 0, CH = 0;
@@ -337,24 +443,33 @@ function resize() {
 const w2s = (wx, wy) => [(wx - cam.x) * cam.z + CW / 2, (wy - cam.y) * cam.z + CH / 2];
 const s2w = (sx, sy) => [(sx - CW / 2) / cam.z + cam.x, (sy - CH / 2) / cam.z + cam.y];
 
-function fitWorld(pad = 60) {
+function cameraBounds(items, pad = 60) {
+  if (!items.length) return { x: 0, y: 0, z: 1 };
   let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
-  for (const d of districts) {
+  for (const d of items) {
     for (const [cx, cy] of [[d.ax - 1, d.ay - 1], [d.ax + d.w, d.ay - 1], [d.ax - 1, d.ay + d.h], [d.ax + d.w, d.ay + d.h]]) {
       const [x, y] = iso(cx, cy);
       minX = Math.min(minX, x); maxX = Math.max(maxX, x);
       minY = Math.min(minY, y - 40); maxY = Math.max(maxY, y);
     }
   }
-  cam.x = (minX + maxX) / 2; cam.y = (minY + maxY) / 2;
-  cam.z = Math.min((CW - pad) / (maxX - minX), (CH - pad) / (maxY - minY));
-  cam.z = Math.max(0.25, Math.min(cam.z, 2.2));
+  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2,
+    z: Math.max(MIN_ZOOM, Math.min((CW - pad) / (maxX - minX), (CH - pad) / (maxY - minY), 2.2)) };
+}
+function fitWorld(pad = 60) {
+  camAnim = null;
+  Object.assign(cam, cameraBounds(districts, pad));
   needsDraw = true;
 }
 
 /* ══ state ══ */
-const _boot = new Date();
-const state = { sel: null, hover: null, day: _boot.getDay(), minute: _boot.getHours() * 60 + _boot.getMinutes(), playing: false, attn: false, statusFilter: new Set(), q: '' };
+function pacificNow() {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Vancouver', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date()).map((p) => [p.type, p.value]));
+  return { day: DOW_LANES.indexOf(parts.weekday.toLowerCase()), minute: Number(parts.hour) * 60 + Number(parts.minute) };
+}
+const state = { sel: null, hover: null, ...pacificNow(), playing: false, attn: false, statusFilter: new Set(), q: '' };
 let needsDraw = true;
 
 const daylight = (m) => { const h = m / 60; if (h < 5 || h >= 22) return 0; if (h < 9) return (h - 5) / 4; if (h < 18) return 1; return 1 - (h - 18) / 4; };
@@ -363,8 +478,9 @@ const firesToday = (n) => (n.fires || []).filter((f) => f.every || f.lane === 'd
   || (f.lane === 'weekdays' && state.day >= 1 && state.day <= 5)
   || f.lane === DOW_LANES[state.day]
   || (f.lane === 'monthly' && f.dow != null && f.dow === state.day));
-const pulseAt = (n, t) => RUNS(n) && firesToday(n).some((f) => f.minute != null && f.lane !== 'monthly' && Math.abs(t - f.minute) < 5);
-const monthlyAt = (n, t) => RUNS(n) && firesToday(n).some((f) => f.minute != null && f.lane === 'monthly' && Math.abs(t - f.minute) < 5);
+const pulseAt = (n, t) => flow.mode !== 'real' && RUNS(n) && firesToday(n).some((f) => f.minute != null && f.lane !== 'monthly' && Math.abs(t - f.minute) < 5);
+const monthlyAt = (n, t) => flow.mode !== 'real' && RUNS(n) && firesToday(n).some((f) => f.minute != null && f.lane === 'monthly' && Math.abs(t - f.minute) < 5);
+const replayPulseAt = (n, t) => flow.mode === 'real' && timelineEvents().some((e) => e.id === n.id && Math.abs(e.minute - t) < 5);
 const isContinuous = (n) => (n.fires || []).some((f) => f.every);
 const fuzzy = (q, s2) => {
   if (s2.includes(q)) return 2;
@@ -388,80 +504,39 @@ const visible = (n) => {
    line (time · job → targets · what) — flow you can watch, not just lit windows. */
 const DAY_FULL = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
 const flow = { events: [], skip: false, nextGapAt: -1, mode: 'sched' };  /* 'sched' | 'real' (yesterday's logged runs) */
-const FLOW_MS = 1400, FLOW_CAP = 24, TICK_CAP = 6;
+const FLOW_MS = 1400, FLOW_CAP = 24;
+let timelineCache = null;
 
-function pushTick(html, isDay) {
-  const tk = $('ticker');
-  if (!tk) return;
-  tk.style.display = 'block';
-  const row = document.createElement('span');
-  row.className = isDay ? 'tkday' : 'tk';
-  row.innerHTML = html;
-  tk.appendChild(row);
-  while (tk.children.length > TICK_CAP) tk.removeChild(tk.firstChild);
-  if (!tk._wired) {
-    tk._wired = true;
-    tk.addEventListener('click', (ev) => {
-      const b = ev.target.closest('[data-goto]');
-      if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); }
-    });
-  }
-}
 const fmtHM = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(Math.floor(m) % 60).padStart(2, '0')}`;
 const whatBrief = (n) => {
   const s = String(n.what || '').split(/(?<=[.!?])\s/)[0];
   return s.length > 72 ? s.slice(0, 69) + '…' : s;
 };
-
-function emitFire(n, minute, real) {
+/* A single event projection drives marks, navigation, feed and playback.
+   Monthly/continuous schedules are conditional/ambient, not dated starts. */
+function timelineEvents() {
+  if (timelineCache) return timelineCache;
+  if (flow.mode === 'real') return (timelineCache = historyEvents().filter((e) => visible(nodeById.get(e.id))));
+  return (timelineCache = nodes.filter((n) => RUNS(n) && visible(n)).flatMap((n) =>
+    firesToday(n).filter((f) => Number.isFinite(f.minute) && f.lane !== 'monthly')
+      .map((f) => ({ id: n.id, minute: f.minute })))
+    .sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)));
+}
+function emitFire(n) {
+  if (REDUCED) return;
   const targets = (n.downstream || []).filter((d) => nodeById.has(d)).slice(0, 6);
-  if (!REDUCED) { /* reviewer note: under reduced-motion, undrained events kept rAF hot forever */
-    flow.events.push({ id: n.id, targets, born: performance.now() });
-    while (flow.events.length > FLOW_CAP) flow.events.shift();
-  }
-  pushTick(`<span class="t">${real ? '●' : ''}[${fmtHM(minute)}]</span> <button data-goto="${esc(n.id)}">${esc(n.id)}</button>`
-    + (targets.length ? ` → ${targets.slice(0, 3).map((t2) => `<button data-goto="${esc(t2)}">${esc(t2)}</button>`).join(', ')}${targets.length > 3 ? ` +${targets.length - 3}` : ''}` : '')
-    + ` <span class="w">· ${esc(whatBrief(n))}</span>`);
+  flow.events.push({ id: n.id, targets, born: performance.now() });
+  while (flow.events.length > FLOW_CAP) flow.events.shift();
 }
-
-function spawnFires(a, b) { /* fires with minute in (a, b] — schedule, or yesterday's logged runs */
-  if (flow.mode === 'real') {
-    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
-      if (e.minute <= a || e.minute > b) continue;
-      const n = nodeById.get(e.id);
-      if (n && visible(n)) emitFire(n, e.minute, true);
-    }
-    return;
-  }
-  for (const n of nodes) {
-    if (!RUNS(n) || !visible(n)) continue;
-    for (const f of firesToday(n)) {
-      if (f.minute == null || f.minute <= a || f.minute > b) continue;
-      emitFire(n, f.minute, false);
-    }
+function spawnFires(a, b) {
+  for (const e of timelineEvents()) {
+    if (e.minute > a && e.minute <= b) emitFire(nodeById.get(e.id));
   }
 }
-
-function advanceDay() {
-  setDay(state.day + 1);
-  pushTick(`── ${DAY_FULL[state.day]} ──`, true);
-}
-
-function nextFireGap(from) { /* sim-minutes until the next fire today (or to midnight) */
-  let best = 1440 - from;
-  if (flow.mode === 'real') {
-    for (const e of ((window.__RW_HIST__ || {}).events || [])) {
-      if (e.minute > from) { best = Math.min(best, e.minute - from); break; }  /* sorted */
-    }
-    return best;
-  }
-  for (const n of nodes) {
-    if (!RUNS(n) || !visible(n)) continue;
-    for (const f of firesToday(n)) {
-      if (f.minute != null && f.minute > from) best = Math.min(best, f.minute - from);
-    }
-  }
-  return best;
+function advanceDay() { setDay(state.day + 1); }
+function nextFireGap(from) {
+  const next = timelineEvents().find((e) => e.minute > from);
+  return next ? next.minute - from : 1440 - from;
 }
 
 function drawFlow(now) {
@@ -531,7 +606,7 @@ function drawBuilding(n, t) {
   const v = idHash(n.id);
   const fp = .40 + v * .14;
   const hw = TILE_W * fp * z, hh = TILE_H * fp * z;
-  const active = !REDUCED && pulseAt(n, t);
+  const active = !REDUCED && (flow.mode === 'real' ? replayPulseAt(n, t) : pulseAt(n, t));
   const monthlyRing = monthlyAt(n, t);
   const bh = n._h * z * (active ? 1.12 : 1);
   const dim = !visible(n) || (state.sel && state.sel !== n.id && !related.has(n.id));
@@ -629,8 +704,7 @@ function drawBuilding(n, t) {
   n._sx = sx; n._sy = sy - bh / 2; n._top = top - hh;
 
   /* labels: LOD — selected/hover always; neighborhood zoom shows all visible */
-  const showLbl = state.sel === n.id || state.hover === n.id || (cam.z > 0.95 && !dim)
-    || (n._landmark && cam.z > 0.55 && !dim) || (n.status === 'DEAD' && cam.z > 0.55 && !dim);
+  const showLbl = state.sel === n.id || state.hover === n.id || (cam.z > 1.2 && !dim);
   if (showLbl) {
     ctx.save();
     ctx.globalAlpha = dim ? .3 : 1;
@@ -689,6 +763,7 @@ function drawDistrict(d) {
 const districtLabelEls = new Map();
 function syncDistrictLabels() {
   const layer = $('labelLayer');
+  const occupied = labelRects.slice();
   for (const d of districts) {
     let el = districtLabelEls.get(d.id);
     if (!el) {
@@ -698,18 +773,25 @@ function syncDistrictLabels() {
       layer.appendChild(el);
       districtLabelEls.set(d.id, el);
     }
-    const [lx, ly] = w2s(...iso(d.ax - .6, d.ay + d.h + .4));
     const fs = Math.max(10, 12 * Math.min(cam.z, 1.3));
-    el.style.fontSize = fs + 'px';
-    el.style.transform = `translate(${Math.round(lx - 5)}px, ${Math.round(ly + 3)}px)`;
-    let html = d.name.toUpperCase();
-    if (cam.z < 0.55) {
-      const tally = {};
-      d.members.forEach((n) => { tally[n.status] = (tally[n.status] || 0) + 1; });
-      html += ' <span style="font-size:' + Math.max(8, fs - 3) + 'px;letter-spacing:0">' + Object.keys(STATUS)
-        .filter((k) => tally[k]).map((k) => `<b style="color:${STATUS[k].c};font-weight:600">${tally[k]}</b>`).join(' ') + '</span>';
+    const html = esc(d.name) + ' <span style="letter-spacing:0;font-weight:400">' + d.members.length + '</span>';
+    if (el._html !== html || el._fs !== fs) {
+      el.innerHTML = html; el._html = html; el._fs = fs; el.style.fontSize = fs + 'px';
+      el._w = el.offsetWidth; el._h = el.offsetHeight;
     }
-    if (el._html !== html) { el.innerHTML = html; el._html = html; }
+    const [lx, ly] = w2s(...iso(d.ax - .6, d.ay + d.h + .4));
+    const ew = el._w, eh = el._h;
+    let placed = false;
+    if (lx > -ew && lx < CW + ew && ly > -eh && ly < CH + eh && ew < CW - 8) {
+      const x = Math.max(4, Math.min(Math.round(lx - 5), CW - ew - 4));
+      for (const offset of [0, -1, 1, -2, 2, -3, 3]) {
+        const y = Math.max(4, Math.min(Math.round(ly + 3 + offset * (eh + 6)), CH - eh - 4));
+        if (occupied.some(([rx, ry, rw, rh]) => x < rx + rw + 4 && x + ew + 4 > rx && y < ry + rh + 4 && y + eh + 4 > ry)) continue;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        occupied.push([x, y, ew, eh]); placed = true; break;
+      }
+    }
+    el.style.visibility = placed ? 'visible' : 'hidden';
   }
 }
 
@@ -859,7 +941,7 @@ function tourGlide(now) {
      but never fight the user (6s hands-off window) and never when selected */
   if (!state.playing || state.sel || REDUCED) return;
   if (now - lastUserCam < 6000 || now - lastTourGlide < 4200 || camAnim) return;
-  const firing = nodes.filter((n) => pulseAt(n, state.minute) && n._tx != null);
+  const firing = nodes.filter((n) => (flow.mode === 'real' ? replayPulseAt(n, state.minute) : pulseAt(n, state.minute)) && n._tx != null);
   if (!firing.length) return;
   const [wx, wy] = iso(firing[0]._tx, firing[0]._ty);
   const [sx, sy] = w2s(wx, wy);
@@ -877,7 +959,7 @@ function loop(ts) {
   const sweepActive = !REDUCED && (performance.now() % 16000) < 2600;
   if (loop._pulseCheckAt === undefined || frame - loop._pulseCheckAt > 30) {
     loop._pulseCheckAt = frame;
-    loop._anyPulse = !REDUCED && nodes.some((n) => pulseAt(n, state.minute));
+    loop._anyPulse = !REDUCED && nodes.some((n) => flow.mode === 'real' ? replayPulseAt(n, state.minute) : pulseAt(n, state.minute));
   }
   const animating = camMoving || sweepActive || state.playing || flow.events.length || (!REDUCED && (state.sel || loop._anyPulse));
   if (state.playing) {
@@ -891,16 +973,14 @@ function loop(ts) {
       $('clock').dataset.skip = flow.skip ? '1' : '0';
     }
     const prev = state.minute;
-    /* TIME-based pace (frame-rate independent — 120Hz displays ran 2× before):
-       active 30 sim-min/s (busy hour ≈ 2s of watching); skip 540 sim-min/s,
+    /* TIME-based pace, slow enough to follow events: active 6 sim-min/s; skip 90,
        clamped to decelerate INTO the next burst, never overshoot it. */
-    let step = (flow.skip ? 540 : 30) * dt;
-    if (flow.skip) step = Math.min(step, Math.max(30 * dt, loop._gap - 6));
+    let step = (flow.skip ? 90 : 6) * dt;
+    if (flow.skip) step = Math.min(step, Math.max(6 * dt, loop._gap - 6));
     let nm = prev + step;
     spawnFires(prev, Math.min(nm, 1439.999));
     if (nm >= 1440) {          /* midnight: week advances in day order; replay loops its one day */
-      if (flow.mode === 'real') pushTick(`── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} restarts ──`, true);
-      else advanceDay();
+      if (flow.mode !== 'real') advanceDay();
       nm -= 1440;
       spawnFires(-0.001, nm);  /* early fires of the NEW day (post-advance) */
       loop._gapAt = -99;
@@ -949,7 +1029,7 @@ canvas.addEventListener('pointermove', (e) => {
     const r = canvas.getBoundingClientRect();
     const mx = (a[0] + b[0]) / 2 - r.left, my = (a[1] + b[1]) / 2 - r.top;
     const [wx, wy] = s2w(mx, my);
-    cam.z = Math.max(.25, Math.min(2.6, pinchStart.z * d / pinchStart.d));
+    cam.z = Math.max(MIN_ZOOM, Math.min(2.6, pinchStart.z * d / pinchStart.d));
     const [nsx, nsy] = w2s(wx, wy);
     cam.x += (nsx - mx) / cam.z;
     cam.y += (nsy - my) / cam.z;
@@ -1023,14 +1103,37 @@ canvas.addEventListener('wheel', (e) => {
   camTouched = true; lastUserCam = performance.now();
   const r = canvas.getBoundingClientRect();
   const [wx, wy] = s2w(e.clientX - r.left, e.clientY - r.top);
-  cam.z = Math.max(.25, Math.min(2.6, cam.z * (e.deltaY < 0 ? 1.12 : 0.89)));
+  cam.z = Math.max(MIN_ZOOM, Math.min(2.6, cam.z * (e.deltaY < 0 ? 1.12 : 0.89)));
   const [nsx, nsy] = w2s(wx, wy);
   cam.x += (nsx - (e.clientX - r.left)) / cam.z;
   cam.y += (nsy - (e.clientY - r.top)) / cam.z;
   needsDraw = true;
 }, { passive: false });
-$('fitBtn').addEventListener('click', () => fitWorld());
+$('fitBtn').addEventListener('click', () => { camTouched = false; districtFocus.value = ''; fitWorld(); });
 $('helpBtn').addEventListener('click', () => toggleHelp());
+function setTimelineCollapsed(collapsed) {
+  document.body.classList.toggle('timeline-collapsed', collapsed);
+  $('timelineToggle').textContent = collapsed ? 'Expand' : 'Collapse';
+  $('timelineToggle').setAttribute('aria-expanded', String(!collapsed));
+  $('timelineToggle').setAttribute('aria-label', (collapsed ? 'Expand' : 'Collapse') + ' activity timeline');
+  requestAnimationFrame(resize);
+}
+$('timelineToggle').addEventListener('click', () => setTimelineCollapsed(!document.body.classList.contains('timeline-collapsed')));
+const headerDetails = [$('auditDetails'), $('filterDetails')];
+headerDetails.forEach((el) => el.addEventListener('toggle', () => {
+  if (el.open) headerDetails.forEach((other) => { if (other !== el) other.open = false; });
+}));
+document.addEventListener('pointerdown', (e) => {
+  headerDetails.forEach((el) => { if (!el.contains(e.target)) el.open = false; });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const open = headerDetails.find((el) => el.open);
+  if (open) {
+    open.open = false; open.querySelector('summary').focus();
+    e.preventDefault(); e.stopImmediatePropagation();
+  }
+});
 const legendMq = matchMedia('(max-width: 720px)');
 const syncLegendBtn = () => { $('legendBtn').style.display = legendMq.matches ? 'block' : 'none'; if (!legendMq.matches) $('legend').classList.remove('open'); };
 legendMq.addEventListener('change', syncLegendBtn); syncLegendBtn();
@@ -1059,6 +1162,15 @@ function walk(startId, dir, maxDepth = 4) {
 function select(id) {
   const n = nodeById.get(id);
   if (!n) return;
+  if (state.attn) {
+    state.attn = false;
+    document.body.classList.remove('attn-open');
+    $('attnToggle').classList.remove('on');
+    $('attnToggle').setAttribute('aria-pressed', 'false');
+    $('attnToggle').setAttribute('aria-expanded', 'false');
+    clearTimelineMotion(); syncClock();
+  }
+  if (innerWidth <= 720) setTimelineCollapsed(true);
   state.sel = id;
   const up = walk(id, 'upstream'), down = walk(id, 'downstream');
   chainDepth = new Map([[id, 0]]);
@@ -1078,7 +1190,16 @@ function deselect() {
   needsDraw = true;
 }
 function nowLine(n) {
-  if (isContinuous(n)) return `runs continuously (every ${(n.fires.find((f) => f.every) || {}).every} min)`;
+  if (flow.mode === 'real') {
+    const events = historyEvents().filter((e) => e.id === n.id);
+    const near = events.find((e) => Math.abs(e.minute - state.minute) < 5);
+    const next = events.find((e) => e.minute > state.minute);
+    return near ? `<b>Logged start at ${fmtHM(near.minute)}</b> on ${esc(historyDate())} — completion not established`
+      : next ? `next sampled log start at <b>${fmtHM(next.minute)}</b> on ${esc(historyDate())}`
+      : 'no later logged starts in this partial sample — not proof of failure';
+  }
+  if (!RUNS(n)) return 'not included in the active schedule view; see curated status and trigger';
+  if (isContinuous(n)) return `scheduled continuously (every ${(n.fires.find((f) => f.every) || {}).every} min), not proof of execution`;
   const f = firesToday(n).filter((x) => x.minute != null);
   const womOnly = (n.fires || []).some((x) => x.lane === 'monthly' && x.dow == null);
   if (!f.length) return womOnly
@@ -1088,13 +1209,14 @@ function nowLine(n) {
   const fmt = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   if (pulseAt(n, state.minute)) return `<b>scheduled to fire ≈ now (${fmt(state.minute)})</b> — a pulse means the schedule says so, not that it succeeded`;
   if (monthlyAt(n, state.minute)) return `<b>~ monthly slot (${fmt(state.minute)})</b> — fires only in its week of the month (1st-week job); week-of-month not tracked live`;
-  return next != null ? `next scheduled today at <b>${fmt(next)}</b>` : 'done for the day';
+  return next != null ? `next scheduled slot at <b>${fmt(next)}</b> (monthly conditions may apply)` : 'no later scheduled slots — completion not established';
 }
 function fireStrip(n) {
-  const f = firesToday(n).filter((x) => x.minute != null);
-  if (!f.length && !isContinuous(n)) return '';
+  const real = flow.mode === 'real';
+  const f = real ? historyEvents().filter((e) => e.id === n.id) : firesToday(n).filter((x) => x.minute != null);
+  if (!f.length && (real || !isContinuous(n))) return '';
   const dots = f.map((x) => `<circle cx="${(x.minute / 1440 * 260).toFixed(1)}" cy="7" r="2.6" fill="${x.lane === 'monthly' ? '#54677A' : '#35C7E8'}"/>`).join('');
-  const cont = isContinuous(n) ? `<rect x="0" y="5.5" width="260" height="3" rx="1.5" fill="rgba(53,199,232,.25)"/>` : '';
+  const cont = !real && isContinuous(n) ? `<rect x="0" y="5.5" width="260" height="3" rx="1.5" fill="rgba(53,199,232,.25)"/>` : '';
   const ph = `<rect x="${(state.minute / 1440 * 260).toFixed(1)}" y="0" width="1.5" height="14" fill="#E8B33F"/>`;
   return `<svg width="260" height="14" viewBox="0 0 260 14" style="margin-top:7px;display:block">
     <rect x="0" y="6.4" width="260" height="1.2" fill="#1D2A38"/>${cont}${dots}${ph}</svg>`;
@@ -1165,14 +1287,14 @@ function flyTo(id) {
   const n = nodeById.get(id);
   if (!n || n._tx == null) return;
   const [wx, wy] = iso(n._tx, n._ty);
-  /* phone: the bottom sheet covers ~56vh — aim the node into the visible upper strip */
-  const sheetOffset = (innerWidth <= 720 && state.sel) ? (CH * 0.28) / Math.max(cam.z, 1.05) : 0;
-  animateCam(wx, wy + sheetOffset, Math.max(cam.z, 1.05));
+  animateCam(wx, wy, Math.max(cam.z, 1.05));
 }
 
 /* ══ header ══ */
 function buildCounters() {
   const counts = {};
+  $('filterDetails').querySelector('summary').textContent = state.statusFilter.size
+    ? `Status filters · ${state.statusFilter.size} hidden` : 'Status filters';
   nodes.forEach((n) => { counts[n.status] = (counts[n.status] || 0) + 1; });
   $('counters').innerHTML = Object.keys(STATUS).filter((s) => counts[s]).map((s) =>
     `<button class="counter${state.statusFilter.has(s) ? ' off-filter' : ''}" data-status="${s}" aria-pressed="${state.statusFilter.has(s)}"><span class="dot" style="background:${STATUS[s].c}"></span>${s} ${counts[s]}</button>`).join('');
@@ -1187,6 +1309,7 @@ function buildCounters() {
         state.statusFilter.has(s) ? state.statusFilter.delete(s) : state.statusFilter.add(s);
       }
       buildCounters();
+      clearTimelineMotion(); syncClock();
       needsDraw = true;
     });
   });
@@ -1196,7 +1319,7 @@ if (M) {
   buildCounters();
   $('legend').innerHTML = Object.keys(STATUS).map((s) =>
     `<span><i style="background:${STATUS[s].c}"></i>${s}</span>`).join('')
-    + `<span><i style="background:${ACCENT}"></i>beam = scheduled fire</span><span style="color:#FF9D5C">▲ gap</span>`
+    + `<span><i style="background:${ACCENT}"></i>beam = selected timeline event, not success</span><span style="color:#FF9D5C">▲ gap</span>`
     + `<span style="flex-basis:100%;height:0"></span>`
     + `<span>━ flow out (code-verified)</span><span>╍ flow in</span><span>┈ curated link (asserted)</span>`;
 }
@@ -1204,6 +1327,8 @@ if (M) {
 /* attention panel */
 $('attnToggle').addEventListener('click', () => {
   state.attn = !state.attn;
+  if (state.attn) { deselect(); if (innerWidth <= 720) setTimelineCollapsed(true); }
+  clearTimelineMotion(); syncClock();
   document.body.classList.toggle('attn-open', state.attn);
   $('attnToggle').classList.toggle('on', state.attn);
   $('attnToggle').setAttribute('aria-pressed', String(state.attn));
@@ -1246,6 +1371,7 @@ if (M) renderAttnPanel();
 /* search */
 $('search').addEventListener('input', (e) => {
   state.q = e.target.value;
+  clearTimelineMotion(); syncClock();
   needsDraw = true;
   const rs = $('results');
   if (!state.q) { rs.style.display = 'none'; return; }
@@ -1259,6 +1385,7 @@ $('search').addEventListener('input', (e) => {
   rs.querySelectorAll('[data-goto]').forEach((el) => el.addEventListener('click', () => {
     select(el.dataset.goto); flyTo(el.dataset.goto);
     rs.style.display = 'none'; $('search').value = ''; state.q = '';
+    clearTimelineMotion(); syncClock();
   }));
 });
 let gapCycle = -1;
@@ -1285,7 +1412,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   const ae = document.activeElement;
-  if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || (ae.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')))) return;
+  if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ((ae.tagName === 'BUTTON' || ae.tagName === 'SUMMARY') && (e.key === ' ' || e.key === 'Enter')))) return;
   const k = e.key;
   if (k === '/') { e.preventDefault(); $('search').focus(); return; }
   if (k === 'Escape') { if (helpOpen) toggleHelp(); else deselect(); return; }
@@ -1295,7 +1422,7 @@ document.addEventListener('keydown', (e) => {
   if (k === 'f') { camTouched = false; fitWorld(); return; }
   if (k === 'd') { const nd = (state.day + 1) % 7; $('days').querySelector(`[data-d="${nd}"]`).click(); return; }
   if (k === '+' || k === '=') { cam.z = Math.min(2.6, cam.z * 1.15); camTouched = true; needsDraw = true; return; }
-  if (k === '-') { cam.z = Math.max(.25, cam.z / 1.15); camTouched = true; needsDraw = true; return; }
+  if (k === '-') { cam.z = Math.max(MIN_ZOOM, cam.z / 1.15); camTouched = true; needsDraw = true; return; }
   const pan = 60 / cam.z;
   if (k === 'ArrowLeft') { cam.x -= pan; camTouched = true; needsDraw = true; }
   if (k === 'ArrowRight') { cam.x += pan; camTouched = true; needsDraw = true; }
@@ -1323,7 +1450,7 @@ function toggleHelp() {
       <b>/</b> — search · <b>g</b> — cycle through gap nodes<br>
       <b>space</b> — play the WEEK (days advance at midnight; pulses ride the edges; quiet hours fast-forward ≫) · <b>d</b> — next day<br>
       ▲ Attention — gap register + 🙋 Needs-Zack filter<br>
-      <span style="color:var(--ink-dim)">beams/lit windows = scheduled activity at the scrub time — never status, never success. Statuses read from shape + texture + label.</span>
+      <span style="color:var(--ink-mut)">beams/lit windows follow the selected timeline: schedule or dated log starts, never successful completion. Event arrows skip to an entry; selecting a row opens its node. Playback runs at 6 minutes/second and skips quiet stretches.</span>
       <div style="margin-top:10px;color:var(--ink-dim)">tap anywhere or ESC to close</div></div>`;
     el.addEventListener('click', toggleHelp);
     $('stage').appendChild(el);
@@ -1337,12 +1464,14 @@ function toggleHelp() {
 const DAY_LBL = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 $('days').innerHTML = DAY_LBL.map((l, i) => `<button class="day${i === state.day ? ' on' : ''}" data-d="${i}" aria-label="${DOW_LANES[i]}" aria-pressed="${i === state.day}">${l}</button>`).join('');
 function setDay(d) {
+  if (flow.mode === 'real' && historyDay() >= 0) d = historyDay();
   state.day = ((d % 7) + 7) % 7;
+  clearTimelineMotion();
   $('days').querySelectorAll('.day').forEach((x) => { const on = Number(x.dataset.d) === state.day; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
-  drawScrub(); needsDraw = true;
+  drawScrub(); syncClock(); needsDraw = true;
   if (state.sel) renderInspector(nodeById.get(state.sel));
 }
-$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => setDay(Number(el.dataset.d))));
+$('days').querySelectorAll('.day').forEach((el) => el.addEventListener('click', () => { setPlaying(false); setDay(Number(el.dataset.d)); }));
 
 $('scrub').value = Math.floor(state.minute);
 const scrubC = $('scrubCanvas'), scrubX = scrubC.getContext('2d');
@@ -1357,13 +1486,9 @@ function drawScrub() {
   scrubX.fillStyle = 'rgba(53,199,232,.05)'; scrubX.fillRect(X(356), 0, X(1260) - X(356), h);
   /* wake window */
   scrubX.fillStyle = 'rgba(53,199,232,.22)'; scrubX.fillRect(X(355), 0, Math.max(2, X(400) - X(355)), h);
-  /* fire marks for this day */
-  for (const n of nodes) {
-    for (const f of firesToday(n)) {
-      if (f.minute == null) continue;
-      scrubX.fillStyle = f.lane === 'monthly' ? 'rgba(124,143,160,.5)' : ((STATUS[n.status] || STATUS.UNKNOWN).c);
-      scrubX.fillRect(X(f.minute), f.lane === 'monthly' ? h * .62 : h * .25, 1.6, f.lane === 'monthly' ? h * .2 : h * .42);
-    }
+  for (const e of timelineEvents()) {
+    scrubX.fillStyle = flow.mode === 'real' ? ACCENT : (STATUS[nodeById.get(e.id).status] || STATUS.UNKNOWN).c;
+    scrubX.fillRect(X(e.minute), h * .2, 2, h * .5);
   }
   /* hour ticks */
   scrubX.fillStyle = INK_DIM;
@@ -1377,55 +1502,118 @@ function drawScrub() {
   scrubX.fillStyle = ACCENT;
   scrubX.fillRect(X(state.minute), 0, 2, h);
 }
+function historyDate() {
+  const date = (window.__RW_HIST__ || {}).date;
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
+  const stamp = new Date(date + 'T12:00:00Z');
+  return Number.isFinite(stamp.getTime()) && stamp.toISOString().slice(0, 10) === date ? date : '';
+}
+function historyEvents() {
+  const raw = window.__RW_HIST__ || {};
+  if (!historyDate() || !Array.isArray(raw.events)) return [];
+  return raw.events.filter((e) => e && Number.isInteger(e.minute) &&
+    e.minute >= 0 && e.minute < 1440 && nodeById.has(e.id))
+    .slice(0, 600).sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id));
+}
+function historyDay() { return historyDate() ? new Date(historyDate() + 'T12:00:00Z').getUTCDay() : -1; }
+function observedAt(minute) {
+  return timelineEvents().filter((e) => Math.abs(e.minute - minute) < 5)
+    .map((e) => nodeById.get(e.id)).filter(visible);
+}
+function renderTimelineContext(minute, hhmm) {
+  const events = timelineEvents(), real = flow.mode === 'real';
+  $('tickerHead').textContent = real ? 'Logged starts' : 'Scheduled activity';
+  const next = events.find((e) => e.minute > minute);
+  $('tickerContext').textContent = next
+    ? `${real ? 'Next in replay' : 'Next planned'} · ${fmtHM(next.minute)}`
+    : real ? 'No later entries in this log sample' : 'No later timed events in this view';
+  $('timelineDate').textContent = `${real ? historyDate() : DAY_FULL[state.day]} · Pacific time`;
+  $('timelineNote').textContent = real
+    ? 'Log start markers only, not completion. Partial sample: continuous jobs omitted; up to 30 starts per job.'
+    : 'Schedule only, not execution. Monthly conditions and continuous workers are not shown as timed events.';
+  $('modeBtn').disabled = !historyEvents().length;
+  $('modeBtn').title = $('modeBtn').disabled ? 'No valid dated log starts available in this scan' : 'Switch schedule / dated logged starts';
+  $('modeBtn').setAttribute('aria-pressed', String(real));
+  $('modeBtn').setAttribute('aria-label', real ? 'Show schedule' : 'Show logged starts');
+  $('modeBtn').textContent = real ? '← Schedule' : 'Logged starts';
+  $('days').querySelectorAll('.day').forEach((el) => {
+    el.disabled = real;
+    el.classList.toggle('on', Number(el.dataset.d) === state.day);
+    el.setAttribute('aria-pressed', String(Number(el.dataset.d) === state.day));
+  });
+  $('prevEventBtn').disabled = !events.some((e) => e.minute < minute);
+  $('nextEventBtn').disabled = !next;
+  // Two preceding + four forthcoming events, always in chronological order.
+  const firstFuture = events.findIndex((e) => e.minute >= minute);
+  const pivot = firstFuture < 0 ? events.length : firstFuture;
+  const nearby = events.slice(Math.max(0, pivot - 2), Math.max(0, pivot - 2) + 6);
+  const html = nearby.length ? nearby.map((e) => {
+    const n = nodeById.get(e.id);
+    const when = e.minute < minute ? 'Earlier' : e.minute === minute ? 'Selected' : 'Later';
+    return `<button class="timeline-event" data-goto="${esc(e.id)}" data-minute="${e.minute}" title="${esc(n.id + ' · ' + whatBrief(n))}"><time>${fmtHM(e.minute)}</time><span class="event-name">${esc(n.name || n.id)}</span><span class="event-when">${when}</span></button>`;
+  }).join('') : '<div class="timeline-empty">No timed events match this view. Try another day or clear the map filters.</div>';
+  // Avoid replacing focused buttons on every animation frame.
+  if ($('tickerRows').innerHTML !== html) $('tickerRows').innerHTML = html;
+}
 const syncClock = () => {
-  const m = Math.floor(state.minute);
-  const hhmm = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const m = Math.floor(state.minute), hhmm = fmtHM(m);
   $('clock').textContent = hhmm;
-  $('scrub').setAttribute('aria-valuetext', `${hhmm} on ${DOW_LANES[state.day]}`);
-  const firing = nodes.filter((n) => pulseAt(n, state.minute) || monthlyAt(n, state.minute));
-  const chip = $('nowChip');
-  if (chip) {
-    if (!firing.length) chip.innerHTML = '<span class="idle">— quiet —</span>';
-    else chip.innerHTML = '◉ ' + firing.slice(0, 3).map((n) =>
-      `<button data-goto="${esc(n.id)}">${esc(n.id)}</button>`).join(' · ')
-      + (firing.length > 3 ? ` <span class="idle">+${firing.length - 3}</span>` : '');
-    if (!chip._wired) {
-      chip._wired = true;
-      chip.addEventListener('click', (ev) => {
-        const b = ev.target.closest('[data-goto]');
-        if (b) { select(b.dataset.goto); flyTo(b.dataset.goto); }
-      });
-    }
-  }
+  $('scrub').value = m;
+  $('scrub').setAttribute('aria-valuetext', `${hhmm} Pacific, ${flow.mode === 'real' ? 'logged starts on ' + historyDate() : 'schedule for ' + DAY_FULL[state.day]}`);
+  renderTimelineContext(m, hhmm);
+  const events = timelineEvents().filter((e) => e.minute === m);
+  $('nowChip').textContent = events.length
+    ? `${events.length} ${flow.mode === 'real' ? 'logged start' : 'planned event'}${events.length === 1 ? '' : 's'} at ${hhmm}`
+    : 'Scrub a time, or step to the next event';
   drawScrub();
 };
-$('scrub').addEventListener('input', (e) => {
-  state.minute = Number(e.target.value);
+function clearTimelineMotion() {
+  timelineCache = null;
+  flow.events = []; flow.skip = false; loop._gapAt = -99; loop._pulseCheckAt = undefined;
+  $('clock').dataset.skip = '0';
+}
+function seekTimeline(minute) {
+  if (!Number.isFinite(minute)) return;
+  setPlaying(false);
+  clearTimelineMotion();
+  state.minute = Math.max(0, Math.min(1439, minute));
   syncClock(); needsDraw = true;
   if (state.sel) renderInspector(nodeById.get(state.sel));
-});
-$('nowBtn').addEventListener('click', () => {
-  const d = new Date();
-  state.minute = d.getHours() * 60 + d.getMinutes();
-  setDay(d.getDay());
-  $('scrub').value = Math.floor(state.minute);
-  syncClock();
-});
-function togglePlay() {
-  state.playing = !state.playing;
-  $('playBtn').textContent = state.playing ? '❚❚' : '▶';
 }
+function setPlaying(playing) {
+  state.playing = playing;
+  $('playBtn').textContent = playing ? '❚❚' : '▶';
+  $('playBtn').setAttribute('aria-label', playing ? 'Pause timeline playback' : 'Play timeline playback');
+  $('playBtn').setAttribute('aria-pressed', String(playing));
+}
+function togglePlay() { setPlaying(!state.playing); }
 $('playBtn').addEventListener('click', togglePlay);
-if (REDUCED) $('playBtn').style.display = 'none';
+$('scrub').addEventListener('input', (e) => seekTimeline(Number(e.target.value)));
+$('tickerRows').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-goto]');
+  if (!b) return;
+  seekTimeline(Number(b.dataset.minute));
+  select(b.dataset.goto); flyTo(b.dataset.goto);
+});
+for (const [id, dir] of [['prevEventBtn', -1], ['nextEventBtn', 1]]) {
+  $(id).addEventListener('click', () => {
+    const events = timelineEvents();
+    const target = dir > 0 ? events.find((e) => e.minute > state.minute)
+      : events.slice().reverse().find((e) => e.minute < state.minute);
+    if (target) seekTimeline(target.minute);
+  });
+}
+$('nowBtn').addEventListener('click', () => {
+  const now = pacificNow();
+  flow.mode = 'sched';
+  setDay(now.day);
+  seekTimeline(now.minute);
+});
 $('modeBtn').addEventListener('click', () => {
+  if (flow.mode === 'sched' && !historyEvents().length) return;
   flow.mode = flow.mode === 'sched' ? 'real' : 'sched';
-  const mb = $('modeBtn');
-  mb.textContent = flow.mode === 'real' ? 'REAL' : 'SCHED';
-  mb.style.color = flow.mode === 'real' ? 'var(--accent)' : 'var(--ink-mut)';
-  pushTick(flow.mode === 'real'
-    ? `── REPLAY ${esc((window.__RW_HIST__ || {}).date || '')} (actual logged runs) ──`
-    : '── SCHEDULE MODE ──', true);
-  loop._gapAt = -99; needsDraw = true;
+  if (flow.mode === 'real') setDay(historyDay());
+  seekTimeline(state.minute);
 });
 
 /* ══ live-scan seam: registry (embedded) + scan (fetched) ══
@@ -1535,7 +1723,7 @@ async function applyLiveScan() {
   } catch (e) {
     $('stamp').innerHTML += ' · <span style="color:var(--armed)">SCAN OFFLINE — showing the dated snapshot</span>';
     $('freshDot').style.background = 'var(--armed)';
-    $('freshTxt').textContent = 'OFFLINE · snapshot ' + (M ? M.meta.surveyed : '');
+    $('freshTxt').textContent = 'Scan unavailable · snapshot view';
     return;
   }
   if (!scan || !scan.jobs || !scan.scanned_at) return;
@@ -1589,16 +1777,14 @@ async function applyLiveScan() {
       if (cn) cn._cloud = w;
     }
   }
-  /* replay layer: yesterday's ACTUAL runs — reveal the REAL toggle when present */
-  if (scan.history && (scan.history.events || []).length) {
-    window.__RW_HIST__ = scan.history;
-    const mb = $('modeBtn');
-    if (mb) { mb.style.display = ''; mb.title = 'Replay the ACTUAL runs of ' + scan.history.date + ' (parsed from cron logs) instead of the schedule'; }
-  }
+  /* Preserve only the bounded dated log sample; no success inference. */
+  window.__RW_HIST__ = scan.history || null;
+  if (!historyEvents().length) flow.mode = 'sched';
+  clearTimelineMotion(); syncClock();
   renderTruthStrip(scan);
   $('stamp').textContent += ` · SCAN LIVE ${t}${scan.killswitch_engaged ? ' · ⛔ KILLSWITCH ENGAGED' : ''}`;
   $('freshDot').style.background = scan.killswitch_engaged ? 'var(--dead)' : 'var(--live)';
-  $('freshTxt').textContent = (scan.killswitch_engaged ? '⛔ KILLSWITCH · ' : 'LIVE ') + t + (typeof changed === 'number' && changed ? ' · Δ' + changed : '');
+  $('freshTxt').textContent = (scan.killswitch_engaged ? '⛔ KILLSWITCH · ' : 'Scan ') + t + ' UTC';
   buildCounters();
   if (state.sel && nodeById.has(state.sel)) renderInspector(nodeById.get(state.sel));
   needsDraw = true;
@@ -1629,9 +1815,10 @@ function restoreSession() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem(PERSIST_KEY) || 'null'); } catch (e) { return; }
   if (!saved) return;
-  state.day = saved.day ?? state.day;
-  state.minute = saved.minute ?? state.minute;
+  if (Number.isInteger(saved.day) && saved.day >= 0 && saved.day < 7) state.day = saved.day;
+  if (Number.isFinite(saved.minute) && saved.minute >= 0 && saved.minute < 1440) state.minute = saved.minute;
   (saved.filters || []).forEach((f) => state.statusFilter.add(f));
+  clearTimelineMotion();
   $('days').querySelectorAll('.day').forEach((el) => el.classList.toggle('on', Number(el.dataset.d) === state.day));
   $('scrub').value = Math.floor(state.minute);
   buildCounters();
