@@ -1009,6 +1009,14 @@
   body.ops .cr-revise[hidden] { display:none; }
   body.ops .cr-note { width:100%; box-sizing:border-box; resize:vertical; background:var(--surface-0); color:var(--text-1); border:1px solid var(--border-2); border-radius:var(--r-md); padding:8px 10px; font:inherit; font-size:var(--fs-2); }
   body.ops .cr-note:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
+.client-social-account { padding:16px 0; min-width:0; }
+.client-social-account + .client-social-account { border-top:1px solid var(--line); }
+.client-social-account h3 { overflow-wrap:anywhere; }
+.client-social-account .card-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+.client-social-account .status-row { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.social-post-list { list-style:none; padding:0; margin:8px 0 0; }
+.social-post-list li { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 16px; padding:8px 0; overflow-wrap:anywhere; }
+.social-post-list li > span { min-width:0; max-width:100%; }
 </style>
 </head>
 <body>
@@ -8611,6 +8619,71 @@ async function fetchClientRequests(queryBase) {
   if (!bad(enriched)) return enriched;
   return rest(queryBase);
 }
+function validateClientSocial(raw) {
+  if (raw == null) return null;
+  const unavailable = {unavailable:true};
+  if (typeof raw !== 'object' || Array.isArray(raw) || raw.version !== 1 || !Array.isArray(raw.accounts) || raw.accounts.length > 50) return unavailable;
+  const accounts = [], ids = new Set();
+  const states = ['complete','partial','stale','collection_failed','awaiting_first_collection','permission_unavailable','reconnect_required'];
+  const timestamp = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(Date.parse(value));
+  const count = value => value === null || (Number.isSafeInteger(value) && value >= 0);
+  for (const a of raw.accounts) {
+    if (!a || typeof a.label !== 'string' || !a.label || a.label.length > 120 || typeof a.binding_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(a.binding_id) || ids.has(a.binding_id) || !['instagram','tiktok','youtube','facebook'].includes(a.platform) || !states.includes(a.status) || !Number.isInteger(a.stale_after_seconds) || a.stale_after_seconds < 60 || a.stale_after_seconds > 604800) return unavailable;
+    ids.add(a.binding_id);
+    const x = {binding_id:a.binding_id,label:a.label,platform:a.platform,status:a.status,stale_after_seconds:a.stale_after_seconds,metrics:{},posts:[]};
+    for (const key of ['collected_at','last_attempt_at']) {
+      if (a[key] != null) { if (!timestamp(a[key])) return unavailable; x[key]=a[key]; }
+    }
+    if (a.metrics != null) {
+      if (typeof a.metrics !== 'object' || Array.isArray(a.metrics) || !x.collected_at) return unavailable;
+      for (const k of ['followers','following','posts']) if (k in a.metrics) {
+        if (!count(a.metrics[k])) return unavailable;
+        x.metrics[k] = a.metrics[k];
+      }
+    }
+    if (a.posts != null) {
+      if (!Array.isArray(a.posts) || a.posts.length > 20 || !x.collected_at) return unavailable;
+      const postIds = new Set();
+      for (const p of a.posts) {
+        if (!p || typeof p.id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(p.id) || postIds.has(p.id)) return unavailable;
+        postIds.add(p.id);
+        const q = {id:p.id};
+        if (p.published_at != null) { if (!timestamp(p.published_at)) return unavailable; q.published_at=p.published_at; }
+        for (const k of ['views','reach','likes','comments','shares','saves']) if (k in p) {
+          if (!count(p[k])) return unavailable;
+          q[k] = p[k];
+        }
+        x.posts.push(q);
+      }
+    }
+    if (['complete','partial','stale'].includes(x.status) && !x.collected_at) return unavailable;
+    accounts.push(x);
+  }
+  return {accounts};
+}
+function renderClientSocial(raw, nowMs) {
+  if (raw == null) return {html:'',attention:[]};
+  const unavailable = () => ({html:'<section class="role-card" aria-labelledby="social-reporting-title"><h2 id="social-reporting-title">Social performance</h2><p class="mut">Social reporting unavailable right now. Existing search reporting is unaffected.</p></section>',attention:[{title:'Social reporting needs a check',sub:'Search reporting remains available.',tone:'warn'}]});
+  try {
+    const data = validateClientSocial(raw), now = nowMs == null ? Date.now() : nowMs;
+    if (!data || data.unavailable || !Number.isFinite(now)) return unavailable();
+    const attention = [];
+    const labels = {complete:'Up to date',partial:'Some metrics unavailable',stale:'Update overdue',collection_failed:'Latest update failed',awaiting_first_collection:'Awaiting first update',permission_unavailable:'Analytics access needed',reconnect_required:'Reconnect needed'};
+    const rows = data.accounts.map(a => {
+      if ((a.collected_at && Date.parse(a.collected_at) > now) || (a.last_attempt_at && Date.parse(a.last_attempt_at) > now)) throw new Error('future observation');
+      let state = a.status;
+      if (['complete','partial'].includes(state) && now-Date.parse(a.collected_at) > a.stale_after_seconds*1000) state='stale';
+      if (state !== 'complete' && state !== 'awaiting_first_collection') attention.push({title:'Social reporting needs attention',sub:a.label+' · '+labels[state],tone:'warn'});
+      const v = k => a.metrics[k] == null ? '—' : String(a.metrics[k]);
+      const posts = a.posts.slice(0,5).map(p => {
+        const values = ['views','reach','likes','comments','shares','saves'].filter(k=>p[k]!=null).map(k=>esc(String(p[k]))+' '+k).join(' · ');
+        return '<li><span>'+esc(p.published_at ? ptTime(p.published_at) : 'Post '+p.id)+'</span><span class="mut">'+(values || 'Metrics unavailable')+'</span></li>';
+      }).join('');
+      return '<article class="client-social-account" aria-label="'+esc(a.label)+' social account"><div class="card-head"><h3>'+esc(a.label)+'</h3>'+statusPill('Reporting',labels[state],state==='complete'?'ok':'warn')+'</div><p class="mut">'+esc(a.platform)+(a.collected_at?' · Measured '+esc(ptTime(a.collected_at)):' · No measurements yet')+'</p>'+(state==='collection_failed'&&a.last_attempt_at?'<p class="mut">Update attempted '+esc(ptTime(a.last_attempt_at))+'. Previously measured results are shown when available.</p>':'')+'<div class="status-row"><span>Followers <b>'+v('followers')+'</b></span><span>Following <b>'+v('following')+'</b></span><span>Posts <b>'+v('posts')+'</b></span></div>'+(posts?'<h4>Recent posts · lifetime counts</h4><ul class="social-post-list">'+posts+'</ul>':'')+'</article>';
+    }).join('');
+    return {html:'<section class="role-card client-social" aria-labelledby="social-reporting-title"><h2 id="social-reporting-title">Social performance</h2><p class="mut">Account counts are measured at a point in time. Recent-post results are a limited sample, not period totals. — means unavailable, not zero.</p>'+(rows || '<p class="mut">No social accounts are connected for reporting.</p>')+'</section>',attention};
+  } catch (_) { return unavailable(); }
+}
 // ── Client dashboard (role=client; operators pass an explicit key to preview) ─
 // Mode is an EXPLICIT param, never inferred from key (finding: the header Refresh button,
 // the Retry button, and the focus-regain refetch all called renderClient(window._clientKey)
@@ -8707,6 +8780,7 @@ async function renderClientImpl(key, opPreview) {
     return;
   }
   const p = snap.payload || {};
+  const clientSocial = renderClientSocial(p.social, Date.now());
   // Client self-serve (M4): the client's own client_key + their OPEN requests from the operator
   // (client_request table, RLS-scoped to this client by their JWT). Fail-soft to [] if the table
   // isn't applied yet or the read errors. Used to render real Approve/Respond buttons below.
@@ -8798,7 +8872,7 @@ async function renderClientImpl(key, opPreview) {
   const nextClientWork = digestNext[0] || planned[0] || null;
   const latestClientProof = digestProof[0] || proofTimeline[0] || null;
   const clientOutcomeWatch = tracking[0] || clientAiRows[0] || clientPresenceRows[0] || null;
-  const attention = [];
+  const attention = clientSocial.attention.slice();
   // Stale-snapshot verdict guard (stale-snapshot-client-verdict-warning): reuses the SAME
   // staleness definition already shown on this exact timestamp (the 'Updated' freshnessPill
   // below uses warn=192h/bad=264h) — a second, invented threshold for the same field would be
@@ -8911,6 +8985,7 @@ async function renderClientImpl(key, opPreview) {
     (ga4.latest_sessions != null ? metric('Site sessions', ga4.latest_sessions, (ga4.sessions_delta != null ? (ga4.sessions_delta >= 0 ? '+' : '') + ga4.sessions_delta + ' vs prior' : 'GA4'), ga4.sessions_delta < 0 ? 'warn' : 'info', 'Visits to your website in this period (from Google Analytics).', _srcStat('GA4')) : '') +
     (aeo.citation_rate_pct != null ? metric('AI citations', (aeo.cited || 0) + ' of ' + (aeo.total || 0), aeo.citation_rate_pct + '% of checked queries cited you', Number(aeo.citation_rate_pct) > 0 ? 'ok' : 'warn', 'How often AI answers (like Google AI Overviews) cite your business, out of the queries we check.') : '') +
     '</div></section>';
+  h += clientSocial.html;
   h += '<div class="role-kicker" style="margin:12px 0 -2px">At a glance</div><div class="status-row">' +
     freshnessPill('Updated', clientGeneratedAt, 192, 264) +
     statusPill('Search tracking', _rankDataMismatch ? 'data check' : (_trackedKpi != null ? _trackedKpi + ' terms' : ((p.rankings || []).length ? p.rankings.length + ' rows shown' : 'pending')), (p.rankings || []).length ? (toNum(terms.value) ? 'ok' : 'warn') : 'warn') +
@@ -9318,4 +9393,4 @@ render();
 </body>
 </html>
 
-<!-- rankwise-portal-version: c18ba48e17b6 -->
+<!-- rankwise-portal-version: 7c507eb1904e -->
