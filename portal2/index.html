@@ -3288,6 +3288,59 @@ function contentRow(it){
     <div class="acts">${acts}</div>
   </div>`;
 }
+// Managed social: read-only operator projection, never a provider credential.
+function renderManagedSocial(raw, now=Date.now()){
+  const unavailable='<section data-managed-social><h3 class="section-h">Social performance</h3><p class="section-note">Social reporting unavailable. This does not mean zero activity.</p></section>';
+  const count=v=>v===null||v===undefined?'Unavailable':Number.isSafeInteger(v)&&v>=0?String(v):(()=>{throw Error('count');})();
+  const stamp=v=>{if(typeof v!=="string"||!/(Z|[+-]\d{2}:\d{2})$/.test(v)||!Number.isFinite(Date.parse(v))||Date.parse(v)>now)throw Error('time');return v;};
+  const labels={complete:'Updated',partial:'Some metrics unavailable',stale:'Update overdue',collection_failed:'Latest update failed',awaiting_first_collection:'Awaiting first update',permission_unavailable:'Access unavailable',reconnect_required:'Reconnect required'};
+  const reelLabels={initial_plays:'Initial plays',replays:'Replays',total_plays:'Total plays',average_watch_time_ms:'Average watch time',watch_time_ms:'Total watch time'};
+  const statuses=['available','unavailable','request_failed','not_attempted','invalid_response'];
+  try{
+    if(!raw||raw.version!==1||raw.status!=='available'||!Array.isArray(raw.clients)||raw.clients.length>200)return unavailable;
+    const seen=new Set();
+    const clients=raw.clients.map(client=>{
+      if(!client||typeof client.client_key!=='string'||!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(client.client_key)||seen.has(client.client_key)||!Array.isArray(client.accounts)||client.accounts.length>50)throw Error('client');
+      seen.add(client.client_key);
+      const accounts=client.accounts.map(a=>{
+        if(!a||!['facebook','instagram','youtube','tiktok'].includes(a.platform)||typeof a.label!=='string'||a.label.length>120||!Object.hasOwn(labels,a.status)||!Number.isSafeInteger(a.stale_after_seconds)||a.stale_after_seconds<60||a.stale_after_seconds>604800)throw Error('account');
+        const measured=a.collected_at?stamp(a.collected_at):null;
+        const status=measured&&now-Date.parse(measured)>a.stale_after_seconds*1000?'Update overdue · '+labels[a.status]:labels[a.status];
+        if((a.metrics||a.posts)&&!measured)throw Error('missing time');
+        const metrics=a.metrics||{};
+        const summary=['followers','following','posts'].filter(k=>Object.hasOwn(metrics,k)).map(k=>`${esc(k)}: ${esc(count(metrics[k]))}`).join(' · ');
+        if(a.posts!==undefined&&(!Array.isArray(a.posts)||a.posts.length>20))throw Error('posts');
+        const ids=new Set();
+        const posts=(a.posts||[]).map(post=>{
+          if(!post||typeof post.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(post.id)||ids.has(post.id))throw Error('post');
+          ids.add(post.id);
+          let text=['views','reach','likes','comments','shares','saves'].filter(k=>Object.hasOwn(post,k)).map(k=>`${esc(k)}: ${esc(count(post[k]))}`).join(' · ');
+          let reel='';
+          if(post.reel){
+            const r=post.reel;
+            if(a.platform!=='facebook'||typeof r.video_id!=='string'||!/^\d{1,30}$/.test(r.video_id)||!r.metrics||!r.metric_status||!statuses.includes(r.retention_status)||Date.parse(stamp(r.collected_at))>Date.parse(measured))throw Error('reel');
+            const values=Object.entries(reelLabels).map(([k,label])=>{
+              const s=r.metric_status[k],v=r.metrics[k];
+              if(!statuses.includes(s)||(s==='available')!==Object.hasOwn(r.metrics,k))throw Error('metric state');
+              let rendered='Unavailable';
+              if(s==='available'){
+                if(k.endsWith('_ms')){if(typeof v!=='number'||!Number.isFinite(v)||v<0||v>Number.MAX_SAFE_INTEGER)throw Error('time value');rendered=String(v/1000)+' s';}
+                else rendered=count(v);
+              }
+              return `${esc(label)}: ${esc(rendered)}`;
+            }).join(' · ');
+            reel=`<p>${values}</p><p class="section-note">Reel measured ${esc(r.collected_at)} · Retention ${r.retention_status==='available'?'data received; chart not yet supported':'unavailable'}. <a href="https://www.facebook.com/reel/${r.video_id}/" target="_blank" rel="noopener noreferrer">Open Reel</a></p>`;
+          }
+          return `<li style="overflow-wrap:anywhere"><b>${post.published_at?esc(stamp(post.published_at)):'Post date unavailable'}</b>${text?`<p>${text}</p>`:''}${reel}</li>`;
+        }).join('');
+        return `<div style="margin:16px 0"><h4>${esc(a.label)} · ${esc(a.platform)}</h4><p class="section-note">${esc(status)} · ${measured?'Measured '+esc(measured):'No measurements yet'}</p>${summary?`<p>${summary}</p>`:''}${posts?`<ul>${posts}</ul>`:'<p class="section-note">No recent posts in this reporting sample.</p>'}</div>`;
+      }).join('');
+      return `<details open><summary>${esc(client.client_key)}</summary>${accounts||'<p>No enrolled accounts in this reporting snapshot.</p>'}</details>`;
+    }).join('');
+    return `<section data-managed-social><h3 class="section-h">Social performance</h3><p class="section-note">Read-only · Recent-post sample, not a complete archive. Per-post metrics are lifetime totals; do not sum repeated snapshots. Plays are not views or reach. Counts may be delayed and include our verification activity.${raw.client_sample_complete===false?' Client-list limit reached; additional clients may be omitted.':''}</p>${clients||'<p>No social reports are present in this snapshot. Connection status is unverified.</p>'}</section>`;
+  }catch{return unavailable;}
+}
+// End managed-social renderer.
 function viewContent(p){
   const items=p.content_items, onHold=p.on_hold_items;
   const validRows=v=>Array.isArray(v)&&v.every(row=>row&&typeof row==="object"&&!Array.isArray(row));
@@ -5941,7 +5994,7 @@ function render(p, updatedAt, srcNote){
       </div>
     </div>
     ${actionFeedbackMarkup()}
-    <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}</div>
+    <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}${['content','analytics'].includes(VIEW)?renderManagedSocial(p.social_reporting):''}</div>
     ${_paletteMarkup()}
   </main>`;
   document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";if(a.dataset.v!=="decisions")DEC_SELECTED=null;VIEW=a.dataset.v;
@@ -6383,4 +6436,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 13e413d99c67 -->
+<!-- rankwise-portal2-version: ed9d171fd01e -->
