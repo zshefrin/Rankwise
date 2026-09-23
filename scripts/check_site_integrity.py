@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_NAV = (ROOT / "partials" / "nav.html").read_text(encoding="utf-8").strip()
-SKIP_NAV = {"404.html", "blog/hvac-marketing-cost/index.html"}
+SKIP_NAV = {"404.html"}
 STALE_NAV_RE = re.compile(r"(?m)^nav\{|\.nav-links|\.nav-cta|\.logo\{")
 STALE_STICKY_CTA_RE = re.compile(
     r"\.mobile-sticky-cta\{display:none\}\s*"
@@ -89,6 +89,14 @@ def main() -> int:
             continue
         if not (ROOT / url.strip("/") / "index.html").exists():
             fail(errors, f"sitemap.xml: {url} has no local index.html")
+
+    mirrors = json.loads((ROOT / "_content" / "mirror-pages.json").read_text(encoding="utf-8"))["mirrors"]
+    for pair in mirrors:
+        if (ROOT / pair["canonical"]).read_bytes() != (ROOT / pair["mirror"]).read_bytes():
+            fail(errors, f"{pair['mirror']}: drifted from mirror source {pair['canonical']} (run scripts/check_mirror_pages.py --sync)")
+        mirror_url = "/" + pair["mirror"].removesuffix("index.html")
+        if mirror_url in sitemap_urls:
+            fail(errors, f"sitemap.xml: mirror {mirror_url} must not be listed (canonical is elsewhere)")
 
     if errors:
         print("Site integrity check failed:")

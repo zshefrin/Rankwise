@@ -7,7 +7,7 @@ title: Roofing Company Marketing in Metro Vancouver, BC
 metaDescription: 33.3% of Metro Vancouver roofing searches have a beatable #1. See the real map-pack numbers and what Rankwise charges to win one.
 h1: "Roofing company marketing in Metro Vancouver: the most beatable map pack in the region"
 numbersUsed: ["33.3% of swept roofer keywords have a #1 with under 30 reviews, 67/201 (asOf 2026-07-09)", "metro n=157 businesses Google surfaces (asOf 2026-07-09)", "metro medianReviews=44 (asOf 2026-07-09)", "metro topReviews=485 (asOf 2026-07-09)", "metro avgRating=4.84 (asOf 2026-07-09)", "metro pctWithWebsite=96% (asOf 2026-07-09)", "Pitt Meadows medianReviews=37, n=16 (asOf 2026-07-09)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -38,7 +38,7 @@ Insurance-claim work deserves its own mention, because it's a category-specific 
 
 Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, with billing paused if the milestone is missed.
 
-A cheaper option, a freelancer posting occasionally to a GBP profile, won't move a business through a field this thin fast enough to matter, because there's no rank tracking proving the work is working. A pricier general agency bundling in a full website rebuild or paid search campaign is selling a broader (and more expensive) scope than what a roofing company needs to win a map pack that's already this open on its own. That's a review-and-visibility fight, not a rebuild. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/); the same service-by-service logic applies to roofing.
+A cheaper option, a freelancer posting occasionally to a GBP profile, won't move a business through a field this thin fast enough to matter, because there's no rank tracking proving the work is working. A pricier general agency bundling in a full website rebuild or paid search campaign is selling a broader (and more expensive) scope than what a roofing company needs to win a map pack that's already this open on its own. That's a review-and-visibility fight, not a rebuild. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/hvac-marketing-cost/); the same service-by-service logic applies to roofing.
 
 ## What a roofing marketing partner should deliver every month
 

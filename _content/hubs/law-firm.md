@@ -7,7 +7,7 @@ title: Law Firm Marketing in Metro Vancouver, BC | Rankwise
 metaDescription: Law firm marketing in BC runs inside Law Society of BC advertising rules. What's compliant, what a Map Pack program costs, and real local data.
 h1: Law firm marketing in Metro Vancouver
 numbersUsed: ["lawyer metro medianReviews=51 (asOf 2026-07-09)", "lawyer metro n=248 businesses Google surfaces (asOf 2026-07-09)", "lawyer metro pctWithWebsite=97% (asOf 2026-07-09)", "lawyer metro avgRating=4.7 (asOf 2026-07-09)", "lawyer Vancouver medianReviews=125 (asOf 2026-07-09)", "lawyer Chilliwack medianReviews=31 (asOf 2026-07-09)", "lawyer winnability=15.0% of keywords have a sub-30-review #1 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---

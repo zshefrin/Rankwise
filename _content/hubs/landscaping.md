@@ -7,7 +7,7 @@ title: Landscaping Company Marketing in Metro Vancouver, BC
 metaDescription: Landscaping marketing in Metro Vancouver costs $450–$1,250/mo with Rankwise. See real map-pack review counts across 8 Lower Mainland cities.
 h1: "Landscaping company marketing in Metro Vancouver: turning seasonal searches into recurring accounts"
 numbersUsed: ["metro n=256 businesses Google surfaces (asOf 2026-07-09)", "metro medianReviews=37 (asOf 2026-07-09)", "metro topReviews=416 (asOf 2026-07-09)", "metro avgRating=4.89 (asOf 2026-07-09)", "metro pctWithWebsite=96% (asOf 2026-07-09)", "Abbotsford medianReviews=44, n=19 (asOf 2026-07-09)", "Chilliwack medianReviews=63, n=16 (asOf 2026-07-09)", "Delta medianReviews=34, n=18 (asOf 2026-07-09)", "Langley medianReviews=51, n=18 (asOf 2026-07-09)", "New Westminster medianReviews=25, n=15 (asOf 2026-07-09)", "Pitt Meadows medianReviews=36, n=18 (asOf 2026-07-09)", "Surrey medianReviews=49, n=17 (asOf 2026-07-09)", "Vancouver medianReviews=48, n=22 (asOf 2026-07-09)", "24.0% of swept landscaper keywords have a #1 with under 30 reviews, 49/204 (asOf 2026-07-09)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-landscaper-map-pack-actually-l/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-landscaper-map-pack-actually-l/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -38,7 +38,7 @@ Timing the ask matters more in landscaping than in most trades on this hub. A re
 
 Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content, useful for a landscaping business that serves several Lower Mainland cities in a season). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, billing paused if it's missed.
 
-A cheaper route, occasional GBP posting with no review system or rank tracking, won't move a landscaping business through a field of 256 competitors fast enough to matter for a given season. A pricier general marketing agency bundling in paid ads or a website rebuild is solving a different problem than the map pack fight. Landscaping's opportunity here is specifically in reviews, categories, and consistent local-search visibility, not a broader marketing overhaul. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/); the same service-by-service logic applies to landscaping.
+A cheaper route, occasional GBP posting with no review system or rank tracking, won't move a landscaping business through a field of 256 competitors fast enough to matter for a given season. A pricier general marketing agency bundling in paid ads or a website rebuild is solving a different problem than the map pack fight. Landscaping's opportunity here is specifically in reviews, categories, and consistent local-search visibility, not a broader marketing overhaul. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/hvac-marketing-cost/); the same service-by-service logic applies to landscaping.
 
 ## What a landscaping marketing partner should deliver every month
 

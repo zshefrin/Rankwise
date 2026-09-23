@@ -7,7 +7,7 @@ title: Med Spa Marketing in Metro Vancouver, BC
 metaDescription: Med spa marketing has to clear three rulebooks before it clears Google. What Metro Vancouver's map pack actually looks like, and what it costs to compete.
 h1: Med spa marketing in Metro Vancouver
 numbersUsed: ["med_spa_metro_n=160 businesses (asOf 2026-07-09)", "med_spa_metro_medianReviews=139 (asOf 2026-07-09)", "med_spa_metro_topReviews=1400 (asOf 2026-07-09)", "med_spa_metro_avgRating=4.88 (asOf 2026-07-09)", "med_spa_metro_pctWithWebsite=82% (asOf 2026-07-09)", "med_spa_thin_map_pack_pct=2.0-3.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -46,7 +46,7 @@ A complete, accurately categorized Google Business Profile, the right service ca
 
 ## What it costs to get local-search help in BC
 
-Three fixed tiers: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review work scoped to whichever rulebook governs your practice, physician-led or RN/NP-led, triaged above), Foundation at $750/month, Growth at $1,250/month CAD, no negotiation. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One med spa per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/), same tiers, same math, so the number isn't something you have to take on faith.
+Three fixed tiers: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review work scoped to whichever rulebook governs your practice, physician-led or RN/NP-led, triaged above), Foundation at $750/month, Growth at $1,250/month CAD, no negotiation. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One med spa per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tiers, same math, so the number isn't something you have to take on faith.
 
 ## What a marketing partner should deliver every month
 
