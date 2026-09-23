@@ -28,6 +28,17 @@ MIRROR_PATHS = (
     if _MIRRORS.exists() else set()
 )
 
+# Live pages deliberately kept OUT of the sitemap (the pages stay published;
+# only the crawl hint is withdrawn). Added 2026-09-23 per the index-coverage
+# diagnosis (rankwise-dashboard vault/_dev/index-coverage-diagnosis-2026-09-23.md,
+# recommendation 5): /audits/ (99 words) and /data-deletion/ (331 words) are
+# non-content utility pages, never crawled, that dilute a sitemap Google is
+# already pruning. Remove an entry here to put the URL back.
+EXCLUDED_URLS = {
+    f"{BASE}/audits/",
+    f"{BASE}/data-deletion/",
+}
+
 
 def git_lastmod(rel_path: str) -> str:
     """Return YYYY-MM-DD of the last commit that touched this path.
@@ -190,6 +201,8 @@ def build_sitemap() -> str:
                 continue
             rel = f"audits/{slug_dir.name}/index.html"
             urls.append((f"{BASE}/audits/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.6"))
+
+    urls = [u for u in urls if u[0] not in EXCLUDED_URLS]
 
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
