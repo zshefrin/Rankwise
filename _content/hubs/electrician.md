@@ -7,7 +7,7 @@ title: Electrician Marketing in Metro Vancouver, BC | Rankwise
 metaDescription: Metro Vancouver electricians should budget $750–$1,250/mo for local-search marketing. Real map-pack data, cost breakdown, and monthly deliverables.
 h1: Electrician marketing in Metro Vancouver
 numbersUsed: ["electrician metro medianReviews=55 (asOf 2026-07-20)", "electrician metro n=275 businesses Google surfaces (asOf 2026-07-20)", "electrician metro pctWithWebsite=91% (asOf 2026-07-20)", "electrician metro avgRating=4.84 (asOf 2026-07-20)", "electrician Delta medianReviews=34 (asOf 2026-07-20)", "electrician North Vancouver medianReviews=72 (asOf 2026-07-20)", "electrician winnability=16.8% of keywords have a sub-30-review #1, 35/208 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---

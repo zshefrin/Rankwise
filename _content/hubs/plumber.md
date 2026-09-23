@@ -7,7 +7,7 @@ title: Plumbing Marketing in Metro Vancouver, BC
 metaDescription: Plumbing marketing in Metro Vancouver runs $450–$1,250/mo with Rankwise. See real map-pack review counts by city and what should move first.
 h1: "Plumbing marketing in Metro Vancouver: what it costs and what actually moves the map pack"
 numbersUsed: ["metro n=206 businesses Google surfaces (asOf 2026-07-20)", "metro medianReviews=75 (asOf 2026-07-20)", "metro topReviews=12000 (asOf 2026-07-20)", "metro avgRating=4.87 (asOf 2026-07-20)", "metro pctWithWebsite=91% (asOf 2026-07-20)", "Abbotsford medianReviews=52, n=15 (asOf 2026-07-20)", "Chilliwack medianReviews=82, n=15 (asOf 2026-07-20)", "Coquitlam medianReviews=75, n=15 (asOf 2026-07-20)", "Langley medianReviews=53, n=16 (asOf 2026-07-20)", "Vancouver medianReviews=148, n=16 (asOf 2026-07-20)", "West Vancouver medianReviews=53, n=19 (asOf 2026-07-20)", "24.9% of swept plumber keywords have a #1 with under 30 reviews, 53/213 (asOf 2026-07-20 partial resweep)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -38,7 +38,7 @@ There's also an ownership objection worth naming directly, because plumbing owne
 
 Rankwise runs three fixed tiers: **Starter at $450/month** (Google Business Profile optimization, a review system, and a rank snapshot, no content, email-only), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). All three are month-to-month, and Foundation and Growth carry a written guarantee: before month one, we agree on a starting Map Pack position and a 90-day milestone, and billing pauses if we miss it.
 
-Cheaper than that, you're typically buying a set-it-and-forget-it GBP tool or a freelancer doing profile hygiene with no rank tracking and no review system behind it: fine for basic upkeep, not built to move a beatable keyword. Pricier general marketing agencies usually bundle in a website rebuild, paid ads, or broader brand work. Those are real services, but not what moves a plumbing business through a map pack that's already 24.9% winnable on its own merits; that fight is won with GBP, reviews, and citations, not a new website. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/); the same service-by-service logic applies to plumbing.
+Cheaper than that, you're typically buying a set-it-and-forget-it GBP tool or a freelancer doing profile hygiene with no rank tracking and no review system behind it: fine for basic upkeep, not built to move a beatable keyword. Pricier general marketing agencies usually bundle in a website rebuild, paid ads, or broader brand work. Those are real services, but not what moves a plumbing business through a map pack that's already 24.9% winnable on its own merits; that fight is won with GBP, reviews, and citations, not a new website. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/hvac-marketing-cost/); the same service-by-service logic applies to plumbing.
 
 ## What a plumbing marketing partner should deliver every month
 

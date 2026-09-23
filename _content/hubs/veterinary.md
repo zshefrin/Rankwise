@@ -7,7 +7,7 @@ title: Veterinary Clinic Marketing in Metro Vancouver, BC
 metaDescription: A vet clinic's Google visibility can move, but review-solicitation sits in a grey zone under BC's current rules. What to run instead, and the real cost.
 h1: Veterinary clinic marketing in Metro Vancouver
 numbersUsed: ["veterinarian_metro_n=160 businesses (asOf 2026-07-09)", "veterinarian_metro_medianReviews=238 (asOf 2026-07-09)", "veterinarian_metro_topReviews=1200 (asOf 2026-07-09)", "veterinarian_metro_avgRating=4.5 (asOf 2026-07-09)", "veterinarian_metro_pctWithWebsite=96% (asOf 2026-07-09)", "veterinarian_thin_map_pack_pct=3.1-3.5% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -38,7 +38,7 @@ Given how even this field's reviews already run, a 238-review median is a genuin
 
 ## What it costs to get local-search help in BC
 
-Three fixed tiers: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review solicitation off entirely for veterinary clients pending CVBC clarification), Foundation at $750/month, Growth at $1,250/month CAD, no negotiation. Before month one, we agree in writing on your clinic's starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One clinic per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/), same tier structure, same math, because a real number beats a sales call.
+Three fixed tiers: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review solicitation off entirely for veterinary clients pending CVBC clarification), Foundation at $750/month, Growth at $1,250/month CAD, no negotiation. Before month one, we agree in writing on your clinic's starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One clinic per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tier structure, same math, because a real number beats a sales call.
 
 Weekend and evening search behaves differently again: a genuine after-hours emergency doesn't wait for a callback, so a profile's posted hours need to be accurate to the minute, not just accurate to the day, and any gap between what the profile says and what the phone confirms costs the clinic a client it can't easily win back.
 

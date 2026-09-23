@@ -7,7 +7,7 @@ title: Dental Practice Marketing in Metro Vancouver, BC
 metaDescription: Should a Metro Vancouver dentist hire local-marketing help? Yes, for $750-$1,250/mo with a 90-day milestone. No review-solicitation shortcuts.
 h1: Dental practice marketing in Metro Vancouver
 numbersUsed: ["dental_metro_n=342 businesses (asOf 2026-07-09)", "dental_metro_medianReviews=172 (asOf 2026-07-09)", "dental_metro_topReviews=2800 (asOf 2026-07-09)", "dental_metro_avgRating=4.83 (asOf 2026-07-09)", "dental_metro_pctWithWebsite=48% (asOf 2026-07-09)", "vancouver_dental_medianReviews=315 (asOf 2026-07-09)", "white-rock_dental_medianReviews=122 (asOf 2026-07-09)", "dentist_thin_map_pack_pct=4.3-5.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -44,7 +44,7 @@ Many Metro Vancouver dental practices run two or more dentists under one clinic 
 
 ## What it costs to get local-search help in BC
 
-Rankwise runs three fixed tiers, no negotiation: Starter at $450/month (GBP optimization work and a scoped 30-day guarantee — with review work held to what BC's dental advertising rules allow, not the solicitation program a trade gets), Foundation at $750/month, and Growth at $1,250/month CAD. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One dental practice per city, per competitive category, so once you're in, we won't sign a second practice competing directly against you in the same city. We've [published the same cost breakdown for HVAC contractors](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/), same tier structure, same math, because the pricing question deserves a real number instead of a sales call.
+Rankwise runs three fixed tiers, no negotiation: Starter at $450/month (GBP optimization work and a scoped 30-day guarantee — with review work held to what BC's dental advertising rules allow, not the solicitation program a trade gets), Foundation at $750/month, and Growth at $1,250/month CAD. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One dental practice per city, per competitive category, so once you're in, we won't sign a second practice competing directly against you in the same city. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tier structure, same math, because the pricing question deserves a real number instead of a sales call.
 
 ## What a marketing partner should deliver every month
 

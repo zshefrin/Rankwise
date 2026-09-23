@@ -7,7 +7,7 @@ title: Auto Repair Shop Marketing in Metro Vancouver | Rankwise
 metaDescription: Auto repair map packs in Metro Vancouver are review-heavy and hard to crack fast. Real numbers, honest timelines, and what marketing should cost.
 h1: Auto repair shop marketing in Metro Vancouver
 numbersUsed: ["auto repair metro medianReviews=173 (asOf 2026-07-09)", "auto repair metro topReviews=38000 (asOf 2026-07-09)", "auto repair metro n=310 businesses Google surfaces (asOf 2026-07-09)", "auto repair metro pctWithWebsite=65% (asOf 2026-07-09)", "auto repair Pitt Meadows medianReviews=115 (asOf 2026-07-09)", "auto repair Vancouver medianReviews=262 (asOf 2026-07-09)", "auto repair winnability=7.2% of keywords have a sub-30-review #1, 15/208 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---

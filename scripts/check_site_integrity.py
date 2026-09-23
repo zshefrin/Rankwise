@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_NAV = (ROOT / "partials" / "nav.html").read_text(encoding="utf-8").strip()
-SKIP_NAV = {"404.html", "blog/hvac-marketing-cost/index.html"}
+SKIP_NAV = {"404.html", "blog/how-much-does-hvac-marketing-cost-in-british-columbia/index.html"}
 STALE_NAV_RE = re.compile(r"(?m)^nav\{|\.nav-links|\.nav-cta|\.logo\{")
 STALE_STICKY_CTA_RE = re.compile(
     r"\.mobile-sticky-cta\{display:none\}\s*"

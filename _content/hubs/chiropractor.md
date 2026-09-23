@@ -7,7 +7,7 @@ title: Chiropractor Marketing in Metro Vancouver, BC
 metaDescription: Chiropractic clinics can win Google visibility in Metro Vancouver, but review-solicitation is banned as of April 2026. What to run instead, and the cost.
 h1: Chiropractic clinic marketing in Metro Vancouver
 numbersUsed: ["chiropractor_metro_n=225 businesses (asOf 2026-07-08)", "chiropractor_metro_medianReviews=148 (asOf 2026-07-08)", "chiropractor_metro_topReviews=1900 (asOf 2026-07-08)", "chiropractor_metro_avgRating=4.89 (asOf 2026-07-08)", "chiropractor_metro_pctWithWebsite=100% (asOf 2026-07-08)", "vancouver_chiropractor_medianReviews=267 (asOf 2026-07-08)", "west-vancouver_chiropractor_medianReviews=44 (asOf 2026-07-08)", "chiropractor_thin_map_pack_pct=3.8-4.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/how-much-does-hvac-marketing-cost-in-british-columbia/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -42,7 +42,7 @@ Many Metro Vancouver chiropractic clinics run several practitioners under one bu
 
 ## What it costs to get local-search help in BC
 
-Three fixed tiers, no negotiation: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review solicitation excluded entirely for chiropractic, per the CCHPBC standard above), Foundation at $750/month, Growth at $1,250/month CAD. Before month one, we agree in writing on your clinic's starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One clinic per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/how-much-does-hvac-marketing-cost-in-british-columbia/), same tiers, same math, so you're not taking our word for the number.
+Three fixed tiers, no negotiation: Starter at $450/month (GBP optimization and a scoped 30-day guarantee — with review solicitation excluded entirely for chiropractic, per the CCHPBC standard above), Foundation at $750/month, Growth at $1,250/month CAD. Before month one, we agree in writing on your clinic's starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One clinic per city, per competitive category. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tiers, same math, so you're not taking our word for the number.
 
 Extended-health coverage renewing on the calendar year creates the same January pickup dental sees; content and profile activity that goes quiet over the holidays leaves that early-year search volume to whichever clinic stayed visible.
 
