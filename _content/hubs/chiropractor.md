@@ -80,7 +80,7 @@ We hold one clinic per city, per competitive category. If that spot's taken, we'
 ## Read next
 
 - [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The ranking signals behind the completeness and citation advice on this page. Its review-velocity signal depends on asking for reviews, which the College's standard bans for BC chiropractors; the category, completeness and citation signals apply unchanged.
-- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — How the primary category decides which searches a profile shows up for. The examples are HVAC; the choice works the same way for a clinic and carries no compliance risk.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — How the primary category decides which searches a profile shows up for. The examples are HVAC; the choice works the same way for a clinic, and like NAP consistency it is compliance-neutral.
 
 ## See your clinic's real numbers
 
