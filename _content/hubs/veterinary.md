@@ -7,7 +7,7 @@ title: Veterinary Clinic Marketing in Metro Vancouver, BC
 metaDescription: A vet clinic's Google visibility can move, but review-solicitation sits in a grey zone under BC's current rules. What to run instead, and the real cost.
 h1: Veterinary clinic marketing in Metro Vancouver
 numbersUsed: ["veterinarian_metro_n=160 businesses (asOf 2026-07-09)", "veterinarian_metro_medianReviews=238 (asOf 2026-07-09)", "veterinarian_metro_topReviews=1200 (asOf 2026-07-09)", "veterinarian_metro_avgRating=4.5 (asOf 2026-07-09)", "veterinarian_metro_pctWithWebsite=96% (asOf 2026-07-09)", "veterinarian_thin_map_pack_pct=3.1-3.5% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/", "/blog/google-business-profile-category-hvac-contractors/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -72,6 +72,11 @@ Not yet for veterinary. The data currently exists at the Metro Vancouver level o
 
 **What if another clinic in my city already works with Rankwise?**
 One clinic per city, per competitive category. We'll tell you on the call if that spot's already taken.
+
+## Read next
+
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a profile that isn't appearing. Its distance and profile-completeness checks matter most for a clinic trying to show up for open-now searches. The examples are HVAC.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — How primary and additional categories decide which searches a profile can appear for, which is the honest-categories point above for a general practice versus an emergency hospital, worked through with HVAC examples.
 
 ## See where your clinic stands
 
