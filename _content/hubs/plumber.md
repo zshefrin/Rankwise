@@ -7,7 +7,7 @@ title: Plumbing Marketing in Metro Vancouver, BC
 metaDescription: Plumbing marketing in Metro Vancouver runs $450–$1,250/mo with Rankwise. See real map-pack review counts by city and what should move first.
 h1: "Plumbing marketing in Metro Vancouver: what it costs and what actually moves the map pack"
 numbersUsed: ["metro n=206 businesses Google surfaces (asOf 2026-07-20)", "metro medianReviews=75 (asOf 2026-07-20)", "metro topReviews=12000 (asOf 2026-07-20)", "metro avgRating=4.87 (asOf 2026-07-20)", "metro pctWithWebsite=91% (asOf 2026-07-20)", "Abbotsford medianReviews=52, n=15 (asOf 2026-07-20)", "Chilliwack medianReviews=82, n=15 (asOf 2026-07-20)", "Coquitlam medianReviews=75, n=15 (asOf 2026-07-20)", "Langley medianReviews=53, n=16 (asOf 2026-07-20)", "Vancouver medianReviews=148, n=16 (asOf 2026-07-20)", "West Vancouver medianReviews=53, n=19 (asOf 2026-07-20)", "24.9% of swept plumber keywords have a #1 with under 30 reviews, 53/213 (asOf 2026-07-20 partial resweep)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/", "/blog/hvac-marketing-cost/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/how-do-i-get-more-hvac-leads-in-vancouver/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -65,6 +65,12 @@ If a plumbing business isn't getting all five, there's no way to tell whether th
 **Does one plumbing business per city really get exclusivity?** Yes. Rankwise works one business per city, per category, so a client's competitor in that market isn't also a client.
 
 **I've been burned by an SEO agency before that promised rankings and delivered nothing. How is this different?** Before month one starts, Rankwise agrees in writing on the current Map Pack position and a 90-day milestone. Miss it, and billing pauses until it's hit — a mechanic, not a promise.
+
+## Read next
+
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — The category step from the section above, in depth: why the primary category decides which searches a profile can appear for, and how to add the rest. A plumber adding water heater or drain cleaning categories follows the same steps as the HVAC examples.
+- [How do I get more HVAC leads in Vancouver?](/blog/how-do-i-get-more-hvac-leads-in-vancouver/) — The Google Business Profile setup behind more inbound calls, including review counts and whether to run ads while rankings build. HVAC is the worked example; emergency plumbing searches behave the same way.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — For a plumbing profile that doesn't appear at all: seven checks in order, starting with category and a consistent name, address and phone number.
 
 ## See the map pack for yourself
 

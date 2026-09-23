@@ -7,7 +7,7 @@ title: HVAC Marketing in Metro Vancouver — Rankwise
 metaDescription: Rankwise's HVAC hub, 17 city pages. HVAC marketing runs $450–$1,250/mo. See why it's the hardest map pack Rankwise tracks and what moves it.
 h1: "HVAC marketing in Metro Vancouver: the category where the proof lives"
 numbersUsed: ["metro n=193 businesses Google surfaces (asOf 2026-07-27)", "metro medianReviews=117 (asOf 2026-07-27)", "metro topReviews=12000 (asOf 2026-07-27)", "metro avgRating=4.92 (asOf 2026-07-27)", "metro pctWithWebsite=97% (asOf 2026-07-27)", "Burnaby medianReviews=175, n=16 (asOf 2026-07-27)", "Coquitlam medianReviews=110, n=15 (asOf 2026-07-27)", "Langley medianReviews=304, n=15 (asOf 2026-07-27)", "Vancouver medianReviews=82, n=22 (asOf 2026-07-27)", "4.2% of swept HVAC keywords have a #1 with under 30 reviews, 9/215 — worst of the six unregulated categories measured (computed 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-like/", "/lab/metro-vancouver-hvac-map-pack-market-study-2026/", "/blog/hvac-marketing-cost/", "/vancouver-hvac-marketing/", "/burnaby-hvac-marketing/", "/surrey-hvac-marketing/", "/richmond-hvac-marketing/", "/coquitlam-hvac-marketing/", "/langley-hvac-marketing/", "/delta-hvac-marketing/", "/new-westminster-hvac-marketing/", "/north-vancouver-hvac-marketing/", "/west-vancouver-hvac-marketing/", "/maple-ridge-hvac-marketing/", "/port-coquitlam-hvac-marketing/", "/port-moody-hvac-marketing/", "/pitt-meadows-hvac-marketing/", "/abbotsford-hvac-marketing/", "/mission-hvac-marketing/", "/white-rock-hvac-marketing/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-like/", "/lab/metro-vancouver-hvac-map-pack-market-study-2026/", "/blog/hvac-marketing-cost/", "/vancouver-hvac-marketing/", "/burnaby-hvac-marketing/", "/surrey-hvac-marketing/", "/richmond-hvac-marketing/", "/coquitlam-hvac-marketing/", "/langley-hvac-marketing/", "/delta-hvac-marketing/", "/new-westminster-hvac-marketing/", "/north-vancouver-hvac-marketing/", "/west-vancouver-hvac-marketing/", "/maple-ridge-hvac-marketing/", "/port-coquitlam-hvac-marketing/", "/port-moody-hvac-marketing/", "/pitt-meadows-hvac-marketing/", "/abbotsford-hvac-marketing/", "/mission-hvac-marketing/", "/white-rock-hvac-marketing/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -61,6 +61,12 @@ Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP 
 **Is there a city-specific HVAC page for my market?** Likely. Rankwise publishes dedicated pages for 17 Metro Vancouver and Fraser Valley cities; check the list above.
 
 **Does a crowded HVAC field mean it costs more to market than other trades?** No. The pricing is the same three tiers as every category Rankwise serves; what changes with a crowded field is the realistic timeline to see movement, not the fee.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The seven signals behind the out-execute-a-crowded-field advice above, worked through on a Metro Vancouver example.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — Which primary and secondary categories the HVAC contractors in the Metro Vancouver map pack actually use, and how to change yours.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — The diagnostic checklist, in order, for an HVAC profile that isn't appearing for its own city.
 
 ## Start with your city page or book an audit
 

@@ -7,7 +7,7 @@ title: Roofing Company Marketing in Metro Vancouver, BC
 metaDescription: 33.3% of Metro Vancouver roofing searches have a beatable #1. See the real map-pack numbers and what Rankwise charges to win one.
 h1: "Roofing company marketing in Metro Vancouver: the most beatable map pack in the region"
 numbersUsed: ["33.3% of swept roofer keywords have a #1 with under 30 reviews, 67/201 (asOf 2026-07-09)", "metro n=157 businesses Google surfaces (asOf 2026-07-09)", "metro medianReviews=44 (asOf 2026-07-09)", "metro topReviews=485 (asOf 2026-07-09)", "metro avgRating=4.84 (asOf 2026-07-09)", "metro pctWithWebsite=96% (asOf 2026-07-09)", "Pitt Meadows medianReviews=37, n=16 (asOf 2026-07-09)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/", "/blog/hvac-marketing-cost/", "/blog/how-do-i-get-more-roofing-leads-in-vancouver/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -63,6 +63,12 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 **Is there real exclusivity for roofing companies?** Yes. One roofing business per city, so a client isn't sharing Rankwise with a direct local competitor.
 
 **Does insurance-claim work help or hurt a roofer's map-pack position?** Neither directly, but it's a strong content angle. Reviews and photos that show a claim handled cleanly build the kind of trust a five-figure decision needs, on top of whatever the raw review count shows.
+
+## Read next
+
+- [How do I get more roofing leads in Vancouver?](/blog/how-do-i-get-more-roofing-leads-in-vancouver/) — The roofing version of this page's argument, built on a Rankwise Lab study of 216 Metro Vancouver roofing searches: the profile setup, the review count a roofer needs, and which cities are hardest to break into.
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — Seven ranking signals, from primary category to citation consistency, and why review velocity counts most in a field with a 44-review median. The worked examples are HVAC; the signals are the same for a roofer.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a profile that isn't appearing at all. Every check on it applies to a roofing profile unchanged.
 
 ## See the numbers, then talk to us
 
