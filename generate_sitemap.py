@@ -11,6 +11,7 @@ Usage:
     python3 generate_sitemap.py --check  # exit 1 if sitemap would change
 """
 
+import json
 import subprocess
 import sys
 from datetime import date
@@ -18,6 +19,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 BASE = "https://rankwise.ca"
+
+# Mirror pages serve the same bytes as a canonical page at a second URL and
+# declare that canonical; only the canonical URL belongs in the sitemap.
+_MIRRORS = ROOT / "_content" / "mirror-pages.json"
+MIRROR_PATHS = (
+    {m["mirror"] for m in json.loads(_MIRRORS.read_text(encoding="utf-8"))["mirrors"]}
+    if _MIRRORS.exists() else set()
+)
 
 
 def git_lastmod(rel_path: str) -> str:
@@ -146,6 +155,8 @@ def build_sitemap() -> str:
         if 'name="robots" content="noindex' in post_html.read_text():
             continue
         rel = f"blog/{slug_dir.name}/index.html"
+        if rel in MIRROR_PATHS:
+            continue
         urls.append((f"{BASE}/blog/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
 
     # Individual lab studies — any subdirectory of lab/ containing index.html

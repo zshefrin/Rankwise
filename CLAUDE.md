@@ -27,6 +27,7 @@ This repo had NO pre-push hook and NO CI at all until 2026-07-24 — a real gap,
 | `portal/index.html` | `vault/_system/publish_portal_page.py` ⚠ hardcodes the RETIRED `~/Documents/GitHub` output path (line 35) — fix before relying on republish |
 | `*-hvac-marketing/` (17 city pages) | `_generate_city_pages.py` (repo root here) |
 | `sitemap.xml` | `generate_sitemap.py` (`--check` to verify) |
+| `blog/how-much-does-hvac-marketing-cost-in-british-columbia/` | MIRROR of `blog/hvac-marketing-cost/` (byte-identical, canonical = short URL, kept out of the sitemap). Registry `_content/mirror-pages.json`; after editing the short page run `python3 scripts/check_mirror_pages.py --sync`. `check_site_integrity.py` flags drift. |
 
 Edit the templates inside those scripts, not the output. There are no generator markers in the HTML — you cannot tell by looking; check the table.
 
