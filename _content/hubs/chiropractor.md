@@ -7,7 +7,7 @@ title: Chiropractor Marketing in Metro Vancouver, BC
 metaDescription: Chiropractic clinics can win Google visibility in Metro Vancouver, but review-solicitation is banned as of April 2026. What to run instead, and the cost.
 h1: Chiropractic clinic marketing in Metro Vancouver
 numbersUsed: ["chiropractor_metro_n=225 businesses (asOf 2026-07-08)", "chiropractor_metro_medianReviews=148 (asOf 2026-07-08)", "chiropractor_metro_topReviews=1900 (asOf 2026-07-08)", "chiropractor_metro_avgRating=4.89 (asOf 2026-07-08)", "chiropractor_metro_pctWithWebsite=100% (asOf 2026-07-08)", "vancouver_chiropractor_medianReviews=267 (asOf 2026-07-08)", "west-vancouver_chiropractor_medianReviews=44 (asOf 2026-07-08)", "chiropractor_thin_map_pack_pct=3.8-4.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
@@ -76,6 +76,11 @@ We agree in writing on a starting position and a 90-day milestone before month o
 
 **What if a competing clinic in my city already works with Rankwise?**
 We hold one clinic per city, per competitive category. If that spot's taken, we'll tell you on the call, before anything's signed.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The ranking signals behind the completeness and citation advice on this page. Its review-velocity signal depends on asking for reviews, which the College's standard bans for BC chiropractors; the category, completeness and citation signals apply unchanged.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — How the primary category decides which searches a profile shows up for. The examples are HVAC; the choice works the same way for a clinic, and like NAP consistency it is compliance-neutral.
 
 ## See your clinic's real numbers
 

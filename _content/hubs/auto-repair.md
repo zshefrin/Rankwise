@@ -7,7 +7,7 @@ title: Auto Repair Shop Marketing in Metro Vancouver | Rankwise
 metaDescription: Auto repair map packs in Metro Vancouver are review-heavy and hard to crack fast. Real numbers, honest timelines, and what marketing should cost.
 h1: Auto repair shop marketing in Metro Vancouver
 numbersUsed: ["auto repair metro medianReviews=173 (asOf 2026-07-09)", "auto repair metro topReviews=38000 (asOf 2026-07-09)", "auto repair metro n=310 businesses Google surfaces (asOf 2026-07-09)", "auto repair metro pctWithWebsite=65% (asOf 2026-07-09)", "auto repair Pitt Meadows medianReviews=115 (asOf 2026-07-09)", "auto repair Vancouver medianReviews=262 (asOf 2026-07-09)", "auto repair winnability=7.2% of keywords have a sub-30-review #1, 15/208 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---
@@ -66,3 +66,8 @@ Start asking every customer for a review at point of service. With a metro media
 No. The guarantee is a written 90-day milestone set before month one starts; if it's missed, billing pauses until the target is hit.
 
 Want to see exactly where your shop sits against the 310 businesses Google surfaces in this category? [Get a free audit](/audit/) before committing to a plan.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — Auto repair incumbents hold their spots on review counts in the hundreds. This post breaks down the signals besides raw review count that a shop can still out-execute them on, using HVAC data.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a shop whose profile doesn't appear for its own city. It was written for HVAC, and none of the checks are trade-specific.

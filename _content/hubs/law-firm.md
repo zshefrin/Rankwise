@@ -7,7 +7,7 @@ title: Law Firm Marketing in Metro Vancouver, BC | Rankwise
 metaDescription: Law firm marketing in BC runs inside Law Society of BC advertising rules. What's compliant, what a Map Pack program costs, and real local data.
 h1: Law firm marketing in Metro Vancouver
 numbersUsed: ["lawyer metro medianReviews=51 (asOf 2026-07-09)", "lawyer metro n=248 businesses Google surfaces (asOf 2026-07-09)", "lawyer metro pctWithWebsite=97% (asOf 2026-07-09)", "lawyer metro avgRating=4.7 (asOf 2026-07-09)", "lawyer Vancouver medianReviews=125 (asOf 2026-07-09)", "lawyer Chilliwack medianReviews=31 (asOf 2026-07-09)", "lawyer winnability=15.0% of keywords have a sub-30-review #1 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/", "/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/", "/blog/signals-google-uses-rank-local-hvac-businesses/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---
@@ -68,3 +68,8 @@ No. That designation is restricted to lawyers certified as specialists by the La
 No. It's a written commitment about the Map Pack ranking work delivered, agreed before month one; it never references case results or legal outcomes.
 
 Want to see where your firm sits in the Metro Vancouver map pack today, compliantly reviewed before anything ships? [Get a free audit](/audit/).
+
+## Read next
+
+- [Who should I hire for HVAC marketing in Vancouver?](/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/) — A checklist for vetting any local-search agency, including the red flags, such as a ranking promised by a set date. It was written for HVAC contractors; the same questions help a firm choose a partner that works inside Law Society rules.
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The ranking signals behind the profile-completeness and citation advice above. Review velocity is one of them, and it is the lever this page treats as the slowest for law firms.
