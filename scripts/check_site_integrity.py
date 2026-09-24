@@ -98,6 +98,14 @@ def main() -> int:
         if mirror_url in sitemap_urls:
             fail(errors, f"sitemap.xml: mirror {mirror_url} must not be listed (canonical is elsewhere)")
 
+    # Folded blog pages (_content/folded-pages.json): canonical to the survivor,
+    # no noindex/refresh, out of the sitemap, nothing links to them. Same rules
+    # as the standalone scripts/check_folded_pages.py, which this reuses.
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from check_folded_pages import check as check_folded_pages
+    for message in check_folded_pages():
+        fail(errors, message)
+
     if errors:
         print("Site integrity check failed:")
         for error in errors:
