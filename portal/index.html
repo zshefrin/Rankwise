@@ -18,7 +18,7 @@
 <!-- add-to-homescreen (finding 92): no chrome flash on a #101418 app, no white
      status bar. apple-touch-icon deliberately omitted — data: URIs don't work on
      iOS and this file stays self-contained (no network asset). -->
-<meta name="theme-color" content="#0F1815">
+<meta name="theme-color" content="#101418">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Rankwise — Dashboard</title>
@@ -1018,8 +1018,6 @@
 .social-post-list li { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 16px; padding:8px 0; overflow-wrap:anywhere; }
 .social-post-list li > span { min-width:0; max-width:100%; }
 </style>
-<link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
-<script src="/assets/nav-mobile.js?v=rw-nav-a11y-20260611" defer></script>
 </head>
 <body>
 <!-- Icon sprite (finding 76): one self-contained stroke set replacing emoji/letter
@@ -8543,22 +8541,30 @@ async function renderOps() {
     // first tab. 2026-07-22 consolidation: the old Home cockpit + the Alerts center
     // are folded into the Today tab (relabeled "Home"); HQ OS · Admin stay gated
     // off behind PORTAL_INTERNAL_SURFACES. 8 visible tabs.
-    '<a class="skip-link" href="#main-content">Skip to content</a>
-<header class="rw-nav">
-  <a href="/" class="rw-nav__logo">Rank<span>wise</span></a>
-  <nav class="rw-nav__menu" aria-label="Primary">
-    <ul class="rw-nav__links">
-      <li><a href="/#services">What we do</a></li>
-      <li><a href="/#how">How it works</a></li>
-      <li><a href="/#results">Results</a></li>
-      <li><a href="/#faq">FAQ</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/lab/">Lab</a></li>
-      <li><a href="/about/">About</a></li>
-    </ul>
-  </nav>
-  <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
-</header>' +
+    '<nav class="ops-tabs" role="tablist">' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='today'?'true':'false') + '" data-v="today" onclick="opsTab(\'today\')">Home' +
+    (todayBadge ? ' <span class="ops-badge hot">' + esc(todayBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='atlas'?'true':'false') + '" data-v="atlas" onclick="opsTab(\'atlas\')">ctOS</button>' +
+    '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='outreach'?'true':'false') + '" data-v="outreach" onclick="opsTab(\'outreach\')">Outreach' +
+    (outreachBadge ? ' <span class="ops-badge">' + esc(outreachBadge) + ' due</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='pipeline'?'true':'false') + '" data-v="pipeline" onclick="opsTab(\'pipeline\')">Pipeline' +
+    (pipelineBadge ? ' <span class="ops-badge">' + esc(pipelineBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='content'?'true':'false') + '" data-v="content" onclick="opsTab(\'content\')">Content' +
+    (contentBadge ? ' <span class="ops-badge">' + esc(contentBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='clients'?'true':'false') + '" data-v="clients" onclick="opsTab(\'clients\')">Clients' +
+    (clientsBadge ? ' <span class="ops-badge">' + esc(clientsBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='money'?'true':'false') + '" data-v="money" onclick="opsTab(\'money\')">Money' +
+    (moneyBadge ? ' <span class="ops-badge hot">' + esc(moneyBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='market'?'true':'false') + '" data-v="market" onclick="opsTab(\'market\')">Market' +
+    (marketBadge ? ' <span class="ops-badge">' + esc(marketBadge) + '</span>' : '') + '</button>' +
+    '<button class="ops-tab zone" role="tab" aria-selected="' + (window._opsTab==='system'?'true':'false') + '" data-v="system" onclick="opsTab(\'system\')">System' +
+    (Number(sys.broken_unknown_count) ? ' <span class="ops-badge hot">' + esc(Number(sys.broken_unknown_count)) + '</span>' :
+      (findingsBuildFailed ? ' <span class="ops-badge hot" title="Findings build failed this push">?</span>' :
+        (findingsTotal ? ' <span class="ops-badge">' + esc(findingsTotal) + '</span>' : ''))) + '</button>' +
+    (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='hq'?'true':'false') + '" data-v="hq" onclick="opsTab(\'hq\')">Legacy HQ' +
+    (hqRiskCount ? ' <span class="ops-badge">' + esc(hqRiskCount) + '</span>' : '') + '</button>' : '') +
+    (PORTAL_INTERNAL_SURFACES ? '<button class="ops-tab" role="tab" aria-selected="' + (window._opsTab==='settings'?'true':'false') + '" data-v="settings" onclick="opsTab(\'settings\')">Admin</button>' : '') +
+    '</nav>' +
     '<main class="ops-main">' +
     '<section class="ops-view" id="ops-today" role="tabpanel"' + (window._opsTab!=='today'?' hidden':'') + '>' + workdeskHomeH + '</section>' +
     '<section class="ops-view" id="ops-atlas" role="tabpanel"' + (window._opsTab!=='atlas'?' hidden':'') + '>' + atlasH + '</section>' +
