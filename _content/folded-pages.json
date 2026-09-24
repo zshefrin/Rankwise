@@ -1,0 +1,71 @@
+{
+  "_comment": "Blog posts folded into a same-intent survivor (index-coverage diagnosis 2026-09-23, recommendation 3; cluster map _content/blog-clusters-2026-09-23.md). A folded page keeps serving its own content with NO noindex, NO meta refresh and NO redirect; it declares <link rel=\"canonical\"> to its survivor and is excluded from sitemap.xml (generate_sitemap.py reads this file). Every internal link that pointed at a folded URL points at the survivor instead. Verify with: python3 scripts/check_folded_pages.py. Remove an entry (and restore the page's self-canonical) to un-fold a page.",
+  "folds": [
+    {
+      "folded": "blog/how-much-should-hvac-contractors-spend-on-marketing/index.html",
+      "survivor": "blog/hvac-marketing-cost/index.html",
+      "cluster": "marketing-cost-and-spend",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-much-should-hvac-contractors-spend-on-marketing-each-mon/index.html",
+      "survivor": "blog/hvac-marketing-cost/index.html",
+      "cluster": "marketing-cost-and-spend",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/hvac-marketing-agency-vs-hiring-an-in-house-marketer-which-m/index.html",
+      "survivor": "blog/hvac-marketing-agency-vs-in-house-marketer/index.html",
+      "cluster": "agency-vs-in-house-marketer",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-do-i-optimize-my-google-business-profile-as-an-hvac-cont/index.html",
+      "survivor": "blog/optimize-gbp-hvac-contractor/index.html",
+      "cluster": "optimize-google-business-profile",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/whats-the-best-way-to-rank-my-hvac-business-on-google-maps/index.html",
+      "survivor": "blog/rank-hvac-google-maps/index.html",
+      "cluster": "best-way-to-rank-on-google-maps",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-long-does-local-seo-take-for-hvac/index.html",
+      "survivor": "blog/how-long-does-it-take-to-rank-on-google-maps-for-hvac-keywor/index.html",
+      "cluster": "how-long-ranking-takes",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/what-primary-category-should-an-hvac-contractor-pick-on-goog/index.html",
+      "survivor": "blog/google-business-profile-category-hvac-contractors/index.html",
+      "cluster": "primary-gbp-category",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-often-should-hvac-contractors-post-on-google-business-profile/index.html",
+      "survivor": "blog/should-hvac-contractors-post-on-google-business-profile/index.html",
+      "cluster": "posting-on-a-gbp",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/7-local-ranking-signals-hvac-contractors-google-maps-metro-vancouver/index.html",
+      "survivor": "blog/signals-google-uses-rank-local-hvac-businesses/index.html",
+      "cluster": "local-ranking-signals",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-to-get-more-hvac-service-calls/index.html",
+      "survivor": "blog/how-do-i-get-more-hvac-leads-in-vancouver/index.html",
+      "cluster": "more-leads-calls-and-customers",
+      "date": "2026-09-23"
+    },
+    {
+      "folded": "blog/how-do-hvac-contractors-find-new-customers-in-2026/index.html",
+      "survivor": "blog/how-do-i-get-more-hvac-leads-in-vancouver/index.html",
+      "cluster": "more-leads-calls-and-customers",
+      "date": "2026-09-23"
+    }
+  ]
+}
