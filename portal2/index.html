@@ -1225,6 +1225,39 @@ let CRI_CHANNEL = "all", CRI_SORT = "created-newest";
 // different clocks. The render SHA binds that local acknowledgement to the
 // exact video; a new render automatically needs review again.
 const REVIEW_HANDLED = new Map();
+const CRI_VARIANT_SELECTION = new Map();
+let CRI_RECEIPTS = undefined;
+let CRI_RECEIPT_SEQ = 0;
+function _criReceiptRows(rows){
+  const out=new Map();
+  for(const row of rows||[]){
+    if(!row||row.status!=="done"||!/^content_review\.(approve|request_changes|reject)$/.test(String(row.action||"")))continue;
+    const p=row.params&&typeof row.params==="object"?row.params:{};
+    const sid=typeof p.script_id==="string"?p.script_id:"",sha=typeof p.expected_render_sha==="string"?p.expected_render_sha:"";
+    if(!sid||!/^[0-9a-f]{16}$/.test(sha))continue;
+    let detail=row.result;if(typeof detail!=="string")detail=JSON.stringify(detail||"");
+    const receipt=_contentReviewReceipt(detail,row.action,sid,sha);
+    if(receipt&&!out.has(sid))out.set(sid,{render_sha:sha,action:row.action,receipt});
+  }
+  return out;
+}
+async function loadContentReviewReceipts(){
+  const epoch=PORTAL_EPOCH,seq=++CRI_RECEIPT_SEQ,current=()=>epoch===PORTAL_EPOCH&&seq===CRI_RECEIPT_SEQ;
+  if(DEV){CRI_RECEIPTS=new Map();return CRI_RECEIPTS}
+  try{const all=[],seen=new Set();let cursor=null;
+    for(let page=0;page<20;page++){
+      const query="operator_action_queue?select=id,action,status,params,result,created_at&action=in.(content_review.approve,content_review.request_changes,content_review.reject)&status=eq.done&order=id.desc&limit=200"+(cursor===null?"":"&id=lt."+cursor);
+      const rows=await rest(query);
+      if(!current())return CRI_RECEIPTS;if(!Array.isArray(rows))throw new Error("receipt read unavailable");
+      let prior=null;
+      for(const row of rows){const id=Number(row&&row.id);if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||(prior!==null&&id>=prior)||(cursor!==null&&id>=cursor))throw new Error("receipt page ordering invalid");seen.add(id);prior=id}
+      all.push(...rows);
+      if(rows.length<200){CRI_RECEIPTS=_criReceiptRows(all);return CRI_RECEIPTS}
+      const next=Number(rows[rows.length-1]&&rows[rows.length-1].id);if(!Number.isSafeInteger(next)||next<=0||(cursor!==null&&next>=cursor))throw new Error("receipt pagination made no progress");cursor=next;
+    }
+    throw new Error("receipt history exceeds safe read bound")
+  }catch(_){if(current())CRI_RECEIPTS=null;return CRI_RECEIPTS}
+}
 // content_review.* is LIVE (migration 082 applied 2026-09-02 + the four
 // operator_action_worker handlers shipped) — buttons enable through the normal
 // allowlist gate; this reason only shows if the live allowlist drops them.
@@ -1246,6 +1279,7 @@ async function loadReviewData(force=false){
   const pending=[];
   if(force||!Array.isArray(ARTS))pending.push(loadArtifacts());
   if(force||!Array.isArray(CRI))pending.push(loadContentReview());
+  if(force||CRI_RECEIPTS===undefined)pending.push(loadContentReviewReceipts());
   await Promise.all(pending);
   return {artifacts:ARTS,content:CRI};
 }
@@ -1642,14 +1676,33 @@ function _reviewCritiqueScore(row){
 }
 function _reviewRows(){
   const artifactRows=Array.isArray(ARTS)?ARTS.filter(Boolean):[];
-  const artifactsById=new Map(artifactRows.map(item=>[String(item.id),item]));
-  const content=Array.isArray(CRI)?CRI.filter(Boolean).map(item=>({kind:"content",key:String(item.script_id),item,
-    linkedArtifact:item.artifact_id==null?null:(artifactsById.get(String(item.artifact_id))||null)})):[];
-  const linked=new Set(content.map(row=>row.item.artifact_id).filter(id=>id!=null).map(String));
+  const artifactsById=new Map();const ambiguousArtifactIds=new Set();
+  for(const item of artifactRows){const id=String(item.id);if(artifactsById.has(id)){artifactsById.delete(id);ambiguousArtifactIds.add(id)}else if(!ambiguousArtifactIds.has(id))artifactsById.set(id,item)}
+  const rawContent=Array.isArray(CRI)?CRI.filter(Boolean).map(item=>({kind:"content",key:String(item.script_id),item,
+    linkedArtifact:item.artifact_id==null||ambiguousArtifactIds.has(String(item.artifact_id))?null:(artifactsById.get(String(item.artifact_id))||null)})):[];
+  const groups=new Map();
+  for(const row of rawContent){const fm=_reviewFamilyMeta(row.item),key="family:"+fm.key;const group=groups.get(key)||{...row,key,family_explicit:fm.explicit,siblings:[],siblingRows:[]};group.siblings.push(row.item);group.siblingRows.push(row);groups.set(key,group)}
+  const content=[...groups.values()].map(group=>{const sorted=group.siblings.slice().sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));const selected=CRI_VARIANT_SELECTION.get(group.key);const item=sorted.find(x=>String(x.script_id)===selected)||sorted.find(x=>_reviewEditorialReady(x)&&!_reviewHandledSibling(group,x))||sorted.find(x=>!_reviewHandledSibling(group,x))||sorted[0];return {...group,key:group.siblings.length===1?String(item.script_id):group.key,item,linkedArtifact:item&&item.artifact_id!=null&&!ambiguousArtifactIds.has(String(item.artifact_id))?(artifactsById.get(String(item.artifact_id))||null):null}});
+  const linked=new Set(rawContent.map(row=>row.item.artifact_id).filter(id=>id!=null).map(String));
   const artifacts=artifactRows.filter(a=>!linked.has(String(a.id)))
     .map(item=>({kind:"artifact",key:_reviewArtifactKey(item.id),item}));
   return content.concat(artifacts);
 }
+function _reviewFamilyMeta(it){
+  const qc=it&&it.qc&&typeof it.qc==="object"?it.qc:{},ed=qc.editorial&&typeof qc.editorial==="object"?qc.editorial:{};
+  const explicit=ed.concept_id||it.concept_id||it.family_id||it.variant_of||qc.concept_id||qc.family_id;
+  if(explicit)return {key:"concept:"+JSON.stringify([it.channel||"",String(explicit)]),explicit:true};
+  const sid=String(it&&it.script_id||""),match=sid.match(/^((?:lc|mn)-[0-9]+)(?=-|$)|^((?:r[1-4]|t[0-9]+))(?=-v[0-9]+)/i);
+  if(match)return {key:"legacy:"+JSON.stringify([it.channel||"",it.source_dir||"",match[0].toLowerCase()]),explicit:false};
+  return {key:"script:"+sid,explicit:false};
+}
+function _reviewEditorialHeld(it){return !!(it&&it.qc&&it.qc.editorial&&it.qc.editorial.status==="held")}
+function _reviewEditorialReady(it){return !!(it&&it.qc&&it.qc.editorial&&it.qc.editorial.status==="ready")}
+function _reviewHandledSibling(row,item){
+  const sibling=(row.siblingRows||[]).find(s=>s.item===item);
+  return _reviewContentHandled(item,sibling?sibling.linkedArtifact:(item===row.item?row.linkedArtifact:null));
+}
+function _reviewArtifactReady(item){return !!(item&&item.meta&&item.meta.editorial&&item.meta.editorial.status==="ready")}
 function _reviewCreatedAt(row){return row.item.created_at||null;}
 function _reviewUpdatedAt(row){return row.kind==="content"?(row.item.pushed_at||row.item.created_at):(row.item.decided_at||row.item.created_at);}
 function _reviewTitle(row){return row.kind==="content"?String(row.item.script_id||""):String(row.item.title||"");}
@@ -1678,6 +1731,8 @@ function _reviewContentHandled(it,linkedArtifact=null){
   if(typeof local==="string"&&typeof it.render_sha==="string"&&it.render_sha.trim()&&
      local===it.render_sha)return true;
   if(_reviewArtifactDecisionMatches(it,linkedArtifact))return true;
+  const receipt=CRI_RECEIPTS instanceof Map?CRI_RECEIPTS.get(String(it.script_id)):null;
+  if(receipt&&receipt.render_sha===String(it.render_sha||""))return true;
   const feedback=_criSavedFeedback(it);
   if(!feedback||!["Queue","Rejected"].includes(feedback.status))return false;
   const reviewed=String(feedback.reviewed_render_sha||"").trim();
@@ -1695,7 +1750,13 @@ function _contentReviewReceipt(detail,action,sid,renderSha){
     return r.outcome==="applied"?r:null;
   }catch{return null;}
 }
-function _reviewAwaiting(row){return row.kind==="content"?!_reviewContentHandled(row.item,row.linkedArtifact):row.item.status==="pending";}
+function _reviewAwaiting(row){
+  if(row.kind!=="content"){
+    if(row.item.status!=="pending")return false;
+    return row.item.kind!=="reel"||_reviewArtifactReady(row.item);
+  }
+  return (row.siblings||[row.item]).some(s=>_reviewEditorialReady(s)&&!_reviewHandledSibling(row,s));
+}
 function _reviewRejected(row){
   if(row.kind==="content"){
     const f=_criSavedFeedback(row.item);
@@ -1708,7 +1769,8 @@ function _reviewRejected(row){
 }
 function _reviewFilterRows(rows,filter){
   if(filter==="waiting")return rows.filter(_reviewAwaiting);
-  if(filter==="completed")return rows.filter(row=>!_reviewAwaiting(row));
+  if(filter==="preparation")return rows.filter(row=>row.kind==="content"?(row.siblings||[row.item]).some(s=>!_reviewEditorialReady(s)&&!_reviewHandledSibling(row,s)):row.item.status==="pending"&&row.item.kind==="reel"&&!_reviewArtifactReady(row.item));
+  if(filter==="completed")return rows.filter(row=>row.kind==="content"?(row.siblings||[row.item]).some(s=>_reviewHandledSibling(row,s)):row.item.status!=="pending");
   if(filter==="rejected")return rows.filter(_reviewRejected);
   if(filter==="draft")return rows.filter(row=>row.kind==="content"&&row.item.state==="draft");
   if(filter==="critiqued")return rows.filter(row=>(row.kind==="content"&&row.item.state==="critiqued")||_reviewHasCritique(row));
@@ -2015,7 +2077,7 @@ function _criQcBlock(it){
     ?`<div class="empty">QC inferred from filename, not a recorded verdict</div>`:"";
   return rows+inferredNote || `<div class="empty">No QC signal recorded.</div>`;
 }
-function _criDetail(it,linkedArtifact=null){
+function _criDetail(it,linkedArtifact=null,row=null){
   const scenes=Array.isArray(it.scenes)?it.scenes:[];
   const dur=it.duration_seconds!=null?it.duration_seconds+"s":"—";
   const captions=it.captions||{};
@@ -2031,7 +2093,11 @@ function _criDetail(it,linkedArtifact=null){
   const renderSha=typeof it.render_sha==="string"&&/^[0-9a-f]{16}$/.test(it.render_sha)?it.render_sha:null;
   const reviewParams=extra=>Object.assign({script_id:it.script_id},extra,renderSha?{expected_render_sha:renderSha}:{});
   const renderReason=renderSha?_CRI_NOT_LIVE_REASON:"Current render identity unavailable — refresh after the render completes.";
+  const siblings=(row&&row.siblings||[]).slice().sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
+  const siblingBar=siblings.length>1?`<div class="acts" style="margin:0 0 10px;flex-wrap:wrap"><span class="section-note" style="margin:0">Variants in this concept · ${siblings.length}${row.family_explicit?"":" · legacy/unverified identity"}</span>${siblings.map(s=>`<button class="btn ${String(s.script_id)===String(it.script_id)?"rec":""}" data-cri-variant="${escAttr(String(s.script_id))}">${esc(String(s.script_id))}${_reviewContentHandled(s,null)?" · decided":""}</button>`).join("")}</div>`:"";
   return `
+    ${siblingBar}
+    ${!_reviewEditorialReady(it)&&!_reviewContentHandled(it,linkedArtifact)?`<div class="state"><b>In preparation</b><br>Editorial acceptance is incomplete. ${esc(((it.qc&&it.qc.editorial&&it.qc.editorial.reasons)||[]).join("; "))}</div>`:""}
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
       <div>
         <div style="font-size:17px;font-weight:700">${esc(it.script_id)}</div>
@@ -2058,7 +2124,7 @@ function _criDetail(it,linkedArtifact=null){
         linkedArtifact&&linkedArtifact.status!=="pending"?`<div class="state" style="margin:10px 0"><b>Earlier artifact decision: ${esc(linkedArtifact.decision&&linkedArtifact.decision.choice||"recorded")}</b><br>This remains active because the artifact receipt does not bind to this exact render.${linkedArtifact.decision&&linkedArtifact.decision.note?`<br><span style="white-space:pre-wrap">Feedback: ${esc(linkedArtifact.decision.note)}</span>`:""}</div>`:""}
       ${_criFeedback(it)}
     <div class="acts" style="border-top:1px solid var(--edge);padding-top:12px">
-      ${actBtn("content_review.approve",reviewParams({platforms:it.platform_targets||[]}),"Approve","rec",renderReason,!renderSha)}
+      ${actBtn("content_review.approve",reviewParams({platforms:it.platform_targets||[]}),"Approve","rec",!_reviewEditorialReady(it)?"Editorial acceptance is incomplete":renderReason,!renderSha||!_reviewEditorialReady(it))}
       ${actBtn("content_review.request_changes",reviewParams({}),"Request changes","",renderReason,!renderSha)}
       ${actBtn("content_review.reject",reviewParams({}),"Reject","",renderReason,!renderSha)}
       ${actBtn("content_review.watched",reviewParams({}),"Watched","",renderReason,!renderSha)}
@@ -2104,15 +2170,15 @@ function viewContentReview(p){
   const rows=_reviewRows();
   if(CRI===undefined&&!Array.isArray(ARTS))return `<div class="status sub" data-review-room data-cri-room>Review</div><div class="empty">Loading the unified queue…</div>`;
   const feedbackFeed=LAST.p&&LAST.p.content_review_feedback;
-  const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":"",CRI_FILTER==="rejected"&&(!feedbackFeed||feedbackFeed.available!==true||!Array.isArray(feedbackFeed.items))?"Rejection feedback read incomplete — the Rejected count is not clearance.":""].filter(Boolean);
+  const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":"",CRI_RECEIPTS===null?"Review receipt read failed — exact prior decisions are unknown; items remain actionable.":"",CRI_FILTER==="rejected"&&(!feedbackFeed||feedbackFeed.available!==true||!Array.isArray(feedbackFeed.items))?"Rejection feedback read incomplete — the Rejected count is not clearance.":""].filter(Boolean);
   const counts={all:rows.length,waiting:_reviewFilterRows(rows,"waiting").length,draft:_reviewFilterRows(rows,"draft").length,critiqued:_reviewFilterRows(rows,"critiqued").length,
     qcfail:_reviewFilterRows(rows,"qcfail").length,blocked:_reviewFilterRows(rows,"blocked").length,
-    completed:_reviewFilterRows(rows,"completed").length,rejected:_reviewFilterRows(rows,"rejected").length};
+    completed:_reviewFilterRows(rows,"completed").length,rejected:_reviewFilterRows(rows,"rejected").length,preparation:_reviewFilterRows(rows,"preparation").length};
   const scored=rows.filter(row=>_reviewCritiqueScore(row)!==null).length;
   const filtered=_reviewVisibleRows(rows);
   if(!filtered.some(row=>row.key===CRI_SEL))CRI_SEL=filtered[0]?filtered[0].key:null;
   const selected=filtered.find(row=>row.key===CRI_SEL);
-  const filters=[["waiting","Needs response"],["completed","Decided"],["all","All history"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected"]];
+  const filters=[["waiting","Needs response"],["preparation","Preparation"],["completed","Decided"],["all","All history"],["draft","Draft"],["critiqued","Critiqued"],["qcfail","QC fail"],["blocked","Blocked"],["rejected","Rejected"]];
   const sources=[...new Map(rows.map(row=>[_reviewSourceKey(row),_reviewSourceLabel(row)])).entries()]
     .sort((a,b)=>a[1].localeCompare(b[1]));
   const sortOptions=[["created-newest","Newest created"],["created-oldest","Oldest created"],["rating-high","Highest critique rating"],["rating-low","Lowest critique rating"],
@@ -2129,7 +2195,7 @@ function viewContentReview(p){
   </div>`;
   const warnings=sourceWarnings.map(msg=>`<div class="state state-error review-source-warning"><b>Partial review data</b>${esc(msg)}</div>`).join("");
   const rejectedLane=CRI_FILTER==="rejected"?`<div data-rejected-lane class="state" style="margin:10px 0"><b>Rejected content</b><br>Reasons and revision instructions are shown from the latest snapshot. Notes below are private, versioned, and do not change the decision.</div>`:"";
-  const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
+  const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact,selected):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
   const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   if(phone){
     const idx=filtered.findIndex(row=>row.key===CRI_SEL);
@@ -2181,6 +2247,9 @@ function wireContentReview(p,updatedAt,srcNote){
   });
   document.querySelectorAll("button[data-review-sel]").forEach(b=>{
     b.onclick=()=>{_criCaptureNoteDraft();CRI_SEL=b.dataset.reviewSel;render(p,updatedAt,srcNote);};
+  });
+  document.querySelectorAll("button[data-cri-variant]").forEach(b=>{
+    b.onclick=()=>{_criCaptureNoteDraft();const row=_reviewVisibleRows().find(x=>x.key===CRI_SEL);if(row)CRI_VARIANT_SELECTION.set(row.key,b.dataset.criVariant);render(p,updatedAt,srcNote);};
   });
   document.querySelectorAll("button[data-cri-nav]").forEach(b=>{
     b.onclick=()=>{
@@ -3341,6 +3410,15 @@ function renderManagedSocial(raw, now=Date.now()){
   }catch{return unavailable;}
 }
 // End managed-social renderer.
+function _contentSchedulePanel(raw){
+  const s=raw&&typeof raw==="object"&&!Array.isArray(raw)?raw:null;
+  const malformed=!s||s.available!==true||!Array.isArray(s.items)||s.items.some(it=>!it||typeof it!=="object"||Array.isArray(it)||typeof it.scheduled_for!=="string"||Number.isNaN(Date.parse(it.scheduled_for)));
+  if(malformed)return `<section data-content-schedule><h4 class="section-h">UPCOMING SCHEDULE</h4><div class="state state-error"><b>Upcoming schedule unavailable</b>The snapshot did not provide a complete valid schedule. This is not an empty schedule, and approval does not mean scheduled or armed.</div></section>`;
+  const rows=s.items.filter(it=>typeof it.scheduled_for==="string"&&!Number.isNaN(Date.parse(it.scheduled_for))&&!it.posted_at).sort((a,b)=>a.scheduled_for.localeCompare(b.scheduled_for)).slice(0,60),grouped=new Map();
+  for(const it of rows){const day=it.scheduled_for.slice(0,10),list=grouped.get(day)||[];list.push(it);grouped.set(day,list)}
+  const dates=[...grouped.entries()].map(([day,list])=>`<div class="dcard" style="margin-bottom:8px"><div class="q">${esc(day)}</div>${list.map(it=>`<div class="why">${esc(it.draft||it.concept_id||"Scheduled post")}${it.platform?` · ${esc(it.platform)}`:""}${it.test_variable?` · ${esc(it.test_variable)}`:""}</div>`).join("")}</div>`).join("");
+  return `<section data-content-schedule><h4 class="section-h">UPCOMING SCHEDULE</h4><p class="section-note">Read-only schedule evidence · approval does not arm or publish a post.</p>${dates||'<div class="empty">No scheduled posts recorded.</div>'}<div class="section-note" style="margin-top:10px"><b>Variant rule</b> · When a concept has two approved variants, test one first, wait at least seven days with a different concept between them, then select a winner from observed evidence. This board records the schedule; it takes no actions.</div></section>`;
+}
 function viewContent(p){
   const items=p.content_items, onHold=p.on_hold_items;
   const validRows=v=>Array.isArray(v)&&v.every(row=>row&&typeof row==="object"&&!Array.isArray(row));
@@ -3358,6 +3436,7 @@ function viewContent(p){
       <div class="pcard"><h4>On hold</h4><div class="v">${esc(String(onHold.length))}</div><small>nothing auto-posts — ever</small></div>
       <div class="pcard"><h4>Experiment runs <span class="src">${ce.as_of?ago(ce.as_of):""}</span></h4><div class="v">${runs.length?runs.length:"—"}</div><small>${runs.length?"hypothesis-grouped, below":"ingest wired (6:45 daily) — numbers land with the first joined posts"}</small></div>
     </div>
+    ${_contentSchedulePanel(p.content_schedule)}
     <h4 class="section-h">CONTENT LEARNING — ${runs.length} RUN${runs.length===1?"":"S"}</h4>
     ${(()=>{const cr=channelRollup(runs); return cr.length?`<div class="empty" style="font-size:11px;margin-bottom:10px">By channel — ${cr.map(([ch,n])=>esc(ch)+" "+n).join(" · ")}</div>`:""})()}
     ${ceBroken?`<div class="state state-error"><b>Content experiments feed FAILED to build this push</b>The board below may be stale or missing rows — this is an error state, not a clean empty board.</div>`:""}
@@ -6154,6 +6233,7 @@ function render(p, updatedAt, srcNote){
               if(receipt){
                 actionFeedback(reg.action,st,detail,queueId);
                 REVIEW_HANDLED.set(String(params.script_id),submittedCriRenderSha);
+                for(const [family,sid] of CRI_VARIANT_SELECTION)if(sid===String(params.script_id))CRI_VARIANT_SELECTION.delete(family);
                 if(isCriNoteAction)_clearConfirmedReviewDraft(reg.action,params,reviewSubmittedRaw);
                 toast(receipt.outcome==="already_approved"?"Already approved — recorded":"Done — recorded");
               }else {actionFeedback(reg.action,"verification-pending","receipt needs refresh verification",queueId);toast("Recorded, but receipt needs refresh verification","err");}
@@ -6383,7 +6463,7 @@ function _resetPortalState(){
   SMS_ENQUIRY_BUSY.clear();
   SMS_SEND_ATTEMPTS.clear();
   SMS_REPLY_RECEIPTS.clear();SMS_REPLY_LOCAL_ADAPTER=null;
-  ARTS=null;DECS=null;DEC_RECENT=undefined;CRI=undefined;WIP=undefined;EXC=undefined;
+  ARTS=null;DECS=null;DEC_RECENT=undefined;CRI=undefined;CRI_RECEIPTS=undefined;CRI_RECEIPT_SEQ++;CRI_VARIANT_SELECTION.clear();WIP=undefined;EXC=undefined;
   // F-A (publish review #2, same class as F1 which missed it): the sign-out link is
   // logout()+boot() with NO page reload, so every tab-scoped operator-state module var
   // survives into the next login in the same tab. Reset them all here or the previous
@@ -6397,7 +6477,7 @@ function _resetPortalState(){
   ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();WORK=undefined;WORK_SELECTED=null;WORK_DISCLOSURES.clear();TODAY_DISCLOSURES.clear();WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();CRI_VARIANT_SELECTION.clear();WORK=undefined;WORK_SELECTED=null;WORK_DISCLOSURES.clear();TODAY_DISCLOSURES.clear();WORK_FOCUS_DETAIL=false;VIEW="command";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -6436,4 +6516,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 5804bb3ff68e -->
+<!-- rankwise-portal2-version: 57bf6b9f33d6 -->
