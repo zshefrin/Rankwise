@@ -1681,7 +1681,7 @@ function _reviewRows(){
   const rawContent=Array.isArray(CRI)?CRI.filter(Boolean).map(item=>({kind:"content",key:String(item.script_id),item,
     linkedArtifact:item.artifact_id==null||ambiguousArtifactIds.has(String(item.artifact_id))?null:(artifactsById.get(String(item.artifact_id))||null)})):[];
   const groups=new Map();
-  for(const row of rawContent){const fm=_reviewFamilyMeta(row.item),key="family:"+fm.key;const group=groups.get(key)||{...row,key,family_explicit:fm.explicit,siblings:[],siblingRows:[]};group.siblings.push(row.item);group.siblingRows.push(row);groups.set(key,group)}
+  for(const row of rawContent){const fm=_reviewFamilyMeta(row.item),key="family:"+fm.key;const group=groups.get(key)||{...row,key,family_explicit:fm.explicit,family_method:fm.method||null,siblings:[],siblingRows:[]};group.siblings.push(row.item);group.siblingRows.push(row);groups.set(key,group)}
   const content=[...groups.values()].map(group=>{const sorted=group.siblings.slice().sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));const selected=CRI_VARIANT_SELECTION.get(group.key);const item=sorted.find(x=>String(x.script_id)===selected)||sorted.find(x=>_reviewEditorialReady(x)&&!_reviewHandledSibling(group,x))||sorted.find(x=>!_reviewHandledSibling(group,x))||sorted[0];return {...group,key:group.siblings.length===1?String(item.script_id):group.key,item,linkedArtifact:item&&item.artifact_id!=null&&!ambiguousArtifactIds.has(String(item.artifact_id))?(artifactsById.get(String(item.artifact_id))||null):null}});
   const linked=new Set(rawContent.map(row=>row.item.artifact_id).filter(id=>id!=null).map(String));
   const artifacts=artifactRows.filter(a=>!linked.has(String(a.id)))
@@ -1692,6 +1692,8 @@ function _reviewFamilyMeta(it){
   const qc=it&&it.qc&&typeof it.qc==="object"?it.qc:{},ed=qc.editorial&&typeof qc.editorial==="object"?qc.editorial:{};
   const explicit=ed.concept_id||it.concept_id||it.family_id||it.variant_of||qc.concept_id||qc.family_id;
   if(explicit)return {key:"concept:"+JSON.stringify([it.channel||"",String(explicit)]),explicit:true};
+  const sim=qc.similarity;
+  if(sim&&sim.status==="matched"&&sim.method==="content_similarity"&&/^sim-[0-9a-f]{16}$/.test(sim.family_id||""))return {key:"similarity:"+JSON.stringify([it.channel||"",sim.family_id]),explicit:false,method:"text"};
   const sid=String(it&&it.script_id||""),match=sid.match(/^((?:lc|mn)-[0-9]+)(?=-|$)|^((?:r[1-4]|t[0-9]+))(?=-v[0-9]+)/i);
   if(match)return {key:"legacy:"+JSON.stringify([it.channel||"",it.source_dir||"",match[0].toLowerCase()]),explicit:false};
   return {key:"script:"+sid,explicit:false};
@@ -1834,10 +1836,10 @@ function _criFeedback(it){
 // decision reason and remain local drafts until snapshot history proves a save.
 const REVIEW_SAVED_NOTE_DRAFTS=new Map(), REVIEW_SAVED_NOTE_PENDING=new Map();
 let REVIEW_NOTES_SNAPSHOT=null;
-// content_review_push.project_lab() has one already-approved historical source
-// layout. Keep this exact string aligned with the worker; it is deliberately
+// content_review_push.project_lab() has two registered historical lab source
+// layouts. Keep these exact strings aligned with the worker; they are deliberately
 // not a generic _dev allowance or a date-pattern matcher.
-const _SAVED_NOTE_METRO_LAB_SOURCE="vault/_dev/content-refresh-2026-09-06/lab-mn";
+const _SAVED_NOTE_LAB_SOURCES=["vault/_dev/content-refresh-2026-09-06/lab-lc","vault/_dev/content-refresh-2026-09-06/lab-mn"];
 function _savedNoteTarget(kind,it){
   return kind==="media"?{kind:"media",id:typeof it.script_id==="string"?it.script_id:"",source_dir:String(it.source_dir||"")}:{kind:"artifact",id:String(it.id)};
 }
@@ -1845,9 +1847,9 @@ function _savedNoteKey(target){
   if(!target||typeof target.id!=="string")return "";
   if(target.kind==="artifact"&&/^[1-9][0-9]*$/.test(target.id))
     return JSON.stringify(["artifact",target.id]);
-  if(target.kind==="media"&&/^[a-z0-9][a-z0-9-]{0,80}$/.test(target.id)&&
+  if(target.kind==="media"&&/^[A-Za-z0-9][A-Za-z0-9_-]{0,80}(?![\s\S])/.test(target.id)&&
      typeof target.source_dir==="string"&&
-     (/^vault\/Clients\/Rankwise\/Content\/Scripts\/[^\\]+$/.test(target.source_dir)||target.source_dir===_SAVED_NOTE_METRO_LAB_SOURCE)&&
+     (/^vault\/Clients\/Rankwise\/Content\/Scripts\/[^\\]+$/.test(target.source_dir)||_SAVED_NOTE_LAB_SOURCES.includes(target.source_dir))&&
      !/[\u0000-\u001f\u007f-\u009f]/.test(target.source_dir)&&
      !target.source_dir.split("/").some(x=>!x||x==="."||x===".."))
     return JSON.stringify(["media",target.id,target.source_dir]);
@@ -2094,7 +2096,7 @@ function _criDetail(it,linkedArtifact=null,row=null){
   const reviewParams=extra=>Object.assign({script_id:it.script_id},extra,renderSha?{expected_render_sha:renderSha}:{});
   const renderReason=renderSha?_CRI_NOT_LIVE_REASON:"Current render identity unavailable — refresh after the render completes.";
   const siblings=(row&&row.siblings||[]).slice().sort((a,b)=>String(b.created_at||"").localeCompare(String(a.created_at||"")));
-  const siblingBar=siblings.length>1?`<div class="acts" style="margin:0 0 10px;flex-wrap:wrap"><span class="section-note" style="margin:0">Variants in this concept · ${siblings.length}${row.family_explicit?"":" · legacy/unverified identity"}</span>${siblings.map(s=>`<button class="btn ${String(s.script_id)===String(it.script_id)?"rec":""}" data-cri-variant="${escAttr(String(s.script_id))}">${esc(String(s.script_id))}${_reviewContentHandled(s,null)?" · decided":""}</button>`).join("")}</div>`:"";
+  const siblingBar=siblings.length>1?`<div class="acts" style="margin:0 0 10px;flex-wrap:wrap"><span class="section-note" style="margin:0">${row.family_method==="text"?"Similar scripts":"Variants in this concept"} · ${siblings.length}${row.family_method==="text"?" · text match, not quality approval":row.family_explicit?"":" · legacy/unverified identity"}</span>${siblings.map(s=>`<button class="btn ${String(s.script_id)===String(it.script_id)?"rec":""}" data-cri-variant="${escAttr(String(s.script_id))}">${esc(String(s.script_id))}${_reviewContentHandled(s,null)?" · decided":""}</button>`).join("")}</div>`:"";
   return `
     ${siblingBar}
     ${!_reviewEditorialReady(it)&&!_reviewContentHandled(it,linkedArtifact)?`<div class="state"><b>In preparation</b><br>Editorial acceptance is incomplete. ${esc(((it.qc&&it.qc.editorial&&it.qc.editorial.reasons)||[]).join("; "))}</div>`:""}
@@ -6516,4 +6518,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 57bf6b9f33d6 -->
+<!-- rankwise-portal2-version: 5b16d4621083 -->
