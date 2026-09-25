@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%230b0f14%27/%3E%3Ctext x=%278%27 y=%2712%27 font-size=%2711%27 font-family=%27Helvetica%27 font-weight=%27bold%27 fill=%27%23e8a33d%27 text-anchor=%27middle%27%3ER%3C/text%3E%3C/svg%3E">
-<title>Rankwise — Command</title>
+<title>Rankwise — Review</title>
 <style>
 /* ── tokens ──────────────────────────────────────────────────────────────
    Dark is the default register (operator checks this at odd hours; a calm,
@@ -452,6 +452,111 @@ details.decide-tech .body{margin-top:8px;font:11.5px/1.6 var(--mono);color:var(-
 [data-decided-history] .dcard.row .why{font-size:14px;margin:9px 0;color:var(--ink)}
 /* Variant B keeps the compared options in natural document flow on every size. */
 @media (min-width:900px){.decide-dock{box-shadow:none;border-radius:var(--radius)}}
+
+/* Workflow refresh: presentation only; review identity and actions remain canonical. */
+#app{grid-template-columns:188px minmax(0,1fr)}
+.workflow-nav{overflow-y:auto}
+.workflow-nav .brand{font-size:14px;letter-spacing:.025em;padding-bottom:24px}
+.nav-head{display:flex;align-items:center;justify-content:space-between}
+.nav-menu-toggle{display:none}
+.nav-routes{display:grid;gap:3px}
+.nav-subroutes{padding:3px 0 9px 12px}
+.nav-subroutes[hidden]{display:none}
+.nav-subroutes .navlink{font-size:12px;padding:6px 15px}
+.nav-search{margin:18px 16px 4px;padding:8px 10px;border:1px solid var(--edge);border-radius:7px;background:transparent;color:var(--ink-2);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.nav-search span{float:right;color:var(--ink-3)}
+.brief.brief-review{max-width:1480px;padding:24px 28px 40px}
+.review-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.review-head .status{margin:0}
+.review-layout-switch{display:flex;gap:3px;padding:3px;background:var(--surface-3);border:1px solid var(--edge);border-radius:9px}
+.review-layout-switch .btn{border:0;background:transparent;padding:6px 12px;min-height:34px}
+.review-layout-switch .btn[aria-pressed=true]{background:var(--surface-2);color:var(--ink);box-shadow:var(--shadow)}
+.review-filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.review-filter-row .acts{margin:0;flex-wrap:wrap}
+.review-more-filters{font-size:12px;color:var(--ink-2)}
+.review-more-filters summary,.review-context summary{cursor:pointer;padding:7px 0}
+.review-more-filters .acts{padding:8px 0}
+.review-context{font-size:12px;color:var(--ink-3);margin:6px 0 12px}
+.review-context .review-summary{margin:8px 0}
+.review-context p{max-width:76ch;padding:4px 0}
+.review-toolbar{margin:8px 0;align-items:center}
+.review-toolbar select{min-width:135px}
+.review-stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 12px;padding-top:12px;border-top:1px solid var(--edge);flex-wrap:wrap}
+.review-stepper .acts{margin:0;gap:6px}
+.review-position{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.review-queue-picker{display:flex;align-items:center;gap:8px;max-width:100%;font-size:12px;color:var(--ink-2)}
+.review-queue-picker select{max-width:350px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.review-shell{grid-template-columns:minmax(230px,280px) minmax(0,1fr);gap:24px;margin-top:0}
+.review-inspector{min-width:0}
+.review-inspector textarea{display:block;width:100%;min-height:88px;margin-top:7px;padding:10px 12px!important;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:var(--radius-sm);font:inherit!important;font-size:13px!important;line-height:1.5;resize:vertical}
+.review-inspector textarea:focus{border-color:var(--acc)}
+.review-inspector label{color:var(--ink-2);font-size:12px}
+.review-control-bar{display:flex;align-items:center;justify-content:space-between;gap:10px 18px;flex-wrap:wrap}
+.review-control-bar .review-filter-row,.review-control-bar .review-toolbar{margin:0}
+.review-support{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;margin-top:5px}
+.review-support .review-context{margin:0}
+.review-guidance{color:var(--ink-3);font-size:11.5px;line-height:1.5}
+@media(min-width:761px){[data-review-layout-current="desk"] .review-queue-picker{display:none}[data-review-layout-current="desk"] .review-stepper{justify-content:flex-end;margin-top:8px;padding-top:8px}}
+.review-inspector .review-watch{grid-template-columns:minmax(180px,260px) minmax(220px,1fr);gap:20px}
+.review-list{top:18px}
+.review-list-item{border-color:transparent;background:transparent;border-bottom-color:var(--edge-soft);border-radius:6px;box-shadow:none}
+.review-list-item.on{border-color:var(--acc-soft-edge)}
+.review-list-meta{line-height:1.6}
+.review-focus{max-width:1000px;margin:0 auto}
+.review-compare-layout{display:grid;grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr);gap:24px;align-items:start}
+.review-previews{display:grid;gap:12px;min-width:0}
+.review-preview{border:1px solid var(--edge);border-radius:9px;padding:14px;background:var(--surface);min-width:0}
+.review-preview.is-selected{border-color:var(--acc-soft-edge);order:1}
+.review-preview h3{font-size:13px;overflow-wrap:anywhere;margin-bottom:7px}
+.review-preview .section-note{margin:6px 0}
+.review-preview .artmedia{background:#000;border-radius:8px;aspect-ratio:9/16;max-width:220px;max-height:360px;margin:12px auto;color:var(--ink-3);display:flex;align-items:center;justify-content:center;font-size:12px}
+.review-preview .artmedia img,.review-preview .artmedia video{object-fit:contain!important}
+.review-preview .btn{margin-top:8px}
+.review-preview-unavailable{padding:18px 10px;background:var(--surface-2);border-radius:7px;color:var(--ink-2);font-size:12px;line-height:1.5;margin:8px 0}
+.review-compare-layout .review-inspector .review-watch{grid-template-columns:1fr}
+.review-compare-layout .review-inspector .watch-media .artmedia{margin:0 auto}
+@media(min-width:1200px){.review-compare-layout .review-inspector .review-watch{grid-template-columns:minmax(180px,240px) minmax(200px,1fr)}}
+@media(max-width:1080px) and (min-width:761px){.review-inspector .review-watch{grid-template-columns:1fr}.review-shell{grid-template-columns:220px minmax(0,1fr);gap:18px}.brief.brief-review{padding:22px 20px}}
+@media(max-width:760px){
+  #app{grid-template-columns:1fr}
+  .workflow-nav{display:block;padding:10px 14px;overflow:visible}
+  .workflow-nav .brand{padding:0;font-size:13px}
+  .nav-menu-toggle{display:inline-flex;align-items:center;gap:7px;min-height:36px}
+  .nav-routes{display:none;margin-top:10px;max-height:68svh;overflow-y:auto}
+  .workflow-nav[data-menu-open=true] .nav-routes{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .nav-routes .navlink{width:100%;margin:0;min-height:40px;padding:8px 12px;font-size:13px}
+  .nav-subroutes{padding:4px 0 8px 8px}
+  .nav-subroutes .navlink{font-size:12px;min-height:36px}
+  .nav-search{margin:4px 0;grid-column:1 / -1}
+  .brief.brief-review{padding:18px 14px 32px}
+  .review-head{gap:10px;margin-bottom:14px}
+  .review-head .status{font-size:21px}
+  .review-layout-switch{width:100%}
+  .review-layout-switch .btn{flex:1;min-height:36px}
+  .review-filter-row{gap:6px}
+  .review-filter-row .btn{font-size:11px;padding:7px 8px}
+  .review-toolbar{gap:8px}
+  .review-toolbar label{flex:1 1 130px}
+  .review-stepper{margin-top:12px}
+  .review-queue-picker{width:100%}
+  .review-queue-picker select{flex:1;max-width:none;width:100%}
+  .review-shell,.review-compare-layout{display:block}
+  .review-shell>.review-list{display:none}
+  .review-inspector .review-watch,.review-compare-layout .review-inspector .review-watch{grid-template-columns:1fr}
+  .review-previews{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+  .review-preview{padding:10px}
+  .review-preview .artmedia{width:100%;max-height:220px}
+  .review-preview h3{font-size:12px}
+  .review-preview-unavailable{padding:12px 8px}
+  .review-context .review-summary{grid-template-columns:1fr 1fr}
+  .mast{height:54px;min-height:54px}
+  .mast [data-ctos-pulse]{max-width:calc(100% - 142px)!important;padding-left:14px!important;gap:7px!important}
+  .mast [data-ctos-pulse]>span:last-child{display:none}
+  .mast .hud{top:10px;right:12px}
+  .mast .hud [data-goto]{display:none}
+  .hud .pill{font-size:11px;padding:6px 8px}
+}
+
 </style></head><body>
 <div id="app"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1130,17 +1235,28 @@ function changeLog(p){
 }
 
 // ── views ────────────────────────────────────────────────────────────────
-let VIEW = "command";
-const NAVS = [["command","Today"],["review","Review"],["conversations","Inbox"],["work","AI Work"],["analytics","Progress"],["business","Money"],
-              ["war_room","War room"],["pipeline","Pipeline"],["decisions","Decide"],["tickets","Tickets"],["ctos","ctOS"],["content","Content"],["machine","Machine"]];
+let VIEW = "review";
+let REVIEW_LAYOUT="desk", NAV_MENU_OPEN=false;
+const REVIEW_DISCLOSURES=new Set();
+// Legacy route IDs remain available to the palette and all existing deep links.
+const NAVS = [["review","Review"],["command","Today"],["decisions","Decisions"],["conversations","Inbox"],["content","Content · Library"],["analytics","Content · Results"],
+              ["war_room","Business · Sales"],["pipeline","Business · Pipeline"],["business","Business · Money"],["work","Work"],["tickets","System · Tickets"],["ctos","System · ctOS"],["machine","System · Machine"]];
+const NAV_PRIMARY=[["review","Review"],["command","Today"],["decisions","Decisions"],["conversations","Inbox"],["content","Content"],["war_room","Business"],["work","Work"],["ctos","System"]];
+const NAV_GROUPS={content:[["content","Library"],["analytics","Results"]],war_room:[["war_room","Sales"],["pipeline","Pipeline"],["business","Money"]],ctos:[["tickets","Tickets"],["ctos","ctOS"],["machine","Machine"]]};
+function _navPrimary(view){return NAV_PRIMARY.find(([v])=>v===view||(NAV_GROUPS[v]||[]).some(([route])=>route===view))?.[0]||"review";}
+function _navMarkup(p){
+  const count=v=>v==="review"?_reviewRows().filter(_reviewAwaiting).length:v==="decisions"&&Array.isArray(DECS)?DECS.length:v==="tickets"&&Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&t.status==="open").length:v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:0;
+  const badge=v=>{const n=count(v);return n?`<span class="n">${n}</span>`:"";};
+  return NAV_PRIMARY.map(([v,label])=>{const children=NAV_GROUPS[v]||[],active=_navPrimary(VIEW)===v;return `<div class="nav-section"><button class="navlink ${active?"on":""}" data-v="${v}" data-nav-primary${VIEW===v?' aria-current="page"':""}>${esc(label)}${badge(v)}</button>${children.length?`<div class="nav-subroutes" ${active?"":"hidden"}>${children.map(([route,name])=>`<button class="navlink ${VIEW===route?"on":""}" ${route===v?'data-nav-route':'data-v'}="${route}"${VIEW===route?' aria-current="page"':""}>${esc(name)}${route===v?"":badge(route)}</button>`).join("")}</div>`:""}</div>`;}).join("");
+}
 let CMDK_OPEN=false, SHORTCUTS_OPEN=false, CMDK_QUERY="", MODAL_OPENER=null;
 function modalOpenerSelector(el){if(!el)return null;if(el.id)return `#${CSS.escape(el.id)}`;if(el.dataset?.v)return `nav button[data-v="${CSS.escape(el.dataset.v)}"]`;if(el.dataset?.goto)return `[data-goto="${CSS.escape(el.dataset.goto)}"]`;return null;}
 function restoreModalFocus(){const selector=MODAL_OPENER;MODAL_OPENER=null;const el=selector?document.querySelector(selector):null;if(el&&typeof el.focus==="function")el.focus({preventScroll:true});}
 function _paletteRows(){
-  return NAVS.map(([view,label],i)=>({view,label,hotkey:i<9?String(i+1):""}));
+  return NAVS.map(([view,label])=>{const i=NAV_PRIMARY.findIndex(([v])=>v===view);return {view,label,hotkey:i>=0?String(i+1):""};});
 }
 function _paletteMarkup(){
-  if(SHORTCUTS_OPEN)return `<div class="cmdk-backdrop" data-shortcut-close><div class="cmdk shortcut-sheet" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts"><h2>Keyboard shortcuts</h2><dl><dt>⌘K</dt><dd>Open command palette</dd><dt>1–9</dt><dd>Go to a Portal section</dd><dt>/</dt><dd>Focus the current page filter, when available</dd><dt>?</dt><dd>Show this shortcut sheet</dd><dt>Esc</dt><dd>Close palette or shortcuts</dd></dl><div class="acts" style="margin-top:16px"><button class="btn rec" data-shortcut-dismiss>Close</button></div></div></div>`;
+  if(SHORTCUTS_OPEN)return `<div class="cmdk-backdrop" data-shortcut-close><div class="cmdk shortcut-sheet" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts"><h2>Keyboard shortcuts</h2><dl><dt>⌘K</dt><dd>Open command palette</dd><dt>1–8</dt><dd>Go to a Portal section</dd><dt>/</dt><dd>Focus the current page filter, when available</dd><dt>?</dt><dd>Show this shortcut sheet</dd><dt>Esc</dt><dd>Close palette or shortcuts</dd></dl><div class="acts" style="margin-top:16px"><button class="btn rec" data-shortcut-dismiss>Close</button></div></div></div>`;
   if(!CMDK_OPEN)return "";
   return `<div class="cmdk-backdrop" data-cmdk-close><div class="cmdk" role="dialog" aria-modal="true" aria-label="Command palette"><input id="cmdk-input" type="search" autocomplete="off" value="${escAttr(CMDK_QUERY)}" placeholder="Go to a Portal section…" aria-label="Search Portal commands"><div class="cmdk-list" data-cmdk-list>${_paletteRows().map(x=>`<button class="cmdk-item" data-palette-goto="${escAttr(x.view)}"><span>${esc(x.label)}</span><small>${x.hotkey||""}</small></button>`).join("")}</div><div class="cmdk-foot">Enter a destination · Esc closes</div></div></div>`;
 }
@@ -1166,7 +1282,7 @@ document.addEventListener("keydown",e=>{
   }
   if(e.metaKey||e.ctrlKey||e.altKey||e.isComposing)return;
   const tag=(e.target&&e.target.tagName)||"";if(/INPUT|TEXTAREA|SELECT/.test(tag)||e.target?.isContentEditable)return;
-  if(/^[1-9]$/.test(e.key)){const n=+e.key-1;if(NAVS[n]){e.preventDefault();document.querySelector(`nav button[data-v="${CSS.escape(NAVS[n][0])}"]`)?.click();}}
+  if(/^[1-8]$/.test(e.key)){const n=+e.key-1;if(NAV_PRIMARY[n]){e.preventDefault();document.querySelector(`nav button[data-v="${CSS.escape(NAV_PRIMARY[n][0])}"]`)?.click();}}
   else if(e.key==="/"){const target=document.querySelector("#money-query,#cri-filter,#cri-channel");if(target){e.preventDefault();target.focus();}}
 });
 // artifacts shelf (migration 072): rows read via RLS; media via short-lived signed URLs.
@@ -2170,7 +2286,7 @@ function _criDetail(it,linkedArtifact=null,row=null){
 function viewContentReview(p){
   MEDIA_REG=[];
   const rows=_reviewRows();
-  if(CRI===undefined&&!Array.isArray(ARTS))return `<div class="status sub" data-review-room data-cri-room>Review</div><div class="empty">Loading the unified queue…</div>`;
+  if(CRI===undefined&&!Array.isArray(ARTS))return `<div data-review-layout-current="${REVIEW_LAYOUT}" data-review-room data-cri-room><div class="status sub">Review</div><div class="empty">Loading the unified queue…</div></div>`;
   const feedbackFeed=LAST.p&&LAST.p.content_review_feedback;
   const sourceWarnings=[CRI===null?"Content review feed failed — content rows may be missing.":"",ARTS===null?"Artifact feed failed — artifact rows may be missing.":"",CRI_RECEIPTS===null?"Review receipt read failed — exact prior decisions are unknown; items remain actionable.":"",CRI_FILTER==="rejected"&&(!feedbackFeed||feedbackFeed.available!==true||!Array.isArray(feedbackFeed.items))?"Rejection feedback read incomplete — the Rejected count is not clearance.":""].filter(Boolean);
   const counts={all:rows.length,waiting:_reviewFilterRows(rows,"waiting").length,draft:_reviewFilterRows(rows,"draft").length,critiqued:_reviewFilterRows(rows,"critiqued").length,
@@ -2185,46 +2301,40 @@ function viewContentReview(p){
     .sort((a,b)=>a[1].localeCompare(b[1]));
   const sortOptions=[["created-newest","Newest created"],["created-oldest","Oldest created"],["rating-high","Highest critique rating"],["rating-low","Lowest critique rating"],
     ["critiqued-first","Critiqued first"],["attention","Needs attention"],["updated","Recent activity"],["channel","Source A–Z"],["title","Item A–Z"],["views-high","Most views (48h)"],["views-low","Fewest views (48h)"]];
-  const filterBar=`<div class="acts" style="margin-bottom:10px;flex-wrap:wrap">${filters.map(([k,label])=>
-    `<button class="btn ${CRI_FILTER===k?"rec":""}" data-cri-filter="${escAttr(k)}">${esc(label)} · ${counts[k]}</button>`).join("")}</div>`;
-  const sortBar=`<div class="review-toolbar"><label>Source<select id="cri-channel" class="btn"><option value="all">All sources</option>${sources.map(([key,label])=>`<option value="${escAttr(key)}" ${CRI_CHANNEL===key?"selected":""}>${esc(label)}</option>`).join("")}</select></label><label>Sort<select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
-    <div class="section-note">Creation sorts use each record's created time. Critique-rating sorts use explicit structured scores only; ${scored} of ${rows.length} loaded items ${scored===1?"has":"have"} one, and unknown scores stay last.</div>`;
-  const summary=`<div class="review-summary">
-    <div class="pcard"><h4>Needs response</h4><div class="v">${counts.waiting}</div></div>
-    <div class="pcard"><h4>Critiqued</h4><div class="v">${counts.critiqued}</div><small>${scored} with ratings</small></div>
-    <div class="pcard"><h4>QC issues</h4><div class="v">${counts.qcfail}</div></div>
-    <div class="pcard"><h4>Decided</h4><div class="v">${counts.completed}</div><small>kept out of the work queue</small></div>
-  </div>`;
+  const filterButton=([k,label])=>`<button class="btn ${CRI_FILTER===k?"rec":""}" data-cri-filter="${escAttr(k)}" aria-pressed="${CRI_FILTER===k}">${esc(label)} · ${counts[k]}</button>`;
+  const filterBar=`<div class="review-filter-row"><div class="acts">${filters.slice(0,4).map(filterButton).join("")}</div><details class="review-more-filters" data-review-disclosure="filters" ${REVIEW_DISCLOSURES.has("filters")||filters.slice(4).some(([k])=>k===CRI_FILTER)?"open":""}><summary>More filters</summary><div class="acts">${filters.slice(4).map(filterButton).join("")}</div></details></div>`;
+  const sortBar=`<div class="review-toolbar"><label>Source<select id="cri-channel" class="btn"><option value="all">All sources</option>${sources.map(([key,label])=>`<option value="${escAttr(key)}" ${CRI_CHANNEL===key?"selected":""}>${esc(label)}</option>`).join("")}</select></label><label>Sort<select id="cri-sort" class="btn">${sortOptions.map(([v,l])=>`<option value="${v}" ${CRI_SORT===v?"selected":""}>${l}</option>`).join("")}</select></label></div>`;
+  const context=`<details class="review-context" data-review-disclosure="context" ${REVIEW_DISCLOSURES.has("context")?"open":""}><summary>Queue details</summary><div class="review-summary"><div class="pcard"><h4>Needs response</h4><div class="v">${counts.waiting}</div></div><div class="pcard"><h4>Critiqued</h4><div class="v">${counts.critiqued}</div><small>${scored} with ratings</small></div><div class="pcard"><h4>QC issues</h4><div class="v">${counts.qcfail}</div></div><div class="pcard"><h4>Decided</h4><div class="v">${counts.completed}</div></div></div><p>Exact-render responses stay under Decided and All history. Linked render artifacts appear once, with their content workflow.</p><p>Creation sorts use each record’s created time. Critique sorts use recorded scores only; ${scored} of ${rows.length} loaded items have one. Unknown scores stay last.</p></details>`;
   const warnings=sourceWarnings.map(msg=>`<div class="state state-error review-source-warning"><b>Partial review data</b>${esc(msg)}</div>`).join("");
   const rejectedLane=CRI_FILTER==="rejected"?`<div data-rejected-lane class="state" style="margin:10px 0"><b>Rejected content</b><br>Reasons and revision instructions are shown from the latest snapshot. Notes below are private, versioned, and do not change the decision.</div>`:"";
+  // Exactly one editable inspector owns every action, note and selected player.
   const detail=selected?(selected.kind==="content"?_criDetail(selected.item,selected.linkedArtifact,selected):_artifactDetail(selected.item)):`<div class="empty">No items match this view.</div>`;
-  const phone = typeof window!=="undefined" && window.matchMedia && window.matchMedia("(max-width:760px)").matches;
-  if(phone){
-    const idx=filtered.findIndex(row=>row.key===CRI_SEL);
-    return `
-      <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length?idx+1:0} of ${filtered.length}</small></div>
-      <div class="section-note">Needs-response items are shown first. Exact-render responses stay available under Decided and All history; nothing is deleted.</div>
-      ${warnings}${summary}${rejectedLane}${filterBar}${sortBar}${detail}
-      <div class="acts" style="margin-top:4px">
-        <button class="btn" data-cri-nav="prev">← Prev</button>
-        <button class="btn" data-cri-nav="next">Next →</button>
-      </div>`;
-  }
-  return `
-    <div class="status sub" data-review-room data-cri-room>Review<small>${filtered.length} shown · ${counts.waiting} need a response</small></div>
-    <div class="section-note">Needs-response items are the default work queue. Exact-render responses stay under Decided and All history; nothing is deleted. Linked render artifacts appear once, with the content workflow.</div>
-    ${warnings}${summary}${rejectedLane}${filterBar}${sortBar}
-    <div class="review-shell">
-      <div class="review-list">${filtered.map(row=>{
-        const score=_reviewCritiqueScore(row),it=row.item;
-        const artifactResponse=row.kind==="content"&&_reviewArtifactDecisionMatches(it,row.linkedArtifact);
-        const badge=row.kind==="content"?_criStateBadge(it):`<span class="badge ${it.status==="pending"?"badge-warn":"badge-ok"}">${it.status==="pending"?"Awaiting":"Decided"}</span>`;
-        return `<button class="btn review-list-item ${row.key===CRI_SEL?"on":""}" data-review-sel="${escAttr(row.key)}"${row.kind==="content"?` data-cri-sel="${escAttr(it.script_id)}"`:` data-art-sel="${escAttr(it.id)}"`}>
-          <div class="review-list-title">${esc(_reviewTitle(row))}</div>
-          <div class="review-list-meta">${badge}${artifactResponse?`<span class="badge badge-ok">Artifact response · exact render</span>`:row.kind==="content"&&row.linkedArtifact&&row.linkedArtifact.status!=="pending"?`<span class="badge badge-neutral">Earlier artifact decision</span>`:""}<span>${esc(_reviewSourceLabel(row))}</span><span>· ${esc(ago(_reviewCreatedAt(row)))}</span>${score?`<span class="review-list-score">${esc(score.label)}</span>`:""}</div>
-        </button>`;}).join("")||`<div class="empty">No items match this view.</div>`}</div>
-      <div>${detail}</div>
-    </div>`;
+  const inspector=`<div class="review-inspector" data-review-inspector>${detail}</div>`;
+  const idx=filtered.findIndex(row=>row.key===CRI_SEL);
+  const stepper=`<div class="review-stepper"><label class="review-queue-picker">Item<select id="review-queue-select" class="btn" ${filtered.length?"":"disabled"}>${filtered.length?filtered.map(row=>`<option value="${escAttr(row.key)}" ${row.key===CRI_SEL?"selected":""}>${esc(_reviewTitle(row))}</option>`).join(""):'<option>No matching items</option>'}</select></label><div class="acts"><span class="review-position">${filtered.length?idx+1:0} of ${filtered.length}</span><button class="btn" data-cri-nav="prev" ${idx<=0?"disabled":""}>← Prev</button><button class="btn" data-cri-nav="next" ${idx<0||idx>=filtered.length-1?"disabled":""}>Next →</button></div></div>`;
+  const queue=`<div class="review-list" aria-label="Review queue">${filtered.map(row=>{
+    const score=_reviewCritiqueScore(row),it=row.item,artifactResponse=row.kind==="content"&&_reviewArtifactDecisionMatches(it,row.linkedArtifact);
+    const badge=row.kind==="content"?_criStateBadge(it):`<span class="badge ${it.status==="pending"?"badge-warn":"badge-ok"}">${it.status==="pending"?"Awaiting":"Decided"}</span>`;
+    return `<button class="btn review-list-item ${row.key===CRI_SEL?"on":""}" data-review-sel="${escAttr(row.key)}" aria-pressed="${row.key===CRI_SEL}"${row.kind==="content"?` data-cri-sel="${escAttr(it.script_id)}"`:` data-art-sel="${escAttr(it.id)}"`}><div class="review-list-title">${esc(_reviewTitle(row))}</div><div class="review-list-meta">${badge}${artifactResponse?`<span class="badge badge-ok">Artifact response · exact render</span>`:row.kind==="content"&&row.linkedArtifact&&row.linkedArtifact.status!=="pending"?`<span class="badge badge-neutral">Earlier artifact decision</span>`:""}<span>${esc(_reviewSourceLabel(row))}</span><span>· ${esc(ago(_reviewCreatedAt(row)))}</span>${score?`<span class="review-list-score">${esc(score.label)}</span>`:""}</div></button>`;}).join("")||`<div class="empty">No items match this view.</div>`}</div>`;
+  const layout=REVIEW_LAYOUT==="focus"?`<div class="review-focus">${inspector}</div>`:REVIEW_LAYOUT==="compare"?`<div class="review-compare-layout">${_reviewComparePreviews(selected)}${inspector}</div>`:`<div class="review-shell">${queue}${inspector}</div>`;
+  return `<div data-review-layout-current="${REVIEW_LAYOUT}" data-review-room data-cri-room><div class="review-head"><div class="status sub">Review<small>${counts.waiting} need a response</small></div><div class="review-layout-switch" role="group" aria-label="Review layout">${[["desk","Desk"],["focus","Focus"],["compare","Compare"]].map(([key,label])=>`<button class="btn" data-review-layout="${key}" aria-pressed="${REVIEW_LAYOUT===key}">${label}</button>`).join("")}</div></div>${warnings}<div class="review-control-bar">${filterBar}${sortBar}</div><div class="review-support">${context}<p class="review-guidance">Exact-render responses stay under Decided and All history.</p></div>${rejectedLane}${stepper}${layout}</div>`;
+}
+// Compare reads the same family members and media registry as the inspector.
+// It never registers actions or editors, and never invents a related variant.
+function _reviewComparePreviews(row){
+  if(!row)return `<div class="review-previews"><div class="review-preview-unavailable" data-review-preview-unavailable>No item selected for comparison.</div></div>`;
+  const siblings=row.kind==="content"?(row.siblingRows||[]).slice().sort((a,b)=>String(b.item.created_at||"").localeCompare(String(a.item.created_at||""))):[];
+  if(siblings.length<2)return `<div class="review-previews"><div class="review-preview-unavailable" data-review-preview-id="${escAttr(row.kind==="content"?row.item.script_id:row.item.id)}" data-review-preview-unavailable>No related variant is available for comparison. The selected review remains open.</div></div>`;
+  const seen=new Set(MEDIA_REG.map(_reviewMediaKey).filter(Boolean));
+  return `<div class="review-previews"><p class="section-note">${row.family_method==="text"?"Similar scripts · text match, not quality approval":row.family_explicit?"Variants in this concept":"Variants · legacy/unverified identity"}. Open a variant to review or respond.</p>${siblings.map(sibling=>{
+    const it=sibling.item,a=sibling.linkedArtifact,id=String(it.script_id),current=id===String(row.item.script_id),score=_reviewCritiqueScore(sibling);
+    const path=it.artifact_id!=null?(a&&a.storage_path?a.storage_path:`reels/${it.script_id}.mp4`):null;
+    const media=path?{path,revision:it.render_sha||(a&&a.content_sha)||"",img:false,title:id}:null;
+    const sameMedia=media&&seen.has(_reviewMediaKey(media));
+    let preview=current?`<div class="review-preview-unavailable">Selected · player and response controls are in the review panel.</div>`:!media?`<div class="review-preview-unavailable" data-review-preview-unavailable>Render not uploaded yet.</div>`:sameMedia?`<div class="review-preview-unavailable" data-review-preview-unavailable>This exact render is already open in the review panel or another preview.</div>`:`<div class="artmedia" data-mi="${MEDIA_REG.push(media)-1}">${DEV?"video plays live":"loading…"}</div>`;
+    if(media)seen.add(_reviewMediaKey(media));
+    return `<article class="review-preview ${current?"is-selected":""}" data-review-preview-id="${escAttr(id)}"><h3>${esc(id)}</h3><div class="review-list-meta">${_criStateBadge(it)}${score?`<span class="badge badge-info">Critique ${esc(score.label)}</span>`:""}</div>${preview}${current?"":`<button class="btn" data-cri-variant="${escAttr(id)}">Open variant</button>`}</article>`;
+  }).join("")}</div>`;
 }
 function viewReview(p){return viewContentReview(p);}
 // The review note draft must survive render()'s innerHTML rebuild (30s tick /
@@ -2239,8 +2349,24 @@ let CRI_NOTE_DRAFT={id:null,text:""};
 const CRI_NOTE_DRAFTS=new Map();
 function _criCaptureNoteDraft(){const ta=$("#cri-note");if(ta){CRI_NOTE_DRAFT={id:ta.dataset.scriptId||null,text:ta.value};if(CRI_NOTE_DRAFT.id)CRI_NOTE_DRAFTS.set(CRI_NOTE_DRAFT.id,ta.value);}}
 function wireContentReview(p,updatedAt,srcNote){
+  document.querySelectorAll("[data-review-layout]").forEach(b=>{b.onclick=()=>{if(!["desk","focus","compare"].includes(b.dataset.reviewLayout))return;_criCaptureNoteDraft();REVIEW_LAYOUT=b.dataset.reviewLayout;render(p,updatedAt,srcNote);document.querySelector(`[data-review-layout="${REVIEW_LAYOUT}"]`)?.focus({preventScroll:true});};});
+  const picker=document.getElementById("review-queue-select");if(picker)picker.onchange=()=>{_criCaptureNoteDraft();CRI_SEL=picker.value;render(p,updatedAt,srcNote);};
   const ta=$("#cri-note");
-  if(ta){ta.value=CRI_NOTE_DRAFTS.get(ta.dataset.scriptId)||"";CRI_NOTE_DRAFT={id:ta.dataset.scriptId,text:ta.value};}
+  if(ta){
+    ta.value=CRI_NOTE_DRAFTS.get(ta.dataset.scriptId)||"";CRI_NOTE_DRAFT={id:ta.dataset.scriptId,text:ta.value};
+    // Presentation only: writing feedback highlights the matching response.
+    // Existing disabled/allowlist/exact-render rules remain untouched.
+    const emphasizeResponse=()=>{
+      const hasFeedback=!!ta.value.trim();
+      document.querySelectorAll(".review-inspector button[data-i]").forEach(button=>{
+        const reg=ACTS_REG[+button.dataset.i];
+        if(!reg||String(reg.params?.script_id)!==ta.dataset.scriptId)return;
+        if(reg.action==="content_review.approve")button.classList.toggle("rec",!hasFeedback);
+        if(reg.action==="content_review.request_changes")button.classList.toggle("rec",hasFeedback);
+      });
+    };
+    ta.addEventListener("input",emphasizeResponse);emphasizeResponse();
+  }
   for(const [id,set] of [["cri-channel",v=>CRI_CHANNEL=v],["cri-sort",v=>CRI_SORT=v]]){
     const el=document.getElementById(id);if(el)el.onchange=()=>{_criCaptureNoteDraft();set(el.value);render(p,updatedAt,srcNote);};
   }
@@ -2279,6 +2405,9 @@ document.addEventListener("keydown", e=>{
   if(e.isComposing||e.key==="Process")return;
   const tag=(e.target&&e.target.tagName)||"";
   if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(e.target&&e.target.isContentEditable))return;
+  // Focused controls own Space (native activation/media controls). The page
+  // playback shortcut applies only when no interactive control owns the key.
+  if(e.key===" "&&e.target?.closest?.('button,a,summary,video,audio,[role="button"],[role="link"],[role="switch"],[role="tab"]'))return;
   const byLabel=(re)=>[...document.querySelectorAll(".acts button.btn")].find(b=>re.test(b.textContent.trim()));
   // F2 (publish review): preventDefault whenever a shortcut key is consumed. R/X on an
   // empty note toast + ta.focus() INSIDE this keydown handler; without preventDefault the
@@ -2290,7 +2419,7 @@ document.addEventListener("keydown", e=>{
   else if(e.key==="a"||e.key==="A"){e.preventDefault();const b=byLabel(/^Approve$/);if(b&&!b.disabled)b.click();}
   else if(e.key==="r"||e.key==="R"){e.preventDefault();const b=byLabel(/^Request changes$/);if(b&&!b.disabled)b.click();}
   else if(e.key==="x"||e.key==="X"){e.preventDefault();const b=byLabel(/^Reject$/);if(b&&!b.disabled)b.click();}
-  else if(e.key===" "){const v=document.querySelector(".artmedia video");if(v){e.preventDefault();v.paused?v.play():v.pause();}}
+  else if(e.key===" "){const v=document.querySelector(".review-inspector .artmedia video");if(v){e.preventDefault();v.paused?v.play():v.pause();}}
 });
 // ── Daily Brief (Home block, plan §5) ──────────────────────────────────────
 // Five sources, each with an honest empty state. Two are real live reads that
@@ -6008,6 +6137,7 @@ function render(p, updatedAt, srcNote){
   // Async callers may finish after teardown. Never paint an operator surface
   // with a cleared snapshot or a missing session.
   if(!p||!_portalReadCurrent(PORTAL_EPOCH))return;
+  document.querySelectorAll('details[data-review-disclosure]').forEach(el=>{if(el.open)REVIEW_DISCLOSURES.add(el.dataset.reviewDisclosure);else REVIEW_DISCLOSURES.delete(el.dataset.reviewDisclosure);});
   const mediaSnapshot=_reviewCaptureMedia();
   _reviewCaptureDrafts();
   _savedNoteCapture();
@@ -6054,14 +6184,9 @@ function render(p, updatedAt, srcNote){
     : VIEW==="business"?viewBusiness(p,updatedAt)
     : viewCommand(p,updatedAt);
   $("#app").innerHTML=`
-  <nav><div class="brand">RANK<span>WISE</span></div>
-    ${NAVS.map(([v,label])=>{
-      const n=v==="conversations"?convN:(v==="review"?_reviewRows().filter(_reviewAwaiting).length:
-        (v==="decisions"&&Array.isArray(DECS)?DECS.length:
-        (v==="tickets"&&Array.isArray(p.tickets)?p.tickets.filter(t=>!t.approved&&t.status==="open").length:
-        (v==="work"&&WORK&&Array.isArray(WORK.items)?WORK.items.filter(w=>!_WORK_TERMINAL.has(w.state)).length:0))));
-      return `<button class="navlink ${VIEW===v?"on":""}" data-v="${v}"${VIEW===v?' aria-current="page"':""}>${esc(label)} ${n?`<span class="n">${n}</span>`:""}</button>`}).join("")}
-    <div class="foot"><a href="/portal/" target="_blank" rel="noopener">Legacy portal ↗</a><br>Fallback · Portal 2 is your main workspace<br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
+  <nav class="workflow-nav" aria-label="Main navigation" data-menu-open="${NAV_MENU_OPEN}"><div class="nav-head"><div class="brand">RANK<span>WISE</span></div><button class="btn nav-menu-toggle" data-nav-toggle aria-expanded="${NAV_MENU_OPEN}" aria-controls="nav-routes">${esc(NAV_PRIMARY.find(([v])=>v===_navPrimary(VIEW))?.[1]||"Review")} · Menu</button></div>
+    <div class="nav-routes" id="nav-routes">${_navMarkup(p)}<button class="nav-search" id="nav-search" data-open-palette>Find a section <span>⌘K</span></button></div>
+    <div class="foot"><a href="/portal/" target="_blank" rel="noopener">Legacy portal ↗</a><br>${esc(srcNote)}${DEV?"":`<br><a href="#" data-logout>sign out</a>`}</div></nav>
   <main>
     <div class="mast">
       <div data-ctos-pulse data-state="${escAttr(ctos.state)}" style="height:100%;display:flex;align-items:center;gap:10px;padding:0 18px;max-width:calc(100% - 260px)">
@@ -6071,14 +6196,18 @@ function render(p, updatedAt, srcNote){
       </div>
       <div class="hud">
         <button class="pill" data-refresh title="refresh portal data">refresh <b>${esc(ago(updatedAt))}</b> ⟳</button>
-        <button class="pill" data-goto="ctos">Open ctOS</button>
+        <button class="pill" data-goto="ctos">System status</button>
       </div>
     </div>
     ${actionFeedbackMarkup()}
-    <div class="brief${VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}${['content','analytics'].includes(VIEW)?renderManagedSocial(p.social_reporting):''}</div>
+    <div class="brief${VIEW==="review"||VIEW==="content_review"?" brief-review":VIEW==="ctos"?" brief-atlas":VIEW==="business"?" brief-money":""}">${body}${['content','analytics'].includes(VIEW)?renderManagedSocial(p.social_reporting):''}</div>
     ${_paletteMarkup()}
   </main>`;
-  document.querySelectorAll("nav button[data-v]").forEach(a=>{a.onclick=async()=>{const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";if(a.dataset.v!=="decisions")DEC_SELECTED=null;VIEW=a.dataset.v;
+  const navigate=async route=>{
+    if(!NAVS.some(([v])=>v===route)&&route!=="content_review")return;
+    const epoch=PORTAL_EPOCH,seq=PORTAL_READ_SEQ,fromToday=VIEW==="command";
+    if(route!=="decisions")DEC_SELECTED=null;
+    VIEW=route;NAV_MENU_OPEN=false;
     if(VIEW==="command")await Promise.all([loadReviewData(true),loadDecisions()]);
     if(VIEW==="review")await loadReviewData(fromToday);
     if(VIEW==="decisions"&&(fromToday||!DECS))await loadDecisions();
@@ -6087,7 +6216,11 @@ function render(p, updatedAt, srcNote){
     if(_portalReadCurrent(epoch)){
       if(seq===PORTAL_READ_SEQ||!LAST.p)render(p,updatedAt,srcNote);
       else render(LAST.p,LAST.updatedAt,LAST.srcNote);
-    }};});
+    }
+  };
+  document.querySelectorAll("nav button[data-v],nav button[data-nav-route]").forEach(a=>{a.onclick=()=>navigate(a.dataset.v||a.dataset.navRoute);});
+  document.querySelector("[data-nav-toggle]")?.addEventListener("click",()=>{NAV_MENU_OPEN=!NAV_MENU_OPEN;const nav=document.querySelector(".workflow-nav");nav.dataset.menuOpen=String(NAV_MENU_OPEN);document.querySelector("[data-nav-toggle]").setAttribute("aria-expanded",String(NAV_MENU_OPEN));});
+  document.querySelector("[data-open-palette]")?.addEventListener("click",()=>{MODAL_OPENER="#nav-search";CMDK_OPEN=true;SHORTCUTS_OPEN=false;render(p,updatedAt,srcNote);});
   _reviewRestoreMedia(mediaSnapshot);
   _reviewRestoreDrafts();
   if(VIEW==="review"||VIEW==="content_review"||VIEW==="decisions")hydrateMedia();
@@ -6112,18 +6245,11 @@ function render(p, updatedAt, srcNote){
   }
   if(VIEW==="conversations")wireConversations(p,updatedAt,srcNote);
   _wirePalette();
-  document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>{if(el.dataset.goto!=="decisions")DEC_SELECTED=null;VIEW=el.dataset.goto;render(p,updatedAt,srcNote);};});
+  document.querySelectorAll("[data-goto]").forEach(el=>{el.onclick=()=>navigate(el.dataset.goto);});
   const lo=document.querySelector("[data-logout]");
   if(lo)lo.onclick=e=>{e.preventDefault();portalLogout();};
   const rf=document.querySelector("[data-refresh]");
   if(rf)rf.onclick=()=>loadAndRender("manual");
-  document.querySelectorAll("button[data-goto]").forEach(b=>{
-    if(b.closest('[data-today-approvals]')||b.closest('[data-war-room-command]')||b.closest('.wr-command-list')){
-      b.onclick=()=>{if(b.dataset.goto!=="decisions")DEC_SELECTED=null;document.querySelector(`nav button[data-v="${CSS.escape(b.dataset.goto)}"]`)?.click();};
-      return;
-    }
-    b.onclick=()=>{if(b.dataset.goto!=="decisions")DEC_SELECTED=null;VIEW=b.dataset.goto;render(p,updatedAt,srcNote);};
-  });
   document.querySelectorAll("button[data-i]").forEach(b=>{
     b.onclick=async()=>{
       const reg=ACTS_REG[+b.dataset.i];
@@ -6479,7 +6605,7 @@ function _resetPortalState(){
   ROUTER_DECISION_DRAFTS.clear();++ROUTER_DECISION_GENERATION;
   resetWarRoom();
   ACTS_DONE.clear();ACTS_INFLIGHT.clear();TIX_IDX=0;TIX_SKIPPED.clear();TIX_RESOLVED.clear();TIX_RECEIPT=null;
-  CRI_SEL=null;CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();CRI_VARIANT_SELECTION.clear();WORK=undefined;WORK_SELECTED=null;WORK_DISCLOSURES.clear();TODAY_DISCLOSURES.clear();WORK_FOCUS_DETAIL=false;VIEW="command";
+  CRI_SEL=null;REVIEW_LAYOUT="desk";NAV_MENU_OPEN=false;REVIEW_DISCLOSURES.clear();CRI_FILTER="waiting";CRI_CHANNEL="all";CRI_SORT="created-newest";REVIEW_HANDLED.clear();CRI_VARIANT_SELECTION.clear();WORK=undefined;WORK_SELECTED=null;WORK_DISCLOSURES.clear();TODAY_DISCLOSURES.clear();WORK_FOCUS_DETAIL=false;VIEW="review";
 }
 function renderLogin(msg){
   _resetPortalState();
@@ -6518,4 +6644,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: 5b16d4621083 -->
+<!-- rankwise-portal2-version: e903cc4ea1f1 -->
