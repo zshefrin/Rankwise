@@ -6388,6 +6388,8 @@ function render(p, updatedAt, srcNote){
     if(_portalReadCurrent(epoch)){
       if(seq===PORTAL_READ_SEQ||!LAST.p)render(p,updatedAt,srcNote);
       else render(LAST.p,LAST.updatedAt,LAST.srcNote);
+      // A new section starts at its heading; background refreshes keep position.
+      window.scrollTo(0,0);
     }
   };
   document.querySelectorAll("nav button[data-v],nav button[data-nav-route]").forEach(a=>{a.onclick=()=>navigate(a.dataset.v||a.dataset.navRoute);});
@@ -6820,4 +6822,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: b1c44416fe30 -->
+<!-- rankwise-portal2-version: 8f2cf48c8828 -->
