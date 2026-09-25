@@ -5557,7 +5557,7 @@ function viewFinance(p){
   const collectionNote=collection.available!==true?"Collection status unavailable":[
     fresh?"Latest collection status":"Collection status stale or clock inconsistent",
     collection.collection_ok===true?"configured-source scan completed":"collection incomplete or failed",
-    collection.all_sources_configured===true?"both sources configured":"personal mailbox connection incomplete",
+    collection.all_sources_configured===true?"both mailboxes connected directly":"forwarded personal receipts may be included; forwarding coverage unverified",
     collection.mode==="local_review_first"?"review-first intake":collection.mode==="receipts_only"?"receipt-only scan — not full scheduled coverage":"usage-only scan — no invoice collection"
   ].join(" · ");
   return `<section data-finance>
@@ -6436,4 +6436,4 @@ boot();
 </script>
 </body></html>
 
-<!-- rankwise-portal2-version: ed9d171fd01e -->
+<!-- rankwise-portal2-version: 5804bb3ff68e -->
