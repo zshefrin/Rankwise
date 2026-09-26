@@ -8,21 +8,26 @@ metaDescription: 33.3% of Metro Vancouver roofing searches have a beatable #1. S
 h1: "Roofing company marketing in Metro Vancouver: the most beatable map pack in the region"
 numbersUsed: ["33.3% of swept roofer keywords have a #1 with under 30 reviews, 67/201 (asOf 2026-07-09)", "metro n=157 businesses Google surfaces (asOf 2026-07-09)", "metro medianReviews=44 (asOf 2026-07-09)", "metro topReviews=485 (asOf 2026-07-09)", "metro avgRating=4.84 (asOf 2026-07-09)", "metro pctWithWebsite=96% (asOf 2026-07-09)", "Pitt Meadows medianReviews=37, n=16 (asOf 2026-07-09)"]
 internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/", "/blog/hvac-marketing-cost/"]
+labLead: "A business posting fewer than 20 reviews appears in only 21% of the map results Google actually shows searchers."
+labLeadCollected: 2026-07-09
+labLeadPublished: 2026-07-09
+labLeadScope: 216 roofer searches across 18 Metro Vancouver cities, 586 appearances with review data.
+labLeadUrl: /lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
 
 # Roofing company marketing in Metro Vancouver: the most beatable map pack in the region
 
-Yes, and the timing argument is unusually strong right now. A Metro Vancouver roofing company can expect to spend $450–$1,250/month on real local-search marketing, and the map pack it's competing in is the most winnable of any trade Rankwise tracks in the region. That combination of low cost of entry and a weak incumbent field doesn't hold in every category, and it won't hold indefinitely in this one either.
+Yes, and the numbers in this category are unusually favourable. A Metro Vancouver roofing company can expect to spend $450–$1,250/month on real local-search marketing, and the map pack it's competing in is the most winnable of any unregulated trade Rankwise tracks in the region (as of 2026-07-09; the numbers are below). That combination of low cost of entry and a weak incumbent field doesn't hold in every category.
 
 ## The roofer map pack is the most beatable field Rankwise tracks
 
-Across every unregulated local-service category Rankwise measures, roofing has the highest share of searches where the #1 result is genuinely thin. 33.3% of swept roofer keywords in Metro Vancouver currently show a top map-pack result with fewer than 30 reviews, meaning a third of the field is holding its position on a review count a focused three-to-six-month push can realistically overtake. No other trade in the current tracking comes close: plumbing and landscaping sit in the mid-20s, and HVAC, the category Rankwise has the deepest published proof in, sits at just 4.2%, the hardest field of the six. Roofing is the opposite case, a genuinely open door.
+Across every unregulated local-service category Rankwise measures, roofing has the highest share of searches where the #1 result is genuinely thin. 33.3% of swept roofer keywords in Metro Vancouver (as of 2026-07-09) show a top map-pack result with fewer than 30 reviews, meaning a third of the field is holding its position on a review count a focused three-to-six-month push can realistically overtake. No other trade in the current tracking comes close: plumbing and landscaping sit in the mid-20s, and HVAC, the category Rankwise has the deepest published proof in, sits at just 4.2%, the hardest field of the six. Roofing is the opposite case, a genuinely open door.
 
 The underlying numbers explain why. Across the 157 roofing businesses Google surfaces regionally (as of 2026-07-09), the median business has just 44 reviews and the highest count tracked anywhere is 485, nowhere near the 12,000-review outliers that show up in categories like plumbing and HVAC. In Pitt Meadows specifically, the median is 37 reviews across 16 tracked businesses. (The Rankwise Lab roofer study reports a median of 65 because it counts every map appearance across 216 July 2026 searches, so businesses that show up often are counted more than once.) This is a category where a real, sustained review program can move a business into contention within a normal marketing timeline, not a multi-year one.
 
-Worth being direct about the other side of this: a field this thin is also easy for a competitor to notice. A roofing company that waits on this doesn't just miss a window; every review a rival earns while a profile sits idle narrows the same 33.3% opening this page is describing. Openness in a map pack isn't a permanent condition. It's a snapshot of who's shown up consistently and who hasn't yet.
+Worth being direct about the other side of this: a field this thin is also easy for a competitor to notice. Openness in a map pack isn't a permanent condition. It's a snapshot of who's shown up consistently and who hasn't yet.
 
 ## Why roofing marketing runs on photos and storms, not phone volume
 
@@ -36,7 +41,7 @@ Insurance-claim work deserves its own mention, because it's a category-specific 
 
 ## What roofing marketing costs in BC
 
-Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, with billing paused if the milestone is missed.
+Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, with billing paused if the milestone is missed. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 A cheaper option, a freelancer posting occasionally to a GBP profile, won't move a business through a field this thin fast enough to matter, because there's no rank tracking proving the work is working. A pricier general agency bundling in a full website rebuild or paid search campaign is selling a broader (and more expensive) scope than what a roofing company needs to win a map pack that's already this open on its own. That's a review-and-visibility fight, not a rebuild. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/hvac-marketing-cost/); the same service-by-service logic applies to roofing.
 

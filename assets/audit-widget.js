@@ -41,7 +41,7 @@
   var wrap = el("div", "aw");
   var label = el("div", "aw-label");
   label.appendChild(document.createTextNode("Instant profile check · "));
-  label.appendChild(el("span", "aw-free", "free — no email, 20 seconds"));
+  label.appendChild(el("span", "aw-free", "free — no email needed"));
   var form = el("form", "aw-form");
   var input = el("input", "aw-input");
   input.type = "text";

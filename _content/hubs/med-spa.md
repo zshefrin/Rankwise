@@ -14,7 +14,7 @@ draftedBy: hub-drafts-c
 
 # Med spa marketing in Metro Vancouver
 
-Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Budget $750-$1,250/month for a program that treats that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer.
+Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Budget $750-$1,250/month for a program that treats that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## Why med spa marketing doesn't look like a trade's
 
@@ -74,7 +74,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, month-to-month. Starter
 Yes. The applicable rulebook shifts, and we triage every med spa client by who performs the treatment before writing a word of copy.
 
 **Do you guarantee a ranking result?**
-We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and billing pauses if we miss it, a guarantee about our work, not a public claim your practice makes.
+We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and if we miss it, billing pauses until we hit it, a guarantee about our work, not a public claim your practice makes.
 
 **What if another med spa in my city already works with Rankwise?**
 One practice per city, per competitive category. We'll tell you before you sign if that spot's already held.

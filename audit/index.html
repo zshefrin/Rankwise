@@ -379,6 +379,12 @@ footer{padding:40px 24px 100px;background:var(--forest);color:var(--on-forest)}
 html.js .reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 html.js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+@media(max-width:640px){
+  /* 44px tap targets on phones */
+  .cal-skel-link{display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:rgba(198,138,58,.38);text-decoration-thickness:2px;text-underline-offset:4px}
+  .footer-links{row-gap:0}
+  .footer-links a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+}
 </style>
 <meta name="theme-color" content="#0F1815">
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">
@@ -411,10 +417,10 @@ html.js .reveal.in{opacity:1;transform:none}
   <div class="hero-inner">
     <p class="hero-eyebrow">Free 15-minute rank check · Lower Mainland, BC</p>
     <h1 id="auditH1">See where you show up on Google — and where you don't.</h1>
-    <p class="hero-copy" id="auditSub">Book a 15-minute call with me, Zack, the operator behind Rankwise. I'll show how your business appears in local search today, who's showing up ahead of you in your city, and the first moves I'd make to fix it.</p>
+    <p class="hero-copy" id="auditSub">Book a 15-minute call with me, Zack, the operator behind Rankwise. I'll show how your business appears in local search today, who shows up for your searches in your city, and the first moves I'd make.</p>
     <div class="hero-actions">
       <a href="#book" class="btn-primary btn-amber" data-cta-location="hero-primary">Book my free rank check →</a>
-      <span class="hero-closer">Foundation or Growth: miss the target, billing pauses.</span>
+      <span class="hero-closer">Foundation or Growth: miss the written 90-day target, billing pauses until we hit it.</span>
     </div>
     <p class="hero-note" id="auditNote">One business per city, per category · Lower Mainland, BC only</p>
   </div>
@@ -454,7 +460,7 @@ html.js .reveal.in{opacity:1;transform:none}
     <div class="guarantee-head reveal in">
       <div class="section-label" style="justify-content:center">02 · The guarantee</div>
       <h2 class="guarantee-headline">Foundation or Growth: miss the target, <span class="amber-hl">billing pauses.</span></h2>
-      <p class="section-sub" style="margin:0 auto">Before month one on Foundation and Growth plans, we agree in writing on your starting Map Pack position and a 90-day target. No fine print, no moving goalposts.</p>
+      <p class="section-sub" style="margin:0 auto">Before month one on Foundation and Growth plans, we agree in writing on your starting Map Pack position and a 90-day target. No fine print, no moving goalposts. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.</p>
     </div>
     <div class="guarantee-layout">
       <div class="guarantee-block reveal in">
@@ -546,7 +552,7 @@ html.js .reveal.in{opacity:1;transform:none}
           <span class="rate-kicker">THE RATE, STATED PLAINLY</span>
           <p class="rate-line"><strong>Three set rates: $450, $750 or $1,250/mo</strong>, month to month. Fixed plans, not negotiation.</p>
           <p class="rate-value">Starter at $450 gets your profile fully optimized, a review system and a rank snapshot. Foundation at $750 runs the complete Maps engine in one city. Growth at $1,250 adds analytics, content and room to expand.</p>
-          <p class="rate-value">One new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself.</p>
+          <p class="rate-value">If better visibility brings you one extra customer a month who is worth more to you than the fee, it covers itself.</p>
         </div>
       </div>
       <div class="close-right">
@@ -582,7 +588,7 @@ html.js .reveal.in{opacity:1;transform:none}
     <div class="faq-list reveal in">
     <details class="faq-entry" name="rw-faq" open>
       <summary><span class="faq-num" aria-hidden="true">A&middot;01</span><span class="faq-question">How much does it cost?</span><span class="faq-x" aria-hidden="true">+</span></summary>
-      <div class="faq-answer">Rankwise has three set rates: Starter at $450 per month, Foundation at $750, and Growth at $1,250 — month-to-month, no long contracts, no negotiation. Starter gets your Google Business Profile fully optimized, plus a review system and a rank snapshot. Foundation is the complete Maps engine for one city. Growth adds analytics, content, and room to expand across 2 to 3 cities. For scale: across these categories, one new client, over the years they stay, is typically worth well over $1,000. If better visibility brings you one more a month, the fee covers itself. Book the free rank check and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call.</div>
+      <div class="faq-answer">Rankwise has three set rates: Starter at $450 per month, Foundation at $750, and Growth at $1,250 — month-to-month, no long contracts, no negotiation. Starter gets your Google Business Profile fully optimized, plus a review system and a rank snapshot. Foundation is the complete Maps engine for one city. Growth adds analytics, content, and room to expand across 2 to 3 cities. For scale: if better visibility brings you one extra customer a month who is worth more to you than the fee, it covers itself. Book the free rank check and we will show you the opportunity in your specific market and give you the exact break-even for your average ticket on the call.</div>
     </details>
     <details class="faq-entry" name="rw-faq">
       <summary><span class="faq-num" aria-hidden="true">A&middot;02</span><span class="faq-question">What if it does not work?</span><span class="faq-x" aria-hidden="true">+</span></summary>
@@ -713,15 +719,15 @@ document.addEventListener('click', function(event){
 
   if (t && c) {
     h1.textContent = 'See where your ' + t + ' business shows up on Google in ' + c + ' — and where you don’t.';
-    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search in ' + c + ' today, who’s showing up ahead of you, and the first moves I’d make to fix it.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search in ' + c + ' today, who shows up for your searches there, and the first moves I’d make.';
     note.textContent = 'One ' + t + ' per city, per category · ' + c + ', Lower Mainland BC';
   } else if (t) {
     h1.textContent = 'See where your ' + t + ' business shows up on Google — and where you don’t.';
-    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search today, who’s showing up ahead of you in your city, and the first moves I’d make to fix it.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your ' + t + ' business appears in local search today, who shows up for your searches in your city, and the first moves I’d make.';
     note.textContent = 'One ' + t + ' per city, per category · Lower Mainland, BC only';
   } else {
     h1.textContent = 'See where you show up on Google in ' + c + ' — and where you don’t.';
-    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your business appears in local search in ' + c + ' today, who’s showing up ahead of you, and the first moves I’d make to fix it.';
+    sub.textContent = 'Book a 15-minute call with me, Zack, the operator behind Rankwise. I’ll show how your business appears in local search in ' + c + ' today, who shows up for your searches there, and the first moves I’d make.';
     note.textContent = 'One business per city, per category · ' + c + ', Lower Mainland BC';
   }
 })();
