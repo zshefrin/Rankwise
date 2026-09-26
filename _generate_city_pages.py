@@ -21,11 +21,11 @@ CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each have distinct search demand for furnace repair and heat pump installation.",
             "<strong>Google Business Profile activity</strong> — weekly posts with real job photos, responses to every review, and an accurate primary category tell Google your business is active and relevant.",
-            "<strong>Review velocity</strong> — Vancouver contractors holding top-3 Map Pack positions carry a median of 275 reviews; contractors below 50 reviews are rarely competitive for high-intent queries.",
+            "<strong>Review velocity</strong> — the median Vancouver HVAC business Google surfaces has 82 reviews (22 businesses tracked, as of 2026-07-27), so steady new reviews matter more than a one-time push.",
             "<strong>City-specific landing pages</strong> — one page per service area lets Google match your website to neighbourhood-level searches for furnace repair, AC installation, and heat pump service.",
         ],
         "hero_copy": "Your crew does great work. The opportunity is getting the dispatch line busier. We build the local search engine around your company so Vancouver homeowners find you first, trust you faster, and call before they call someone else.",
-        "problem_stat": "In Vancouver, the median contractor holding a top-3 Map Pack position has 275 reviews — most new entrants have fewer than 30.",
+        "problem_stat": "In Vancouver, the median HVAC business Google surfaces has 82 reviews (22 businesses tracked, as of 2026-07-27).",
         "services_copy": "We tighten your Google Business Profile and local SEO structure so your company shows up across Vancouver — wherever high-intent homeowners are searching for furnace repair, AC installation, or heat pump service.",
         "cta_h2": "See your Vancouver Map Pack standing in 15 minutes.",
         "cta_sub": "We pull your live Vancouver Map Pack data before the call so you can see exactly which calls are going to competitors — and what it would take to change that.",
@@ -159,7 +159,7 @@ CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Clearbrook, Clayburn, and West Abbotsford each have distinct residential search demand for furnace repair and heat pump installation, driven by a mix of older housing stock and active new development.",
             "<strong>Google Business Profile activity</strong> — regular posts with real job photos and prompt review responses keep your listing visible and credible to Abbotsford homeowners who search before they call.",
-            "<strong>Review velocity</strong> — Abbotsford HVAC contractors with fewer than 25 reviews rarely appear in competitive Map Pack results for high-intent furnace repair and heating contractor searches.",
+            "<strong>Review velocity</strong> — across Metro Vancouver, the median HVAC business Google surfaces has 117 reviews (193 businesses tracked, as of 2026-07-27); a steady review cadence is how an Abbotsford contractor closes that gap.",
             "<strong>City-specific landing pages</strong> — an Abbotsford-specific page lets Google match your business to neighbourhood-level searches for furnace repair, heat pump service, and HVAC installation across Clearbrook and West Abbotsford.",
         ],
         "hero_copy": "Abbotsford homeowners search for HVAC help year-round — furnace service in winter, heat pump and AC work in summer. We make sure your company shows up first when they search on Google Maps, so the call comes to you, not a competitor.",
@@ -436,7 +436,7 @@ PLUMBING_CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Kitsilano, Mount Pleasant, Kerrisdale, and Marpole each generate high search demand for drain cleaning and water heater replacement, driven by Vancouver's median housing build year of 1975 and an ageing cast-iron drain stock.",
             "<strong>Google Business Profile activity</strong> — weekly posts with real job photos of water heater swaps and drain work, responses to every review, and an accurate primary category tell Google your business is active and relevant.",
-            "<strong>Review velocity</strong> — Vancouver plumbing contractors holding top-3 Map Pack positions consistently carry strong review profiles; contractors with fewer than 30 reviews rarely appear for high-intent drain and water heater queries.",
+            "<strong>Review velocity</strong> — the median Vancouver plumbing business Google surfaces has 148 reviews (16 businesses tracked, as of 2026-07-20), so a consistent review cadence matters.",
             "<strong>City-specific landing pages</strong> — neighbourhood-level pages let Google match your website to searches for drain cleaning, water heater replacement, and sewer line repair across Vancouver's distinct service areas.",
         ],
         "hero_copy": "Vancouver's housing stock — most of it built before 1980 — means cast-iron drains failing and water heaters hitting end-of-life are a consistent call driver all year. We build the local search presence that puts your plumbing company in front of those homeowners before they dial a competitor.",
@@ -460,7 +460,7 @@ PLUMBING_CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones, with a mix of pre-1980 condos and townhomes driving consistent drain cleaning and water heater call volume year-round.",
             "<strong>Google Business Profile activity</strong> — regular posts featuring local water heater installations and drain jobs, paired with prompt review responses, signal an active and trustworthy business to both Google and homeowners.",
-            "<strong>Review velocity</strong> — Burnaby plumbing contractors with fewer than 25 reviews rarely appear in competitive Map Pack results for high-intent drain and water heater replacement queries.",
+            "<strong>Review velocity</strong> — across Metro Vancouver, the median plumbing business Google surfaces has 75 reviews (206 businesses tracked, as of 2026-07-20); a steady review cadence is how a Burnaby plumber closes that gap.",
             "<strong>City-specific landing pages</strong> — Burnaby-specific pages let Google match your business to neighbourhood-level searches for hot water tank replacement, drain cleaning, and emergency plumbing service.",
         ],
         "hero_copy": "Burnaby's pre-1980 condo and townhome stock keeps drain cleaning and water heater replacement calls steady all year. We build the local search presence that puts your plumbing company at the top of those searches — before a competitor picks up the phone.",
