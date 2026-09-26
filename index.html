@@ -1870,7 +1870,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
       <h2>Your customers are already searching.<br>Right now they find someone else.</h2>
     </div>
     <p class="cities-intro">
-      Pick your line of work. This is the local search demand across the areas we cover, every month. Most of it goes to the top three on the map. Today, that is not you. Tap your city to check if it is still open.
+      Pick your line of work. This is the local search demand across the areas we cover, every month. Most of it goes to the top three on the map. Today, that is not you. Tap your city to see its numbers.
     </p>
     <div class="region-pick reveal in">
       <span class="pick-label">Choose your line of work</span>
@@ -1982,11 +1982,11 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
             <div class="cc-card-body">
               <span class="cc-verdict cc-verdict--open">Open</span>
               <div class="cc-title" id="rmOpenTitle"></div>
-              <p class="cc-line">No business holds this city yet. First to claim it locks it.</p>
-              <a class="cc-claim-btn" id="rmClaimBtn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=map-city-check" data-cta-location="map-city-check">Claim this city first</a>
+              <p class="cc-line">We work with one business per city in each category, so the work we do for you never helps a direct competitor.</p>
+              <a class="cc-claim-btn" id="rmClaimBtn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=map-city-check" data-cta-location="map-city-check">Check where you rank</a>
               <span class="cc-sub">Free 15-minute audit &middot; no pitch deck</span>
             </div>
-            <div class="cc-card-foot">One business per city, per category. A claim closes the city.</div>
+            <div class="cc-card-foot">One business per city, per category.</div>
           </div>
           <div class="cc-card" id="rmClaimed" hidden>
             <div class="cc-card-head">Roster check &middot; live read &middot; <span class="rmDate"></span></div>
@@ -2297,12 +2297,12 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
       <div class="cc-card-head">Roster check &middot; live read &middot; <span class="rmDate"></span></div>
       <div class="cc-card-body">
         <span class="cc-verdict cc-verdict--open">Open</span>
-        <div class="cc-title" id="claimTitle">Every city on the roster is still open.</div>
-        <p class="cc-line">One category, one city, one client. The first business to claim its city locks it. No timers, no manufactured scarcity.</p>
-        <a class="cc-claim-btn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=claim-band" data-cta-location="claim-band">Claim your city first</a>
+        <div class="cc-title" id="claimTitle">One business per city, per category.</div>
+        <p class="cc-line">We don't take on two competing businesses in the same city and category. That is a standing policy, not a countdown.</p>
+        <a class="cc-claim-btn" href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=claim-band" data-cta-location="claim-band">Check where you rank</a>
         <span class="cc-sub">Free 15-minute audit &middot; no pitch deck</span>
       </div>
-      <div class="cc-card-foot">One business per city, per category. A claim closes the city.</div>
+      <div class="cc-card-foot">One business per city, per category.</div>
     </div>
   </div>
 </section>
@@ -2786,8 +2786,6 @@ function __rwLoadCal(){
   var openEl=document.getElementById('rmOpen'),claimedEl=document.getElementById('rmClaimed');
   var _d=new Date().toISOString().slice(0,10);
   [].slice.call(document.querySelectorAll('.rmDate')).forEach(function(el){el.textContent=_d;});
-  (function(){var ct=document.getElementById('claimTitle');
-    if(ct&&Object.keys(ROSTER).length>0){ct.textContent='Most cities on the roster are still open.';}})();
   function showVerdict(city,opts){
     opts=opts||{};
     if(!openEl||!claimedEl)return;
@@ -2799,7 +2797,7 @@ function __rwLoadCal(){
     if(opts.band)bandActive=true;
     if(bandActive){
       var ct=document.getElementById('claimTitle');
-      if(ct&&!held){ct.textContent=title+' is still open.';}
+      if(ct&&!held){ct.textContent=title+' \u00b7 one business per city, per category.';}
     }
     if(opts.scroll){
       var rc=document.getElementById('rmCheck');
