@@ -4,10 +4,10 @@ kind: category-hub
 category: Electrician
 slug: /electrician-marketing/
 title: Electrician Marketing in Metro Vancouver, BC | Rankwise
-metaDescription: Metro Vancouver electricians should budget $750–$1,250/mo for local-search marketing. Real map-pack data, cost breakdown, and monthly deliverables.
+metaDescription: Rankwise runs three set tiers for Metro Vancouver electricians: $450, $750 or $1,250/mo. Real map-pack data, cost breakdown, and monthly deliverables.
 h1: Electrician marketing in Metro Vancouver
 numbersUsed: ["electrician metro medianReviews=55 (asOf 2026-07-20)", "electrician metro n=275 businesses Google surfaces (asOf 2026-07-20)", "electrician metro pctWithWebsite=91% (asOf 2026-07-20)", "electrician metro avgRating=4.84 (asOf 2026-07-20)", "electrician Delta medianReviews=34 (asOf 2026-07-20)", "electrician North Vancouver medianReviews=72 (asOf 2026-07-20)", "electrician winnability=16.8% of keywords have a sub-30-review #1, 35/208 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 labLead: "Across 557 tracked appearances where review counts were available, businesses with 50 or more reviews took 319, while those under 20 reviews took only 99, just 18% of the field."
 labLeadCollected: 2026-07-09
 labLeadPublished: 2026-07-09
@@ -19,7 +19,7 @@ draftedBy: hub-drafts-b
 
 # Electrician marketing in Metro Vancouver
 
-Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and it should cost somewhere between $750 and $1,250 a month if it's the kind of work that actually moves a Map Pack position. Below that, you're usually buying a one-time profile optimization rather than an ongoing ranking program, which is what Rankwise's $450 Starter plan is and says it is. Above it, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
+Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and Rankwise runs it on three set tiers: $450 a month gets your Google Business Profile fully optimized, plus a review system and a rank snapshot; $750 runs the complete Map Pack program in one city; $1,250 adds analytics, content and room to expand. Above that, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
 
 ## How electrical searches split into two different jobs
 
@@ -71,3 +71,9 @@ No guaranteed-rankings language exists anywhere Rankwise operates. The guarantee
 It helps, since 91% of the electricians Google currently surfaces have one, but Starter tier doesn't require a rebuild. GBP and reviews move first regardless of site condition.
 
 Curious where your business sits in Metro Vancouver's electrical map pack right now? [Get a free rank check](/audit/) and see the real numbers before spending anything.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The ranking signals behind the review-velocity and job-photo advice above, including review count and velocity as separate levers. The data is HVAC; the signals are the same for an electrician.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — Emergency and planned electrical work land in the same map pack, so the primary and additional categories decide which of those searches a profile can show up for. This post walks through that choice with HVAC examples.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — The diagnostic to run first when an electrical contractor's profile doesn't appear for its own city.

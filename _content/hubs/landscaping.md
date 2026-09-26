@@ -7,7 +7,7 @@ title: Landscaping Company Marketing in Metro Vancouver, BC
 metaDescription: Landscaping marketing in Metro Vancouver costs $450–$1,250/mo with Rankwise. See real map-pack review counts across 8 Lower Mainland cities.
 h1: "Landscaping company marketing in Metro Vancouver: turning seasonal searches into recurring accounts"
 numbersUsed: ["metro n=256 businesses Google surfaces (asOf 2026-07-09)", "metro medianReviews=37 (asOf 2026-07-09)", "metro topReviews=416 (asOf 2026-07-09)", "metro avgRating=4.89 (asOf 2026-07-09)", "metro pctWithWebsite=96% (asOf 2026-07-09)", "Abbotsford medianReviews=44, n=19 (asOf 2026-07-09)", "Chilliwack medianReviews=63, n=16 (asOf 2026-07-09)", "Delta medianReviews=34, n=18 (asOf 2026-07-09)", "Langley medianReviews=51, n=18 (asOf 2026-07-09)", "New Westminster medianReviews=25, n=15 (asOf 2026-07-09)", "Pitt Meadows medianReviews=36, n=18 (asOf 2026-07-09)", "Surrey medianReviews=49, n=17 (asOf 2026-07-09)", "Vancouver medianReviews=48, n=22 (asOf 2026-07-09)", "24.0% of swept landscaper keywords have a #1 with under 30 reviews, 49/204 (asOf 2026-07-09)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-landscaper-map-pack-actually-l/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-landscaper-map-pack-actually-l/", "/blog/hvac-marketing-cost/", "/blog/why-isnt-my-landscaping-business-showing-up-in-the-map-pack/", "/blog/google-business-profile-category-hvac-contractors/"]
 labLead: "Vancouver and Surrey, the two biggest markets by population, are wide open — no single competitor holds more than four appearances out of 25 to 30."
 labLeadCollected: 2026-07-09
 labLeadPublished: 2026-07-10
@@ -29,7 +29,7 @@ The economics behind this are what make landscaping unusual among the trades on 
 
 ## What the landscaper map pack looks like right now
 
-Landscaping is the most fragmented category Rankwise tracks by business count, with 256 businesses surfacing across Metro Vancouver, more than plumbing, roofing, or HVAC. That also means the median incumbent is thinner: just 37 reviews regionally, the lowest median of any trade in this data. Across eight tracked cities the spread runs from New Westminster's 25-review median (15 businesses) up to Chilliwack's 63 (16 businesses), with Delta (34), Pitt Meadows (36), Surrey (49), Vancouver (48), Langley (51), and Abbotsford (44) filling in between. The regional review ceiling tops out at 416, nothing close to the multi-thousand-review outliers that show up in plumbing or HVAC, which means a genuinely new landscaping profile isn't chasing an impossible incumbent anywhere in the region.
+Landscaping is one of the more fragmented categories Rankwise tracks by business count, with 256 businesses surfacing across Metro Vancouver, more than plumbing, roofing, or HVAC. That also means the median incumbent is thinner: just 37 reviews regionally, the lowest median of any trade in this data. Across eight tracked cities the spread runs from New Westminster's 25-review median (15 businesses) up to Chilliwack's 63 (16 businesses), with Delta (34), Pitt Meadows (36), Surrey (49), Vancouver (48), Langley (51), and Abbotsford (44) filling in between. The regional review ceiling tops out at 416, nothing close to the multi-thousand-review outliers that show up in plumbing or HVAC, which means a genuinely new landscaping profile isn't chasing an impossible incumbent anywhere in the region.
 
 24.0% of swept landscaper keywords currently show a #1 map-pack result with fewer than 30 reviews, a real, sizeable share of searches where the top spot is holding on volume a focused push can catch. Combined with a 256-business field, the practical read is that there's room in nearly every city tracked, and the fight is winnable without needing thousands of reviews to get there.
 
@@ -69,6 +69,11 @@ A cheaper route, occasional GBP posting with no review system or rank tracking, 
 **Is there real exclusivity for landscaping clients?** Yes. One landscaping business per city, so a client's local competitor in that city isn't also a Rankwise client.
 
 **Does a landscaping business need a different marketing plan for maintenance versus design-build work?** Not a different plan, but different proof. Maintenance clients respond to consistency and recent activity; design-build prospects respond to finished-project photos and reviews naming the specific work done.
+
+## Read next
+
+- [Why isn't my landscaping business showing up in the map pack?](/blog/why-isnt-my-landscaping-business-showing-up-in-the-map-pack/) — The landscaping diagnostic that goes with this page: the checks to run in order, how many reviews a landscaper actually needs, and which landscaping services Google struggles to answer.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — Why the primary category is the highest-leverage field on a profile, and how to set primary against additional categories. It is written for HVAC, but it is the same decision a landscaper makes about irrigation, hardscaping or snow removal.
 
 ## See the map pack, then book a look at yours
 

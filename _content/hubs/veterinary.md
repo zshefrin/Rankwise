@@ -7,7 +7,7 @@ title: Veterinary Clinic Marketing in Metro Vancouver, BC
 metaDescription: A vet clinic's Google visibility can move, but review-solicitation sits in a grey zone under BC's current rules. What to run instead, and the real cost.
 h1: Veterinary clinic marketing in Metro Vancouver
 numbersUsed: ["veterinarian_metro_n=160 businesses (asOf 2026-07-09)", "veterinarian_metro_medianReviews=238 (asOf 2026-07-09)", "veterinarian_metro_topReviews=1200 (asOf 2026-07-09)", "veterinarian_metro_avgRating=4.5 (asOf 2026-07-09)", "veterinarian_metro_pctWithWebsite=96% (asOf 2026-07-09)", "veterinarian_thin_map_pack_pct=3.1-3.5% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/", "/blog/google-business-profile-category-hvac-contractors/"]
 labLead: "Only 3.5% of #1 Map Pack spots — 7 of 201 — went to a clinic with fewer than 30 reviews, and 11 of 18 cities recorded zero such spots at all."
 labLeadCollected: 2026-07-08 to 2026-07-09
 labLeadPublished: 2026-08-01
@@ -19,7 +19,7 @@ draftedBy: hub-drafts-c
 
 # Veterinary clinic marketing in Metro Vancouver
 
-Yes, Metro Vancouver's veterinary map pack has real room to move. But the review-solicitation rule sits in a genuine grey zone under the current regulator's standard, so the safe program looks different from a landscaper's or a roofer's. Expect $750-$1,250/month for GBP, citation, and content work with a written 90-day map-pack milestone, not a promise about outcomes. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
+Yes, Metro Vancouver's veterinary map pack has real room to move. But the review-solicitation rule sits in a genuine grey zone under the current regulator's standard, so the safe program looks different from a landscaper's or a roofer's. Rankwise runs three set tiers ($450, $750 and $1,250 a month); the $750 and $1,250 tiers cover GBP, citation, and content work with a written 90-day map-pack milestone, not a promise about outcomes. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## How pet owners actually search
 
@@ -77,6 +77,11 @@ Not yet for veterinary. The data currently exists at the Metro Vancouver level o
 
 **What if another clinic in my city already works with Rankwise?**
 One clinic per city, per competitive category. We'll tell you on the call if that spot's already taken.
+
+## Read next
+
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a profile that isn't appearing. Its distance and profile-completeness checks matter most for a clinic trying to show up for open-now searches. The examples are HVAC.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — How primary and additional categories decide which searches a profile can appear for, which is the honest-categories point above for a general practice versus an emergency hospital, worked through with HVAC examples.
 
 ## See where your clinic stands
 

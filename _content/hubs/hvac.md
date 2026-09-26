@@ -4,17 +4,17 @@ kind: category-hub
 category: HVAC
 slug: /hvac-marketing/
 title: HVAC Marketing in Metro Vancouver — Rankwise
-metaDescription: Rankwise's HVAC hub, 17 city pages. HVAC marketing runs $450–$1,250/mo. See why it's the hardest map pack Rankwise tracks and what moves it.
+metaDescription: Rankwise's HVAC hub, 17 city pages. HVAC marketing runs $450–$1,250/mo. See why it's the hardest trade map pack Rankwise tracks and what moves it.
 h1: "HVAC marketing in Metro Vancouver: the category where the proof lives"
 numbersUsed: ["metro n=193 businesses Google surfaces (asOf 2026-07-27)", "metro medianReviews=117 (asOf 2026-07-27)", "metro topReviews=12000 (asOf 2026-07-27)", "metro avgRating=4.92 (asOf 2026-07-27)", "metro pctWithWebsite=97% (asOf 2026-07-27)", "Burnaby medianReviews=175, n=16 (asOf 2026-07-27)", "Coquitlam medianReviews=110, n=15 (asOf 2026-07-27)", "Langley medianReviews=304, n=15 (asOf 2026-07-27)", "Vancouver medianReviews=82, n=22 (asOf 2026-07-27)", "4.2% of swept HVAC keywords have a #1 with under 30 reviews, 9/215 — worst of the six unregulated categories measured (computed 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-like/", "/lab/metro-vancouver-hvac-map-pack-market-study-2026/", "/blog/hvac-marketing-cost/", "/vancouver-hvac-marketing/", "/burnaby-hvac-marketing/", "/surrey-hvac-marketing/", "/richmond-hvac-marketing/", "/coquitlam-hvac-marketing/", "/langley-hvac-marketing/", "/delta-hvac-marketing/", "/new-westminster-hvac-marketing/", "/north-vancouver-hvac-marketing/", "/west-vancouver-hvac-marketing/", "/maple-ridge-hvac-marketing/", "/port-coquitlam-hvac-marketing/", "/port-moody-hvac-marketing/", "/pitt-meadows-hvac-marketing/", "/abbotsford-hvac-marketing/", "/mission-hvac-marketing/", "/white-rock-hvac-marketing/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-hvac-map-pack-actually-look-like/", "/lab/metro-vancouver-hvac-map-pack-market-study-2026/", "/blog/hvac-marketing-cost/", "/vancouver-hvac-marketing/", "/burnaby-hvac-marketing/", "/surrey-hvac-marketing/", "/richmond-hvac-marketing/", "/coquitlam-hvac-marketing/", "/langley-hvac-marketing/", "/delta-hvac-marketing/", "/new-westminster-hvac-marketing/", "/north-vancouver-hvac-marketing/", "/west-vancouver-hvac-marketing/", "/maple-ridge-hvac-marketing/", "/port-coquitlam-hvac-marketing/", "/port-moody-hvac-marketing/", "/pitt-meadows-hvac-marketing/", "/abbotsford-hvac-marketing/", "/mission-hvac-marketing/", "/white-rock-hvac-marketing/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
 
 # HVAC marketing in Metro Vancouver: the category where the proof lives
 
-Yes, and for HVAC specifically, that answer comes with more evidence behind it than for any other trade Rankwise covers: real cost data, 17 city-level pages, and Living Lab studies already published. The honest number is $450–$1,250/month with Rankwise, and the honest context is that HVAC is also the hardest map pack in the region to win a new position in. This hub exists to show both at once.
+Yes, and for HVAC specifically, that answer comes with more evidence behind it than for any other trade Rankwise covers: real cost data, 17 city-level pages, and Living Lab studies already published. The honest number is $450–$1,250/month with Rankwise, and the honest context is that HVAC is also the hardest trade map pack Rankwise tracks to win a new position in. This hub exists to show both at once.
 
 ## Why HVAC gets its own hub, not just a page
 
@@ -22,7 +22,7 @@ Rankwise started as an HVAC-concentrated operation, and the site still reflects 
 
 ## The honest map-pack reality for HVAC
 
-Here's the part that doesn't get softened: HVAC is the hardest local-service category Rankwise measures. Of the six unregulated trades tracked, HVAC has the lowest share of beatable searches. Just 4.2% of swept HVAC keywords currently show a #1 map-pack result with under 30 reviews, against 33.3% for roofing and 24–25% for plumbing and landscaping. The underlying field explains why: across 193 tracked HVAC businesses, the metro median sits at 117 reviews, already the highest median of any trade in this data, and Langley's tracked median runs even higher, at 304 reviews across 15 businesses. Burnaby (175) and Coquitlam (110) aren't far behind. Vancouver, at 82, is the closest to an opening among the four cities with enough tracked data to report. The regional average rating is 4.92, and 97% of tracked businesses already have a website. This is a mature, well-optimized field, not an empty one.
+Here's the part that doesn't get softened: HVAC is the hardest of the six unregulated trades Rankwise measures. Of the six unregulated trades tracked, HVAC has the lowest share of beatable searches. Just 4.2% of swept HVAC keywords currently show a #1 map-pack result with under 30 reviews, against 33.3% for roofing and 24–25% for plumbing and landscaping. The underlying field explains why: across 193 tracked HVAC businesses, the metro median sits at 117 reviews, already the highest median of the six trades in this data (Rankwise tracking, July 2026), and Langley's tracked median runs even higher, at 304 reviews across 15 businesses. Burnaby (175) and Coquitlam (110) aren't far behind. Vancouver, at 82, is the closest to an opening among the four cities with enough tracked data to report. The regional average rating is 4.92, and 97% of tracked businesses already have a website. This is a mature, well-optimized field, not an empty one.
 
 That doesn't mean HVAC marketing doesn't work; it means the win looks different here than in roofing. It's less "outrun a thin field" and more "out-execute a crowded one": tighter category setup, more consistent review velocity than the incumbent, sharper city-specific content, sustained over a longer runway. It's also the category where Rankwise's own published proof is real and specific, which is a genuine advantage nowhere else on this site can currently back up the same way.
 
@@ -61,6 +61,12 @@ Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP 
 **Is there a city-specific HVAC page for my market?** Likely. Rankwise publishes dedicated pages for 17 Metro Vancouver and Fraser Valley cities; check the list above.
 
 **Does a crowded HVAC field mean it costs more to market than other trades?** No. The pricing is the same three tiers as every category Rankwise serves; what changes with a crowded field is the realistic timeline to see movement, not the fee.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The seven signals behind the out-execute-a-crowded-field advice above, worked through on a Metro Vancouver example.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — Which primary and secondary categories the HVAC contractors in the Metro Vancouver map pack actually use, and how to change yours.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — The diagnostic checklist, in order, for an HVAC profile that isn't appearing for its own city.
 
 ## Start with your city page or book an audit
 
