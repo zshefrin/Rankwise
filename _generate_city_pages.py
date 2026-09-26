@@ -1128,7 +1128,7 @@ def build_page(c, cities_list):
     <div class="flinks">
       <a href="/#services">What we do</a>
       <a href="/#how">How it works</a>
-      <a href="/#results">Results</a>
+      <a href="/#results">Timeline</a>
       <a href="/#faq">FAQ</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Rankwise Lab</a>
