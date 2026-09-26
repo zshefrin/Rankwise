@@ -147,7 +147,7 @@ h1{font-family:var(--headline);font-weight:800;font-size:clamp(28px,5vw,40px);li
 .faq-q{font-family:var(--headline);font-weight:800;font-size:16px;line-height:1.35;margin:0 0 7px}
 .faq-a{margin:0!important;color:var(--ink-soft)}
 .hub-lab{margin:18px 0 22px;padding:16px 18px;border-left:4px solid var(--accent-2);border-radius:0 12px 12px 0;background:var(--surface)}
-.hub-lab-label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
+.hub-lab-label{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
 .hub .hub-lab-quote{font-family:var(--headline);font-weight:800;font-size:clamp(17px,2.6vw,20px);line-height:1.4;margin:0 0 10px}
 .hub .hub-lab-src{font-size:13.5px;color:var(--ink-soft);margin:0}
 .hub-cta{margin:38px 0 8px;padding:24px 22px;border-radius:14px;background:#12211C;color:#F3EFE6}
@@ -164,7 +164,9 @@ footer{background:#12211C;color:#B9C4BC;margin-top:48px}
 .flinks{display:flex;flex-wrap:wrap;gap:16px}
 .flinks a{color:#B9C4BC;text-decoration:none;font-size:13.5px}
 .fcopy{font-size:12px;color:#7E8B83;width:100%}
-@media (max-width:640px){.hub{padding:10px 18px 44px}.crumb{padding:16px 18px 0}}
+@media (max-width:640px){.hub{padding:10px 18px 44px}.crumb{padding:16px 18px 0}
+.hub-strip{row-gap:0;align-items:center}.hub-strip a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;border-bottom:0;text-decoration:underline dotted var(--line);text-underline-offset:4px}
+.flinks{row-gap:0}.flinks a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}}
 """
 
 GA4 = ("<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-LRX309H9CH\"></script>\n"

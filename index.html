@@ -623,7 +623,17 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
   .ps-loc .ps-pin{display:block}
   /* city pin is icon-only here: pad the hit area to ~44px without moving the layout */
   .ps-loc{padding:15px 8px;margin:-15px -8px}
+  .ps-main{padding:8px 0;margin:-8px 0}
   .row-held{display:none}
+  /* 44px tap targets on phones */
+  .aw-btn,.cal-skel-link,.blog-mini-all{min-height:44px}
+  .blog-mini-all{align-items:center}
+  .founder-direct{row-gap:0}
+  .founder-direct a{display:inline-block;padding:12px 0;border-bottom:0;text-decoration:underline;text-decoration-color:rgba(198,138,58,.38);text-decoration-thickness:2px;text-underline-offset:4px}
+  section[aria-label="Marketing guides by category"]>div{row-gap:0!important;align-items:center!important}
+  section[aria-label="Marketing guides by category"] a,.footer-links a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+  .footer-links{row-gap:0}
+  .trade-menu [role="option"]{min-height:44px;display:flex;align-items:center}
 }
 
 /* ── SECTION WRAPPER ─────────────────────────────────────────────── */
