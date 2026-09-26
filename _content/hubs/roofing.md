@@ -19,7 +19,7 @@ draftedBy: hub-drafts-a
 
 # Roofing company marketing in Metro Vancouver: the most beatable map pack in the region
 
-Yes, and the numbers in this category are unusually favourable. A Metro Vancouver roofing company can expect to spend $450–$1,250/month on real local-search marketing, and the map pack it's competing in is the most winnable of any trade Rankwise tracks in the region. That combination of low cost of entry and a weak incumbent field doesn't hold in every category.
+Yes, and the numbers in this category are unusually favourable. A Metro Vancouver roofing company can expect to spend $450–$1,250/month on real local-search marketing, and the map pack it's competing in is the most winnable of any unregulated trade Rankwise tracks in the region (as of 2026-07-09; the numbers are below). That combination of low cost of entry and a weak incumbent field doesn't hold in every category.
 
 ## The roofer map pack is the most beatable field Rankwise tracks
 
