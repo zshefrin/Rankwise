@@ -20,7 +20,7 @@ Yes, and the timing argument is unusually strong right now. A Metro Vancouver ro
 
 Across every unregulated local-service category Rankwise measures, roofing has the highest share of searches where the #1 result is genuinely thin. 33.3% of swept roofer keywords in Metro Vancouver currently show a top map-pack result with fewer than 30 reviews, meaning a third of the field is holding its position on a review count a focused three-to-six-month push can realistically overtake. No other trade in the current tracking comes close: plumbing and landscaping sit in the mid-20s, and HVAC, the category Rankwise has the deepest published proof in, sits at just 4.2%, the hardest field of the six. Roofing is the opposite case, a genuinely open door.
 
-The underlying numbers explain why. Across the 157 roofing businesses Google surfaces regionally, the median sits at just 44 reviews and the highest count tracked anywhere is 485, nowhere near the 12,000-review outliers that show up in categories like plumbing and HVAC. In Pitt Meadows specifically, the median is 37 reviews across 16 tracked businesses. This is a category where a real, sustained review program can move a business into contention within a normal marketing timeline, not a multi-year one.
+The underlying numbers explain why. Across the 157 roofing businesses Google surfaces regionally (as of 2026-07-09), the median business has just 44 reviews and the highest count tracked anywhere is 485, nowhere near the 12,000-review outliers that show up in categories like plumbing and HVAC. In Pitt Meadows specifically, the median is 37 reviews across 16 tracked businesses. (The Rankwise Lab roofer study reports a median of 65 because it counts every map appearance across 216 July 2026 searches, so businesses that show up often are counted more than once.) This is a category where a real, sustained review program can move a business into contention within a normal marketing timeline, not a multi-year one.
 
 Worth being direct about the other side of this: a field this thin is also easy for a competitor to notice. A roofing company that waits on this doesn't just miss a window; every review a rival earns while a profile sits idle narrows the same 33.3% opening this page is describing. Openness in a map pack isn't a permanent condition. It's a snapshot of who's shown up consistently and who hasn't yet.
 
@@ -50,7 +50,7 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 
 ## FAQ
 
-**Why is the roofer map pack easier to win than other trades right now?** Median review counts across Metro Vancouver's 157 tracked roofing businesses sit at just 44, and 33.3% of swept keywords have a #1 result under 30 reviews. The field is thin enough that consistent review growth can realistically shift position.
+**Why is the roofer map pack easier to win than other trades right now?** The median review count across Metro Vancouver's 157 tracked roofing businesses is just 44 (as of 2026-07-09), and 33.3% of swept keywords have a #1 result under 30 reviews. The field is thin enough that consistent review growth can realistically shift position.
 
 **Does a roofing company need a big review count to compete?** No. The metro median is 44 and Pitt Meadows' is 37, so outpacing the field doesn't require thousands of reviews, just a steady, sustained cadence.
 

@@ -14,7 +14,7 @@ draftedBy: hub-drafts-b
 
 # Electrician marketing in Metro Vancouver
 
-Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and it should cost somewhere between $750 and $1,250 a month if it's the kind of work that actually moves a Map Pack position. Below that, you're usually paying for a listing cleanup and hoping. Above it, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
+Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and it should cost somewhere between $750 and $1,250 a month if it's the kind of work that actually moves a Map Pack position. Below that, you're usually buying a one-time profile optimization rather than an ongoing ranking program, which is what Rankwise's $450 Starter plan is and says it is. Above it, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
 
 ## How electrical searches split into two different jobs
 

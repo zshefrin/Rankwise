@@ -44,7 +44,7 @@ CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Brentwood, Metrotown, and Lougheed are Burnaby's densest residential zones for furnace repair and HVAC installation searches.",
             "<strong>Google Business Profile activity</strong> — weekly posts with real job photos and consistent review responses signal an active, trustworthy business to Google and to homeowners reading your profile.",
-            "<strong>Review velocity</strong> — Burnaby contractors with fewer than 30 reviews rarely appear in competitive Map Pack results for high-intent furnace repair and heating contractor queries.",
+            "<strong>Review velocity</strong> — the median Burnaby HVAC business Google surfaces has 175 reviews (16 businesses tracked, as of 2026-07-27), so a steady stream of new reviews matters more than a one-time push.",
             "<strong>City-specific landing pages</strong> — a Burnaby-specific page lets Google match your business to neighbourhood-level searches for furnace repair, HVAC installation, and emergency heating service.",
         ],
         "hero_copy": "Burnaby homeowners search for furnace repair and HVAC help on Google every day. The opportunity is making sure they find your company first. We build the local search presence around your business so you get the call before a competitor does.",
@@ -90,7 +90,7 @@ CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Steveston, Brighouse, and Hamilton are Richmond's densest residential zones, with year-round demand for AC repair, heat pump installation, and furnace service.",
             "<strong>Google Business Profile activity</strong> — active GBP with frequent job photos and review responses signals relevance for Richmond homeowners searching for HVAC service.",
-            "<strong>Review velocity</strong> — Richmond's top-3 Map Pack positions are typically held by contractors with 30–60 reviews and a consistent response pattern; below 20 reviews it is difficult to appear for competitive queries.",
+            "<strong>Review velocity</strong> — across Metro Vancouver, the median HVAC business Google surfaces has 117 reviews (193 businesses tracked, as of 2026-07-27); a consistent review and response pattern is how a Richmond contractor closes that gap.",
             "<strong>City-specific landing pages</strong> — Richmond-specific pages target city-level searches for AC repair, heat pump installation, and furnace service from a dense, high-intent residential market.",
         ],
         "hero_copy": "Richmond homeowners search for AC repair, heat pump service, and furnace work year-round. We build the local search presence that puts your company in front of those searches — before a competitor gets the call.",
@@ -136,7 +136,7 @@ CITIES = [
         "aio_items": [
             "<strong>Google Map Pack coverage</strong> across your service area — Walnut Grove, Willoughby, and Brookswood are Langley's fastest-growing residential zones, with strong heat pump installation and furnace replacement demand driven by new-build activity and older housing stock.",
             "<strong>Google Business Profile activity</strong> — weekly posts with real job photos and consistent review responses signal an active, trustworthy business to both Google and Langley homeowners searching for HVAC service.",
-            "<strong>Review velocity</strong> — Langley HVAC contractors holding top-3 Map Pack positions maintain a consistent review cadence; contractors with fewer than 25 reviews rarely appear for high-intent furnace repair and heating contractor queries.",
+            "<strong>Review velocity</strong> — the median Langley HVAC business Google surfaces has 304 reviews (15 businesses tracked, as of 2026-07-27), so a consistent review cadence is what keeps a contractor in contention.",
             "<strong>City-specific landing pages</strong> — a Langley-specific page lets Google match your business to neighbourhood-level searches for furnace repair, heat pump installation, and HVAC service across Walnut Grove and Willoughby.",
         ],
         "hero_copy": "Langley homeowners search for furnace repair and HVAC help on Google every week. The contractors who win those calls aren't the biggest — they're the ones showing up first on Google Maps. We build that visibility around your business so you get the call before a competitor does.",
@@ -858,9 +858,9 @@ def build_page(c, cities_list):
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, with weekly rank tracking), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}}}},
+    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}}}},
     {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
-    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment."}}}},
+    {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"On Foundation and Growth, before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment. Starter carries a narrower written guarantee: your profile optimization is done within 30 days."}}}},
     {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
     {{"@type":"Question","name":"How fast will I see results?","acceptedAnswer":{{"@type":"Answer","text":"Google Business Profile improvements show up within 30 days — more people seeing your listing, more clicks to your profile. Actual ranking improvements for search terms typically take 60–90 days. The full effect compounds over 6+ months."}}}},
     {{"@type":"Question","name":"Do you work with other {tl} contractors in {name}?","acceptedAnswer":{{"@type":"Answer","text":"{c["faq_exclusivity"]}"}}}}
@@ -1087,7 +1087,7 @@ def build_page(c, cities_list):
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-1" onclick="toggleFaq(this)">How much does it cost?<span class="faq-icon" aria-hidden="true">+</span></button>
-      <div class="faq-a" id="faq-a-1" aria-hidden="true">Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, with weekly rank tracking), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-a" id="faq-a-1" aria-hidden="true">Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-2" onclick="toggleFaq(this)">Am I locked into a contract?<span class="faq-icon" aria-hidden="true">+</span></button>
@@ -1095,7 +1095,7 @@ def build_page(c, cities_list):
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-3" onclick="toggleFaq(this)">What if it doesn't work?<span class="faq-icon" aria-hidden="true">+</span></button>
-      <div class="faq-a" id="faq-a-3" aria-hidden="true">Before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment.</div>
+      <div class="faq-a" id="faq-a-3" aria-hidden="true">On Foundation and Growth, before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment. Starter carries a narrower written guarantee: your profile optimization is done within 30 days.</div>
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-4" onclick="toggleFaq(this)">How much of my time does this take?<span class="faq-icon" aria-hidden="true">+</span></button>
