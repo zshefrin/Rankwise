@@ -14,7 +14,7 @@ draftedBy: hub-drafts-c
 
 # Chiropractic clinic marketing in Metro Vancouver
 
-Yes, a chiropractic clinic's Google visibility in Metro Vancouver is genuinely winnable. But since April 2026 the province's regulator bans the exact tactic most local-marketing programs lead with: asking a patient to leave a review. Expect to pay $750-$1,250/month for a program built around your profile, citations, and content instead, with a written 90-day map-pack milestone attached before the first invoice.
+Yes, a chiropractic clinic's Google visibility in Metro Vancouver is genuinely winnable. But since April 2026 the province's regulator bans the exact tactic most local-marketing programs lead with: asking a patient to leave a review. Expect to pay $750-$1,250/month for a program built around your profile, citations, and content instead, with a written 90-day map-pack milestone attached before the first invoice. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What actually decides who shows up first
 
@@ -72,7 +72,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, month-to-month, no cont
 The map pack's review median varies by city; West Vancouver sits at 44, Vancouver at 267. Your 90-day milestone is set against your city's real number, not a metro-wide average.
 
 **Do you guarantee a ranking result?**
-We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and billing pauses if we miss it. That's a guarantee about our work, not a public claim about your clinic's results.
+We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and if we miss it, billing pauses until we hit it. That's a guarantee about our work, not a public claim about your clinic's results.
 
 **What if a competing clinic in my city already works with Rankwise?**
 We hold one clinic per city, per competitive category. If that spot's taken, we'll tell you on the call, before anything's signed.

@@ -8,6 +8,11 @@ metaDescription: Law firm marketing in BC runs inside Law Society of BC advertis
 h1: Law firm marketing in Metro Vancouver
 numbersUsed: ["lawyer metro medianReviews=51 (asOf 2026-07-09)", "lawyer metro n=248 businesses Google surfaces (asOf 2026-07-09)", "lawyer metro pctWithWebsite=97% (asOf 2026-07-09)", "lawyer metro avgRating=4.7 (asOf 2026-07-09)", "lawyer Vancouver medianReviews=125 (asOf 2026-07-09)", "lawyer Chilliwack medianReviews=31 (asOf 2026-07-09)", "lawyer winnability=15.0% of keywords have a sub-30-review #1 (asOf 2026-07-30)"]
 internalLinks: ["/audit/", "/lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/", "/blog/hvac-marketing-cost/"]
+labLead: "15% of the top-ranked results in the lawyer Map Pack — 32 of 213 — belong to a firm with fewer than 30 reviews."
+labLeadCollected: 2026-07-08 to 2026-07-09
+labLeadPublished: 2026-08-01
+labLeadScope: 216 legal-service searches across 18 Metro Vancouver and Fraser Valley cities.
+labLeadUrl: /lab/how-do-lawyers-actually-rank-in-the-metro-vancouver-google-map-pack/
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---
@@ -34,7 +39,7 @@ Google Business Profile completeness and citation consistency do most of the wor
 
 ## What it costs, and what Rankwise won't do
 
-Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (GBP optimization, a compliant review system, and a rank snapshot, email-only), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city or multi-practice-area expansion plus content), month-to-month, no long-term contract. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting Map Pack position and a 90-day milestone; miss it and billing pauses until it's hit. That guarantee is a Rankwise-to-firm term about the ranking work delivered, not a claim about legal outcomes, and it never touches case results. What Rankwise won't do for this category, regardless of tier: solicit reviews framed as case-outcome endorsements, publish an unverifiable "best lawyer" or "specialist" claim without Law Society certification behind it, or promise any ranking result as a public-facing guarantee.
+Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (GBP optimization, a compliant review system, and a rank snapshot, email-only), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city or multi-practice-area expansion plus content), month-to-month, no long-term contract. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting Map Pack position and a 90-day milestone; miss it and billing pauses until it's hit. That guarantee is a Rankwise-to-firm term about the ranking work delivered, not a claim about legal outcomes, and it never touches case results. What Rankwise won't do for this category, regardless of tier: solicit reviews framed as case-outcome endorsements, publish an unverifiable "best lawyer" or "specialist" claim without Law Society certification behind it, or promise any ranking result as a public-facing guarantee. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What a compliant marketing program delivers every month
 

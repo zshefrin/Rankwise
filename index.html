@@ -198,7 +198,15 @@
       "name": "What does a local marketing agency do?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A local marketing agency helps a business get found by nearby customers who are searching right now. Rankwise focuses on one part of that: local search, your Google Business Profile, reviews, and city pages that decide who shows up in the Map Pack. We don't run ads, build websites, or manage social; we win the local-search visibility that turns \"near me\" searches into calls, month to month, with pay tied to a written ranking target."
+        "text": "A local marketing agency helps a business get found by nearby customers who are searching right now. Rankwise focuses on one part of that: local search, your Google Business Profile, reviews, and city pages that decide who shows up in the Map Pack. That is our core. If you also want Google or Meta ads, we can run them alongside it or work with your current setup; we don't build websites or manage social. The goal is the local-search visibility that turns \"near me\" searches into calls, month to month, with pay tied to a written ranking target."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my business has bad reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A few bad reviews are normal, and they do not sink a listing on their own. Here is how Rankwise approaches it. Reply to each one calmly and professionally, stick to the facts, and offer to sort it out directly, because future customers read your reply as closely as the review. Keep asking happy customers for reviews at a steady pace, so one bad week is not most of what people see. If a review breaks Google's rules (spam, someone who was never a customer, a conflict of interest), we flag it through Google's own process; Google makes that call, so we never promise a removal. We never buy reviews, post fake ones, or ask only the customers we expect to be happy, because all of that breaks Google's policies and can put your listing at risk. For regulated professions, review work also follows your regulator's advertising rules."
       }
     }
   ]
@@ -1564,16 +1572,16 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <p class="hero-eyebrow">Rankwise · Local search visibility · Lower Mainland, BC</p>
     <h1>
       More customers from the neighbourhood you serve.
-      <span class="h1-tagline">Claim the top of Google Maps in your city, first.</span>
+      <span class="h1-tagline">Show up higher on Google Maps in your city.</span>
     </h1>
     <p class="hero-copy">
-      We work to win you the winnable top-3 Map Pack spot, the results nearby customers see first, so they call you instead of a competitor. Your Google profile, your reviews, and a page for every area you serve, tracked against a 90-day position target we put in writing on Foundation and Growth plans. Every month, you see the numbers that prove it.
+      We work to win you the winnable top-3 Map Pack spot, the results nearby customers see first, so more of them find you and call. Your Google profile, your reviews, and a page for every area you serve, tracked against a 90-day position target we put in writing on Foundation and Growth plans. Every month, you see the numbers, whether they moved or not.
     </p>
     <div id="audit-widget" data-endpoint="https://mxzkzgbonxrgkwanhnxs.supabase.co/functions/v1/instant-audit" data-turnstile-sitekey="0x4AAAAAADjMBGvdtAUcYW6u"></div>
     <div class="hero-actions">
       <div class="hero-cta-group">
         <a href="/audit/?utm_source=home&amp;utm_medium=cta&amp;utm_content=hero-primary" class="btn-primary btn-amber" data-cta-location="hero-primary">Book my free rank check</a>
-        <span class="hero-closer">Foundation or Growth: miss the target, billing pauses.</span>
+        <span class="hero-closer">Foundation or Growth: miss the written 90-day target, billing pauses until we hit it.</span>
       </div>
       <a href="#cities" class="btn-secondary" data-cta-location="hero-secondary">Explore the local data</a>
     </div>
@@ -1592,13 +1600,13 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <div class="pack-card" id="packCard">
           <span class="visually-hidden">Illustration of a local Map Pack with your business in the third spot, the winnable one. An example, not a client result.</span>
           <div class="pack-search" id="packBar">
-            <button type="button" class="ps-main" id="packSearchBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradeMenu" aria-label="Change your trade. Showing plumber near me.">
+            <button type="button" class="ps-main" id="packSearchBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradeMenu" aria-label="Choose your trade.">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-              <span class="q" id="heroQ">plumber</span>
+              <span class="q" id="heroQ">pick your trade</span>
               <span class="ps-trade" aria-hidden="true">Your trade<svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
             </button>
-            <button type="button" class="ps-loc" id="locBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityMenu" aria-label="Choose your city. Currently showing Burnaby.">
-              <svg class="ps-pin" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="loc" id="heroLoc">Burnaby, BC</span><svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ps-loc" id="locBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="cityMenu" aria-label="Choose your city.">
+              <svg class="ps-pin" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="loc" id="heroLoc">Pick your city</span><svg class="ps-caret" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
             </button>
           </div>
 
@@ -1624,7 +1632,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
               <svg class="row-pin" viewBox="0 0 26 34"><path fill="#C68A3A" d="M13 0C6 0 0 5.6 0 12.6 0 22 13 34 13 34s13-12 13-21.4C26 5.6 20 0 13 0z"/><circle cx="13" cy="12.6" r="4.8" fill="#16352A"/></svg>
               <div class="row-body">
                 <div class="row-name">Your business</div>
-                <div class="row-meta"><span class="rnum">4.9</span><span class="stars">★★★★★</span><span>(142)</span><span>·</span><span id="heroCat">Plumber</span><span>·</span><span class="open">Open</span></div>
+                <div class="row-meta"><span id="heroCat">Your trade</span><span>·</span><span id="heroCity">your city</span></div>
               </div>
             </li>
           </ul>
@@ -1638,7 +1646,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
              clipping never cuts it off; positioned under the search bar by JS -->
         <ul class="trade-menu" id="tradeMenu" role="listbox" aria-label="Choose your trade" tabindex="-1" hidden>
           <li class="tm-head" role="presentation">Choose your trade</li>
-          <li role="option" id="trade-plumber" data-trade="plumber" aria-selected="true">Plumber</li>
+          <li role="option" id="trade-plumber" data-trade="plumber" aria-selected="false">Plumber</li>
           <li role="option" id="trade-electrician" data-trade="electrician" aria-selected="false">Electrician</li>
           <li role="option" id="trade-hvac" data-trade="hvac" aria-selected="false">HVAC</li>
           <li role="option" id="trade-roofer" data-trade="roofer" aria-selected="false">Roofer</li>
@@ -1706,7 +1714,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <div class="region-pick reveal in" style="margin-bottom:32px">
       <span class="pick-label">See it for your line of work</span>
       <div class="region-trades" role="group" aria-label="Choose your line of work to preview the Map Pack">
-        <button type="button" class="trade-btn" data-mptrade="plumber" aria-pressed="true">Plumber</button>
+        <button type="button" class="trade-btn" data-mptrade="plumber" aria-pressed="false">Plumber</button>
         <button type="button" class="trade-btn" data-mptrade="electrician" aria-pressed="false">Electrician</button>
         <button type="button" class="trade-btn" data-mptrade="hvac" aria-pressed="false">HVAC</button>
         <button type="button" class="trade-btn" data-mptrade="roofer" aria-pressed="false">Roofer</button>
@@ -1724,7 +1732,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
       <div class="g-panel reveal in" role="img" aria-label="Illustration of a Google Map Pack result showing three local business listings">
         <div class="g-search">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" stroke="#4285F4" stroke-width="2" stroke-linecap="round"/></svg>
-          <span class="g-q" id="mp-q">plumber near me</span>
+          <span class="g-q" id="mp-q">pick your trade above</span>
           <span class="g-icons" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path fill="#34A853" d="M17 11a5 5 0 01-10 0H5a7 7 0 006 6.9V21h2v-3.1A7 7 0 0019 11h-2z"/></svg></span>
         </div>
         <div class="g-tabs" aria-hidden="true">
@@ -1735,18 +1743,18 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <div class="g-row">
           <span class="g-pin" aria-hidden="true"><svg viewBox="0 0 24 30"><path fill="#EA4335" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z"/></svg><span>1</span></span>
           <div class="g-body">
-            <div class="g-name" id="mp-r1n">Westside Plumbing Co.</div>
-            <div class="g-rate"><span class="num" id="mp-r1g">4.9</span><span class="g-stars">★★★★★</span><span id="mp-r1v">(41)</span></div>
-            <div class="g-meta" id="mp-r1m">Plumber · <span class="g-open">Open</span> · North Vancouver</div>
+            <div class="g-name" id="mp-r1n">Established local business</div>
+            <div class="g-rate"><span class="num" id="mp-r1g">Established listing</span><span class="g-stars" hidden>★★★★★</span><span id="mp-r1v" hidden></span></div>
+            <div class="g-meta" id="mp-r1m">Your trade · <span class="g-open">Open</span> · Nearby</div>
           </div>
           <div class="g-thumb" aria-hidden="true"></div>
         </div>
         <div class="g-row">
           <span class="g-pin" aria-hidden="true"><svg viewBox="0 0 24 30"><path fill="#EA4335" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z"/></svg><span>2</span></span>
           <div class="g-body">
-            <div class="g-name" id="mp-r2n">Metro Drain &amp; Rooter</div>
-            <div class="g-rate"><span class="num" id="mp-r2g">4.8</span><span class="g-stars">★★★★★</span><span id="mp-r2v">(276)</span></div>
-            <div class="g-meta" id="mp-r2m">Plumbing contractor · <span class="g-open">Open</span> · Vancouver</div>
+            <div class="g-name" id="mp-r2n">Another local business</div>
+            <div class="g-rate"><span class="num" id="mp-r2g">Established listing</span><span class="g-stars" hidden>★★★★★</span><span id="mp-r2v" hidden></span></div>
+            <div class="g-meta" id="mp-r2m">Your trade · <span class="g-open">Open</span> · Nearby</div>
           </div>
           <div class="g-thumb" aria-hidden="true"></div>
         </div>
@@ -1837,7 +1845,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <div class="results-grid">
       <article class="result-side reveal in">
         <h3>What we write down together</h3>
-        <p>On Foundation and Growth, both the starting position and the 90-day target are on paper before your first payment. The target never moves.</p>
+        <p>In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it. The target never moves.</p>
         <div class="guarantee-block">
           <div class="guarantee-doc-cap">The milestone document</div>
           <div class="gd-row"><strong>Baseline</strong><span>Where you show up today on 3 to 5 agreed searches in your area</span></div>
@@ -1867,10 +1875,10 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 <section id="cities">
   <div class="container">
     <div class="section-head reveal in">
-      <h2>Your customers are already searching.<br>Right now they find someone else.</h2>
+      <h2>People near you search for your trade every month.<br>Here is how much, city by city.</h2>
     </div>
     <p class="cities-intro">
-      Pick your line of work. This is the local search demand across the areas we cover, every month. Most of it goes to the top three on the map. Today, that is not you. Tap your city to see its numbers.
+      Pick your line of work to see monthly Google search demand across the areas we cover. Most of that attention goes to the top three results on the map. Tap your city to see its numbers; the free rank check shows where your own business appears.
     </p>
     <div class="region-pick reveal in">
       <span class="pick-label">Choose your line of work</span>
@@ -2024,8 +2032,8 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
   <div class="container">
     <div class="section-head reveal in">
       <div class="section-label">The six signals</div>
-      <h2>Six signals Google counts, and most businesses are weak on all six.</h2>
-      <p class="section-sub">Google weighs relevance, proximity, and prominence. These six working signals are where that translates into rank, and where most new entrants are weak.</p>
+      <h2>Six signals Google counts, and where a typical profile starts.</h2>
+      <p class="section-sub">Google weighs relevance, proximity, and prominence. These six working signals are where that translates into rank. The left column is a common starting point, not a read of your business; the free rank check shows yours.</p>
     </div>
     <p class="visually-hidden">A diagnostic scorecard. For each signal: where a typical new entrant sits today, the competitive bar to reach, and what Rankwise does about it. The small bar beside each signal is a qualitative gap indicator, not a measured score.</p>
     <ul class="scorecard-grid reveal in" role="list">
@@ -2040,7 +2048,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>0 to 1 posts per month</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>0 to 1 posts per month</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>4 to 6 posts per month</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Weekly optimized posts</p>
@@ -2056,7 +2064,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>Stalled, no responses</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>Stalled, no responses</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>50+ to be in the running; leaders near 200 in competitive cities</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Velocity strategy + responses</p>
@@ -2072,7 +2080,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>1 generic page</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>1 generic page</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>4 to 6 city pages</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Full Metro Vancouver structure</p>
@@ -2088,7 +2096,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>Inconsistent across directories</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>Inconsistent across directories</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>Clean across 40+ sources</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Citation audit and cleanup</p>
@@ -2104,7 +2112,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>A logo and a few old photos</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>A logo and a few old photos</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>Fresh photos of recent work or your space, monthly</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Photo pipeline: you snap, we post</p>
@@ -2120,7 +2128,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
           <span class="sig-tick"></span>
         </div>
         <dl class="sig-pairs">
-          <div class="sig-pair sig-pair--you"><dt>You today</dt><dd>One category, services blank</dd></div>
+          <div class="sig-pair sig-pair--you"><dt>Typical start</dt><dd>One category, services blank</dd></div>
           <div class="sig-pair sig-pair--bar"><dt>The bar</dt><dd>Right primary category + full services</dd></div>
         </dl>
         <p class="sig-fix"><span class="sig-fix-arrow" aria-hidden="true">&rarr;</span><span class="sig-fix-label">What we do:</span> Full GBP build, re-checked quarterly</p>
@@ -2129,7 +2137,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <p class="signals-note reveal in">The review figures come from Rankwise's Metro Vancouver HVAC tracking; the same Map Pack mechanics decide rank in every local category. Activity, coverage, photo, and completeness bars are practitioner targets, not measured medians. The meter beside each signal is a qualitative gap indicator, not a measured score.</p>
     <p class="signals-note reveal in">Review work is compliance-aware: we earn genuine reviews through a post-visit flow using Google's own tools, never incentivized testimonials, and it follows your College's or regulator's advertising rules.</p>
     <a class="bridge reveal" href="#services">
-      <p class="bridge-q">Weak on all six is the normal starting point. That is exactly why it is fixable.</p>
+      <p class="bridge-q">Most profiles have room to improve on a few of these. Those are the fixable parts.</p>
       <span class="bridge-line" aria-hidden="true"></span>
       <span class="bridge-next">Next: the system that fixes them</span>
     </a>
@@ -2205,16 +2213,16 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
       <p class="section-sub">Twelve public market studies of who actually wins the Map Pack's three slots and why. Behind them, a standing scan of 2,000+ local searches across the 8 categories we have studied, refreshed every quarter.</p>
     </div>
     <div class="lab-strip reveal in">
-      <a href="/lab/metro-vancouver-hvac-map-pack-market-study-2026/" class="lab-strip-item">
-        <strong>What it takes to show up in the Metro Vancouver HVAC Map Pack</strong>
+      <a href="/lab/what-does-the-metro-vancouver-roofer-map-pack-actually-look-/" class="lab-strip-item">
+        <strong>What the Metro Vancouver roofer Map Pack looks like (July 2026)</strong>
         <span class="lab-strip-cta">Read <span class="lab-arrow">→</span></span>
       </a>
-      <a href="/lab/what-do-hvac-consumers-actually-search-for-metro-vancouver/" class="lab-strip-item">
-        <strong>What HVAC customers actually search for</strong>
+      <a href="/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/" class="lab-strip-item">
+        <strong>What the Metro Vancouver plumber Map Pack looks like (July 2026)</strong>
         <span class="lab-strip-cta">Read <span class="lab-arrow">→</span></span>
       </a>
-      <a href="/lab/hvac-marketing-agencies-map-pack-metro-vancouver/" class="lab-strip-item">
-        <strong>Which agencies show up when businesses search for help</strong>
+      <a href="/lab/what-does-the-metro-vancouver-landscaper-map-pack-actually-l/" class="lab-strip-item">
+        <strong>How competitive the landscaper Map Pack is, city by city (July 2026)</strong>
         <span class="lab-strip-cta">Read <span class="lab-arrow">→</span></span>
       </a>
     </div>
@@ -2262,7 +2270,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     <!-- PROOF SLOT: un-hide only when a real, dated client result exists. Do NOT populate with fabricated data. -->
     <div class="proof-slot" hidden style="margin-top:40px;padding:24px 26px;border:1px solid var(--hairline);border-radius:var(--card-radius);background:var(--surface);box-shadow:var(--card-shadow)"></div>
     <a class="bridge reveal" href="#contact">
-      <p class="bridge-q">That is who signs the milestone. The only number still missing is yours.</p>
+      <p class="bridge-q">That is who signs the milestone. Next: the plans and what each one includes.</p>
       <span class="bridge-line" aria-hidden="true"></span>
       <span class="bridge-next">Next: see your standing</span>
     </a>
@@ -2278,11 +2286,12 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <a href="/blog/" class="blog-mini-all">All articles <span class="blog-arrow">→</span></a>
       </div>
       <ul class="blog-mini-list">
-        <li><a href="/blog/how-do-i-get-more-hvac-leads-in-vancouver/">How Do I Get More HVAC Leads in Vancouver?</a></li>
+        <li><a href="/blog/how-do-i-get-more-roofing-leads-in-vancouver/">More Roofing Leads in Vancouver: What the Map Pack Actually Rewards</a></li>
+        <li><a href="/blog/why-isnt-my-landscaping-business-showing-up-in-the-map-pack/">Landscaping Business Not Showing in Google's Map Pack? Here's Why</a></li>
+        <li><a href="/blog/whats-the-difference-between-local-seo-and-regular-seo-for-t/">What's the Difference Between Local SEO and Regular SEO for Trades Businesses?</a></li>
         <li><a href="/blog/why-isnt-my-hvac-business-showing-in-map-pack/">Why Is My HVAC Business Not Showing Up in the Map Pack?</a></li>
-        <li><a href="/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/">Who Should I Hire for HVAC Marketing in Vancouver?</a></li>
       </ul>
-      <p class="blog-mini-note">HVAC examples; the Map Pack mechanics are the same in every local category.</p>
+      <p class="blog-mini-note">Roofing, landscaping, HVAC and general trades posts; each one covers its own category.</p>
     </div>
   </div>
 </section>
@@ -2454,7 +2463,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
         <div class="section-label">Appendix</div>
         <h2>Questions we get a lot.</h2>
       </div>
-      <span class="faq-tag">10 QUESTIONS</span>
+      <span class="faq-tag">11 QUESTIONS</span>
     </div>
     <div class="faq-list reveal in">
     <details class="faq-entry" name="rw-faq" open>
@@ -2495,11 +2504,15 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     </details>
     <details class="faq-entry" name="rw-faq">
       <summary><span class="faq-num" aria-hidden="true">A&middot;10</span><span class="faq-question">What does a local marketing agency do?</span><span class="faq-x" aria-hidden="true">+</span></summary>
-      <div class="faq-answer">A local marketing agency helps a business get found by nearby customers who are searching right now. Rankwise focuses on one part of that: local search, your Google Business Profile, reviews, and city pages that decide who shows up in the Map Pack. We don't run ads, build websites, or manage social; we win the local-search visibility that turns "near me" searches into calls, month to month, with pay tied to a written ranking target.</div>
+      <div class="faq-answer">A local marketing agency helps a business get found by nearby customers who are searching right now. Rankwise focuses on one part of that: local search, your Google Business Profile, reviews, and city pages that decide who shows up in the Map Pack. That is our core. If you also want Google or Meta ads, we can run them alongside it or work with your current setup; we don't build websites or manage social. The goal is the local-search visibility that turns "near me" searches into calls, month to month, with pay tied to a written ranking target.</div>
+    </details>
+    <details class="faq-entry" name="rw-faq">
+      <summary><span class="faq-num" aria-hidden="true">A&middot;11</span><span class="faq-question">What if my business has bad reviews?</span><span class="faq-x" aria-hidden="true">+</span></summary>
+      <div class="faq-answer">A few bad reviews are normal, and they do not sink a listing on their own. Here is how Rankwise approaches it. Reply to each one calmly and professionally, stick to the facts, and offer to sort it out directly, because future customers read your reply as closely as the review. Keep asking happy customers for reviews at a steady pace, so one bad week is not most of what people see. If a review breaks Google's rules (spam, someone who was never a customer, a conflict of interest), we flag it through Google's own process; Google makes that call, so we never promise a removal. We never buy reviews, post fake ones, or ask only the customers we expect to be happy, because all of that breaks Google's policies and can put your listing at risk. For regulated professions, review work also follows your regulator's advertising rules.</div>
     </details>
     </div>
     <a class="bridge reveal" href="#contact">
-      <p class="bridge-q">Still reading? That is usually the sign it is worth fifteen minutes.</p>
+      <p class="bridge-q">Still have questions? A 15-minute call is the quickest way to get them answered.</p>
       <span class="bridge-line" aria-hidden="true"></span>
       <span class="bridge-next">Book the free rank check</span>
     </a>
@@ -3009,8 +3022,8 @@ function __rwLoadCal(){
 
   // shared trade state: the hero broadcasts on choose(), and also listens so
   // a pick in #01 Map Pack or the cities demand map updates the hero card too
+  // no pre-selected trade: the card starts neutral until the visitor picks one
   document.addEventListener('rw:trade',function(e){updateUI(e.detail);});
-  updateUI('plumber');
 })();
 </script>
 
@@ -3054,6 +3067,7 @@ function __rwLoadCal(){
   }
   function setCity(c){
     lab.textContent=c+', BC';
+    var hc=document.getElementById('heroCity'); if(hc)hc.textContent=c;
     btn.setAttribute('aria-label','Choose your city. Currently showing '+c+'.');
     items.forEach(function(li){li.setAttribute('aria-selected',li.getAttribute('data-cityopt')===c?'true':'false');});
   }

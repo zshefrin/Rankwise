@@ -8,6 +8,11 @@ metaDescription: Auto repair map packs in Metro Vancouver are review-heavy and h
 h1: Auto repair shop marketing in Metro Vancouver
 numbersUsed: ["auto repair metro medianReviews=173 (asOf 2026-07-09)", "auto repair metro topReviews=38000 (asOf 2026-07-09)", "auto repair metro n=310 businesses Google surfaces (asOf 2026-07-09)", "auto repair metro pctWithWebsite=65% (asOf 2026-07-09)", "auto repair Pitt Meadows medianReviews=115 (asOf 2026-07-09)", "auto repair Vancouver medianReviews=262 (asOf 2026-07-09)", "auto repair winnability=7.2% of keywords have a sub-30-review #1, 15/208 (asOf 2026-07-30)"]
 internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
+labLead: "Businesses with 50 or more reviews took 541 of 617 tracked Map Pack appearances, while shops under 20 reviews took only 25."
+labLeadCollected: 2026-07-10
+labLeadPublished: 2026-07-10
+labLeadScope: 216 auto repair searches across 18 Metro Vancouver cities.
+labLeadUrl: /lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---
@@ -32,7 +37,7 @@ Google currently surfaces 310 auto repair businesses across the Metro Vancouver 
 
 ## What it costs, and what that money should buy
 
-Rankwise runs three fixed tiers: **Starter at $450/mo** (GBP optimization, a review system, and a rank snapshot, no content), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city plus content), month-to-month, no contract. Given how review-dense this category already is, Foundation or Growth is the realistic starting point for a shop that wants to move a needle inside a year. Starter's email-only, no-posting scope climbs slower here than it would in a thinner category like electrical or roofing. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting position and a 90-day milestone; miss it and billing pauses until it's hit. A cheap "SEO package" promising a fast #1 in this specific category should be treated as a red flag; the incumbents are too well-reviewed for a shortcut to be real.
+Rankwise runs three fixed tiers: **Starter at $450/mo** (GBP optimization, a review system, and a rank snapshot, no content), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city plus content), month-to-month, no contract. Given how review-dense this category already is, Foundation or Growth is the realistic starting point for a shop that wants to move a needle inside a year. Starter's email-only, no-posting scope climbs slower here than it would in a thinner category like electrical or roofing. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting position and a 90-day milestone; miss it and billing pauses until it's hit. A cheap "SEO package" promising a fast #1 in this specific category should be treated as a red flag; the incumbents are too well-reviewed for a shortcut to be real. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What a shop's monthly marketing should actually look like
 

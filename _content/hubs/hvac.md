@@ -36,7 +36,7 @@ The seasonal split cuts two ways for content planning. Summer AC-failure searche
 
 ## What HVAC marketing costs in BC
 
-Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, with billing paused if it's missed. For a fuller breakdown of what different price points typically buy across the BC market, not just Rankwise's own tiers, see the full [HVAC marketing cost guide for British Columbia](/blog/hvac-marketing-cost/).
+Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). Foundation and Growth carry a written guarantee: a starting Map Pack position and a 90-day milestone agreed before month one, with billing paused if it's missed. For a fuller breakdown of what different price points typically buy across the BC market, not just Rankwise's own tiers, see the full [HVAC marketing cost guide for British Columbia](/blog/hvac-marketing-cost/). In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What we track every month for an HVAC client
 

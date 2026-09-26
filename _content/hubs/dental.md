@@ -44,7 +44,7 @@ Many Metro Vancouver dental practices run two or more dentists under one clinic 
 
 ## What it costs to get local-search help in BC
 
-Rankwise runs three fixed tiers, no negotiation: Starter at $450/month (GBP optimization work and a scoped 30-day guarantee — with review work held to what BC's dental advertising rules allow, not the solicitation program a trade gets), Foundation at $750/month, and Growth at $1,250/month CAD. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One dental practice per city, per competitive category, so once you're in, we won't sign a second practice competing directly against you in the same city. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tier structure, same math, because the pricing question deserves a real number instead of a sales call.
+Rankwise runs three fixed tiers, no negotiation: Starter at $450/month (GBP optimization work and a scoped 30-day guarantee — with review work held to what BC's dental advertising rules allow, not the solicitation program a trade gets), Foundation at $750/month, and Growth at $1,250/month CAD. Before month one starts, we agree in writing on your starting map-pack position and a 90-day milestone; miss it and billing pauses until we hit it. One dental practice per city, per competitive category, so once you're in, we won't sign a second practice competing directly against you in the same city. We've [published the same cost breakdown for HVAC contractors](/blog/hvac-marketing-cost/), same tier structure, same math, because the pricing question deserves a real number instead of a sales call. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What a marketing partner should deliver every month
 
@@ -69,7 +69,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, both month-to-month wit
 A redesign is a one-time project. This is a managed, monthly program built around your Google Business Profile, citations, content, and map-pack position, the parts of local search that keep working after the invoice is paid.
 
 **Do you guarantee I'll rank #1?**
-We agree in writing on a starting position and a 90-day milestone before month one begins on Foundation and Growth plans, and billing pauses if we miss it. That's a guarantee about our own work, not a claim your practice makes to patients.
+We agree in writing on a starting position and a 90-day milestone before month one begins on Foundation and Growth plans, and if we miss it, billing pauses until we hit it. That's a guarantee about our own work, not a claim your practice makes to patients.
 
 **What if another dentist in my city already works with Rankwise?**
 We don't sign two practices in the same competitive category in the same city. If a competitor already holds that spot, we'll tell you before you sign anything.

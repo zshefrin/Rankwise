@@ -8,6 +8,11 @@ metaDescription: Metro Vancouver electricians should budget $750–$1,250/mo for
 h1: Electrician marketing in Metro Vancouver
 numbersUsed: ["electrician metro medianReviews=55 (asOf 2026-07-20)", "electrician metro n=275 businesses Google surfaces (asOf 2026-07-20)", "electrician metro pctWithWebsite=91% (asOf 2026-07-20)", "electrician metro avgRating=4.84 (asOf 2026-07-20)", "electrician Delta medianReviews=34 (asOf 2026-07-20)", "electrician North Vancouver medianReviews=72 (asOf 2026-07-20)", "electrician winnability=16.8% of keywords have a sub-30-review #1, 35/208 (asOf 2026-07-30)"]
 internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
+labLead: "Across 557 tracked appearances where review counts were available, businesses with 50 or more reviews took 319, while those under 20 reviews took only 99, just 18% of the field."
+labLeadCollected: 2026-07-09
+labLeadPublished: 2026-07-09
+labLeadScope: 216 electrician searches across 18 Metro Vancouver cities.
+labLeadUrl: /lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/
 createdAt: 2026-08-17
 draftedBy: hub-drafts-b
 ---
@@ -32,7 +37,7 @@ One honest constraint, stated plainly: electrical work in BC runs through a lice
 
 ## What electrician marketing costs in BC
 
-Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (Google Business Profile optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/mo** (the core Map Pack program for one city), and **Growth at $1,250/mo** (city expansion plus ongoing content), month-to-month with no long-term contract. Before month one starts on Foundation and Growth plans, Rankwise agrees in writing with the contractor on the starting Map Pack position and a 90-day milestone; miss that milestone and billing pauses until it's hit. Cheaper options on the market tend to be one-off GBP cleanups with nothing behind them after week one. Pricier options tend to be paid-ads or full-website retainers that an electrician with a functioning site, in a category where 91% of competitors already have one, doesn't need to buy twice.
+Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (Google Business Profile optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/mo** (the core Map Pack program for one city), and **Growth at $1,250/mo** (city expansion plus ongoing content), month-to-month with no long-term contract. Before month one starts on Foundation and Growth plans, Rankwise agrees in writing with the contractor on the starting Map Pack position and a 90-day milestone; miss that milestone and billing pauses until it's hit. Cheaper options on the market tend to be one-off GBP cleanups with nothing behind them after week one. Pricier options tend to be paid-ads or full-website retainers that an electrician with a functioning site, in a category where 91% of competitors already have one, doesn't need to buy twice. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## What a monthly program should actually include
 
