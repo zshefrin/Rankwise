@@ -858,7 +858,7 @@ def build_page(c, cities_list):
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number."}}}},
+    {{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{{"@type":"Answer","text":"Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free rank check and we'll show you the opportunity in your specific market and give you the exact number."}}}},
     {{"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{{"@type":"Answer","text":"No long-term contracts. It's month-to-month — if you want to stop, give us 30 days notice and that's it."}}}},
     {{"@type":"Question","name":"What if it doesn't work?","acceptedAnswer":{{"@type":"Answer","text":"On Foundation and Growth, before month one begins, we document your current Map Pack position for 3–5 agreed search terms in {name} and set a 90-day target position in writing. We track it weekly using the same method we set up on day one. If we miss the agreed milestone, billing pauses until we hit it. No arguing about whether it counts — the starting position and the target are both documented before we take your first payment. Starter carries a narrower written guarantee: your profile optimization is done within 30 days."}}}},
     {{"@type":"Question","name":"How much of my time does this take?","acceptedAnswer":{{"@type":"Answer","text":"About 30 minutes upfront for a quick onboarding call where we get access to your Google listing and learn about your business. After that, we just need you to send us job photos when you finish installs — a quick phone pic works fine. That's it. We handle everything else."}}}},
@@ -886,12 +886,12 @@ def build_page(c, cities_list):
       <h1>Get more booked<br>{tl} jobs in <span class="serif">{c["h1_city"]}</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
-        <div>Free 15-minute audit.<br>No pitch deck.</div>
+        <div>Free 15-minute rank check.<br>No pitch deck.</div>
         <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
       <div class="hero-actions">
-        <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=hero" class="btn-primary">Book my free {tl} audit</a>
+        <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=hero" class="btn-primary">Book my free {tl} rank check</a>
         <a href="/#services" class="btn-secondary">See how it works</a>
       </div>
     </div>
@@ -1043,7 +1043,7 @@ def build_page(c, cities_list):
       </article>
     </div>
     <div class="midpage-cta reveal in" style="text-align:center;margin-top:28px">
-      <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=midpage" class="btn-primary">Book my free {tl} audit</a>
+      <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=midpage" class="btn-primary">Book my free {tl} rank check</a>
     </div>
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">That's the plan in general. The only numbers missing are yours, in {name}.</p>
@@ -1058,7 +1058,7 @@ def build_page(c, cities_list):
 <section class="cta" id="contact">
   <div class="container">
     <div class="section-head reveal in">
-      <div class="label">05 · Your move — free {tl} audit</div>
+      <div class="label">05 · Your move — free {tl} rank check</div>
       <h2>{c["cta_h2"]}</h2>
       <p class="sub">{c["cta_sub"]}</p>
     </div>
@@ -1087,7 +1087,7 @@ def build_page(c, cities_list):
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-1" onclick="toggleFaq(this)">How much does it cost?<span class="faq-icon" aria-hidden="true">+</span></button>
-      <div class="faq-a" id="faq-a-1" aria-hidden="true">Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free audit and we'll show you the opportunity in your specific market and give you the exact number.</div>
+      <div class="faq-a" id="faq-a-1" aria-hidden="true">Rankwise runs three set rates: Starter at $450/month (your profile fully optimized, a review system and a rank snapshot), Foundation at $750/month (the complete Maps program for one city), and Growth at $1,250/month (adds analytics, content and city expansion), month-to-month — no long contracts, no negotiation. Book the free rank check and we'll show you the opportunity in your specific market and give you the exact number.</div>
     </div>
     <div class="faq-item reveal in">
       <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a-2" onclick="toggleFaq(this)">Am I locked into a contract?<span class="faq-icon" aria-hidden="true">+</span></button>
@@ -1112,7 +1112,7 @@ def build_page(c, cities_list):
     <a class="bridge reveal" href="#contact">
       <p class="bridge-q">Still reading? That's usually the sign it's worth fifteen minutes.</p>
       <span class="bridge-line" aria-hidden="true"></span>
-      <span class="bridge-next">Book the free {tl} audit</span>
+      <span class="bridge-next">Book the free {tl} rank check</span>
     </a>
   </div>
 </section>
@@ -1132,14 +1132,14 @@ def build_page(c, cities_list):
       <a href="/blog/">Blog</a>
       <a href="/lab/">Rankwise Lab</a>
       <a href="/hvac-marketing-options-compared/">Compare options</a>
-      <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=footer">Free audit</a>
+      <a href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=footer">Free rank check</a>
       <a href="https://www.linkedin.com/in/zackary-shefrin-8a1a87406/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
     <div class="fcopy">© 2026 Rankwise · {tl} marketing · {name}, BC</div>
   </div>
 </footer>
 
-<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book my free {tl} audit</a>
+<a class="mobile-sticky-cta" href="/audit/?utm_source={utm}&amp;utm_medium=cta&amp;utm_content=mobile-sticky">Book my free {tl} rank check</a>
 
 <script>
 const obs=new IntersectionObserver(e=>{{e.forEach(x=>{{if(x.isIntersecting)x.target.classList.add('in')}});}},{{threshold:.1}});

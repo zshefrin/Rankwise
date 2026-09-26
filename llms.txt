@@ -7,7 +7,7 @@ Rankwise works across local service categories (plumbers, electricians, HVAC, ro
 ## Pages
 
 - [Home](https://rankwise.ca/): what we do, pricing tiers, and the guarantee
-- [Free audit booking](https://rankwise.ca/audit/): book a free 15-minute local search audit
+- [Free rank check booking](https://rankwise.ca/audit/): book a free 15-minute rank check
 - [Audit examples](https://rankwise.ca/audits/): real audits of Lower Mainland businesses, showing the method (not client results)
 - [Rankwise Lab](https://rankwise.ca/lab/): market studies of how local businesses actually rank in the Metro Vancouver Map Pack
 - [Blog](https://rankwise.ca/blog/): answers to common local-marketing questions for service businesses

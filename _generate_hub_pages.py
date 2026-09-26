@@ -181,7 +181,7 @@ NAV = """<header class="rw-nav">
       <li><a href="/about/">About</a></li>
     </ul>
   </nav>
-  <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free audit</a>
+  <a href="/audit/?utm_source=nav&amp;utm_medium=cta&amp;utm_content=global_nav" class="rw-nav__cta">Book free rank check</a>
 </header>"""
 
 FOOTER = """<footer>
@@ -193,7 +193,7 @@ FOOTER = """<footer>
       <a href="/#results">Results</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Lab</a>
-      <a href="/audit/">Free audit</a>
+      <a href="/audit/">Free rank check</a>
     </div>
     <div class="fcopy">© 2026 Rankwise · local-search marketing · Metro Vancouver, BC</div>
   </div>
@@ -253,8 +253,8 @@ def build(fm: dict, body: str) -> str:
 {article}
 <div class="hub-cta">
 <h2>See where your business actually sits</h2>
-<p>The free 15-minute audit shows your current map-pack position against the real numbers on this page — no pitch deck.</p>
-<a class="btn" href="/audit/?utm_source=hub&amp;utm_medium=cta&amp;utm_campaign={slug}">Book your free audit</a>
+<p>The free 15-minute rank check shows your current map-pack position against the real numbers on this page — no pitch deck.</p>
+<a class="btn" href="/audit/?utm_source=hub&amp;utm_medium=cta&amp;utm_campaign={slug}">Book your free rank check</a>
 </div>
 {cross_hub_strip(fm["slug"])}
 </article>

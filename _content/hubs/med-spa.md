@@ -81,4 +81,4 @@ One practice per city, per competitive category. We'll tell you before you sign 
 
 ## See where your practice stands
 
-A free audit shows your med spa's current Metro Vancouver map-pack position, honestly. [Start your free audit](/audit/), or see the same kind of real data in the [Rankwise Lab](/lab/).
+A free rank check shows your med spa's current Metro Vancouver map-pack position, honestly. [Start your free rank check](/audit/), or see the same kind of real data in the [Rankwise Lab](/lab/).

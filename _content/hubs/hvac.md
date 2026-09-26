@@ -64,4 +64,4 @@ Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP 
 
 ## Start with your city page or book an audit
 
-Every HVAC city page on this site is built from the same live tracking data referenced here. [Book a free audit](/audit/) to see exactly where your HVAC business sits in a map pack this competitive.
+Every HVAC city page on this site is built from the same live tracking data referenced here. [Book a free rank check](/audit/) to see exactly where your HVAC business sits in a map pack this competitive.

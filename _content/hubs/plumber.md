@@ -68,4 +68,4 @@ If a plumbing business isn't getting all five, there's no way to tell whether th
 
 ## See the map pack for yourself
 
-Rankwise published a full breakdown of what the Metro Vancouver plumber map pack looks like across 216 tracked searches: the businesses that show up most, and how many reviews it actually takes. [Book a free audit](/audit/) to see where your own plumbing business sits against these numbers.
+Rankwise published a full breakdown of what the Metro Vancouver plumber map pack looks like across 216 tracked searches: the businesses that show up most, and how many reviews it actually takes. [Book a free rank check](/audit/) to see where your own plumbing business sits against these numbers.

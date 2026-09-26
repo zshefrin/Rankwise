@@ -79,4 +79,4 @@ We hold one clinic per city, per competitive category. If that spot's taken, we'
 
 ## See your clinic's real numbers
 
-A free audit checks your clinic's current map-pack position against the real Metro Vancouver data above. [Start your free audit](/audit/), or see the same kind of data behind this page in the [Rankwise Lab](/lab/).
+A free rank check checks your clinic's current map-pack position against the real Metro Vancouver data above. [Start your free rank check](/audit/), or see the same kind of data behind this page in the [Rankwise Lab](/lab/).

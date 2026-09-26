@@ -79,4 +79,4 @@ Metro Vancouver dental data currently covers 13 cities, from Vancouver to Chilli
 
 ## See where your practice actually stands
 
-A free audit shows your practice's current map-pack position against the real numbers above, not a generic pitch. [Start your free audit](/audit/), or browse the real Metro Vancouver data behind pages like this one in the [Rankwise Lab](/lab/).
+A free rank check shows your practice's current map-pack position against the real numbers above, not a generic pitch. [Start your free rank check](/audit/), or browse the real Metro Vancouver data behind pages like this one in the [Rankwise Lab](/lab/).

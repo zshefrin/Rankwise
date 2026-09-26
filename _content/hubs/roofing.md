@@ -66,4 +66,4 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 
 ## See the numbers, then talk to us
 
-Rankwise published a full breakdown of how many reviews it actually takes to show up in the Metro Vancouver roofer map pack. [Book a free audit](/audit/) to see exactly where your roofing business sits against a field this open.
+Rankwise published a full breakdown of how many reviews it actually takes to show up in the Metro Vancouver roofer map pack. [Book a free rank check](/audit/) to see exactly where your roofing business sits against a field this open.

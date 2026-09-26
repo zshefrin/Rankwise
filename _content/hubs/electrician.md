@@ -65,4 +65,4 @@ No guaranteed-rankings language exists anywhere Rankwise operates. The guarantee
 **Is a website required before starting?**
 It helps, since 91% of the electricians Google currently surfaces have one, but Starter tier doesn't require a rebuild. GBP and reviews move first regardless of site condition.
 
-Curious where your business sits in Metro Vancouver's electrical map pack right now? [Get a free audit](/audit/) and see the real numbers before spending anything.
+Curious where your business sits in Metro Vancouver's electrical map pack right now? [Get a free rank check](/audit/) and see the real numbers before spending anything.

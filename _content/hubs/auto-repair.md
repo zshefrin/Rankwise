@@ -65,4 +65,4 @@ Start asking every customer for a review at point of service. With a metro media
 **Does Rankwise guarantee a top ranking?**
 No. The guarantee is a written 90-day milestone set before month one starts; if it's missed, billing pauses until the target is hit.
 
-Want to see exactly where your shop sits against the 310 businesses Google surfaces in this category? [Get a free audit](/audit/) before committing to a plan.
+Want to see exactly where your shop sits against the 310 businesses Google surfaces in this category? [Get a free rank check](/audit/) before committing to a plan.

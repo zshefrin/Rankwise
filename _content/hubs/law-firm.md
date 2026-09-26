@@ -67,4 +67,4 @@ No. That designation is restricted to lawyers certified as specialists by the La
 **Does the 90-day guarantee say anything about legal outcomes?**
 No. It's a written commitment about the Map Pack ranking work delivered, agreed before month one; it never references case results or legal outcomes.
 
-Want to see where your firm sits in the Metro Vancouver map pack today, compliantly reviewed before anything ships? [Get a free audit](/audit/).
+Want to see where your firm sits in the Metro Vancouver map pack today, compliantly reviewed before anything ships? [Get a free rank check](/audit/).

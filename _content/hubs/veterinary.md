@@ -75,4 +75,4 @@ One clinic per city, per competitive category. We'll tell you on the call if tha
 
 ## See where your clinic stands
 
-Rankwise's own Lab study on how veterinary map-pack rankings actually work in Metro Vancouver is public. Read it, then check your clinic's numbers with a free audit. [Read the Lab study](/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/) · [Start your free audit](/audit/).
+Rankwise's own Lab study on how veterinary map-pack rankings actually work in Metro Vancouver is public. Read it, then check your clinic's numbers with a free rank check. [Read the Lab study](/lab/how-do-veterinarians-actually-rank-in-the-metro-vancouver-google-map-pack/) · [Start your free rank check](/audit/).

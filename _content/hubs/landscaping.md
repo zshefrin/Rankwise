@@ -67,4 +67,4 @@ A cheaper route, occasional GBP posting with no review system or rank tracking, 
 
 ## See the map pack, then book a look at yours
 
-Rankwise published a full breakdown of which landscaping businesses show up most across Metro Vancouver's map pack searches. [Book a free audit](/audit/) to see where your landscaping business sits against these numbers today.
+Rankwise published a full breakdown of which landscaping businesses show up most across Metro Vancouver's map pack searches. [Book a free rank check](/audit/) to see where your landscaping business sits against these numbers today.

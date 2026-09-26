@@ -267,7 +267,7 @@
           box.textContent = "";
           box.appendChild(el("p", "aw-email-done",
             "Got it — your full breakdown will be ready at your audit. Grab a time:"));
-          box.appendChild(bookLink("Book your free 15-minute audit", "email-capture"));
+          box.appendChild(bookLink("Book your free 15-minute rank check", "email-capture"));
         })
         .catch(function () {
           bb.disabled = false;
