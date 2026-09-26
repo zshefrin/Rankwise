@@ -139,6 +139,14 @@ def main() -> int:
         if value != live_studies:
             fail(errors, f"index.html: says '{home_count.group(1)} public market studies' but lab/ has {live_studies} live studies")
 
+    # Folded blog pages (_content/folded-pages.json): canonical to the survivor,
+    # no noindex/refresh, out of the sitemap, nothing links to them. Same rules
+    # as the standalone scripts/check_folded_pages.py, which this reuses.
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from check_folded_pages import check as check_folded_pages
+    for message in check_folded_pages():
+        fail(errors, message)
+
     if errors:
         print("Site integrity check failed:")
         for error in errors:

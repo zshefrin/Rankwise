@@ -7,14 +7,14 @@ title: Med Spa Marketing in Metro Vancouver, BC
 metaDescription: Med spa marketing has to clear three rulebooks before it clears Google. What Metro Vancouver's map pack actually looks like, and what it costs to compete.
 h1: Med spa marketing in Metro Vancouver
 numbersUsed: ["med_spa_metro_n=160 businesses (asOf 2026-07-09)", "med_spa_metro_medianReviews=139 (asOf 2026-07-09)", "med_spa_metro_topReviews=1400 (asOf 2026-07-09)", "med_spa_metro_avgRating=4.88 (asOf 2026-07-09)", "med_spa_metro_pctWithWebsite=82% (asOf 2026-07-09)", "med_spa_thin_map_pack_pct=2.0-3.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
 
 # Med spa marketing in Metro Vancouver
 
-Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Budget $750-$1,250/month for a program that treats that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
+Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Rankwise runs three set tiers ($450, $750 and $1,250 a month), and the $750 and $1,250 tiers treat that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 ## Why med spa marketing doesn't look like a trade's
 
@@ -78,6 +78,11 @@ We agree in writing on a starting position and a 90-day milestone before month o
 
 **What if another med spa in my city already works with Rankwise?**
 One practice per city, per competitive category. We'll tell you before you sign if that spot's already held.
+
+## Read next
+
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — The categorization step from the section above, in depth: why the primary category decides which searches a profile appears for, and how to add the rest. The examples are HVAC.
+- [Who should I hire for HVAC marketing in Vancouver?](/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/) — A checklist and a list of red flags for vetting any local-search agency, written for HVAC contractors. A med spa can use the same questions to check that a partner understands the advertising rules above.
 
 ## See where your practice stands
 

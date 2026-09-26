@@ -4,17 +4,17 @@ kind: category-hub
 category: Dentist
 slug: /dental-marketing/
 title: Dental Practice Marketing in Metro Vancouver, BC
-metaDescription: Should a Metro Vancouver dentist hire local-marketing help? Yes, for $750-$1,250/mo with a 90-day milestone. No review-solicitation shortcuts.
+metaDescription: Should a Metro Vancouver dentist hire local-marketing help? Yes, on one of three set tiers ($450, $750 or $1,250/mo); the $750 and $1,250 tiers carry a 90-day milestone. No review-solicitation shortcuts.
 h1: Dental practice marketing in Metro Vancouver
 numbersUsed: ["dental_metro_n=342 businesses (asOf 2026-07-09)", "dental_metro_medianReviews=172 (asOf 2026-07-09)", "dental_metro_topReviews=2800 (asOf 2026-07-09)", "dental_metro_avgRating=4.83 (asOf 2026-07-09)", "dental_metro_pctWithWebsite=48% (asOf 2026-07-09)", "vancouver_dental_medianReviews=315 (asOf 2026-07-09)", "white-rock_dental_medianReviews=122 (asOf 2026-07-09)", "dentist_thin_map_pack_pct=4.3-5.4% (asOf 2026-07-29)"]
-internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/"]
 createdAt: 2026-08-17
 draftedBy: hub-drafts-c
 ---
 
 # Dental practice marketing in Metro Vancouver
 
-Yes, a Metro Vancouver dental practice benefits from local-search help, and it should cost $750-$1,250/month, not a flat web-design invoice. The catch is that the tactic most local-marketing programs lead with, asking every satisfied patient for a Google review, sits inside advertising rules a trades page never has to think about.
+Yes, a Metro Vancouver dental practice benefits from local-search help, and Rankwise runs it on three set tiers ($450, $750 or $1,250 a month), not a flat web-design invoice. The catch is that the tactic most local-marketing programs lead with, asking every satisfied patient for a Google review, sits inside advertising rules a trades page never has to think about.
 
 ## How patients actually search for a dentist
 
@@ -76,6 +76,12 @@ We don't sign two practices in the same competitive category in the same city. I
 
 **Is my city even in your data?**
 Metro Vancouver dental data currently covers 13 cities, from Vancouver to Chilliwack. Tell us your city on the audit call and we'll show you the real numbers before you commit to anything.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — The ranking signals behind the three levers above: profile completeness, citation consistency and content. The data is HVAC; the mechanics are the same for a dental practice.
+- [What Google Business Profile category should HVAC contractors use?](/blog/google-business-profile-category-hvac-contractors/) — Why the primary category decides which searches a profile appears for, and how to set primary against additional categories. A practice offering several services faces the same choice as the HVAC examples.
+- [Who should I hire for HVAC marketing in Vancouver?](/blog/who-should-i-hire-for-hvac-marketing-in-vancouver/) — The questions to ask any local-search agency before hiring, with HVAC examples. Use them to check that a partner will work inside the advertising rules described above.
 
 ## See where your practice actually stands
 

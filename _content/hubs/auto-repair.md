@@ -7,7 +7,7 @@ title: Auto Repair Shop Marketing in Metro Vancouver | Rankwise
 metaDescription: Auto repair map packs in Metro Vancouver are review-heavy and hard to crack fast. Real numbers, honest timelines, and what marketing should cost.
 h1: Auto repair shop marketing in Metro Vancouver
 numbersUsed: ["auto repair metro medianReviews=173 (asOf 2026-07-09)", "auto repair metro topReviews=38000 (asOf 2026-07-09)", "auto repair metro n=310 businesses Google surfaces (asOf 2026-07-09)", "auto repair metro pctWithWebsite=65% (asOf 2026-07-09)", "auto repair Pitt Meadows medianReviews=115 (asOf 2026-07-09)", "auto repair Vancouver medianReviews=262 (asOf 2026-07-09)", "auto repair winnability=7.2% of keywords have a sub-30-review #1, 15/208 (asOf 2026-07-30)"]
-internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/"]
+internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-auto-repair-map-pack-actually-/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
 labLead: "Businesses with 50 or more reviews took 541 of 617 tracked Map Pack appearances, while shops under 20 reviews took only 25."
 labLeadCollected: 2026-07-10
 labLeadPublished: 2026-07-10
@@ -19,11 +19,11 @@ draftedBy: hub-drafts-b
 
 # Auto repair shop marketing in Metro Vancouver
 
-An auto repair shop in Metro Vancouver should hire local-search help, but should go in with a longer timeline than most trades and a monthly spend of $750 to $1,250 aimed at review volume first. This is one of the harder map pack fields to move in the Lower Mainland, and the honest read on why is below, not a sales pitch built around it.
+An auto repair shop in Metro Vancouver should hire local-search help, but should go in with a longer timeline than most trades and a Foundation ($750) or Growth ($1,250) program aimed at review volume first. This is one of the harder map pack fields to move in the Lower Mainland, and the honest read on why is below, not a sales pitch built around it.
 
 ## Why this map pack is harder to crack than most trades
 
-Auto repair is the second-hardest unregulated category Rankwise tracks for displacing a #1 result, behind only HVAC. Only 7.2% of tracked auto repair keywords currently have a top-ranked business with fewer than 30 reviews (as of 2026-07-30), compared to 33.3% for roofer or 24.0% for landscaper, where a third to a quarter of the field is genuinely open. Auto repair's incumbents are old, established, and review-heavy: the highest review count Google surfaces across this category's tracked cities is 38,000, and the metro-wide median business already sits at 173 reviews (as of 2026-07-09). A shop that's been open five years and asked every customer for a review can still be starting from behind a business with that kind of head start. This isn't a reason to skip marketing. It's a reason to set the 90-day milestone conservatively and measure early progress in review-count trajectory as much as in Map Pack position, because position tends to lag volume in a field this dense.
+Auto repair is the second-hardest unregulated category Rankwise tracks for displacing a #1 result, behind only HVAC. Only 7.2% of tracked auto repair keywords currently have a top-ranked business with fewer than 30 reviews (as of 2026-07-30), compared to 33.3% for roofer or 24.0% for landscaper, where a third to a quarter of the field is genuinely open. Auto repair's incumbents are old, established, and review-heavy: the busiest shops in this category's tracked cities carry thousands of reviews, and the metro-wide median business already sits at 173 reviews (as of 2026-07-09). A shop that's been open five years and asked every customer for a review can still be starting from behind a business with that kind of head start. This isn't a reason to skip marketing. It's a reason to set the 90-day milestone conservatively and measure early progress in review-count trajectory as much as in Map Pack position, because position tends to lag volume in a field this dense.
 
 ## How customers actually search for a mechanic
 
@@ -33,7 +33,7 @@ Ticket size shifts how much that trust threshold matters. A routine oil change i
 
 ## What the map pack looks like city by city
 
-Google currently surfaces 310 auto repair businesses across the Metro Vancouver and Fraser Valley cities Rankwise tracks, and only 65% of them have a website, the lowest website rate of any trade category benchmarked. That's unusual for a field this review-heavy, and it suggests a real number of established shops are running almost entirely on GBP and word of mouth rather than a maintained site. City medians vary less here than in some other trades: Pitt Meadows sits at 115 reviews and Vancouver at 262, so the "easier" cities in this category are still a real climb, not an open door the way a thinner field like electrical offers. Unlike Ontario, Manitoba, or Quebec, BC does not license or provincially regulate repair shops themselves, which means there's no shop-licensing gate here at all. The whole competitive fight is review volume, GBP activity, and citation consistency, not credentials.
+Google currently surfaces 310 auto repair businesses across the Metro Vancouver and Fraser Valley cities Rankwise tracks, and only 65% of them have a website, the lowest website rate of the six trades benchmarked. That's unusual for a field this review-heavy, and it suggests a real number of established shops are running almost entirely on GBP and word of mouth rather than a maintained site. City medians vary less here than in some other trades: Pitt Meadows sits at 115 reviews and Vancouver at 262, so the "easier" cities in this category are still a real climb, not an open door the way a thinner field like electrical offers. Unlike Ontario, Manitoba, or Quebec, BC does not license or provincially regulate repair shops themselves, which means there's no shop-licensing gate here at all. The whole competitive fight is review volume, GBP activity, and citation consistency, not credentials.
 
 ## What it costs, and what that money should buy
 
@@ -56,7 +56,7 @@ $450 to $1,250/mo depending on scope. Given how review-heavy this category is, F
 Incumbents are older and more reviewed than most categories. Only 7.2% of tracked keywords have a top result with under 30 reviews, versus 33.3% for roofing.
 
 **Do I need a website to compete?**
-It helps but isn't required to start. Only 65% of the shops Google currently surfaces have one, the lowest rate of any trade tracked, so GBP strength carries real weight here.
+It helps but isn't required to start. Only 65% of the shops Google currently surfaces have one, the lowest rate of the six trades tracked, so GBP strength carries real weight here.
 
 **Are auto repair shops licensed in BC?**
 No. Unlike Ontario or Quebec, BC has no provincial licensing requirement for repair shops specifically, though Consumer Protection BC covers billing and estimate disputes.
@@ -71,3 +71,8 @@ Start asking every customer for a review at point of service. With a metro media
 No. The guarantee is a written 90-day milestone set before month one starts on Foundation and Growth plans; if it's missed, billing pauses until the target is hit.
 
 Want to see exactly where your shop sits against the 310 businesses Google surfaces in this category? [Get a free rank check](/audit/) before committing to a plan.
+
+## Read next
+
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — Auto repair incumbents hold their spots on review counts in the hundreds. This post breaks down the signals besides raw review count that a shop can still out-execute them on, using HVAC data.
+- [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a shop whose profile doesn't appear for its own city. It was written for HVAC, and none of the checks are trade-specific.
