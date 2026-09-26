@@ -882,7 +882,7 @@ def build_page(c, cities_list):
   <div class="container hero-grid">
     <div class="hero-left reveal in">
       <div class="eyebrow">{c["eyebrow"]}</div>
-      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One business per city, per service category — first to sign locks {name}</div>
+      <div class="city-slot-pill"><span class="csp-dot" aria-hidden="true"></span>One business per city, per service category</div>
       <h1>Get more booked<br>{tl} jobs in <span class="serif">{c["h1_city"]}</span></h1>
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
