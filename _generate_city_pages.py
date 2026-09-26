@@ -1301,6 +1301,8 @@ def main():
 # HVAC-first bias — plumbing gets the same bar as every other service (studies with receipts
 # before a trade goes live). Data definitions (PLUMBING_CITIES, PLUMBING_LANDING) kept above
 # so this block can be uncommented when the Trade Expansion Plan Phase 1 trigger fires.
+# ⚠ SLUG COLLISION: vancouver/burnaby/surrey/richmond-plumbing-marketing are now written by
+# _generate_trade_city_pages.py (pilot, 2026-09-26) — uncommenting this would overwrite them.
 
 # for c in PLUMBING_CITIES:
 #     out_dir = os.path.join(base, c["slug"])

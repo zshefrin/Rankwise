@@ -1,0 +1,1365 @@
+{
+ "_about": "Derived by _generate_trade_city_pages.py --refresh-facts from the rankwise-dashboard September 2026 map-pack sweep. Business names are deliberately NOT carried over: pages describe the market, not individual competitors. Letters (A, B, ...) are per-city labels for distinct Google listings (place_id), in order of first appearance.",
+ "dashboard_commit": "cf0675b47fe193b18cd11434b25769a4e8355447",
+ "region_cities": [
+  "Vancouver",
+  "Surrey",
+  "Burnaby",
+  "Richmond",
+  "Coquitlam",
+  "Langley",
+  "Abbotsford",
+  "Delta",
+  "North Vancouver",
+  "West Vancouver",
+  "Port Coquitlam",
+  "Port Moody",
+  "New Westminster",
+  "Maple Ridge",
+  "Pitt Meadows",
+  "White Rock",
+  "Mission",
+  "Chilliwack"
+ ],
+ "thin_reviews_threshold": 50,
+ "trades": {
+  "roofing": {
+   "source_file": "vault/_research/data/local-ownership-roofing-bc-2026-09.json",
+   "source_sha256": "32948536dc292e002c73a199960aaa3f53f816fbffa34ffc446cc3804af85655",
+   "source_last_commit": "47ae96b6663a3bd77ce2ca868cdbf8c827cd7cb6",
+   "sweep_generated_at": "2026-09-09T06:47:20.842785+00:00",
+   "backfill_ran_at": "2026-09-10T11:11:32.118791+00:00",
+   "keywords": [
+    "roofer {city}",
+    "roof repair {city}",
+    "roofing contractor {city}"
+   ],
+   "cities": {
+    "Vancouver": {
+     "searches": [
+      {
+       "keyword": "roofer Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 124
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 162
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 260
+        }
+       ]
+      },
+      {
+       "keyword": "roof repair Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 124
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 162
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 318
+        }
+       ]
+      },
+      {
+       "keyword": "roofing contractor Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 124
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 162
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 318
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 124,
+      "B": 162,
+      "C": 260,
+      "D": 318
+     }
+    },
+    "Surrey": {
+     "searches": [
+      {
+       "keyword": "roofer Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 130
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 125
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 162
+        }
+       ]
+      },
+      {
+       "keyword": "roof repair Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 130
+        },
+        {
+         "position": 2,
+         "business": "C",
+         "reviews": 162
+        },
+        {
+         "position": 3,
+         "business": "B",
+         "reviews": 125
+        }
+       ]
+      },
+      {
+       "keyword": "roofing contractor Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 130
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 125
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 162
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 130,
+      "B": 125,
+      "C": 162
+     }
+    },
+    "Burnaby": {
+     "searches": [
+      {
+       "keyword": "roofer Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 227
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 80
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 45
+        }
+       ]
+      },
+      {
+       "keyword": "roof repair Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 227
+        },
+        {
+         "position": 2,
+         "business": "D",
+         "reviews": 50
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 45
+        }
+       ]
+      },
+      {
+       "keyword": "roofing contractor Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 227
+        },
+        {
+         "position": 2,
+         "business": "C",
+         "reviews": 45
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 50
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 227,
+      "B": 80,
+      "C": 45,
+      "D": 50
+     }
+    },
+    "Richmond": {
+     "searches": [
+      {
+       "keyword": "roofer Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 83
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 149
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 26
+        }
+       ]
+      },
+      {
+       "keyword": "roof repair Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "D",
+         "reviews": 136
+        },
+        {
+         "position": 2,
+         "business": "E",
+         "reviews": 318
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 26
+        }
+       ]
+      },
+      {
+       "keyword": "roofing contractor Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 83
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 149
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 26
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 83,
+      "B": 149,
+      "C": 26,
+      "D": 136,
+      "E": 318
+     }
+    },
+    "Abbotsford": {
+     "searches": [
+      {
+       "keyword": "roofer Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 31
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 33
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 50
+        }
+       ]
+      },
+      {
+       "keyword": "roof repair Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 31
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 33
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 50
+        }
+       ]
+      },
+      {
+       "keyword": "roofing contractor Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 31
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 33
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 50
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 31,
+      "B": 33,
+      "C": 50
+     }
+    }
+   },
+   "region": {
+    "searches_with_pack": 51,
+    "first_under_threshold": 18,
+    "captured_on": [
+     "2026-09-09",
+     "2026-09-10"
+    ]
+   }
+  },
+  "landscaping": {
+   "source_file": "vault/_research/data/local-ownership-landscaping-bc-2026-09.json",
+   "source_sha256": "09d74efeb1a4f815a3fa36d4093d3e0c65c23fc83cf32ced4029e597d04e5f2f",
+   "source_last_commit": "47ae96b6663a3bd77ce2ca868cdbf8c827cd7cb6",
+   "sweep_generated_at": "2026-09-09T06:57:10.325928+00:00",
+   "backfill_ran_at": "2026-09-10T11:11:32.113904+00:00",
+   "keywords": [
+    "landscaper {city}",
+    "landscaping company {city}",
+    "lawn care {city}"
+   ],
+   "cities": {
+    "Vancouver": {
+     "searches": [
+      {
+       "keyword": "landscaper Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 55
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 87
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 13
+        }
+       ]
+      },
+      {
+       "keyword": "landscaping company Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "B",
+         "reviews": 87
+        },
+        {
+         "position": 2,
+         "business": "D",
+         "reviews": 418
+        },
+        {
+         "position": 3,
+         "business": "A",
+         "reviews": 55
+        }
+       ]
+      },
+      {
+       "keyword": "lawn care Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "E",
+         "reviews": 18
+        },
+        {
+         "position": 2,
+         "business": "F",
+         "reviews": 46
+        },
+        {
+         "position": 3,
+         "business": "G",
+         "reviews": 106
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 55,
+      "B": 87,
+      "C": 13,
+      "D": 418,
+      "E": 18,
+      "F": 46,
+      "G": 106
+     }
+    },
+    "Surrey": {
+     "searches": [
+      {
+       "keyword": "landscaper Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 2
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 59
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 40
+        }
+       ]
+      },
+      {
+       "keyword": "landscaping company Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 2
+        },
+        {
+         "position": 2,
+         "business": "D",
+         "reviews": 261
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 40
+        }
+       ]
+      },
+      {
+       "keyword": "lawn care Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "E",
+         "reviews": 83
+        },
+        {
+         "position": 2,
+         "business": "F",
+         "reviews": 76
+        },
+        {
+         "position": 3,
+         "business": "G",
+         "reviews": 12
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 2,
+      "B": 59,
+      "C": 40,
+      "D": 261,
+      "E": 83,
+      "F": 76,
+      "G": 12
+     }
+    },
+    "Burnaby": {
+     "searches": [
+      {
+       "keyword": "landscaper Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 41
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 32
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 27
+        }
+       ]
+      },
+      {
+       "keyword": "landscaping company Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "B",
+         "reviews": 32
+        },
+        {
+         "position": 2,
+         "business": "A",
+         "reviews": 41
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 134
+        }
+       ]
+      },
+      {
+       "keyword": "lawn care Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "E",
+         "reviews": 279
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 32
+        },
+        {
+         "position": 3,
+         "business": "F",
+         "reviews": 14
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 41,
+      "B": 32,
+      "C": 27,
+      "D": 134,
+      "E": 279,
+      "F": 14
+     }
+    },
+    "Richmond": {
+     "searches": [
+      {
+       "keyword": "landscaper Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 115
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 1
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 76
+        }
+       ]
+      },
+      {
+       "keyword": "landscaping company Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "C",
+         "reviews": 76
+        },
+        {
+         "position": 2,
+         "business": "A",
+         "reviews": 115
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 26
+        }
+       ]
+      },
+      {
+       "keyword": "lawn care Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "D",
+         "reviews": 26
+        },
+        {
+         "position": 2,
+         "business": "E",
+         "reviews": 63
+        },
+        {
+         "position": 3,
+         "business": "F",
+         "reviews": 46
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 115,
+      "B": 1,
+      "C": 76,
+      "D": 26,
+      "E": 63,
+      "F": 46
+     }
+    },
+    "Abbotsford": {
+     "searches": [
+      {
+       "keyword": "landscaper Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 59
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 74
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 55
+        }
+       ]
+      },
+      {
+       "keyword": "landscaping company Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 59
+        },
+        {
+         "position": 2,
+         "business": "C",
+         "reviews": 55
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 33
+        }
+       ]
+      },
+      {
+       "keyword": "lawn care Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "E",
+         "reviews": 145
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 74
+        },
+        {
+         "position": 3,
+         "business": "F",
+         "reviews": 40
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 59,
+      "B": 74,
+      "C": 55,
+      "D": 33,
+      "E": 145,
+      "F": 40
+     }
+    }
+   },
+   "region": {
+    "searches_with_pack": 52,
+    "first_under_threshold": 27,
+    "captured_on": [
+     "2026-09-09"
+    ]
+   }
+  },
+  "plumbing": {
+   "source_file": "vault/_research/data/local-ownership-plumbing-bc-2026-09.json",
+   "source_sha256": "91951fcaf42dfdf93b208c36d3f3361c1bed02f26b6ec85ebd23ad8cca0eaf17",
+   "source_last_commit": "47ae96b6663a3bd77ce2ca868cdbf8c827cd7cb6",
+   "sweep_generated_at": "2026-09-09T06:16:00.196069+00:00",
+   "backfill_ran_at": "2026-09-10T11:11:32.116998+00:00",
+   "keywords": [
+    "plumber {city}",
+    "emergency plumber {city}",
+    "drain cleaning {city}",
+    "water heater installation {city}"
+   ],
+   "cities": {
+    "Vancouver": {
+     "searches": [
+      {
+       "keyword": "plumber Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 588
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 148
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 121
+        }
+       ]
+      },
+      {
+       "keyword": "emergency plumber Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 588
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 148
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 121
+        }
+       ]
+      },
+      {
+       "keyword": "drain cleaning Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "C",
+         "reviews": 121
+        },
+        {
+         "position": 2,
+         "business": "D",
+         "reviews": 734
+        },
+        {
+         "position": 3,
+         "business": "E",
+         "reviews": 206
+        }
+       ]
+      },
+      {
+       "keyword": "water heater installation Vancouver",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 588
+        },
+        {
+         "position": 2,
+         "business": "F",
+         "reviews": 113
+        },
+        {
+         "position": 3,
+         "business": "B",
+         "reviews": 148
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 588,
+      "B": 148,
+      "C": 121,
+      "D": 734,
+      "E": 206,
+      "F": 113
+     }
+    },
+    "Surrey": {
+     "searches": [
+      {
+       "keyword": "plumber Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 1600
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 72
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 209
+        }
+       ]
+      },
+      {
+       "keyword": "emergency plumber Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "B",
+         "reviews": 72
+        },
+        {
+         "position": 2,
+         "business": "D",
+         "reviews": 37
+        },
+        {
+         "position": 3,
+         "business": "E",
+         "reviews": 264
+        }
+       ]
+      },
+      {
+       "keyword": "drain cleaning Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "F",
+         "reviews": 47
+        },
+        {
+         "position": 2,
+         "business": "G",
+         "reviews": 36
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 37
+        }
+       ]
+      },
+      {
+       "keyword": "water heater installation Surrey",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 1600
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 72
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 37
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 1600,
+      "B": 72,
+      "C": 209,
+      "D": 37,
+      "E": 264,
+      "F": 47,
+      "G": 36
+     }
+    },
+    "Burnaby": {
+     "searches": [
+      {
+       "keyword": "plumber Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 2600
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 13000
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 211
+        }
+       ]
+      },
+      {
+       "keyword": "emergency plumber Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 2600
+        },
+        {
+         "position": 2,
+         "business": "C",
+         "reviews": 211
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 43
+        }
+       ]
+      },
+      {
+       "keyword": "drain cleaning Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 2600
+        },
+        {
+         "position": 2,
+         "business": "E",
+         "reviews": 11
+        },
+        {
+         "position": 3,
+         "business": "F",
+         "reviews": 104
+        }
+       ]
+      },
+      {
+       "keyword": "water heater installation Burnaby",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "C",
+         "reviews": 211
+        },
+        {
+         "position": 2,
+         "business": "G",
+         "reviews": 113
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 43
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 2600,
+      "B": 13000,
+      "C": 211,
+      "D": 43,
+      "E": 11,
+      "F": 104,
+      "G": 113
+     }
+    },
+    "Richmond": {
+     "searches": [
+      {
+       "keyword": "plumber Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 85
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 509
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 71
+        }
+       ]
+      },
+      {
+       "keyword": "emergency plumber Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 85
+        },
+        {
+         "position": 2,
+         "business": "C",
+         "reviews": 71
+        },
+        {
+         "position": 3,
+         "business": "B",
+         "reviews": 509
+        }
+       ]
+      },
+      {
+       "keyword": "drain cleaning Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "D",
+         "reviews": 39
+        },
+        {
+         "position": 2,
+         "business": "A",
+         "reviews": 85
+        },
+        {
+         "position": 3,
+         "business": "E",
+         "reviews": 2
+        }
+       ]
+      },
+      {
+       "keyword": "water heater installation Richmond",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 85
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 509
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 71
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 85,
+      "B": 509,
+      "C": 71,
+      "D": 39,
+      "E": 2
+     }
+    },
+    "Abbotsford": {
+     "searches": [
+      {
+       "keyword": "plumber Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 334
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 58
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 32
+        }
+       ]
+      },
+      {
+       "keyword": "emergency plumber Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "B",
+         "reviews": 58
+        },
+        {
+         "position": 2,
+         "business": "A",
+         "reviews": 334
+        },
+        {
+         "position": 3,
+         "business": "D",
+         "reviews": 189
+        }
+       ]
+      },
+      {
+       "keyword": "drain cleaning Abbotsford",
+       "captured_on": "2026-09-09",
+       "backfilled": false,
+       "top3": [
+        {
+         "position": 1,
+         "business": "B",
+         "reviews": 58
+        },
+        {
+         "position": 2,
+         "business": "E",
+         "reviews": 17
+        },
+        {
+         "position": 3,
+         "business": "C",
+         "reviews": 32
+        }
+       ]
+      },
+      {
+       "keyword": "water heater installation Abbotsford",
+       "captured_on": "2026-09-10",
+       "backfilled": true,
+       "top3": [
+        {
+         "position": 1,
+         "business": "A",
+         "reviews": 334
+        },
+        {
+         "position": 2,
+         "business": "B",
+         "reviews": 58
+        },
+        {
+         "position": 3,
+         "business": "F",
+         "reviews": 557
+        }
+       ]
+      }
+     ],
+     "businesses": {
+      "A": 334,
+      "B": 58,
+      "C": 32,
+      "D": 189,
+      "E": 17,
+      "F": 557
+     }
+    }
+   },
+   "region": {
+    "searches_with_pack": 71,
+    "first_under_threshold": 21,
+    "captured_on": [
+     "2026-09-09",
+     "2026-09-10"
+    ]
+   }
+  }
+ }
+}
