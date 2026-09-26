@@ -827,7 +827,6 @@ def build_page(c, cities_list):
   "description": "{tl} marketing agency serving {name}, BC — one business per city, per service category, no exceptions. Local SEO and Google Business Profile management for {tl} contractors.",
   "url": "https://rankwise.ca",
   "image": "https://rankwise.ca/rankwise-icon.svg.png",
-  "email": "zshef@rankwise.ca",
   "address": {{
     "@type": "PostalAddress",
     "addressLocality": "Metro Vancouver",
