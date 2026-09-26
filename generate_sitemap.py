@@ -28,6 +28,15 @@ MIRROR_PATHS = (
     if _MIRRORS.exists() else set()
 )
 
+# Folded pages keep serving their own content but declare a same-intent
+# survivor as canonical (blog cluster folds, 2026-09-23); only the survivor
+# belongs in the sitemap. Registry: _content/folded-pages.json.
+_FOLDED = ROOT / "_content" / "folded-pages.json"
+FOLDED_PATHS = (
+    {f["folded"] for f in json.loads(_FOLDED.read_text(encoding="utf-8"))["folds"]}
+    if _FOLDED.exists() else set()
+)
+
 # Live pages deliberately kept OUT of the sitemap (the pages stay published;
 # only the crawl hint is withdrawn). Added 2026-09-23 per the index-coverage
 # diagnosis (rankwise-dashboard vault/_dev/index-coverage-diagnosis-2026-09-23.md,
@@ -166,7 +175,7 @@ def build_sitemap() -> str:
         if 'name="robots" content="noindex' in post_html.read_text():
             continue
         rel = f"blog/{slug_dir.name}/index.html"
-        if rel in MIRROR_PATHS:
+        if rel in MIRROR_PATHS or rel in FOLDED_PATHS:
             continue
         urls.append((f"{BASE}/blog/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.7"))
 
