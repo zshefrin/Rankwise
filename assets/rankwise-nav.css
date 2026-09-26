@@ -223,8 +223,11 @@
 }
 
 @media (max-width: 1000px) {
+  /* Sticky, not fixed: keeps the CTA on screen while scrolling a long mobile
+     page without the body padding the fixed desktop nav needs. */
   .rw-nav {
-    position: relative;
+    position: sticky;
+    top: 0;
     min-height: 70px;
     padding: 14px;
     gap: 10px;

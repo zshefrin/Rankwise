@@ -635,7 +635,9 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
   .ps-loc .ps-pin{display:block}
   /* city pin is icon-only here: pad the hit area to ~44px without moving the layout */
   .ps-loc{padding:15px 8px;margin:-15px -8px}
-  .ps-main{padding:8px 0;margin:-8px 0}
+  .ps-main{padding:15px 0;margin:-15px 0}
+  /* text links that act as CTAs: pad the hit area to 44px without moving the layout */
+  .hero-lab-src a,.cmp5-cta a{display:inline-block;padding:12px 0;margin:-12px 0}
   .row-held{display:none}
   /* 44px tap targets on phones */
   .aw-btn,.cal-skel-link,.blog-mini-all{min-height:44px}
@@ -1465,7 +1467,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
 
 /* ── OVERFLOW GUARD (390px + 1280px) ────────────────────────────── */
 @media(max-width:390px){
-  html,body{max-width:100%;overflow-x:hidden}
+  html,body{max-width:100%;overflow-x:hidden;overflow-x:clip} /* clip, not hidden: hidden makes body a scroll container and breaks the sticky mobile nav */
   .container{padding-left:16px;padding-right:16px}
   section{padding-left:16px;padding-right:16px}
   .home-hero{padding-left:16px;padding-right:16px}

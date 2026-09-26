@@ -686,6 +686,8 @@ CITY_EXTRA_CSS = """
 @media(max-width:640px){.btn-secondary{min-height:44px}.faq-q{min-height:44px}.city-links-list a{display:inline-flex;align-items:center;min-height:44px}.flinks{row-gap:0}.flinks a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:22px}.hero-right{max-width:620px}.city-proof-grid{grid-template-columns:1fr 1fr}.city-proof-copy{grid-column:1/-1;padding-right:0}.city-proof-card-wide{grid-column:1/-1}.problem-grid,.how-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.hero{min-height:auto!important;padding-top:104px!important;padding-bottom:34px!important}.hero-grid{gap:0}.hero-lock{grid-template-columns:1fr;gap:4px;margin-bottom:12px}.hero-lock div{font-size:13px;line-height:1.25}.city-slot-pill{font-size:12px;padding:6px 12px}.hero-right{margin-top:20px;padding:16px 16px 14px;box-shadow:none}.hero-right h2{font-size:17px;margin-bottom:10px}.hero-right .mini strong{font-size:13.5px}.hero-right .mini span{font-size:12.5px}.city-proof{padding:28px 18px}.city-proof-grid{grid-template-columns:1fr;gap:10px}.city-proof-card{padding:15px 16px}.city-proof-card strong{font-size:24px}.city-intel{padding:36px 20px}.city-links{padding:24px 20px}}
+/* clip, not hidden: the frozen home CSS sets overflow-x:hidden on html/body, which makes body a scroll container and breaks the sticky mobile nav */
+html,body{overflow-x:clip}
 """
 
 
