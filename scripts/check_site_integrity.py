@@ -23,6 +23,13 @@ RW_NAV_RE = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 JSON_LD_RE = re.compile(r'<script type="application/ld\+json">([\s\S]*?)</script>')
+NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\'][^>]*noindex', re.IGNORECASE)
+NUMBER_WORDS = {
+    w: i for i, w in enumerate(
+        "zero one two three four five six seven eight nine ten eleven twelve thirteen "
+        "fourteen fifteen sixteen seventeen eighteen nineteen twenty".split()
+    )
+}
 
 
 def live_html_files() -> list[Path]:
@@ -97,6 +104,40 @@ def main() -> int:
         mirror_url = "/" + pair["mirror"].removesuffix("index.html")
         if mirror_url in sitemap_urls:
             fail(errors, f"sitemap.xml: mirror {mirror_url} must not be listed (canonical is elsewhere)")
+
+    # Withdrawn/redirect stubs (noindex) must stay out of the sitemap and the
+    # blog/lab listing pages; everything else in lab/ counts as a live study.
+    live_studies = 0
+    listing = {
+        "blog": (ROOT / "blog" / "index.html").read_text(encoding="utf-8"),
+        "lab": (ROOT / "lab" / "index.html").read_text(encoding="utf-8"),
+    }
+    for section in ("blog", "lab"):
+        for page in sorted((ROOT / section).glob("*/index.html")):
+            text = page.read_text(encoding="utf-8")
+            url = f"/{section}/{page.parent.name}/"
+            if NOINDEX_RE.search(text):
+                if url in sitemap_urls:
+                    fail(errors, f"sitemap.xml: noindex page {url} must not be listed")
+                if f'href="{url}"' in listing[section] or f'href="https://rankwise.ca{url}"' in listing[section]:
+                    fail(errors, f"{section}/index.html: links noindex page {url}")
+            elif section == "lab":
+                live_studies += 1
+
+    # The homepage study count is prose ("Twelve public market studies ...") and
+    # publish_lab.py's badge updater no longer finds its target, so pin it here.
+    lab_count = re.search(r'data-count="(\d+)">\d+</strong><span>studies published', listing["lab"])
+    if not lab_count or int(lab_count.group(1)) != live_studies:
+        fail(errors, f"lab/index.html: studies-published count != {live_studies} live lab studies")
+    home = (ROOT / "index.html").read_text(encoding="utf-8")
+    home_count = re.search(r"\b([A-Za-z]+|\d+) public market stud(?:y|ies)\b", home)
+    if not home_count:
+        fail(errors, "index.html: lab study-count sentence not found (update check_site_integrity.py if reworded)")
+    else:
+        word = home_count.group(1).lower()
+        value = int(word) if word.isdigit() else NUMBER_WORDS.get(word)
+        if value != live_studies:
+            fail(errors, f"index.html: says '{home_count.group(1)} public market studies' but lab/ has {live_studies} live studies")
 
     if errors:
         print("Site integrity check failed:")
