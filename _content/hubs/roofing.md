@@ -71,8 +71,8 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 
 ## Read next
 
-- [How do I get more roofing leads in Vancouver?](/blog/how-do-i-get-more-roofing-leads-in-vancouver/) — The roofing version of this page's argument, built on a Rankwise Lab study of 216 Metro Vancouver roofing searches: the profile setup, the review count a roofer needs, and which cities are hardest to break into.
-- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — Seven ranking signals, from primary category to citation consistency, and why review velocity counts most in a field with a 44-review median. The worked examples are HVAC; the signals are the same for a roofer.
+- [How do I get more roofing leads in Vancouver?](/blog/how-do-i-get-more-roofing-leads-in-vancouver/) — The roofing version of this page's argument, built on a July 2026 Rankwise Lab study of 216 Metro Vancouver roofing searches: the profile setup, the review count a roofer needs, and which cities are hardest to break into.
+- [What signals does Google use to rank local HVAC businesses?](/blog/signals-google-uses-rank-local-hvac-businesses/) — Seven ranking signals, from primary category to citation consistency, and why review velocity matters in a field with a 44-review median (as of 2026-07-09). The worked examples are HVAC; the signals are the same for a roofer.
 - [Why isn't my HVAC business showing up in the map pack?](/blog/why-isnt-my-hvac-business-showing-in-map-pack/) — A check-in-order diagnostic for a profile that isn't appearing at all. Every check on it applies to a roofing profile unchanged.
 
 ## See the numbers, then talk to us
