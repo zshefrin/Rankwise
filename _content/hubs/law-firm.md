@@ -34,7 +34,7 @@ Google Business Profile completeness and citation consistency do most of the wor
 
 ## What it costs, and what Rankwise won't do
 
-Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (GBP optimization, a compliant review system, and a rank snapshot, email-only), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city or multi-practice-area expansion plus content), month-to-month, no long-term contract. Before month one, Rankwise agrees in writing on the starting Map Pack position and a 90-day milestone; miss it and billing pauses until it's hit. That guarantee is a Rankwise-to-firm term about the ranking work delivered, not a claim about legal outcomes, and it never touches case results. What Rankwise won't do for this category, regardless of tier: solicit reviews framed as case-outcome endorsements, publish an unverifiable "best lawyer" or "specialist" claim without Law Society certification behind it, or promise any ranking result as a public-facing guarantee.
+Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (GBP optimization, a compliant review system, and a rank snapshot, email-only), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city or multi-practice-area expansion plus content), month-to-month, no long-term contract. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting Map Pack position and a 90-day milestone; miss it and billing pauses until it's hit. That guarantee is a Rankwise-to-firm term about the ranking work delivered, not a claim about legal outcomes, and it never touches case results. What Rankwise won't do for this category, regardless of tier: solicit reviews framed as case-outcome endorsements, publish an unverifiable "best lawyer" or "specialist" claim without Law Society certification behind it, or promise any ranking result as a public-facing guarantee.
 
 ## What a compliant marketing program delivers every month
 
@@ -65,6 +65,6 @@ It means one firm per competitive practice area per city. A family lawyer and a 
 No. That designation is restricted to lawyers certified as specialists by the Law Society of BC, and no page Rankwise builds will use the term otherwise.
 
 **Does the 90-day guarantee say anything about legal outcomes?**
-No. It's a written commitment about the Map Pack ranking work delivered, agreed before month one; it never references case results or legal outcomes.
+No. It's a written commitment about the Map Pack ranking work delivered, agreed before month one on Foundation and Growth plans; it never references case results or legal outcomes.
 
 Want to see where your firm sits in the Metro Vancouver map pack today, compliantly reviewed before anything ships? [Get a free rank check](/audit/).

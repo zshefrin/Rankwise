@@ -887,7 +887,7 @@ def build_page(c, cities_list):
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
         <div>Free 15-minute rank check.<br>No pitch deck.</div>
-        <div>Position milestone in writing.<br>Miss it — billing pauses.</div>
+        <div>Foundation and Growth: position milestone in writing.<br>Miss it — billing pauses.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
       <div class="hero-actions">
@@ -1038,7 +1038,7 @@ def build_page(c, cities_list):
         <p style="margin-top:10px">If a move does not help call quality or booking volume, we do not keep it in the system.</p>
         <div class="guarantee-badge">
           <span class="gb-icon" aria-hidden="true">✓</span>
-          <span>Before month one, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
+          <span>Before month one on Foundation and Growth plans, we agree in writing on your starting Map Pack position and a 90-day milestone. <strong>Miss it — billing pauses until we hit it.</strong></span>
         </div>
       </article>
     </div>

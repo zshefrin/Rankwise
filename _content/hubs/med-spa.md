@@ -74,7 +74,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, month-to-month. Starter
 Yes. The applicable rulebook shifts, and we triage every med spa client by who performs the treatment before writing a word of copy.
 
 **Do you guarantee a ranking result?**
-We agree in writing on a starting position and a 90-day milestone before month one, and billing pauses if we miss it, a guarantee about our work, not a public claim your practice makes.
+We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and billing pauses if we miss it, a guarantee about our work, not a public claim your practice makes.
 
 **What if another med spa in my city already works with Rankwise?**
 One practice per city, per competitive category. We'll tell you before you sign if that spot's already held.

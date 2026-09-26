@@ -59,7 +59,7 @@ A cheaper route, occasional GBP posting with no review system or rank tracking, 
 
 **Does landscaping marketing need to run year-round?** Search demand peaks in spring and fall cleanup seasons, but a profile that goes dark in the off-season loses the consistency signal that GBP and searchers both reward. Steady beats seasonal-only.
 
-**How fast can a landscaping business move up the map pack?** Rankwise sets a written 90-day milestone before month one starts, giving a defined checkpoint tied to the actual starting position.
+**How fast can a landscaping business move up the map pack?** Rankwise sets a written 90-day milestone before month one starts on Foundation and Growth plans, giving a defined checkpoint tied to the actual starting position.
 
 **Is there real exclusivity for landscaping clients?** Yes. One landscaping business per city, so a client's local competitor in that city isn't also a Rankwise client.
 

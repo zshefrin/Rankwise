@@ -69,7 +69,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, both month-to-month wit
 A redesign is a one-time project. This is a managed, monthly program built around your Google Business Profile, citations, content, and map-pack position, the parts of local search that keep working after the invoice is paid.
 
 **Do you guarantee I'll rank #1?**
-We agree in writing on a starting position and a 90-day milestone before month one begins, and billing pauses if we miss it. That's a guarantee about our own work, not a claim your practice makes to patients.
+We agree in writing on a starting position and a 90-day milestone before month one begins on Foundation and Growth plans, and billing pauses if we miss it. That's a guarantee about our own work, not a claim your practice makes to patients.
 
 **What if another dentist in my city already works with Rankwise?**
 We don't sign two practices in the same competitive category in the same city. If a competitor already holds that spot, we'll tell you before you sign anything.

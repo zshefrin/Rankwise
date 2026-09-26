@@ -43,7 +43,7 @@ Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP 
 - **GBP activity** with a real posting cadence, current job photos, and a reply on every new review.
 - **Review velocity** — new reviews this month versus last, since outrunning a 117-review median takes sustained volume, not a one-time push.
 - **NAP consistency audit** across the directories Google trusts for Canadian contractors.
-- **Map Pack rank tracking** by keyword and city, reported monthly against the agreed 90-day baseline.
+- **Map Pack rank tracking** by keyword and city, reported monthly against the agreed 90-day baseline (Foundation and Growth plans).
 - **A written monthly summary** covering what moved, what didn't, and what's changing next month.
 
 ## FAQ
@@ -56,7 +56,7 @@ Rankwise runs three fixed, month-to-month tiers: **Starter at $450/month** (GBP 
 
 **Which Metro Vancouver city has the most room for a new HVAC business right now?** Vancouver's tracked median, at 82 reviews, is the lowest of the four cities with enough data to report, still well above the regional beatable threshold but the closest to one.
 
-**How fast can an HVAC business move up the map pack?** Rankwise sets a written 90-day milestone before month one starts, giving a real checkpoint against the actual starting position rather than an open-ended promise.
+**How fast can an HVAC business move up the map pack?** Rankwise sets a written 90-day milestone before month one starts on Foundation and Growth plans, giving a real checkpoint against the actual starting position rather than an open-ended promise.
 
 **Is there a city-specific HVAC page for my market?** Likely. Rankwise publishes dedicated pages for 17 Metro Vancouver and Fraser Valley cities; check the list above.
 

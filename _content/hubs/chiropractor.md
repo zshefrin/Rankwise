@@ -72,7 +72,7 @@ Foundation is $750/month and Growth is $1,250/month CAD, month-to-month, no cont
 The map pack's review median varies by city; West Vancouver sits at 44, Vancouver at 267. Your 90-day milestone is set against your city's real number, not a metro-wide average.
 
 **Do you guarantee a ranking result?**
-We agree in writing on a starting position and a 90-day milestone before month one, and billing pauses if we miss it. That's a guarantee about our work, not a public claim about your clinic's results.
+We agree in writing on a starting position and a 90-day milestone before month one on Foundation and Growth plans, and billing pauses if we miss it. That's a guarantee about our work, not a public claim about your clinic's results.
 
 **What if a competing clinic in my city already works with Rankwise?**
 We hold one clinic per city, per competitive category. If that spot's taken, we'll tell you on the call, before anything's signed.

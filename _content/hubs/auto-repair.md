@@ -32,7 +32,7 @@ Google currently surfaces 310 auto repair businesses across the Metro Vancouver 
 
 ## What it costs, and what that money should buy
 
-Rankwise runs three fixed tiers: **Starter at $450/mo** (GBP optimization, a review system, and a rank snapshot, no content), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city plus content), month-to-month, no contract. Given how review-dense this category already is, Foundation or Growth is the realistic starting point for a shop that wants to move a needle inside a year. Starter's email-only, no-posting scope climbs slower here than it would in a thinner category like electrical or roofing. Before month one, Rankwise agrees in writing on the starting position and a 90-day milestone; miss it and billing pauses until it's hit. A cheap "SEO package" promising a fast #1 in this specific category should be treated as a red flag; the incumbents are too well-reviewed for a shortcut to be real.
+Rankwise runs three fixed tiers: **Starter at $450/mo** (GBP optimization, a review system, and a rank snapshot, no content), **Foundation at $750/mo** (the core one-city Map Pack program), and **Growth at $1,250/mo** (multi-city plus content), month-to-month, no contract. Given how review-dense this category already is, Foundation or Growth is the realistic starting point for a shop that wants to move a needle inside a year. Starter's email-only, no-posting scope climbs slower here than it would in a thinner category like electrical or roofing. Before month one on Foundation and Growth plans, Rankwise agrees in writing on the starting position and a 90-day milestone; miss it and billing pauses until it's hit. A cheap "SEO package" promising a fast #1 in this specific category should be treated as a red flag; the incumbents are too well-reviewed for a shortcut to be real.
 
 ## What a shop's monthly marketing should actually look like
 
@@ -63,6 +63,6 @@ Slower than most trades in the first quarter. Set the 90-day milestone conservat
 Start asking every customer for a review at point of service. With a metro median of 173 reviews, volume moves this category more than any content or citation work.
 
 **Does Rankwise guarantee a top ranking?**
-No. The guarantee is a written 90-day milestone set before month one starts; if it's missed, billing pauses until the target is hit.
+No. The guarantee is a written 90-day milestone set before month one starts on Foundation and Growth plans; if it's missed, billing pauses until the target is hit.
 
 Want to see exactly where your shop sits against the 310 businesses Google surfaces in this category? [Get a free rank check](/audit/) before committing to a plan.

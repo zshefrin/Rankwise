@@ -45,7 +45,7 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 - **GBP activity** with real job photos added regularly, not stock roofing images.
 - **Review acquisition tracked as velocity** — new reviews this month against last, since the whole opportunity here is outrunning a 44-review median.
 - **NAP consistency** across the directories Google cross-checks, including roofing-specific listings like HomeStars.
-- **Map Pack rank tracking** by keyword and city, checked regularly and reported against the agreed 90-day milestone.
+- **Map Pack rank tracking** by keyword and city, checked regularly and reported against the agreed 90-day milestone (Foundation and Growth plans).
 - **A monthly written summary** in plain language, covering what moved, what didn't, and what's next.
 
 ## FAQ
@@ -56,7 +56,7 @@ A cheaper option, a freelancer posting occasionally to a GBP profile, won't move
 
 **Is roofing marketing seasonal?** Search demand tracks BC's storm and wet-season pattern, so a profile that stays active year-round, not just after a big storm, captures searches the competition misses during quiet months.
 
-**How fast can a roofing business move up the map pack?** Rankwise sets a written 90-day milestone before month one, giving a real checkpoint against the starting position rather than an open-ended timeline.
+**How fast can a roofing business move up the map pack?** Rankwise sets a written 90-day milestone before month one on Foundation and Growth plans, giving a real checkpoint against the starting position rather than an open-ended timeline.
 
 **Should photos or reviews come first for a roofing profile?** Both matter, but recent, real job photos are unusually high-leverage for roofing specifically. Homeowners researching a five-figure project want visual proof before they call.
 

@@ -32,7 +32,7 @@ One honest constraint, stated plainly: electrical work in BC runs through a lice
 
 ## What electrician marketing costs in BC
 
-Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (Google Business Profile optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/mo** (the core Map Pack program for one city), and **Growth at $1,250/mo** (city expansion plus ongoing content), month-to-month with no long-term contract. Before month one starts, Rankwise agrees in writing with the contractor on the starting Map Pack position and a 90-day milestone; miss that milestone and billing pauses until it's hit. Cheaper options on the market tend to be one-off GBP cleanups with nothing behind them after week one. Pricier options tend to be paid-ads or full-website retainers that an electrician with a functioning site, in a category where 91% of competitors already have one, doesn't need to buy twice.
+Rankwise runs three fixed monthly tiers: **Starter at $450/mo** (Google Business Profile optimization, a review system, and a rank snapshot, email-only, no content), **Foundation at $750/mo** (the core Map Pack program for one city), and **Growth at $1,250/mo** (city expansion plus ongoing content), month-to-month with no long-term contract. Before month one starts on Foundation and Growth plans, Rankwise agrees in writing with the contractor on the starting Map Pack position and a 90-day milestone; miss that milestone and billing pauses until it's hit. Cheaper options on the market tend to be one-off GBP cleanups with nothing behind them after week one. Pricier options tend to be paid-ads or full-website retainers that an electrician with a functioning site, in a category where 91% of competitors already have one, doesn't need to buy twice.
 
 ## What a monthly program should actually include
 
@@ -60,7 +60,7 @@ They benefit from their own page and keyword targeting. "EV charger installer" a
 Consistent, recent reviews. With a metro median of just 55 reviews, a steady post-job request habit closes the gap with the top of the pack faster than almost any other lever.
 
 **Does Rankwise guarantee a #1 ranking?**
-No guaranteed-rankings language exists anywhere Rankwise operates. The guarantee is a written 90-day milestone agreed before month one; billing pauses if it's missed.
+No guaranteed-rankings language exists anywhere Rankwise operates. The guarantee is a written 90-day milestone agreed before month one on Foundation and Growth plans; billing pauses if it's missed.
 
 **Is a website required before starting?**
 It helps, since 91% of the electricians Google currently surfaces have one, but Starter tier doesn't require a rebuild. GBP and reviews move first regardless of site condition.

@@ -54,7 +54,7 @@ If a plumbing business isn't getting all five, there's no way to tell whether th
 
 **Is a Metro Vancouver plumbing business too small for local-search marketing?** No. The category runs 15–19 businesses per city in the benchmark data, with plenty of room below the median-review incumbents. Size isn't the blocker; having no rank or review system in place is.
 
-**How long before a plumbing business sees movement in the map pack?** Rankwise sets a written 90-day milestone before month one starts, so there's a defined checkpoint rather than an open-ended promise. Specifics depend on the starting position and city.
+**How long before a plumbing business sees movement in the map pack?** Rankwise sets a written 90-day milestone before month one starts on Foundation and Growth plans, so there's a defined checkpoint rather than an open-ended promise. Specifics depend on the starting position and city.
 
 **Does a higher star rating matter more than review count?** Less than most owners assume. Metro Vancouver's plumbing average sits at 4.87, a tight band, so review volume and recency separate businesses more than the star number does.
 
@@ -64,7 +64,7 @@ If a plumbing business isn't getting all five, there's no way to tell whether th
 
 **Does one plumbing business per city really get exclusivity?** Yes. Rankwise works one business per city, per category, so a client's competitor in that market isn't also a client.
 
-**I've been burned by an SEO agency before that promised rankings and delivered nothing. How is this different?** Before month one starts, Rankwise agrees in writing on the current Map Pack position and a 90-day milestone. Miss it, and billing pauses until it's hit — a mechanic, not a promise.
+**I've been burned by an SEO agency before that promised rankings and delivered nothing. How is this different?** Before month one starts on Foundation and Growth plans, Rankwise agrees in writing on the current Map Pack position and a 90-day milestone. Miss it, and billing pauses until it's hit — a mechanic, not a promise.
 
 ## See the map pack for yourself
 
