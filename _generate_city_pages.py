@@ -836,7 +836,7 @@ def build_page(c, cities_list):
   "areaServed": [{{"@type": "City", "name": "{name}", "containedInPlace": {{"@type": "AdministrativeArea", "name": "British Columbia"}}}}],
   "knowsAbout": ["Local SEO", "Google Business Profile Management", "Content Marketing", "{tl} Marketing", "Search Engine Optimization", "Map Pack Optimization", "Review Management"],
   "priceRange": "$$",
-  "telephone": "+1-778-887-0311",
+  "telephone": "+1-778-200-7265",
   "openingHoursSpecification": {{
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
