@@ -146,6 +146,10 @@ h1{font-family:var(--headline);font-weight:800;font-size:clamp(28px,5vw,40px);li
 .faq-item{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;margin:0 0 12px}
 .faq-q{font-family:var(--headline);font-weight:800;font-size:16px;line-height:1.35;margin:0 0 7px}
 .faq-a{margin:0!important;color:var(--ink-soft)}
+.hub-lab{margin:18px 0 22px;padding:16px 18px;border-left:4px solid var(--accent-2);border-radius:0 12px 12px 0;background:var(--surface)}
+.hub-lab-label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
+.hub .hub-lab-quote{font-family:var(--headline);font-weight:800;font-size:clamp(17px,2.6vw,20px);line-height:1.4;margin:0 0 10px}
+.hub .hub-lab-src{font-size:13.5px;color:var(--ink-soft);margin:0}
 .hub-cta{margin:38px 0 8px;padding:24px 22px;border-radius:14px;background:#12211C;color:#F3EFE6}
 .hub-cta h2{color:#FFF;margin:0 0 8px!important;font-size:22px!important}
 .hub-cta p{color:rgba(243,239,230,.85);margin-bottom:14px}
@@ -200,6 +204,24 @@ FOOTER = """<footer>
 </footer>"""
 
 
+def lab_lead(fm: dict) -> str:
+    """Optional dated Rankwise Lab figure shown first on the hub. labLead is quoted
+    verbatim from the linked Lab study's own text (never paraphrase a number);
+    labLeadCollected / labLeadPublished are the study's own dates."""
+    quote = fm.get("labLead")
+    if not quote:
+        return ""
+    return (
+        '<aside class="hub-lab" aria-label="Rankwise Lab figure">'
+        f'<span class="hub-lab-label">Rankwise Lab · Market Study · data collected {html.escape(fm["labLeadCollected"])}</span>'
+        f'<p class="hub-lab-quote">&ldquo;{html.escape(quote, quote=False)}&rdquo;</p>'
+        f'<p class="hub-lab-src">{html.escape(fm["labLeadScope"], quote=False)} One snapshot of public Google data, '
+        'not client results. '
+        f'<a href="{html.escape(fm["labLeadUrl"])}">Read the study (published {html.escape(fm["labLeadPublished"])})</a></p>'
+        '</aside>\n'
+    )
+
+
 def build(fm: dict, body: str) -> str:
     slug = fm["slug"].strip("/")
     url = f"{BASE}/{slug}/"
@@ -250,7 +272,7 @@ def build(fm: dict, body: str) -> str:
 <h1>{inline_md(h1)}</h1>
 <p class="hub-sub">Real Google map-pack data, honest costs, and what actually moves position — no client-results claims, because the numbers here are market data, not testimonials.</p>
 </div>
-{article}
+{lab_lead(fm)}{article}
 <div class="hub-cta">
 <h2>See where your business actually sits</h2>
 <p>The free 15-minute rank check shows your current map-pack position against the real numbers on this page — no pitch deck.</p>

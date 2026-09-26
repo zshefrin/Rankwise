@@ -887,7 +887,7 @@ def build_page(c, cities_list):
       <div class="hero-lock">
         <div>No contracts.<br>Month to month.</div>
         <div>Free 15-minute rank check.<br>No pitch deck.</div>
-        <div>Foundation and Growth: position milestone in writing.<br>Miss it — billing pauses.</div>
+        <div>Foundation and Growth: position milestone in writing before you pay.<br>Miss it by day 90 — billing pauses until we hit it.</div>
       </div>
       <p class="hero-copy">{c["hero_copy"]}</p>
       <div class="hero-actions">

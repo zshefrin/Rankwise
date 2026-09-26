@@ -8,6 +8,11 @@ metaDescription: Plumbing marketing in Metro Vancouver runs $450–$1,250/mo wit
 h1: "Plumbing marketing in Metro Vancouver: what it costs and what actually moves the map pack"
 numbersUsed: ["metro n=206 businesses Google surfaces (asOf 2026-07-20)", "metro medianReviews=75 (asOf 2026-07-20)", "metro topReviews=12000 (asOf 2026-07-20)", "metro avgRating=4.87 (asOf 2026-07-20)", "metro pctWithWebsite=91% (asOf 2026-07-20)", "Abbotsford medianReviews=52, n=15 (asOf 2026-07-20)", "Chilliwack medianReviews=82, n=15 (asOf 2026-07-20)", "Coquitlam medianReviews=75, n=15 (asOf 2026-07-20)", "Langley medianReviews=53, n=16 (asOf 2026-07-20)", "Vancouver medianReviews=148, n=16 (asOf 2026-07-20)", "West Vancouver medianReviews=53, n=19 (asOf 2026-07-20)", "24.9% of swept plumber keywords have a #1 with under 30 reviews, 53/213 (asOf 2026-07-20 partial resweep)"]
 internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/", "/blog/hvac-marketing-cost/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/how-do-i-get-more-hvac-leads-in-vancouver/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
+labLead: "The median review count among businesses Google places at the top of these searches is 82, but 66 of the 628 tracked appearances belong to businesses with fewer than 20 reviews."
+labLeadCollected: 2026-07-10
+labLeadPublished: 2026-07-10
+labLeadScope: 216 plumbing searches across 18 Metro Vancouver cities. It counts every map appearance, so its median differs from the per-business figures further down this page.
+labLeadUrl: /lab/what-does-the-metro-vancouver-plumber-map-pack-actually-look/
 createdAt: 2026-08-17
 draftedBy: hub-drafts-a
 ---
@@ -36,7 +41,7 @@ There's also an ownership objection worth naming directly, because plumbing owne
 
 ## What plumbing marketing costs in BC
 
-Rankwise runs three fixed tiers: **Starter at $450/month** (Google Business Profile optimization, a review system, and a rank snapshot, no content, email-only), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). All three are month-to-month, and Foundation and Growth carry a written guarantee: before month one, we agree on a starting Map Pack position and a 90-day milestone, and billing pauses if we miss it.
+Rankwise runs three fixed tiers: **Starter at $450/month** (Google Business Profile optimization, a review system, and a rank snapshot, no content, email-only), **Foundation at $750/month** (the core Map Pack program for one city), and **Growth at $1,250/month** (city expansion plus content). All three are month-to-month, and Foundation and Growth carry a written guarantee: before month one, we agree on a starting Map Pack position and a 90-day milestone, and if we miss it, billing pauses until we hit it. In plain terms: on the Foundation and Growth plans, your target position is agreed in writing before you pay, and if we miss it by day 90, billing pauses until we hit it.
 
 Cheaper than that, you're typically buying a set-it-and-forget-it GBP tool or a freelancer doing profile hygiene with no rank tracking and no review system behind it: fine for basic upkeep, not built to move a beatable keyword. Pricier general marketing agencies usually bundle in a website rebuild, paid ads, or broader brand work. Those are real services, but not what moves a plumbing business through a map pack that's already 24.9% winnable on its own merits; that fight is won with GBP, reviews, and citations, not a new website. Rankwise has published the HVAC version of this cost breakdown [in full](/blog/hvac-marketing-cost/); the same service-by-service logic applies to plumbing.
 
@@ -58,7 +63,7 @@ If a plumbing business isn't getting all five, there's no way to tell whether th
 
 **Does a higher star rating matter more than review count?** Less than most owners assume. Metro Vancouver's plumbing average sits at 4.87, a tight band, so review volume and recency separate businesses more than the star number does.
 
-**Should a plumbing business run Google Ads instead of local SEO?** They solve different problems; ads buy immediate visibility, local-search work builds a map-pack position that keeps producing calls without an ongoing spend. Rankwise doesn't run paid ads; this is local-search visibility work specifically.
+**Should a plumbing business run Google Ads instead of local SEO?** They solve different problems; ads buy immediate visibility, local-search work builds a map-pack position that keeps producing calls without an ongoing spend. Rankwise's core is local-search visibility; if you also want Google or Meta ads, we can run them alongside it or work with your current setup.
 
 **What's the fastest fix for a plumbing GBP profile?** Confirming every relevant service category is set, not just "Plumber." An incomplete category list is the most common reason a real plumbing business misses searches it should be winning.
 
