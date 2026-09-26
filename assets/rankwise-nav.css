@@ -246,7 +246,7 @@
     min-height: 44px;
     max-width: calc(100vw - 138px);
     padding: 8px 14px;
-    font-size: 12px;
+    font-size: 14px;
     white-space: normal;
   }
 
@@ -345,7 +345,15 @@
 
   .rw-nav__cta {
     min-height: 44px;
-    padding: 7px 10px;
-    font-size: 11px;
+    padding: 7px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  /* 14px CTA text: wrap to two lines instead of pushing the nav past the viewport */
+  .rw-nav__cta {
+    max-width: calc(100vw - 196px);
+    line-height: 1.2;
   }
 }
