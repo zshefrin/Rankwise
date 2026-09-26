@@ -379,6 +379,12 @@ footer{padding:40px 24px 100px;background:var(--forest);color:var(--on-forest)}
 html.js .reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 html.js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+@media(max-width:640px){
+  /* 44px tap targets on phones */
+  .cal-skel-link{display:inline-flex;align-items:center;min-height:44px;border-bottom:0;text-decoration:underline;text-decoration-color:rgba(198,138,58,.38);text-decoration-thickness:2px;text-underline-offset:4px}
+  .footer-links{row-gap:0}
+  .footer-links a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+}
 </style>
 <meta name="theme-color" content="#0F1815">
 <link rel="stylesheet" href="/assets/rankwise-nav.css?v=rw-nav-a11y-20260610">

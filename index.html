@@ -190,7 +190,7 @@
       "name": "How do I get more Google reviews?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The reliable way is a simple post-visit flow: ask every satisfied customer right after the job, with a direct link to your Google review page. Rankwise sets that up and keeps it running using Google's own tools (never incentivized or fake reviews) and following your industry's advertising rules. Review count and recency are among the strongest Map Pack signals, so a steady pace beats a one-time push."
+        "text": "The reliable way is a simple post-visit flow: ask every customer right after the job, with the same neutral request and a direct link to your Google review page. Rankwise sets that up and keeps it running using Google's own tools (never incentivized or fake reviews) and following your industry's advertising rules. Review count and recency are among the strongest Map Pack signals, so a steady pace beats a one-time push."
       }
     },
     {
@@ -623,7 +623,17 @@ footer a:focus-visible{outline:3px solid var(--on-forest);outline-offset:3px}
   .ps-loc .ps-pin{display:block}
   /* city pin is icon-only here: pad the hit area to ~44px without moving the layout */
   .ps-loc{padding:15px 8px;margin:-15px -8px}
+  .ps-main{padding:8px 0;margin:-8px 0}
   .row-held{display:none}
+  /* 44px tap targets on phones */
+  .aw-btn,.cal-skel-link,.blog-mini-all{min-height:44px}
+  .blog-mini-all{align-items:center}
+  .founder-direct{row-gap:0}
+  .founder-direct a{display:inline-block;padding:12px 0;border-bottom:0;text-decoration:underline;text-decoration-color:rgba(198,138,58,.38);text-decoration-thickness:2px;text-underline-offset:4px}
+  section[aria-label="Marketing guides by category"]>div{row-gap:0!important;align-items:center!important}
+  section[aria-label="Marketing guides by category"] a,.footer-links a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+  .footer-links{row-gap:0}
+  .trade-menu [role="option"]{min-height:44px;display:flex;align-items:center}
 }
 
 /* ── SECTION WRAPPER ─────────────────────────────────────────────── */
@@ -2504,7 +2514,7 @@ html.js #readoutList.m-draw .readout-bar i{animation:rwBarDraw 1.2s cubic-bezier
     </details>
     <details class="faq-entry" name="rw-faq">
       <summary><span class="faq-num" aria-hidden="true">A&middot;09</span><span class="faq-question">How do I get more Google reviews?</span><span class="faq-x" aria-hidden="true">+</span></summary>
-      <div class="faq-answer">The reliable way is a simple post-visit flow: ask every satisfied customer right after the job, with a direct link to your Google review page. Rankwise sets that up and keeps it running using Google's own tools (never incentivized or fake reviews) and following your industry's advertising rules. Review count and recency are among the strongest Map Pack signals, so a steady pace beats a one-time push.</div>
+      <div class="faq-answer">The reliable way is a simple post-visit flow: ask every customer right after the job, with the same neutral request and a direct link to your Google review page. Rankwise sets that up and keeps it running using Google's own tools (never incentivized or fake reviews) and following your industry's advertising rules. Review count and recency are among the strongest Map Pack signals, so a steady pace beats a one-time push.</div>
     </details>
     <details class="faq-entry" name="rw-faq">
       <summary><span class="faq-num" aria-hidden="true">A&middot;10</span><span class="faq-question">What does a local marketing agency do?</span><span class="faq-x" aria-hidden="true">+</span></summary>
@@ -2680,44 +2690,44 @@ function __rwLoadCal(){
 </script>
 
 <script>
-/* Section 01 Map Pack: line-of-work picker (illustrative data only, no network) */
+/* Section 01 Map Pack: line-of-work picker (illustrative only: generic placeholder listings, never real or invented business names/ratings; no network) */
 (function(){
   var root=document.getElementById('mappack');
   if(!root)return;
   var T={
     plumber:{q:"plumber near me",
-      r1:{n:"Westside Plumbing Co.",g:"4.9",v:"41",c:"Plumber",city:"North Vancouver"},
-      r2:{n:"Metro Drain & Rooter",g:"4.8",v:"276",c:"Plumbing contractor",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Plumber",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Plumbing contractor",city:"Nearby"}},
     electrician:{q:"electrician near me",
-      r1:{n:"North Shore Electric",g:"4.9",v:"63",c:"Electrician",city:"North Vancouver"},
-      r2:{n:"Lions Gate Electrical",g:"4.8",v:"191",c:"Electrical contractor",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Electrician",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Electrical contractor",city:"Nearby"}},
     hvac:{q:"hvac contractor near me",
-      r1:{n:"Coastal Heating & Cooling",g:"4.9",v:"52",c:"HVAC contractor",city:"Burnaby"},
-      r2:{n:"Metro Climate Co.",g:"4.7",v:"243",c:"Air conditioning contractor",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"HVAC contractor",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Air conditioning contractor",city:"Nearby"}},
     roofer:{q:"roofer near me",
-      r1:{n:"Summit Roofing Co.",g:"4.9",v:"38",c:"Roofing contractor",city:"Coquitlam"},
-      r2:{n:"Pacific Roof & Exterior",g:"4.8",v:"156",c:"Roofing contractor",city:"Surrey"}},
+      r1:{n:"Established local business",generic:true,c:"Roofing contractor",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Roofing contractor",city:"Nearby"}},
     landscaper:{q:"landscaper near me",
-      r1:{n:"Evergreen Landscaping",g:"4.9",v:"57",c:"Landscaper",city:"Coquitlam"},
-      r2:{n:"West Coast Yard & Garden",g:"4.7",v:"184",c:"Landscape designer",city:"Surrey"}},
+      r1:{n:"Established local business",generic:true,c:"Landscaper",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Landscape designer",city:"Nearby"}},
     auto:{q:"auto repair near me",
-      r1:{n:"Westside Auto Care",g:"4.8",v:"97",c:"Auto repair shop",city:"Surrey"},
-      r2:{n:"Metro Mechanics",g:"4.7",v:"333",c:"Auto repair shop",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Auto repair shop",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Auto repair shop",city:"Nearby"}},
     dentist:{q:"dentist near me",
-      r1:{n:"Cedar Park Dental",g:"4.9",v:"118",c:"Dentist",city:"Burnaby"},
-      r2:{n:"Harbourview Dental",g:"4.8",v:"402",c:"Dental clinic",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Dentist",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Dental clinic",city:"Nearby"}},
     chiropractor:{q:"chiropractor near me",
-      r1:{n:"North Shore Chiropractic",g:"4.9",v:"86",c:"Chiropractor",city:"North Vancouver"},
-      r2:{n:"Align Spine & Wellness",g:"4.8",v:"214",c:"Chiropractic clinic",city:"Burnaby"}},
+      r1:{n:"Established local business",generic:true,c:"Chiropractor",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Chiropractic clinic",city:"Nearby"}},
     medspa:{q:"med spa near me",
-      r1:{n:"Glow Aesthetics",g:"4.9",v:"73",c:"Medical spa",city:"Vancouver"},
-      r2:{n:"Riverside Skin & Laser",g:"4.8",v:"229",c:"Skin care clinic",city:"Richmond"}},
+      r1:{n:"Established local business",generic:true,c:"Medical spa",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Skin care clinic",city:"Nearby"}},
     lawyer:{q:"lawyer near me",
-      r1:{n:"Fraser Legal Group",g:"4.9",v:"64",c:"Law firm",city:"Surrey"},
-      r2:{n:"Lions Gate Law",g:"4.8",v:"187",c:"Lawyer",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Law firm",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Lawyer",city:"Nearby"}},
     vet:{q:"veterinarian near me",
-      r1:{n:"Cedar Animal Hospital",g:"4.9",v:"108",c:"Veterinarian",city:"Burnaby"},
-      r2:{n:"Westside Vet Clinic",g:"4.8",v:"256",c:"Veterinary clinic",city:"Vancouver"}},
+      r1:{n:"Established local business",generic:true,c:"Veterinarian",city:"Nearby"},
+      r2:{n:"Another local business",generic:true,c:"Veterinary clinic",city:"Nearby"}},
     painter:{q:"painter near me",
       r1:{n:"Established local business",generic:true,c:"Painter",city:"Nearby"},
       r2:{n:"Another local business",generic:true,c:"Painting contractor",city:"Nearby"}},
