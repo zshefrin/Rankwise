@@ -140,6 +140,9 @@ def build_sitemap() -> str:
         page_html = slug_dir / "index.html"
         if not page_html.exists():
             continue
+        # Skip noindex pages (e.g. the trade x city pilot pages awaiting operator review)
+        if 'name="robots" content="noindex' in page_html.read_text():
+            continue
         rel = f"{slug_dir.name}/index.html"
         urls.append((f"{BASE}/{slug_dir.name}/", git_lastmod(rel), "monthly", "0.8"))
 
