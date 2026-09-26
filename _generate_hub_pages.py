@@ -180,7 +180,7 @@ NAV = """<header class="rw-nav">
     <ul class="rw-nav__links">
       <li><a href="/#services">What we do</a></li>
       <li><a href="/#how">How it works</a></li>
-      <li><a href="/#results">Results</a></li>
+      <li><a href="/#results">Timeline</a></li>
       <li><a href="/#faq">FAQ</a></li>
       <li><a href="/blog/">Blog</a></li>
       <li><a href="/lab/">Lab</a></li>
@@ -196,7 +196,7 @@ FOOTER = """<footer>
     <div class="flinks">
       <a href="/#services">What we do</a>
       <a href="/#how">How it works</a>
-      <a href="/#results">Results</a>
+      <a href="/#results">Timeline</a>
       <a href="/blog/">Blog</a>
       <a href="/lab/">Lab</a>
       <a href="/audit/">Free rank check</a>
