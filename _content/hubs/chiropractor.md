@@ -14,7 +14,7 @@ draftedBy: hub-drafts-c
 
 # Chiropractic clinic marketing in Metro Vancouver
 
-Yes, a chiropractic clinic's Google visibility in Metro Vancouver is genuinely winnable. But since April 2026 the province's regulator bans the exact tactic most local-marketing programs lead with: asking a patient to leave a review. Expect to pay $750-$1,250/month for a program built around your profile, citations, and content instead, with a written 90-day map-pack milestone attached before the first invoice.
+Yes, a chiropractic clinic's Google visibility in Metro Vancouver is genuinely winnable. But since April 2026 the province's regulator bans the exact tactic most local-marketing programs lead with: asking a patient to leave a review. Rankwise runs three set tiers ($450, $750 and $1,250 a month); the $750 and $1,250 tiers build a program around your profile, citations, and content instead, with a written 90-day map-pack milestone attached before the first invoice.
 
 ## What actually decides who shows up first
 

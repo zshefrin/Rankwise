@@ -14,7 +14,7 @@ draftedBy: hub-drafts-c
 
 # Veterinary clinic marketing in Metro Vancouver
 
-Yes, Metro Vancouver's veterinary map pack has real room to move. But the review-solicitation rule sits in a genuine grey zone under the current regulator's standard, so the safe program looks different from a landscaper's or a roofer's. Expect $750-$1,250/month for GBP, citation, and content work with a written 90-day map-pack milestone, not a promise about outcomes.
+Yes, Metro Vancouver's veterinary map pack has real room to move. But the review-solicitation rule sits in a genuine grey zone under the current regulator's standard, so the safe program looks different from a landscaper's or a roofer's. Rankwise runs three set tiers ($450, $750 and $1,250 a month); the $750 and $1,250 tiers cover GBP, citation, and content work with a written 90-day map-pack milestone, not a promise about outcomes.
 
 ## How pet owners actually search
 

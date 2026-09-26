@@ -14,7 +14,7 @@ draftedBy: hub-drafts-b
 
 # Law firm marketing in Metro Vancouver
 
-Yes, a Metro Vancouver law firm should invest in local-search marketing, and it should cost $750 to $1,250 a month for a program built around Google Business Profile, citations, and content, not review-solicitation tactics that work for a roofer but sit in restricted territory for a regulated profession. The Law Society of British Columbia governs how a BC lawyer may market, and that constraint shapes this page more than pricing does.
+Yes, a Metro Vancouver law firm should invest in local-search marketing, and Rankwise runs it on three set tiers ($450, $750 or $1,250 a month), with the $750 and $1,250 tiers covering a program built around Google Business Profile, citations, and content, not review-solicitation tactics that work for a roofer but sit in restricted territory for a regulated profession. The Law Society of British Columbia governs how a BC lawyer may market, and that constraint shapes this page more than pricing does.
 
 ## What the Law Society of BC actually allows
 
@@ -26,7 +26,7 @@ Marketing has to be accurate and can't be misleading, confusing, or deceptive; t
 
 ## What the law firm map pack looks like today
 
-Google currently surfaces 248 law firms across the Metro Vancouver and Fraser Valley cities Rankwise tracks, with a metro median of 51 reviews and 97% of firms already running a website (as of 2026-07-09), the highest website rate of any category benchmarked. That makes sense for a profession where a credible site is close to a baseline expectation rather than a differentiator. The city spread is wide: Vancouver's median firm sits at 125 reviews, while Chilliwack's sits at 31, a genuinely different competitive bar depending on where a firm practices. Across the whole tracked field, 15.0% of law firm keywords currently have a top-ranked result with fewer than 30 reviews (as of 2026-07-30), more open than any other regulated category Rankwise tracks — dentist, chiropractor, veterinary, and med spa all sit under 5.5%. The same 2026-07-30 analysis attributes that gap to the field simply being more fragmented, with fewer dominant multi-location incumbents than the health-and-wellness regulated categories carry.
+Google currently surfaces 248 law firms across the Metro Vancouver and Fraser Valley cities Rankwise tracks, with a metro median of 51 reviews and 97% of firms already running a website (as of 2026-07-09), among the highest website rates of any category benchmarked. That makes sense for a profession where a credible site is close to a baseline expectation rather than a differentiator. The city spread is wide: Vancouver's median firm sits at 125 reviews, while Chilliwack's sits at 31, a genuinely different competitive bar depending on where a firm practices. Across the whole tracked field, 15.0% of law firm keywords currently have a top-ranked result with fewer than 30 reviews (as of 2026-07-30), more open than any other regulated category Rankwise tracks — dentist, chiropractor, veterinary, and med spa all sit under 5.5%.
 
 ## What actually moves a law firm's position, within the rules
 

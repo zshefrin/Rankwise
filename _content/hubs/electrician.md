@@ -4,7 +4,7 @@ kind: category-hub
 category: Electrician
 slug: /electrician-marketing/
 title: Electrician Marketing in Metro Vancouver, BC | Rankwise
-metaDescription: Metro Vancouver electricians should budget $750–$1,250/mo for local-search marketing. Real map-pack data, cost breakdown, and monthly deliverables.
+metaDescription: Rankwise runs three set tiers for Metro Vancouver electricians: $450, $750 or $1,250/mo. Real map-pack data, cost breakdown, and monthly deliverables.
 h1: Electrician marketing in Metro Vancouver
 numbersUsed: ["electrician metro medianReviews=55 (asOf 2026-07-20)", "electrician metro n=275 businesses Google surfaces (asOf 2026-07-20)", "electrician metro pctWithWebsite=91% (asOf 2026-07-20)", "electrician metro avgRating=4.84 (asOf 2026-07-20)", "electrician Delta medianReviews=34 (asOf 2026-07-20)", "electrician North Vancouver medianReviews=72 (asOf 2026-07-20)", "electrician winnability=16.8% of keywords have a sub-30-review #1, 35/208 (asOf 2026-07-30)"]
 internalLinks: ["/audit/", "/lab/what-does-the-metro-vancouver-electrician-map-pack-actually-/", "/blog/hvac-marketing-cost/", "/blog/signals-google-uses-rank-local-hvac-businesses/", "/blog/google-business-profile-category-hvac-contractors/", "/blog/why-isnt-my-hvac-business-showing-in-map-pack/"]
@@ -14,7 +14,7 @@ draftedBy: hub-drafts-b
 
 # Electrician marketing in Metro Vancouver
 
-Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and it should cost somewhere between $750 and $1,250 a month if it's the kind of work that actually moves a Map Pack position. Below that, you're usually buying a one-time profile optimization rather than an ongoing ranking program, which is what Rankwise's $450 Starter plan is and says it is. Above it, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
+Yes, most Metro Vancouver electrical contractors should be running some form of local-search marketing, and Rankwise runs it on three set tiers: $450 a month gets your Google Business Profile fully optimized, plus a review system and a rank snapshot; $750 runs the complete Map Pack program in one city; $1,250 adds analytics, content and room to expand. Above that, you're usually paying for services an electrical contractor rarely needs, like paid ads or a full site rebuild.
 
 ## How electrical searches split into two different jobs
 

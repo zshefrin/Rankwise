@@ -14,7 +14,7 @@ draftedBy: hub-drafts-c
 
 # Med spa marketing in Metro Vancouver
 
-Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Budget $750-$1,250/month for a program that treats that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer.
+Yes, a med spa benefits from local-search help, but the marketing has to survive three separate rulebooks at once, your regulating college's, your injector's, and a federal drug-advertising regulation, before it even gets to competing on Google. Rankwise runs three set tiers ($450, $750 and $1,250 a month), and the $750 and $1,250 tiers treat that compliance as part of the deliverable, with a written 90-day map-pack milestone, not a flat design fee bolted onto a disclaimer.
 
 ## Why med spa marketing doesn't look like a trade's
 

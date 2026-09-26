@@ -61,11 +61,11 @@ CITIES = [
         "eyebrow": "HVAC marketing agency · Surrey, BC",
         "h1_city": "Surrey.",
         "meta_title": "HVAC Marketing Agency in Surrey | Rankwise",
-        "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for BC's largest city. One business per city, per service category.",
+        "meta_desc": "HVAC marketing for Surrey contractors — Cloverdale, Newton, Fleetwood, South Surrey. Local SEO and GBP management for one of BC's largest cities. One business per city, per service category.",
         "og_desc": "HVAC marketing for Surrey contractors. One client per city. Month-to-month, position milestones agreed in writing.",
         "aio_heading": "HVAC marketing in Surrey: four signals that decide who gets the call",
         "aio_items": [
-            "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high HVAC installation search volume as BC's largest city (~600,000 population) with active new-build development.",
+            "<strong>Google Map Pack coverage</strong> across your service area — Cloverdale, Newton, Fleetwood, and South Surrey drive high HVAC installation search volume as one of BC's largest cities with active new-build development.",
             "<strong>Google Business Profile activity</strong> — consistent weekly posting and review responses maintain visibility as Surrey's rapid growth drives heat pump and HVAC installation searches year-round.",
             "<strong>Review velocity</strong> — Surrey's competitive HVAC market rewards contractors with strong review velocity; new-build areas like Fleetwood and South Surrey generate disproportionate search volume for heat pump installation.",
             "<strong>City-specific landing pages</strong> — Surrey neighbourhood pages capture installation and furnace replacement searches from homeowners in new-build developments who are actively looking to book.",
